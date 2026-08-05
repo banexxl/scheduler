@@ -4,8 +4,8 @@ export default function TeamPage() {
   return (
     <PlaceholderPage
       title="Team"
-      area="Tenant Backoffice"
-      route="/app/[tenantSlug]/team"
+      area="Business Portal"
+      route="/[tenantSlug]/team"
     />
   );
 }

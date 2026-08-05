@@ -5,7 +5,7 @@ export default function ContactPage() {
     <PlaceholderPage
       title="Contact"
       area="Public Site"
-      route="/[tenantSlug]/contact"
+      route="/_sites/[tenantSlug]/contact"
     />
   );
 }

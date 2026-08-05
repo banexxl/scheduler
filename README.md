@@ -109,6 +109,7 @@ All clients are typed with the generated `Database` type.
 - **Environment validation** uses Yup schemas at startup
 - **Server-only** modules prevent accidental client imports
 - **RLS** enforces data access at the database level
+- **`_sites/`** is an internal rendering area for public business websites (not a public route)
 - See `docs/` for detailed documentation
 
 ## URLs
@@ -117,4 +118,16 @@ All clients are typed with the generated `Database` type.
 |---------|-------------|
 | Platform | `https://get-slot.app` |
 | Business Dashboard | `https://get-slot.app/[slug]/dashboard` |
-| Public Website | `https://[slug].get-slot.app` (future) |
+| Create Business | `https://get-slot.app/create-business` |
+| Public Website | `https://[slug].get-slot.app` (future, via proxy rewrite) |
+
+## Post-Login Routing
+
+| User Type | Destination |
+|-----------|-------------|
+| Platform admin | `/platform/dashboard` |
+| Business owner/member | `/[slug]/dashboard` |
+| Customer-only | `/account` |
+| New user | `/create-business` |
+
+`/create-business` is a placeholder. Business onboarding starts in Milestone 4.2.

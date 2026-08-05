@@ -4,8 +4,8 @@ export default function BillingPage() {
   return (
     <PlaceholderPage
       title="Billing"
-      area="Tenant Backoffice"
-      route="/app/[tenantSlug]/billing"
+      area="Business Portal"
+      route="/[tenantSlug]/billing"
     />
   );
 }

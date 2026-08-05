@@ -5,7 +5,7 @@ export default function BookingPage() {
     <PlaceholderPage
       title="Booking"
       area="Public Site"
-      route="/[tenantSlug]/booking"
+      route="/_sites/[tenantSlug]/booking"
     />
   );
 }

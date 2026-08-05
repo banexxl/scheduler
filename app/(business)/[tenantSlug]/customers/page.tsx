@@ -4,8 +4,8 @@ export default function CustomersPage() {
   return (
     <PlaceholderPage
       title="Customers"
-      area="Tenant Backoffice"
-      route="/app/[tenantSlug]/customers"
+      area="Business Portal"
+      route="/[tenantSlug]/customers"
     />
   );
 }

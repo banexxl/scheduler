@@ -8,7 +8,7 @@ import Container from "@mui/material/Container";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { logoutAction } from "@/features/auth/actions/logout";
 
-export default async function TenantBackofficeLayout({
+export default async function BusinessLayout({
   children,
   params,
 }: {

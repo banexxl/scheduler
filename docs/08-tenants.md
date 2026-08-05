@@ -30,25 +30,55 @@ Customer accounts are global. One customer can book with many businesses.
 - **Business** — User-facing term in the UI
 - **Tenant** — Internal/database term (`tenants`, `tenant_id`, `tenantSlug`)
 
-Database tables are NOT renamed.
+Database tables are NOT renamed. Never expose "Tenant" in the UI.
 
 ## URLs
 
-### Tenant Dashboard (Backoffice)
+### Business Portal (Backoffice)
 
 ```
 https://get-slot.app/[tenantSlug]/dashboard
+https://get-slot.app/[tenantSlug]/customers
+https://get-slot.app/[tenantSlug]/locations
+https://get-slot.app/[tenantSlug]/team
+https://get-slot.app/[tenantSlug]/billing
+https://get-slot.app/[tenantSlug]/settings
 ```
 
 Example: `https://get-slot.app/johns-barbershop/dashboard`
 
-### Tenant Public Website (Future)
+### Public Business Website (Future — subdomain)
 
 ```
 https://[tenantSlug].get-slot.app
+https://[tenantSlug].get-slot.app/booking
+https://[tenantSlug].get-slot.app/about
+https://[tenantSlug].get-slot.app/contact
 ```
 
-Example: `https://johns-barbershop.get-slot.app`
+Example: `https://johns-barbershop.get-slot.app/booking`
+
+### Internal Rendering (`_sites`)
+
+Public site pages are rendered internally at:
+
+```
+/_sites/[tenantSlug]/...
+```
+
+This is NOT a public URL. Users never navigate directly to `/_sites/...`.
+
+In production, the proxy rewrites subdomain requests:
+- `https://johns-barbershop.get-slot.app/booking` → internally renders `/_sites/johns-barbershop/booking`
+- The browser URL remains `https://johns-barbershop.get-slot.app/booking`
+
+## Three Logical Applications
+
+| Application | URL Pattern | Route Group |
+|-------------|-------------|-------------|
+| Marketing | `https://get-slot.app` | `(marketing)` |
+| Business Portal | `https://get-slot.app/[slug]/dashboard` | `(business)` |
+| Public Website | `https://[slug].get-slot.app` | `_sites` (via proxy rewrite) |
 
 ## Tenant Members
 
@@ -86,7 +116,7 @@ Member status (`tenant_members.status`):
 
 ## Protected Layout
 
-`/app/[tenantSlug]/*` is protected by `requireTenantMember()`.
+`/[tenantSlug]/*` is protected by `requireTenantMember()`.
 
 The shell displays:
 - Business name
@@ -98,14 +128,26 @@ The shell displays:
 
 | Route | Purpose |
 |-------|---------|
-| `/app` | Authenticated landing (redirects to business or /account) |
-| `/app/new` | Create business (placeholder) |
-| `/app/[slug]/dashboard` | Business dashboard |
-| `/app/[slug]/locations` | Location management |
-| `/app/[slug]/customers` | Customer management |
-| `/app/[slug]/team` | Team management |
-| `/app/[slug]/billing` | Billing & subscription |
-| `/app/[slug]/settings` | Business settings |
+| `/create-business` | Create business (placeholder) |
+| `/[slug]/dashboard` | Business dashboard |
+| `/[slug]/locations` | Location management |
+| `/[slug]/customers` | Customer management |
+| `/[slug]/team` | Team management |
+| `/[slug]/billing` | Billing & subscription |
+| `/[slug]/settings` | Business settings |
+
+## Login Flow
+
+| User Type | Destination |
+|-----------|-------------|
+| Platform admin | `/platform/dashboard` |
+| Business owner/member | `/[tenantSlug]/dashboard` |
+| Customer-only (no membership) | `/account` |
+| New user (no relationships) | `/create-business` |
+
+When multiple active tenant memberships exist, the first one ordered alphabetically by tenant name is used.
+
+`/create-business` is a placeholder page. Actual business onboarding begins in Milestone 4.2.
 
 ## Status Behavior
 

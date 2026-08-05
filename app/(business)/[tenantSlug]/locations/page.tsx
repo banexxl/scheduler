@@ -4,8 +4,8 @@ export default function LocationsPage() {
   return (
     <PlaceholderPage
       title="Locations"
-      area="Tenant Backoffice"
-      route="/app/[tenantSlug]/locations"
+      area="Business Portal"
+      route="/[tenantSlug]/locations"
     />
   );
 }

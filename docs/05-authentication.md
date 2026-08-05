@@ -68,19 +68,22 @@ After authentication, the system resolves the user's identity by querying:
 ## Post-Login Destination Precedence
 
 1. **Platform administrator** → `/platform/dashboard`
-2. **Active tenant member** → `/app/[slug]/dashboard`
-3. **No platform role or memberships** → `/account`
+2. **Active tenant member** → `/[tenantSlug]/dashboard`
+3. **Customer-only user** (has `tenant_customers` rows but no active membership) → `/account`
+4. **New user** (no platform, tenant, or customer relationship) → `/create-business`
 
 Only memberships where both `tenant_members.status = 'active'` AND `tenants.status = 'active'` are considered accessible.
 
-One owner = one business. The first accessible tenant membership determines the redirect.
+When multiple tenant memberships exist, the first one ordered by tenant name ascending is used. Multi-tenant selection is not supported.
 
-## Authenticated Landing (`/app`)
+One owner = one business.
 
-- Protected by `requireUser()`
-- If user has an active tenant → redirects to `/app/[slug]/dashboard`
-- If no tenant → redirects to `/account`
-- No multi-business selector is shown
+## Authenticated Landing
+
+- Platform admin → `/platform/dashboard`
+- Active tenant member → `/[slug]/dashboard`
+- Customer-only user → `/account`
+- New user (no relationships) → `/create-business`
 
 ## Protected Layouts
 
@@ -88,9 +91,8 @@ One owner = one business. The first accessible tenant membership determines the 
 |------|-------|-------------------|
 | `/account/*` | `requireUser()` | Redirect to `/login` |
 | `/platform/*` | `requirePlatformAdmin()` | 404 (not found) |
-| `/app/[slug]/*` | `requireTenantMember(slug)` | 404 (not found) |
-| `/app` | `requireUser()` | Redirect to `/login` |
-| `/app/new` | `requireUser()` | Redirect to `/login` |
+| `/[slug]/*` | `requireTenantMember(slug)` | 404 (not found) |
+| `/create-business` | `requireUser()` | Redirect to `/login` |
 
 Unauthorized access to tenant/platform routes returns 404 to avoid revealing resource existence.
 

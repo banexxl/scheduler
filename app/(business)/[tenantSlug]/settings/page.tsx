@@ -4,8 +4,8 @@ export default function SettingsPage() {
   return (
     <PlaceholderPage
       title="Settings"
-      area="Tenant Backoffice"
-      route="/app/[tenantSlug]/settings"
+      area="Business Portal"
+      route="/[tenantSlug]/settings"
     />
   );
 }

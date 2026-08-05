@@ -1,11 +1,11 @@
 import PlaceholderPage from "@/components/common/PlaceholderPage";
 
-export default function SiteHomePage() {
+export default function AboutPage() {
   return (
     <PlaceholderPage
-      title="Tenant Website"
+      title="About"
       area="Public Site"
-      route="/[tenantSlug]"
+      route="/_sites/[tenantSlug]/about"
     />
   );
 }

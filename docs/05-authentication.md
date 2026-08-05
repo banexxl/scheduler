@@ -68,20 +68,19 @@ After authentication, the system resolves the user's identity by querying:
 ## Post-Login Destination Precedence
 
 1. **Platform administrator** → `/platform/dashboard`
-2. **Exactly one active tenant membership** → `/app/[slug]/dashboard`
-3. **Multiple active tenant memberships** → `/app` (workspace selector)
-4. **No platform role or memberships** → `/account`
+2. **Active tenant member** → `/app/[slug]/dashboard`
+3. **No platform role or memberships** → `/account`
 
 Only memberships where both `tenant_members.status = 'active'` AND `tenants.status = 'active'` are considered accessible.
 
-## Workspace Selector (`/app`)
+One owner = one business. The first accessible tenant membership determines the redirect.
+
+## Authenticated Landing (`/app`)
 
 - Protected by `requireUser()`
-- Lists all accessible workspaces (active tenant memberships)
-- Shows tenant name and user's role
-- Links to `/app/[slug]/dashboard`
-- Redirects to `/account` if no memberships
-- Auto-redirects if exactly one membership
+- If user has an active tenant → redirects to `/app/[slug]/dashboard`
+- If no tenant → redirects to `/account`
+- No multi-business selector is shown
 
 ## Protected Layouts
 

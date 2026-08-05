@@ -104,8 +104,17 @@ All clients are typed with the generated `Database` type.
 
 ## Architecture
 
+- **One Tenant = One Business** — each tenant is a single business with multiple locations
 - **Proxy** (`/proxy.ts`) refreshes Supabase sessions on every request
 - **Environment validation** uses Yup schemas at startup
 - **Server-only** modules prevent accidental client imports
 - **RLS** enforces data access at the database level
 - See `docs/` for detailed documentation
+
+## URLs
+
+| Purpose | URL Pattern |
+|---------|-------------|
+| Platform | `https://get-slot.app` |
+| Business Dashboard | `https://get-slot.app/[slug]/dashboard` |
+| Public Website | `https://[slug].get-slot.app` (future) |

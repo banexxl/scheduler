@@ -7,12 +7,11 @@ import { resolveUserIdentity } from "./resolve-user-identity";
  *
  * Precedence:
  * 1. Active platform administrator → /platform/dashboard
- * 2. Exactly one accessible active tenant membership → /app/[slug]/dashboard
- * 3. More than one accessible tenant membership → /app (workspace selector)
- * 4. No platform-admin and no tenant membership → /account
+ * 2. Active tenant member → /app/[tenantSlug]/dashboard
+ * 3. No platform role and no tenant membership → /account
  *
- * Only tenant memberships where both the member is active AND
- * the tenant status is "active" are considered accessible.
+ * One owner = one business. The first accessible tenant membership
+ * determines the redirect. Multi-tenant selection is not supported.
  */
 export async function resolveLoginDestination(user: User): Promise<string> {
   const identity = await resolveUserIdentity(user);
@@ -22,21 +21,15 @@ export async function resolveLoginDestination(user: User): Promise<string> {
     return "/platform/dashboard";
   }
 
-  // Filter to accessible tenants (active status)
+  // 2. Tenant member — redirect to their business dashboard
   const accessible = identity.tenantMemberships.filter(
     (m) => m.tenantStatus === "active"
   );
 
-  // 2. Exactly one accessible tenant
-  if (accessible.length === 1) {
+  if (accessible.length > 0) {
     return `/app/${accessible[0]!.tenantSlug}/dashboard`;
   }
 
-  // 3. Multiple accessible tenants
-  if (accessible.length > 1) {
-    return "/app";
-  }
-
-  // 4. No platform role, no tenant membership
+  // 3. No platform role, no tenant membership
   return "/account";
 }

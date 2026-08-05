@@ -1,8 +1,7 @@
 "use client";
 
 import { useTransition, useState } from "react";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { Formik, Form, Field } from "formik";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -19,86 +18,103 @@ export default function LoginForm() {
     null
   );
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm<LoginFormValues>({
-    resolver: yupResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
-  });
-
-  const onSubmit = (data: LoginFormValues) => {
+  const handleSubmit = (
+    values: LoginFormValues,
+    { setFieldValue }: { setFieldValue: (field: string, value: string) => void }
+  ) => {
     setActionResult(null);
     const formData = new FormData();
-    formData.set("email", data.email);
-    formData.set("password", data.password);
+    formData.set("email", values.email);
+    formData.set("password", values.password);
 
     startTransition(async () => {
       const result = await loginAction(formData);
       setActionResult(result);
       // Clear password on failure
       if (!result.success) {
-        setValue("password", "");
+        setFieldValue("password", "");
       }
     });
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-      <AuthFormAlert
-        message={actionResult?.message}
-        severity={actionResult?.success ? "success" : "error"}
-      />
+    <Formik<LoginFormValues>
+      initialValues={{ email: "", password: "" }}
+      validationSchema={loginSchema}
+      onSubmit={handleSubmit}
+    >
+      {({ errors, touched }) => (
+        <Box component={Form} noValidate>
+          <AuthFormAlert
+            message={actionResult?.message}
+            severity={actionResult?.success ? "success" : "error"}
+          />
 
-      <TextField
-        {...register("email")}
-        label="Email"
-        type="email"
-        autoComplete="email"
-        fullWidth
-        margin="normal"
-        error={!!errors.email || !!actionResult?.fieldErrors?.email}
-        helperText={
-          errors.email?.message || actionResult?.fieldErrors?.email
-        }
-        disabled={isPending}
-      />
+          <Field name="email">
+            {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
+              <TextField
+                {...field}
+                label="Email"
+                type="email"
+                autoComplete="email"
+                fullWidth
+                margin="normal"
+                error={
+                  (!!touched.email && !!errors.email) ||
+                  !!actionResult?.fieldErrors?.email
+                }
+                helperText={
+                  (touched.email && errors.email) ||
+                  actionResult?.fieldErrors?.email
+                }
+                disabled={isPending}
+              />
+            )}
+          </Field>
 
-      <TextField
-        {...register("password")}
-        label="Password"
-        type="password"
-        autoComplete="current-password"
-        fullWidth
-        margin="normal"
-        error={!!errors.password || !!actionResult?.fieldErrors?.password}
-        helperText={
-          errors.password?.message || actionResult?.fieldErrors?.password
-        }
-        disabled={isPending}
-      />
+          <Field name="password">
+            {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
+              <TextField
+                {...field}
+                label="Password"
+                type="password"
+                autoComplete="current-password"
+                fullWidth
+                margin="normal"
+                error={
+                  (!!touched.password && !!errors.password) ||
+                  !!actionResult?.fieldErrors?.password
+                }
+                helperText={
+                  (touched.password && errors.password) ||
+                  actionResult?.fieldErrors?.password
+                }
+                disabled={isPending}
+              />
+            )}
+          </Field>
 
-      <Button
-        type="submit"
-        variant="contained"
-        fullWidth
-        size="large"
-        disabled={isPending}
-        sx={{ mt: 2, mb: 2 }}
-      >
-        {isPending ? "Signing in..." : "Sign In"}
-      </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            size="large"
+            disabled={isPending}
+            sx={{ mt: 2, mb: 2 }}
+          >
+            {isPending ? "Signing in..." : "Sign In"}
+          </Button>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Link component={NextLink} href="/forgot-password" variant="body2">
-          Forgot password?
-        </Link>
-        <Link component={NextLink} href="/register" variant="body2">
-          Create an account
-        </Link>
-      </Box>
-    </Box>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Link component={NextLink} href="/forgot-password" variant="body2">
+              Forgot password?
+            </Link>
+            <Link component={NextLink} href="/register" variant="body2">
+              Create an account
+            </Link>
+          </Box>
+        </Box>
+      )}
+    </Formik>
   );
 }

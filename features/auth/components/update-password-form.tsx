@@ -1,8 +1,7 @@
 "use client";
 
 import { useTransition, useState } from "react";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { Formik, Form, Field } from "formik";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -20,81 +19,94 @@ export default function UpdatePasswordForm() {
     null
   );
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm<UpdatePasswordFormValues>({
-    resolver: yupResolver(updatePasswordSchema),
-    defaultValues: { password: "", confirmPassword: "" },
-  });
-
-  const onSubmit = (data: UpdatePasswordFormValues) => {
+  const handleSubmit = (
+    values: UpdatePasswordFormValues,
+    { setFieldValue }: { setFieldValue: (field: string, value: string) => void }
+  ) => {
     setActionResult(null);
     const formData = new FormData();
-    formData.set("password", data.password);
-    formData.set("confirmPassword", data.confirmPassword);
+    formData.set("password", values.password);
+    formData.set("confirmPassword", values.confirmPassword);
 
     startTransition(async () => {
       const result = await updatePasswordAction(formData);
       setActionResult(result);
       if (!result.success) {
-        setValue("password", "");
-        setValue("confirmPassword", "");
+        setFieldValue("password", "");
+        setFieldValue("confirmPassword", "");
       }
     });
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-      <AuthFormAlert
-        message={actionResult?.message}
-        severity={actionResult?.success ? "success" : "error"}
-      />
+    <Formik<UpdatePasswordFormValues>
+      initialValues={{ password: "", confirmPassword: "" }}
+      validationSchema={updatePasswordSchema}
+      onSubmit={handleSubmit}
+    >
+      {({ errors, touched }) => (
+        <Box component={Form} noValidate>
+          <AuthFormAlert
+            message={actionResult?.message}
+            severity={actionResult?.success ? "success" : "error"}
+          />
 
-      <TextField
-        {...register("password")}
-        label="New Password"
-        type="password"
-        autoComplete="new-password"
-        fullWidth
-        margin="normal"
-        error={!!errors.password || !!actionResult?.fieldErrors?.password}
-        helperText={
-          errors.password?.message || actionResult?.fieldErrors?.password
-        }
-        disabled={isPending}
-      />
+          <Field name="password">
+            {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
+              <TextField
+                {...field}
+                label="New Password"
+                type="password"
+                autoComplete="new-password"
+                fullWidth
+                margin="normal"
+                error={
+                  (!!touched.password && !!errors.password) ||
+                  !!actionResult?.fieldErrors?.password
+                }
+                helperText={
+                  (touched.password && errors.password) ||
+                  actionResult?.fieldErrors?.password
+                }
+                disabled={isPending}
+              />
+            )}
+          </Field>
 
-      <TextField
-        {...register("confirmPassword")}
-        label="Confirm New Password"
-        type="password"
-        autoComplete="new-password"
-        fullWidth
-        margin="normal"
-        error={
-          !!errors.confirmPassword ||
-          !!actionResult?.fieldErrors?.confirmPassword
-        }
-        helperText={
-          errors.confirmPassword?.message ||
-          actionResult?.fieldErrors?.confirmPassword
-        }
-        disabled={isPending}
-      />
+          <Field name="confirmPassword">
+            {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
+              <TextField
+                {...field}
+                label="Confirm New Password"
+                type="password"
+                autoComplete="new-password"
+                fullWidth
+                margin="normal"
+                error={
+                  (!!touched.confirmPassword && !!errors.confirmPassword) ||
+                  !!actionResult?.fieldErrors?.confirmPassword
+                }
+                helperText={
+                  (touched.confirmPassword && errors.confirmPassword) ||
+                  actionResult?.fieldErrors?.confirmPassword
+                }
+                disabled={isPending}
+              />
+            )}
+          </Field>
 
-      <Button
-        type="submit"
-        variant="contained"
-        fullWidth
-        size="large"
-        disabled={isPending}
-        sx={{ mt: 2, mb: 2 }}
-      >
-        {isPending ? "Updating..." : "Update Password"}
-      </Button>
-    </Box>
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            size="large"
+            disabled={isPending}
+            sx={{ mt: 2, mb: 2 }}
+          >
+            {isPending ? "Updating..." : "Update Password"}
+          </Button>
+        </Box>
+      )}
+    </Formik>
   );
 }

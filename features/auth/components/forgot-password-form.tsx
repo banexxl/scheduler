@@ -1,8 +1,7 @@
 "use client";
 
 import { useTransition, useState } from "react";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { Formik, Form, Field } from "formik";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -22,19 +21,10 @@ export default function ForgotPasswordForm() {
     null
   );
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ForgotPasswordFormValues>({
-    resolver: yupResolver(forgotPasswordSchema),
-    defaultValues: { email: "" },
-  });
-
-  const onSubmit = (data: ForgotPasswordFormValues) => {
+  const handleSubmit = (values: ForgotPasswordFormValues) => {
     setActionResult(null);
     const formData = new FormData();
-    formData.set("email", data.email);
+    formData.set("email", values.email);
 
     startTransition(async () => {
       const result = await forgotPasswordAction(formData);
@@ -49,39 +39,55 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-      <AuthFormAlert message={actionResult?.message} />
+    <Formik<ForgotPasswordFormValues>
+      initialValues={{ email: "" }}
+      validationSchema={forgotPasswordSchema}
+      onSubmit={handleSubmit}
+    >
+      {({ errors, touched }) => (
+        <Box component={Form} noValidate>
+          <AuthFormAlert message={actionResult?.message} />
 
-      <TextField
-        {...register("email")}
-        label="Email"
-        type="email"
-        autoComplete="email"
-        fullWidth
-        margin="normal"
-        error={!!errors.email || !!actionResult?.fieldErrors?.email}
-        helperText={
-          errors.email?.message || actionResult?.fieldErrors?.email
-        }
-        disabled={isPending}
-      />
+          <Field name="email">
+            {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
+              <TextField
+                {...field}
+                label="Email"
+                type="email"
+                autoComplete="email"
+                fullWidth
+                margin="normal"
+                error={
+                  (!!touched.email && !!errors.email) ||
+                  !!actionResult?.fieldErrors?.email
+                }
+                helperText={
+                  (touched.email && errors.email) ||
+                  actionResult?.fieldErrors?.email
+                }
+                disabled={isPending}
+              />
+            )}
+          </Field>
 
-      <Button
-        type="submit"
-        variant="contained"
-        fullWidth
-        size="large"
-        disabled={isPending}
-        sx={{ mt: 2, mb: 2 }}
-      >
-        {isPending ? "Sending..." : "Send Reset Link"}
-      </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            size="large"
+            disabled={isPending}
+            sx={{ mt: 2, mb: 2 }}
+          >
+            {isPending ? "Sending..." : "Send Reset Link"}
+          </Button>
 
-      <Box sx={{ textAlign: "center" }}>
-        <Link component={NextLink} href="/login" variant="body2">
-          Back to sign in
-        </Link>
-      </Box>
-    </Box>
+          <Box sx={{ textAlign: "center" }}>
+            <Link component={NextLink} href="/login" variant="body2">
+              Back to sign in
+            </Link>
+          </Box>
+        </Box>
+      )}
+    </Formik>
   );
 }

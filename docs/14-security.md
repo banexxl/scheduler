@@ -86,6 +86,22 @@ Only allows paths starting with exactly one `/`.
 - Health endpoints return safe generic messages
 - Error logging uses sanitized messages
 
+## Slug Availability Endpoint
+
+`GET /api/businesses/slug-availability?slug=...`
+
+Security measures:
+- Requires authenticated user (returns 401 otherwise)
+- Never exposes tenant details (names, IDs, statuses, owners)
+- Returns only availability status boolean
+- Uses `SECURITY DEFINER` RPC to bypass RLS without weakening policies
+- The RPC has empty `search_path` and is restricted to `authenticated` role
+- Never uses the admin/service-role client
+- Cache-prevention headers (`no-store, no-cache, must-revalidate`)
+- Input length capped (rejects >100 chars)
+- Server-side format validation before database query
+- Reserved slugs rejected before database query
+
 ## Rules for Development
 
 1. Never import `lib/supabase/admin.ts` from client code

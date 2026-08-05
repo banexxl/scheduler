@@ -128,7 +128,7 @@ The shell displays:
 
 | Route | Purpose |
 |-------|---------|
-| `/create-business` | Create business (placeholder) |
+| `/create-business` | Create business (onboarding form) |
 | `/[slug]/dashboard` | Business dashboard |
 | `/[slug]/locations` | Location management |
 | `/[slug]/customers` | Customer management |
@@ -147,7 +147,7 @@ The shell displays:
 
 When multiple active tenant memberships exist, the first one ordered alphabetically by tenant name is used.
 
-`/create-business` is a placeholder page. Actual business onboarding begins in Milestone 4.2.
+`/create-business` is a fully implemented form (UI + validation). Actual database creation is deferred to Milestone 4.3. See `docs/17-business-onboarding.md` for details.
 
 ## Status Behavior
 
@@ -161,3 +161,14 @@ Certain slugs are reserved and cannot be used as tenant slugs.
 See `lib/constants/reserved-slugs.ts` for the full list.
 
 These conflict with application routes or system paths (e.g. `admin`, `api`, `login`, `platform`, etc.).
+
+## Slug Availability
+
+Slug uniqueness is enforced at two levels:
+
+1. **Live check** — `is_tenant_slug_available()` RPC called during onboarding (advisory)
+2. **Unique index** — Database constraint on `tenants.slug` (final authority)
+
+The RPC uses `SECURITY DEFINER` to check all slugs without exposing tenant data through RLS. It is restricted to `authenticated` users and returns only a boolean.
+
+Shared validation utilities in `lib/tenants/validate-tenant-slug.ts` ensure consistent format rules across client, server, and database layers.

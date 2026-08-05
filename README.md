@@ -7,7 +7,7 @@ A production-grade multi-tenant SaaS Scheduling Platform.
 - **Framework:** Next.js 16 (App Router, Turbopack)
 - **Language:** TypeScript (strict mode)
 - **UI:** Material UI 6
-- **Forms:** React Hook Form + Yup
+- **Forms:** Formik + Yup
 - **Styling:** CSS Modules + CSS custom properties
 - **Database:** Supabase (PostgreSQL + RLS)
 - **Auth:** Supabase Auth (SSR via `@supabase/ssr`, email/password)
@@ -130,4 +130,4 @@ All clients are typed with the generated `Database` type.
 | Customer-only | `/account` |
 | New user | `/create-business` |
 
-`/create-business` is a placeholder. Business onboarding starts in Milestone 4.2.
+`/create-business` collects business name, slug, location, timezone, and currency. Slug availability is checked live via `GET /api/businesses/slug-availability`. See `docs/17-business-onboarding.md`.

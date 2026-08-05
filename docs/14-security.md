@@ -1,7 +1,102 @@
 # Security
 
-- Never expose service-role key
-- Never bypass RLS
+## Core Principles
+
+- Never expose `SUPABASE_SERVICE_ROLE_KEY` to browser code
+- Never add the service-role key to a `NEXT_PUBLIC_` variable
+- Never bypass Row Level Security for normal user queries
 - Always authorize on the server
-- Never trust tenant IDs from the client
-- Platform admins authenticated via platform_admins
+- Never trust tenant IDs from the client without verification
+- Platform admins authenticated via `platform_admins` table (not email lists)
+- Never authorize from user metadata
+
+## Authentication Security
+
+- Never use the admin client for authentication flows
+- Never log passwords, tokens, or full session objects
+- Never reveal whether an email exists (generic error messages)
+- Never redirect to arbitrary external URLs
+- All `next` parameters validated by `getSafeRedirectPath()`
+- Server-side identity resolution — never route from client state alone
+- Server Actions revalidate input with Yup (never trust client validation alone)
+- Raw Supabase errors never exposed to users
+
+## Supabase Client Security
+
+### Browser Client
+- Uses only the publishable (anon) key
+- Subject to RLS policies
+- Cannot access data outside user's permissions
+
+### Server Client
+- Uses the publishable key with cookie-based auth
+- Operates as the authenticated user
+- Subject to RLS policies
+- Safe for Server Components, Actions, and Route Handlers
+
+### Admin Client
+- Uses the service-role key — **bypasses RLS**
+- Protected by `import "server-only"`
+- Cannot be imported into Client Components
+- Throws if service-role key is missing
+- Reserved for platform-level operations only
+- Never used for authentication
+- Never use to work around missing RLS policies
+
+## Route Protection
+
+| Area | Guard | On failure |
+|------|-------|-----------|
+| `/account/*` | `requireUser()` | Redirect to `/login` |
+| `/platform/*` | `requirePlatformAdmin()` | 404 |
+| `/app/[slug]/*` | `requireTenantMember(slug)` | 404 |
+| `/app` | `requireUser()` | Redirect to `/login` |
+
+Authorization occurs server-side in layouts (not client-side navigation guards).
+
+## Redirect Security
+
+`getSafeRedirectPath()` rejects:
+- External URLs (`https://evil.com`)
+- Protocol-relative URLs (`//evil.com`)
+- JavaScript injection (`javascript:alert(1)`)
+- Data URIs (`data:text/html,...`)
+
+Only allows paths starting with exactly one `/`.
+
+## Environment Variables
+
+| Variable | Exposure | Notes |
+|----------|----------|-------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Browser + Server | Safe to expose |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser + Server | Safe to expose |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server only | Never expose |
+| `SUPABASE_PROJECT_ID` | Server only | Type generation only |
+
+## Proxy
+
+- Session refresh only — no business logic
+- Never logs cookies, tokens, or keys
+- Never makes data queries
+- No auth redirects (authorization is in layouts)
+
+## API Security
+
+- Raw Supabase errors never in HTTP responses
+- Health endpoints return safe generic messages
+- Error logging uses sanitized messages
+
+## Rules for Development
+
+1. Never import `lib/supabase/admin.ts` from client code
+2. Never create a second proxy/middleware entry point
+3. Never log credentials, cookies, tokens, or sessions
+4. Never include raw database errors in API responses
+5. Never disable RLS policies
+6. Never use the admin client for normal user queries
+7. Never commit `.env.local` or secrets
+8. Never trust client-provided user IDs or roles
+9. Never authorize from editable user metadata
+10. Never create tenant/customer records during basic sign-up
+11. Never implement platform-admin access from email allowlists
+12. Never place private identity data in public page output

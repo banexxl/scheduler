@@ -1,13 +1,12 @@
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/proxy";
 
-export function proxy(request: NextRequest) {
-    console.log(request.headers)
-    return NextResponse.next();
+export async function proxy(request: NextRequest) {
+    return updateSession(request);
 }
 
 export const config = {
     matcher: [
-        "/((?!_next/static|_next/image|favicon.ico|images|icons|logos|themes).*)",
+        "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
     ],
 };

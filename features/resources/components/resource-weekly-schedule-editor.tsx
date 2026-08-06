@@ -110,9 +110,11 @@ export default function ResourceWeeklyScheduleEditor({
   const periodsForDay = (day: DayOfWeek) =>
     periods.filter((p) => p.dayOfWeek === day);
 
-  const isDirty =
-    JSON.stringify(periods.map(({ key: _k, ...rest }) => rest)) !==
-    JSON.stringify(initPeriods(initialSchedule).map(({ key: _k2, ...rest }) => rest));
+  const isDirty = (() => {
+    const current = periods.map((p) => ({ locationId: p.locationId, dayOfWeek: p.dayOfWeek, startTime: p.startTime, endTime: p.endTime, isActive: p.isActive }));
+    const initial = initPeriods(initialSchedule).map((p) => ({ locationId: p.locationId, dayOfWeek: p.dayOfWeek, startTime: p.startTime, endTime: p.endTime, isActive: p.isActive }));
+    return JSON.stringify(current) !== JSON.stringify(initial);
+  })();
 
   return (
     <Box>

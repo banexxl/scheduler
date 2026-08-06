@@ -161,6 +161,23 @@ export function renderNotificationTemplate(
   return { subject, html, text };
 }
 
+// ─── Reminder Offset Formatting ──────────────────────────────────────────────
+
+/**
+ * Formats a reminder offset in minutes into user-friendly text.
+ */
+function formatReminderOffsetValue(offsetMinutes: number): string {
+  if (offsetMinutes % 1440 === 0) {
+    const days = offsetMinutes / 1440;
+    return days === 1 ? "1 day" : `${days} days`;
+  }
+  if (offsetMinutes % 60 === 0) {
+    const hours = offsetMinutes / 60;
+    return hours === 1 ? "1 hour" : `${hours} hours`;
+  }
+  return offsetMinutes === 1 ? "1 minute" : `${offsetMinutes} minutes`;
+}
+
 // ─── Build Variable Values from Payload ──────────────────────────────────────
 
 /**
@@ -212,6 +229,9 @@ export function buildTemplateVariables(
     price: formattedPrice,
     currency: payload.currency,
     cancellation_reason: payload.cancellationReason ?? "",
+    reminder_offset: payload.reminderOffsetMinutes
+      ? formatReminderOffsetValue(payload.reminderOffsetMinutes)
+      : "",
   };
 }
 
@@ -277,6 +297,26 @@ const DEFAULT_CANCELLED_TEMPLATE: DefaultTemplate = {
 </div>`,
 };
 
+const DEFAULT_REMINDER_TEMPLATE: DefaultTemplate = {
+  subject: "Reminder: upcoming appointment — {{appointment_number}}",
+  body: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+<h2>Appointment Reminder</h2>
+<p>Hi {{customer_name}},</p>
+<p>This is a reminder that your appointment is coming up in {{reminder_offset}}.</p>
+<table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+<tr><td style="padding: 8px 0; color: #666;">Appointment</td><td style="padding: 8px 0; font-weight: bold;">{{appointment_number}}</td></tr>
+<tr><td style="padding: 8px 0; color: #666;">Service</td><td style="padding: 8px 0;">{{service_name}}</td></tr>
+<tr><td style="padding: 8px 0; color: #666;">Date</td><td style="padding: 8px 0;">{{appointment_date}}</td></tr>
+<tr><td style="padding: 8px 0; color: #666;">Time</td><td style="padding: 8px 0;">{{appointment_start_time}} – {{appointment_end_time}}</td></tr>
+<tr><td style="padding: 8px 0; color: #666;">Location</td><td style="padding: 8px 0;">{{location_name}}</td></tr>
+<tr><td style="padding: 8px 0; color: #666;">With</td><td style="padding: 8px 0;">{{resource_name}}</td></tr>
+<tr><td style="padding: 8px 0; color: #666;">Price</td><td style="padding: 8px 0;">{{price}}</td></tr>
+</table>
+<p style="color: #666; font-size: 12px;">Time zone: {{time_zone}}</p>
+<p>We look forward to seeing you at {{tenant_name}}!</p>
+</div>`,
+};
+
 /**
  * Returns the default template for a given template type.
  */
@@ -288,5 +328,7 @@ export function getDefaultTemplate(templateType: NotificationTemplateType): Defa
       return DEFAULT_RESCHEDULED_TEMPLATE;
     case "appointment_cancelled":
       return DEFAULT_CANCELLED_TEMPLATE;
+    case "appointment_reminder":
+      return DEFAULT_REMINDER_TEMPLATE;
   }
 }

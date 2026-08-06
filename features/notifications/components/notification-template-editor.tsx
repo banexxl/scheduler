@@ -38,6 +38,7 @@ const TEMPLATE_TYPE_LABELS: Record<NotificationTemplateType, string> = {
   appointment_created: "Appointment Confirmation",
   appointment_rescheduled: "Appointment Rescheduled",
   appointment_cancelled: "Appointment Cancelled",
+  appointment_reminder: "Appointment Reminder",
 };
 
 type Props = {

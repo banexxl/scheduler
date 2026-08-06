@@ -13,6 +13,7 @@ import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { appointmentCreateSchema } from "../schemas/appointment-schemas";
 import { createAppointment } from "../services/create-appointment";
 import { enqueueAppointmentCreatedNotification } from "@/features/notifications/services/enqueue-notification";
+import { syncRemindersAfterCreation } from "@/features/notifications/services/reminder-sync-service";
 import { loadTenantTimezone } from "@/features/availability/services/availability-queries";
 import type { Appointment } from "../types/appointment";
 
@@ -91,6 +92,13 @@ export async function createAppointmentAction(
       );
     } catch {
       // Notification failure must never block appointment creation
+    }
+
+    // Sync reminder schedules (non-blocking)
+    try {
+      await syncRemindersAfterCreation(tenant.id, tenant.name, result.appointment);
+    } catch {
+      // Reminder sync failure must never block appointment creation
     }
 
     return { success: true, data: result.appointment };

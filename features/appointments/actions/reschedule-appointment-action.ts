@@ -14,6 +14,7 @@ import { appointmentRescheduleSchema } from "../schemas/appointment-schemas";
 import { rescheduleAppointment } from "../services/update-appointment";
 import { getAppointmentById } from "../services/appointment-queries";
 import { enqueueAppointmentRescheduledNotification } from "@/features/notifications/services/enqueue-notification";
+import { syncRemindersAfterReschedule } from "@/features/notifications/services/reminder-sync-service";
 import { loadTenantTimezone } from "@/features/availability/services/availability-queries";
 import type { Appointment } from "../types/appointment";
 
@@ -86,6 +87,15 @@ export async function rescheduleAppointmentAction(
         );
       } catch {
         // Notification failure must never block rescheduling
+      }
+    }
+
+    // Sync reminder schedules after rescheduling (non-blocking)
+    if (schedulingChanged) {
+      try {
+        await syncRemindersAfterReschedule(tenant.id, tenant.name, result.appointment);
+      } catch {
+        // Reminder sync failure must never block rescheduling
       }
     }
 

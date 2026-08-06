@@ -19,11 +19,12 @@ import {
 } from "../types/notification";
 
 describe("notification constants", () => {
-  it("has 3 event types", () => {
-    expect(NOTIFICATION_EVENT_TYPES).toHaveLength(3);
+  it("has 4 event types", () => {
+    expect(NOTIFICATION_EVENT_TYPES).toHaveLength(4);
     expect(NOTIFICATION_EVENT_TYPES).toContain("appointment_created");
     expect(NOTIFICATION_EVENT_TYPES).toContain("appointment_rescheduled");
     expect(NOTIFICATION_EVENT_TYPES).toContain("appointment_cancelled");
+    expect(NOTIFICATION_EVENT_TYPES).toContain("appointment_reminder");
   });
 
   it("template types match event types", () => {
@@ -99,8 +100,8 @@ describe("retry policy", () => {
 });
 
 describe("template variables", () => {
-  it("has 13 supported variables", () => {
-    expect(SUPPORTED_TEMPLATE_VARIABLES).toHaveLength(13);
+  it("has 14 supported variables", () => {
+    expect(SUPPORTED_TEMPLATE_VARIABLES).toHaveLength(14);
   });
 
   it("each variable has a label", () => {

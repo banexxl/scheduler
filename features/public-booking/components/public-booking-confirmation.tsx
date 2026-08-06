@@ -53,7 +53,9 @@ export default function PublicBookingConfirmationView({ confirmation }: Props) {
 
       {confirmation.emailConfirmationEnqueued && (
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          A confirmation email will be sent to the address provided.
+          {confirmation.remindersScheduled
+            ? "You may receive appointment updates and reminders by email."
+            : "A confirmation email will be sent to the address provided."}
         </Typography>
       )}
     </Paper>

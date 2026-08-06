@@ -520,3 +520,39 @@ Implemented transactional email notifications for appointment events using an ou
 - Bulk messaging, notification campaigns
 
 See `docs/36-appointment-notifications.md` for full details.
+
+### Milestone 6.13 — Appointment Reminder Scheduling
+
+Implemented scheduled email reminders sent before appointments using the existing notification outbox infrastructure.
+
+**Implemented:**
+- `schedule_version` column on appointments with auto-increment trigger
+- `tenant_reminder_rules` table with configurable offsets (5 min – 365 days)
+- `appointment_reminders` table with version-based uniqueness
+- Extended notification event/template types with `appointment_reminder`
+- `sync_appointment_reminders` RPC (atomic create/update/cancel per rules)
+- `claim_due_appointment_reminders` RPC (SKIP LOCKED with eligibility check)
+- `cancel_pending_appointment_reminder_notifications` RPC
+- `backfill_appointment_reminders` RPC (90-day max, 500 batch)
+- Schedule version auto-increment trigger on scheduling field changes
+- Tenant-consistency trigger for reminder records
+- Reminder rule CRUD service and server actions
+- Reminder synchronization service integrated into create/reschedule/cancel
+- Reminder processing service (scheduler → outbox pipeline)
+- Protected reminder processing route (POST /api/internal/reminders/process)
+- Sent-state synchronization (outbox sent → reminder sent)
+- Reminder settings UI with rules table, add/edit/delete, presets
+- Appointment detail reminders section with manual sync action
+- Default `appointment_reminder` email template with `{{reminder_offset}}` variable
+- Public booking confirmation conditional reminder wording
+- 53 automated tests (types, template rendering, schema validation)
+- Full documentation (docs/37-appointment-reminders.md)
+
+**Not implemented (deferred):**
+- SMS reminders
+- Push notifications
+- Customer self-service (cancel/reschedule links)
+- Recurring appointments
+- Provider delivery webhooks
+
+See `docs/37-appointment-reminders.md` for full details.

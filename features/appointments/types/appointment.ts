@@ -166,6 +166,7 @@ export type Appointment = {
   updatedBy: string | null;
   createdAt: string;
   updatedAt: string;
+  scheduleVersion: number;
 };
 
 // ─── List Item (for table display) ──────────────────────────────────────────

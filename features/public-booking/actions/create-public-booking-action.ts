@@ -256,6 +256,16 @@ export async function createPublicBookingAction(
             // Notification failure must never block public booking
         }
 
+        // 11c. Sync reminder schedules (non-blocking)
+        let remindersScheduled = false;
+        try {
+            const { syncRemindersAfterCreation } = await import("@/features/notifications/services/reminder-sync-service");
+            const reminderResult = await syncRemindersAfterCreation(tenantId, tenant.name, createResult.appointment);
+            remindersScheduled = reminderResult.status === "synced" && reminderResult.createdOrUpdated > 0;
+        } catch {
+            // Reminder sync failure must never block public booking
+        }
+
         // 12. Build public-safe confirmation
         const appt = createResult.appointment;
         const timeZone = tenant.defaultTimeZone;
@@ -278,6 +288,7 @@ export async function createPublicBookingAction(
             customerName: appt.customerName,
             confirmationMessage: settings.confirmationMessage,
             emailConfirmationEnqueued,
+            remindersScheduled,
         };
 
         return { success: true, data: confirmation };
@@ -360,6 +371,7 @@ async function buildConfirmationFromAppointment(
             customerName: row.customer_name as string,
             confirmationMessage,
             emailConfirmationEnqueued: true, // Already completed — email was enqueued on first attempt
+            remindersScheduled: true, // Already completed — reminders were synced on first attempt
         },
     };
 }

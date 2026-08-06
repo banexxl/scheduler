@@ -373,6 +373,7 @@ export async function createAppointment(
         updatedBy: (row.updated_by as string) ?? null,
         createdAt: row.created_at as string,
         updatedAt: row.updated_at as string,
+        scheduleVersion: (row.schedule_version as number) ?? 1,
     };
 
     return { success: true, appointment };

@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointment_reminders: {
+        Row: {
+          appointment_id: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          channel: string
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          enqueued_at: string | null
+          id: string
+          outbox_id: string | null
+          reminder_rule_id: string
+          schedule_version: number
+          scheduled_for: string
+          sent_at: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          channel?: string
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          enqueued_at?: string | null
+          id?: string
+          outbox_id?: string | null
+          reminder_rule_id: string
+          schedule_version: number
+          scheduled_for: string
+          sent_at?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          channel?: string
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          enqueued_at?: string | null
+          id?: string
+          outbox_id?: string | null
+          reminder_rule_id?: string
+          schedule_version?: number
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_reminders_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_reminders_outbox_id_fkey"
+            columns: ["outbox_id"]
+            isOneToOne: false
+            referencedRelation: "notification_outbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_reminders_reminder_rule_id_fkey"
+            columns: ["reminder_rule_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_reminder_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_reminders_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointment_sequences: {
         Row: {
           created_at: string
@@ -73,6 +162,7 @@ export type Database = {
           price: number
           resource_id: string
           resource_name_snapshot: string
+          schedule_version: number
           service_id: string
           service_name_snapshot: string
           source: string
@@ -108,6 +198,7 @@ export type Database = {
           price?: number
           resource_id: string
           resource_name_snapshot: string
+          schedule_version?: number
           service_id: string
           service_name_snapshot: string
           source?: string
@@ -143,6 +234,7 @@ export type Database = {
           price?: number
           resource_id?: string
           resource_name_snapshot?: string
+          schedule_version?: number
           service_id?: string
           service_name_snapshot?: string
           source?: string
@@ -1958,6 +2050,50 @@ export type Database = {
           },
         ]
       }
+      tenant_reminder_rules: {
+        Row: {
+          channel: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          offset_minutes: number
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          offset_minutes: number
+          sort_order?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          offset_minutes?: number
+          sort_order?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_reminder_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_subscriptions: {
         Row: {
           cancel_at_period_end: boolean
@@ -2095,6 +2231,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      backfill_appointment_reminders: {
+        Args: {
+          p_batch_limit?: number
+          p_end_at: string
+          p_start_at: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
       cancel_appointment: {
         Args: {
           p_appointment_id: string
@@ -2128,6 +2273,7 @@ export type Database = {
           price: number
           resource_id: string
           resource_name_snapshot: string
+          schedule_version: number
           service_id: string
           service_name_snapshot: string
           source: string
@@ -2142,6 +2288,42 @@ export type Database = {
           to: "appointments"
           isOneToOne: true
           isSetofReturn: false
+        }
+      }
+      cancel_pending_appointment_reminder_notifications: {
+        Args: {
+          p_appointment_id: string
+          p_reason?: string
+          p_tenant_id: string
+        }
+        Returns: number
+      }
+      claim_due_appointment_reminders: {
+        Args: { p_batch_size?: number; p_worker_id: string }
+        Returns: {
+          appointment_id: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          channel: string
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          enqueued_at: string | null
+          id: string
+          outbox_id: string | null
+          reminder_rule_id: string
+          schedule_version: number
+          scheduled_for: string
+          sent_at: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "appointment_reminders"
+          isOneToOne: false
+          isSetofReturn: true
         }
       }
       claim_notification_outbox_batch: {
@@ -2395,6 +2577,7 @@ export type Database = {
           price: number
           resource_id: string
           resource_name_snapshot: string
+          schedule_version: number
           service_id: string
           service_name_snapshot: string
           source: string
@@ -2586,6 +2769,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      sync_appointment_reminders: {
+        Args: { p_appointment_id: string; p_tenant_id: string }
+        Returns: Json
       }
       update_location_exception_v2: {
         Args: {

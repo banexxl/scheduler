@@ -157,4 +157,6 @@ export type PublicBookingConfirmation = {
   confirmationMessage: string | null;
   /** Whether a confirmation email was enqueued for the customer */
   emailConfirmationEnqueued: boolean;
+  /** Whether reminder schedules were created for this appointment */
+  remindersScheduled: boolean;
 };

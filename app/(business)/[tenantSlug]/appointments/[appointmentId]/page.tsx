@@ -13,7 +13,9 @@ import { APPOINTMENT_STATUS_LABELS } from "@/features/appointments/types/appoint
 import type { AppointmentStatus } from "@/features/appointments/types/appointment";
 import AppointmentStatusActions from "@/features/appointments/components/appointment-status-actions";
 import { getNotificationsForAppointment } from "@/features/notifications/services/notification-outbox-service";
+import { getRemindersForAppointment } from "@/features/notifications/services/reminder-queries";
 import AppointmentNotificationsSection from "@/features/notifications/components/appointment-notifications-section";
+import AppointmentRemindersSection from "@/features/notifications/components/appointment-reminders-section";
 
 const EDITABLE_ROLES = ["owner", "admin"];
 
@@ -46,10 +48,13 @@ export default async function AppointmentDetailPage({
   const appointment = await getAppointmentById(tenant.id, appointmentId);
   if (!appointment) notFound();
 
-  // Load notifications for this appointment (owner/admin only)
-  const notifications = canEdit
-    ? await getNotificationsForAppointment(tenant.id, appointmentId)
-    : [];
+  // Load notifications and reminders for this appointment (owner/admin only)
+  const [notifications, reminders] = canEdit
+    ? await Promise.all([
+      getNotificationsForAppointment(tenant.id, appointmentId),
+      getRemindersForAppointment(tenant.id, appointmentId),
+    ])
+    : [[], []];
 
   const price = parseFloat(appointment.price);
 
@@ -192,6 +197,15 @@ export default async function AppointmentDetailPage({
           </Box>
         </Box>
       </Paper>
+
+      {canEdit && (reminders.length > 0 || notifications.length > 0) && (
+        <AppointmentRemindersSection
+          tenantSlug={tenantSlug}
+          appointmentId={appointmentId}
+          reminders={reminders}
+          canSync={canEdit}
+        />
+      )}
 
       {canEdit && notifications.length > 0 && (
         <AppointmentNotificationsSection

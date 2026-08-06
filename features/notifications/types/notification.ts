@@ -1,8 +1,9 @@
 /**
- * Domain types for appointment notifications — Milestone 6.12.
+ * Domain types for appointment notifications — Milestones 6.12 & 6.13.
  *
  * Defines the notification data model: settings, templates, outbox entries,
- * delivery attempts, payloads, provider interfaces, and all input/output shapes.
+ * delivery attempts, payloads, provider interfaces, reminder rules,
+ * reminder records, and all input/output shapes.
  */
 
 // ─── Event Types ─────────────────────────────────────────────────────────────
@@ -11,6 +12,7 @@ export const NOTIFICATION_EVENT_TYPES = [
   "appointment_created",
   "appointment_rescheduled",
   "appointment_cancelled",
+  "appointment_reminder",
 ] as const;
 
 export type NotificationEventType = (typeof NOTIFICATION_EVENT_TYPES)[number];
@@ -21,6 +23,7 @@ export const NOTIFICATION_TEMPLATE_TYPES = [
   "appointment_created",
   "appointment_rescheduled",
   "appointment_cancelled",
+  "appointment_reminder",
 ] as const;
 
 export type NotificationTemplateType = (typeof NOTIFICATION_TEMPLATE_TYPES)[number];
@@ -116,6 +119,7 @@ export const SUPPORTED_TEMPLATE_VARIABLES = [
   "price",
   "currency",
   "cancellation_reason",
+  "reminder_offset",
 ] as const;
 
 export type TemplateVariable = (typeof SUPPORTED_TEMPLATE_VARIABLES)[number];
@@ -134,6 +138,7 @@ export const TEMPLATE_VARIABLE_LABELS: Record<TemplateVariable, string> = {
   price: "Price",
   currency: "Currency",
   cancellation_reason: "Cancellation Reason",
+  reminder_offset: "Reminder Offset (e.g. 24 hours)",
 };
 
 // ─── Notification Outbox ─────────────────────────────────────────────────────
@@ -206,6 +211,9 @@ export type AppointmentNotificationPayload = {
   previousEndsAt?: string;
 
   cancellationReason?: string | null;
+
+  /** Reminder offset in minutes (only for appointment_reminder events) */
+  reminderOffsetMinutes?: number;
 
   tenantName: string;
 };
@@ -333,3 +341,175 @@ export const NOTIFICATION_RETRY_POLICY = {
 export const EMAIL_PROVIDERS = ["console", "nodemailer"] as const;
 
 export type EmailProviderName = (typeof EMAIL_PROVIDERS)[number];
+
+// ─── Reminder Rule Types (Milestone 6.13) ────────────────────────────────────
+
+export type ReminderRule = {
+  id: string;
+  tenantId: string;
+  name: string;
+  offsetMinutes: number;
+  channel: NotificationChannel;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ReminderRuleListItem = {
+  id: string;
+  name: string;
+  offsetMinutes: number;
+  channel: NotificationChannel;
+  isActive: boolean;
+  sortOrder: number;
+};
+
+export type CreateReminderRuleInput = {
+  name: string;
+  offsetMinutes: number;
+  isActive?: boolean;
+};
+
+export type UpdateReminderRuleInput = {
+  name?: string;
+  offsetMinutes?: number;
+  isActive?: boolean;
+};
+
+// ─── Reminder Offset Units ───────────────────────────────────────────────────
+
+export const REMINDER_OFFSET_UNITS = ["minutes", "hours", "days"] as const;
+
+export type ReminderOffsetUnit = (typeof REMINDER_OFFSET_UNITS)[number];
+
+/** Presets for quick-add in the UI */
+export const REMINDER_OFFSET_PRESETS = [
+  { label: "30 minutes before", offsetMinutes: 30 },
+  { label: "1 hour before", offsetMinutes: 60 },
+  { label: "2 hours before", offsetMinutes: 120 },
+  { label: "24 hours before", offsetMinutes: 1440 },
+  { label: "48 hours before", offsetMinutes: 2880 },
+  { label: "7 days before", offsetMinutes: 10080 },
+] as const;
+
+// ─── Appointment Reminder Record Types ───────────────────────────────────────
+
+export const REMINDER_STATUSES = [
+  "pending",
+  "processing",
+  "enqueued",
+  "sent",
+  "cancelled",
+  "failed",
+] as const;
+
+export type ReminderStatus = (typeof REMINDER_STATUSES)[number];
+
+export type AppointmentReminder = {
+  id: string;
+  tenantId: string;
+  appointmentId: string;
+  reminderRuleId: string;
+  scheduleVersion: number;
+  channel: NotificationChannel;
+  scheduledFor: string;
+  status: ReminderStatus;
+  outboxId: string | null;
+  claimedAt: string | null;
+  claimedBy: string | null;
+  enqueuedAt: string | null;
+  sentAt: string | null;
+  cancelledAt: string | null;
+  cancellationReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AppointmentReminderListItem = {
+  id: string;
+  reminderRuleId: string;
+  ruleName: string;
+  offsetMinutes: number;
+  scheduleVersion: number;
+  scheduledFor: string;
+  status: ReminderStatus;
+  enqueuedAt: string | null;
+  sentAt: string | null;
+  cancelledAt: string | null;
+  cancellationReason: string | null;
+};
+
+// ─── Reminder Eligible Statuses ──────────────────────────────────────────────
+
+export const REMINDER_ELIGIBLE_APPOINTMENT_STATUSES = [
+  "pending",
+  "confirmed",
+] as const;
+
+// ─── Reminder Sync Result ────────────────────────────────────────────────────
+
+export type ReminderSyncResult =
+  | { status: "synced"; createdOrUpdated: number; cancelled: number; skippedPast: number; scheduleVersion: number }
+  | { status: "ineligible"; cancelled: number }
+  | { status: "skipped"; reason: string }
+  | { status: "error"; reason: string };
+
+// ─── Reminder Process Result ─────────────────────────────────────────────────
+
+export type ProcessReminderResult = {
+  reminderId: string;
+  status: "enqueued" | "skipped" | "failed";
+  outboxId?: string;
+  reason?: string;
+};
+
+export type ProcessReminderBatchResult = {
+  processed: number;
+  enqueued: number;
+  skipped: number;
+  failed: number;
+  results: ProcessReminderResult[];
+};
+
+// ─── Offset Formatting ───────────────────────────────────────────────────────
+
+/**
+ * Formats an offset in minutes into a user-friendly string.
+ * Examples: "30 minutes", "2 hours", "1 day", "3 days"
+ */
+export function formatReminderOffset(offsetMinutes: number): string {
+  if (offsetMinutes % 1440 === 0) {
+    const days = offsetMinutes / 1440;
+    return days === 1 ? "1 day" : `${days} days`;
+  }
+  if (offsetMinutes % 60 === 0) {
+    const hours = offsetMinutes / 60;
+    return hours === 1 ? "1 hour" : `${hours} hours`;
+  }
+  return offsetMinutes === 1 ? "1 minute" : `${offsetMinutes} minutes`;
+}
+
+/**
+ * Converts amount + unit to canonical offset_minutes.
+ */
+export function toOffsetMinutes(amount: number, unit: ReminderOffsetUnit): number {
+  switch (unit) {
+    case "minutes": return amount;
+    case "hours": return amount * 60;
+    case "days": return amount * 1440;
+  }
+}
+
+/**
+ * Converts offset_minutes to the best-fit amount + unit for display.
+ */
+export function fromOffsetMinutes(offsetMinutes: number): { amount: number; unit: ReminderOffsetUnit } {
+  if (offsetMinutes % 1440 === 0) {
+    return { amount: offsetMinutes / 1440, unit: "days" };
+  }
+  if (offsetMinutes % 60 === 0) {
+    return { amount: offsetMinutes / 60, unit: "hours" };
+  }
+  return { amount: offsetMinutes, unit: "minutes" };
+}

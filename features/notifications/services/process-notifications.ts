@@ -111,6 +111,19 @@ async function processOneNotification(
       p_provider_message_id: result.providerMessageId ?? undefined,
     } as never);
 
+    // Sync linked reminder status (if this outbox entry is a reminder)
+    if (entry.eventType === "appointment_reminder") {
+      try {
+        await adminClient
+          .from("appointment_reminders" as never)
+          .update({ status: "sent", sent_at: new Date().toISOString() } as never)
+          .eq("outbox_id" as never, entry.id)
+          .eq("status" as never, "enqueued");
+      } catch {
+        // Non-critical — reminder status is diagnostic only
+      }
+    }
+
     return {
       outboxId: entry.id,
       status: "sent",

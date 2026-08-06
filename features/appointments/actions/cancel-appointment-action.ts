@@ -9,6 +9,7 @@ import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { appointmentCancellationSchema } from "../schemas/appointment-schemas";
 import { cancelAppointment } from "../services/update-appointment";
 import { enqueueAppointmentCancelledNotification } from "@/features/notifications/services/enqueue-notification";
+import { cancelRemindersAfterCancellation } from "@/features/notifications/services/reminder-sync-service";
 import { loadTenantTimezone } from "@/features/availability/services/availability-queries";
 import type { Appointment } from "../types/appointment";
 
@@ -57,6 +58,13 @@ export async function cancelAppointmentAction(
       );
     } catch {
       // Notification failure must never block cancellation
+    }
+
+    // Cancel pending reminders (non-blocking)
+    try {
+      await cancelRemindersAfterCancellation(tenant.id, result.appointment.id);
+    } catch {
+      // Reminder cancellation failure must never block appointment cancellation
     }
 
     return { success: true, data: result.appointment };

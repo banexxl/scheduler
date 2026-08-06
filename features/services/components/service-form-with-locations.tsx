@@ -15,8 +15,11 @@ import { serviceSchema, type ServiceFormValues } from "../schemas/service-schema
 import { generateTenantSlug } from "@/lib/tenants/generate-tenant-slug";
 import type { ServiceCategory } from "@/features/service-categories/types/service-category";
 import type { LocationListItem } from "@/features/locations/services/get-business-locations";
+import type { Resource } from "@/features/resources/types/resource";
+import type { ServiceResourceAssignmentInput } from "../types/service-resource";
 import ServiceLocationPicker from "./service-location-picker";
-import { createServiceWithLocationsAction } from "../actions/create-service-with-locations";
+import ServiceResourcePicker from "./service-resource-picker";
+import { createServiceWithAssignmentsAction } from "../actions/create-service-with-assignments";
 
 type ServiceFormWithLocationsProps = {
   initialValues: ServiceFormValues;
@@ -24,12 +27,13 @@ type ServiceFormWithLocationsProps = {
   canEdit: boolean;
   categories: ServiceCategory[];
   locations: LocationListItem[];
+  resources: Resource[];
   tenantSlug: string;
 };
 
 /**
- * Service creation form that includes location assignment.
- * Uses createServiceWithLocationsAction to create service + assign locations atomically.
+ * Service creation form that includes location and resource assignment.
+ * Uses createServiceWithAssignmentsAction to create everything atomically.
  */
 export default function ServiceFormWithLocations({
   initialValues,
@@ -37,11 +41,13 @@ export default function ServiceFormWithLocations({
   canEdit,
   categories,
   locations,
+  resources,
   tenantSlug,
 }: ServiceFormWithLocationsProps) {
   const [isPending, startTransition] = useTransition();
   const [actionResult, setActionResult] = useState<{ success: boolean; message?: string; fieldErrors?: Record<string, string> } | null>(null);
   const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>([]);
+  const [resourceAssignments, setResourceAssignments] = useState<ServiceResourceAssignmentInput[]>([]);
   const slugEdited = useRef<boolean | null>(null);
   if (slugEdited.current == null) slugEdited.current = initialValues.slug !== "";
 
@@ -49,7 +55,7 @@ export default function ServiceFormWithLocations({
     if (!canEdit) return;
     setActionResult(null);
     startTransition(async () => {
-      const r = await createServiceWithLocationsAction(tenantSlug, values, selectedLocationIds);
+      const r = await createServiceWithAssignmentsAction(tenantSlug, values, selectedLocationIds, resourceAssignments);
       setActionResult(r);
     });
   };
@@ -171,6 +177,30 @@ export default function ServiceFormWithLocations({
               <Typography variant="h6" sx={{ mb: 1 }}>Locations</Typography>
               <Typography variant="body2" color="text.secondary">
                 No locations have been created yet. Create a location first to assign services to it.
+              </Typography>
+            </>
+          )}
+
+          {resources.length > 0 && (
+            <>
+              <Divider sx={{ my: 3 }} />
+              <Typography variant="h6" sx={{ mb: 1 }}>Resources</Typography>
+              <ServiceResourcePicker
+                resources={resources}
+                assignments={resourceAssignments}
+                onChange={setResourceAssignments}
+                disabled={isPending}
+                canEdit={canEdit}
+              />
+            </>
+          )}
+
+          {resources.length === 0 && (
+            <>
+              <Divider sx={{ my: 3 }} />
+              <Typography variant="h6" sx={{ mb: 1 }}>Resources</Typography>
+              <Typography variant="body2" color="text.secondary">
+                No resources have been created yet. Create a resource first to assign it to services.
               </Typography>
             </>
           )}

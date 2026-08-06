@@ -21,6 +21,7 @@ import { deleteServiceAction } from "../actions/delete-service";
 import { toggleServiceStatusAction } from "../actions/toggle-service-status";
 
 type LocationInfo = { count: number; locationNames: string[] };
+type ResourceInfo = { count: number; resourceNames: string[] };
 
 type Props = {
   services: Service[];
@@ -28,9 +29,11 @@ type Props = {
   canEdit: boolean;
   /** Map of serviceId → location assignment info */
   locationMap?: Map<string, LocationInfo>;
+  /** Map of serviceId → resource assignment info */
+  resourceMap?: Map<string, ResourceInfo>;
 };
 
-export default function ServiceList({ services, tenantSlug, canEdit, locationMap }: Props) {
+export default function ServiceList({ services, tenantSlug, canEdit, locationMap, resourceMap }: Props) {
   const [isPending, startTransition] = useTransition();
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [menuAnchor, setMenuAnchor] = useState<{ el: HTMLElement; id: string } | null>(null);
@@ -73,6 +76,16 @@ export default function ServiceList({ services, tenantSlug, canEdit, locationMap
                   if (!info || info.count === 0) return "Not assigned to a location";
                   if (info.count <= 3) return info.locationNames.join(", ");
                   return `${info.count} locations`;
+                })()}
+              </Typography>
+            )}
+            {resourceMap && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+                {(() => {
+                  const info = resourceMap.get(svc.id);
+                  if (!info || info.count === 0) return "No resources assigned";
+                  if (info.count <= 3) return info.resourceNames.join(", ");
+                  return `${info.count} resources`;
                 })()}
               </Typography>
             )}

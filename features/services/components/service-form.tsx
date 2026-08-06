@@ -15,7 +15,10 @@ import { serviceSchema, type ServiceFormValues } from "../schemas/service-schema
 import { generateTenantSlug } from "@/lib/tenants/generate-tenant-slug";
 import type { ServiceCategory } from "@/features/service-categories/types/service-category";
 import type { LocationListItem } from "@/features/locations/services/get-business-locations";
+import type { Resource } from "@/features/resources/types/resource";
+import type { ServiceResourceAssignmentInput } from "../types/service-resource";
 import ServiceLocationPicker from "./service-location-picker";
+import ServiceResourcePicker from "./service-resource-picker";
 
 type ServiceFormProps = {
   initialValues: ServiceFormValues;
@@ -29,13 +32,21 @@ type ServiceFormProps = {
   assignedLocationIds?: string[];
   /** Callback to save location assignments after service save */
   onLocationsSave?: (locationIds: string[]) => Promise<{ success: boolean; message?: string }>;
+  /** All tenant resources for the assignment picker */
+  resources?: Resource[];
+  /** Currently assigned resource data (edit mode) */
+  assignedResources?: ServiceResourceAssignmentInput[];
+  /** Callback to save resource assignments after service save */
+  onResourcesSave?: (assignments: ServiceResourceAssignmentInput[]) => Promise<{ success: boolean; message?: string }>;
 };
 
-export default function ServiceForm({ initialValues, onSubmit, submitLabel, canEdit, categories, locations, assignedLocationIds, onLocationsSave }: ServiceFormProps) {
+export default function ServiceForm({ initialValues, onSubmit, submitLabel, canEdit, categories, locations, assignedLocationIds, onLocationsSave, resources, assignedResources, onResourcesSave }: ServiceFormProps) {
   const [isPending, startTransition] = useTransition();
   const [actionResult, setActionResult] = useState<{ success: boolean; message?: string; fieldErrors?: Record<string, string> } | null>(null);
   const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>(assignedLocationIds ?? []);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [resourceAssignments, setResourceAssignments] = useState<ServiceResourceAssignmentInput[]>(assignedResources ?? []);
+  const [resourceError, setResourceError] = useState<string | null>(null);
   const slugEdited = useRef<boolean | null>(null);
   if (slugEdited.current == null) slugEdited.current = initialValues.slug !== "";
 
@@ -43,6 +54,7 @@ export default function ServiceForm({ initialValues, onSubmit, submitLabel, canE
     if (!canEdit) return;
     setActionResult(null);
     setLocationError(null);
+    setResourceError(null);
     startTransition(async () => {
       const r = await onSubmit(values);
       if (r.success && onLocationsSave) {
@@ -50,6 +62,14 @@ export default function ServiceForm({ initialValues, onSubmit, submitLabel, canE
         if (!locResult.success) {
           setLocationError(locResult.message ?? "Unable to save location assignments.");
           setActionResult({ success: true, message: "Service saved, but location assignments failed." });
+          return;
+        }
+      }
+      if (r.success && onResourcesSave) {
+        const resResult = await onResourcesSave(resourceAssignments);
+        if (!resResult.success) {
+          setResourceError(resResult.message ?? "Unable to save resource assignments.");
+          setActionResult({ success: true, message: "Service saved, but resource assignments failed." });
           return;
         }
       }
@@ -68,6 +88,12 @@ export default function ServiceForm({ initialValues, onSubmit, submitLabel, canE
       if (!current.has(id)) return true;
     }
     return false;
+  };
+
+  const resourcesChanged = () => {
+    const initial = assignedResources ?? [];
+    if (initial.length !== resourceAssignments.length) return true;
+    return JSON.stringify(initial) !== JSON.stringify(resourceAssignments);
   };
 
   return (
@@ -190,7 +216,32 @@ export default function ServiceForm({ initialValues, onSubmit, submitLabel, canE
             </>
           )}
 
-          {canEdit && <Box sx={{ mt: 3 }}><Button type="submit" variant="contained" size="large" disabled={isPending || (!formik.dirty && !locationsChanged())}>{isPending ? "Saving..." : submitLabel}</Button></Box>}
+          {resources && resources.length > 0 && (
+            <>
+              <Divider sx={{ my: 3 }} />
+              <Typography variant="h6" sx={{ mb: 1 }}>Resources</Typography>
+              <ServiceResourcePicker
+                resources={resources}
+                assignments={resourceAssignments}
+                onChange={setResourceAssignments}
+                disabled={isPending}
+                canEdit={canEdit}
+                error={resourceError}
+              />
+            </>
+          )}
+
+          {resources && resources.length === 0 && (
+            <>
+              <Divider sx={{ my: 3 }} />
+              <Typography variant="h6" sx={{ mb: 1 }}>Resources</Typography>
+              <Typography variant="body2" color="text.secondary">
+                No resources have been created yet. Create a resource first to assign it to services.
+              </Typography>
+            </>
+          )}
+
+          {canEdit && <Box sx={{ mt: 3 }}><Button type="submit" variant="contained" size="large" disabled={isPending || (!formik.dirty && !locationsChanged() && !resourcesChanged())}>{isPending ? "Saving..." : submitLabel}</Button></Box>}
         </Box>
       )}
     </Formik>

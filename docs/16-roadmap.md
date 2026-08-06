@@ -351,6 +351,42 @@ Implemented tenant-safe assignments between services and business locations.
 
 See `docs/27-service-locations.md` for full details.
 
+### Milestone 6.4 — Service Resource Assignments
+
+Implemented tenant-safe assignments between services and resources with optional overrides.
+
+**Implemented:**
+- `service_resources` junction table with constraints, indexes, unique (tenant_id, service_id, resource_id)
+- Override columns: duration, price, currency, buffer_before, buffer_after (all nullable)
+- Currency-requires-price constraint
+- Tenant-consistency trigger (validates service and resource belong to same tenant)
+- RLS policies (read: all members; write: owner/admin)
+- `set_service_resources` RPC (atomic JSONB-based sync with upsert)
+- `reorder_service_resources` RPC (atomic service-scoped ordering)
+- `create_service_with_assignments` RPC (atomic service + locations + resources in one transaction)
+- Domain types, Yup validation schemas
+- Resolution utility (`resolveServiceResourceValues`) using nullish coalescing
+- Query services (resources for service, services for resource, counts)
+- Server actions using atomic RPCs
+- Service form: resource picker with collapsible override fields
+- Service list: shows assigned resource names or count
+- Resource edit page: read-only assigned services with resolved values
+- CASCADE deletion on service/resource/tenant delete
+
+**Override semantics:**
+- null = use service default
+- explicit 0 = valid override (free price, no buffer)
+- Currency override requires price override
+
+**Not implemented (deferred):**
+- Resource schedules or availability
+- Location-resource-service compatibility triples
+- Booking rules, appointments, public pages
+- Drag-and-drop reordering UI
+- Calendar, payments, notifications
+
+See `docs/28-service-resources.md` for full details.
+
 ## Planned
 
 - Foundation

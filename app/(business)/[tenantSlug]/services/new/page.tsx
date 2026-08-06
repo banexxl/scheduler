@@ -7,6 +7,7 @@ import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getServiceCategories } from "@/features/service-categories/services/get-service-categories";
 import { getBusinessSettings } from "@/features/business/services/get-business-settings";
 import { getBusinessLocations } from "@/features/locations/services/get-business-locations";
+import { getBusinessResources } from "@/features/resources/services/get-business-resources";
 import ServiceFormWithLocations from "@/features/services/components/service-form-with-locations";
 import type { ServiceFormValues } from "@/features/services/schemas/service-schema";
 
@@ -14,10 +15,11 @@ export default async function NewServicePage({ params }: { params: Promise<{ ten
   const { tenantSlug } = await params;
   const { tenant } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
 
-  const [categories, settings, locations] = await Promise.all([
+  const [categories, settings, locations, resources] = await Promise.all([
     getServiceCategories(tenant.id),
     getBusinessSettings(tenant.id).catch(() => null),
     getBusinessLocations(tenant.id),
+    getBusinessResources(tenant.id),
   ]);
 
   const defaultCurrency = settings?.defaultCurrency ?? "EUR";
@@ -39,6 +41,7 @@ export default async function NewServicePage({ params }: { params: Promise<{ ten
           canEdit={true}
           categories={categories}
           locations={locations}
+          resources={resources}
           tenantSlug={tenantSlug}
         />
       </Paper>

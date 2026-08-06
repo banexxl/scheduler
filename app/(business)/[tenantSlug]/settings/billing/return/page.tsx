@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
@@ -90,10 +89,10 @@ export default async function TenantBillingReturnPage({
                                         Refresh Status
                                    </Button>
                               </form>
-                              <Button component={Link} href={`/${tenantSlug}/settings/billing`} variant="text">
+                              <Button href={`/${tenantSlug}/settings/billing`} variant="text">
                                    Return to Billing
                               </Button>
-                              <Button component={Link} href={`/${tenantSlug}/settings/billing/plans`} variant="text">
+                              <Button href={`/${tenantSlug}/settings/billing/plans`} variant="text">
                                    Retry Checkout
                               </Button>
                          </Stack>

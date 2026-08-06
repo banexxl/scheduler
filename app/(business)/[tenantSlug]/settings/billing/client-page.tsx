@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
@@ -62,10 +61,10 @@ export function BillingOverviewClientPage({
                          </Typography>
 
                          <Stack direction={{ xs: "column", md: "row" }} spacing={1}>
-                              <Button component={Link} href={`/${tenantSlug}/settings/billing/plans`} variant="contained">
+                              <Button href={`/${tenantSlug}/settings/billing/plans`} variant="contained">
                                    View Plans
                               </Button>
-                              <Button component={Link} href={`/${tenantSlug}/settings/billing/history`} variant="outlined">
+                              <Button href={`/${tenantSlug}/settings/billing/history`} variant="outlined">
                                    View Billing History
                               </Button>
                               <form action={openPortalAction}>

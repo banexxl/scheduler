@@ -5,7 +5,6 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireUser } from "@/lib/auth/require-user";
 import { resolveUserIdentity } from "@/features/auth/services/resolve-user-identity";
 import CreateBusinessForm from "@/features/business/components/create-business-form";
@@ -74,12 +73,7 @@ export default async function CreateBusinessPage() {
           gap: 1,
         }}
       >
-        <Link
-          component={NextLink}
-          href="/account"
-          variant="body2"
-          color="text.secondary"
-        >
+        <Link href="/account" variant="body2" color="text.secondary">
           Go to my account
         </Link>
         <Typography variant="body2" color="text.secondary">

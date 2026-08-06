@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
@@ -88,7 +87,7 @@ export function BillingPlansClientPage({
                     </Stack>
                </Paper>
 
-               <Button component={Link} href={`/${tenantSlug}/settings/billing`} variant="text" sx={{ width: "fit-content" }}>
+               <Button href={`/${tenantSlug}/settings/billing`} variant="text" sx={{ width: "fit-content" }}>
                     Back to Billing
                </Button>
           </Stack>

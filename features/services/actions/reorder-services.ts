@@ -17,7 +17,7 @@ export async function reorderServicesAction(tenantSlug: string, categoryId: stri
 
   const { error } = await supabase.rpc("reorder_services", {
     target_tenant_id: tenant.id,
-    target_category_id: categoryId,
+    target_category_id: categoryId as string,
     ordered_service_ids: orderedIds,
   });
 

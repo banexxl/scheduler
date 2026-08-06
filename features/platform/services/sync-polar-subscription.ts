@@ -535,7 +535,7 @@ export async function syncPolarSubscription(input: SyncInput): Promise<PolarSubs
                               change_source: input.source,
                               change_summary: {
                                    reason: accessResolution.reason,
-                                   sync_status: syncStatus,
+                                   status : syncStatus,
                               },
                          } as never
                     );

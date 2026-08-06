@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 
@@ -18,6 +20,8 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 export default function PlatformAdminNavigation() {
+     const router = useRouter();
+
      return (
           <Stack
                direction={{ xs: "column", md: "row" }}
@@ -28,8 +32,7 @@ export default function PlatformAdminNavigation() {
                {NAV_ITEMS.map((item) => (
                     <Button
                          key={item.href}
-                         component={Link}
-                         href={item.href}
+                         onClick={() => router.push(item.href)}
                          variant="outlined"
                          size="small"
                     >

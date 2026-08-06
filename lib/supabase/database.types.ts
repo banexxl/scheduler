@@ -782,6 +782,66 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_subscription_state_history: {
+        Row: {
+          change_source: string
+          change_summary: Json
+          created_at: string
+          effective_at: string
+          id: string
+          new_access_state: string
+          new_status: string
+          polar_event_id: string | null
+          previous_access_state: string | null
+          previous_status: string | null
+          tenant_id: string
+          tenant_subscription_id: string
+        }
+        Insert: {
+          change_source: string
+          change_summary?: Json
+          created_at?: string
+          effective_at: string
+          id?: string
+          new_access_state: string
+          new_status: string
+          polar_event_id?: string | null
+          previous_access_state?: string | null
+          previous_status?: string | null
+          tenant_id: string
+          tenant_subscription_id: string
+        }
+        Update: {
+          change_source?: string
+          change_summary?: Json
+          created_at?: string
+          effective_at?: string
+          id?: string
+          new_access_state?: string
+          new_status?: string
+          polar_event_id?: string | null
+          previous_access_state?: string | null
+          previous_status?: string | null
+          tenant_id?: string
+          tenant_subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_subscription_state_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_subscription_state_history_tenant_subscription_id_fkey"
+            columns: ["tenant_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_sync_runs: {
         Row: {
           completed_at: string | null
@@ -2747,59 +2807,149 @@ export type Database = {
       }
       tenant_subscriptions: {
         Row: {
+          access_state: string
+          amount: number | null
+          billing_interval: string | null
+          billing_interval_count: number | null
+          billing_plan_id: string | null
+          billing_plan_price_id: string | null
           cancel_at_period_end: boolean
+          canceled_at: string | null
           cancelled_at: string | null
           created_at: string
-          current_period_ends_at: string | null
-          current_period_started_at: string | null
+          currency: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          current_period_started: string | null
+          customer_cancellation_comment: string | null
+          customer_cancellation_reason: string | null
           ended_at: string | null
+          ends_at: string | null
           external_customer_id: string | null
           external_subscription_id: string | null
           id: string
+          last_event_at: string | null
+          last_event_id: string | null
+          last_synced_at: string | null
           metadata: Json
           payment_provider: string | null
           plan_id: string | null
+          polar_checkout_id: string | null
+          polar_created_at: string | null
+          polar_customer_id: string | null
+          polar_modified_at: string | null
+          polar_price_id: string | null
+          polar_product_id: string | null
+          polar_subscription_id: string | null
+          quantity: number | null
+          started_at: string | null
           status: string
+          subscription_metadata: Json | null
+          sync_error_code: string | null
+          sync_error_message: string | null
+          sync_status: string
+          tenant_billing_customer_id: string | null
           tenant_id: string
-          trial_ends_at: string | null
+          trial_end: string | null
+          trial_start: string | null
           trial_started_at: string | null
           updated_at: string
         }
         Insert: {
+          access_state?: string
+          amount?: number | null
+          billing_interval?: string | null
+          billing_interval_count?: number | null
+          billing_plan_id?: string | null
+          billing_plan_price_id?: string | null
           cancel_at_period_end?: boolean
+          canceled_at?: string | null
           cancelled_at?: string | null
           created_at?: string
-          current_period_ends_at?: string | null
-          current_period_started_at?: string | null
+          currency?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          current_period_started?: string | null
+          customer_cancellation_comment?: string | null
+          customer_cancellation_reason?: string | null
           ended_at?: string | null
+          ends_at?: string | null
           external_customer_id?: string | null
           external_subscription_id?: string | null
           id?: string
+          last_event_at?: string | null
+          last_event_id?: string | null
+          last_synced_at?: string | null
           metadata?: Json
           payment_provider?: string | null
           plan_id?: string | null
+          polar_checkout_id?: string | null
+          polar_created_at?: string | null
+          polar_customer_id?: string | null
+          polar_modified_at?: string | null
+          polar_price_id?: string | null
+          polar_product_id?: string | null
+          polar_subscription_id?: string | null
+          quantity?: number | null
+          started_at?: string | null
           status?: string
+          subscription_metadata?: Json | null
+          sync_error_code?: string | null
+          sync_error_message?: string | null
+          sync_status?: string
+          tenant_billing_customer_id?: string | null
           tenant_id: string
-          trial_ends_at?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
           trial_started_at?: string | null
           updated_at?: string
         }
         Update: {
+          access_state?: string
+          amount?: number | null
+          billing_interval?: string | null
+          billing_interval_count?: number | null
+          billing_plan_id?: string | null
+          billing_plan_price_id?: string | null
           cancel_at_period_end?: boolean
+          canceled_at?: string | null
           cancelled_at?: string | null
           created_at?: string
-          current_period_ends_at?: string | null
-          current_period_started_at?: string | null
+          currency?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          current_period_started?: string | null
+          customer_cancellation_comment?: string | null
+          customer_cancellation_reason?: string | null
           ended_at?: string | null
+          ends_at?: string | null
           external_customer_id?: string | null
           external_subscription_id?: string | null
           id?: string
+          last_event_at?: string | null
+          last_event_id?: string | null
+          last_synced_at?: string | null
           metadata?: Json
           payment_provider?: string | null
           plan_id?: string | null
+          polar_checkout_id?: string | null
+          polar_created_at?: string | null
+          polar_customer_id?: string | null
+          polar_modified_at?: string | null
+          polar_price_id?: string | null
+          polar_product_id?: string | null
+          polar_subscription_id?: string | null
+          quantity?: number | null
+          started_at?: string | null
           status?: string
+          subscription_metadata?: Json | null
+          sync_error_code?: string | null
+          sync_error_message?: string | null
+          sync_status?: string
+          tenant_billing_customer_id?: string | null
           tenant_id?: string
-          trial_ends_at?: string | null
+          trial_end?: string | null
+          trial_start?: string | null
           trial_started_at?: string | null
           updated_at?: string
         }

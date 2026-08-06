@@ -53,8 +53,14 @@ export async function updateSession(
 
     // Refresh the session. Do not use getSession() as it reads from
     // potentially stale storage. getUser() contacts the Auth server
-    // and ensures the session is valid.
-    await supabase.auth.getUser();
+    // and ensures the session is valid. If the stored refresh token is
+    // invalid or missing, treat the request as unauthenticated instead of
+    // failing the whole render path.
+    try {
+        await supabase.auth.getUser();
+    } catch {
+        // Ignore invalid or stale auth cookies during SSR/build.
+    }
 
     return supabaseResponse;
 }

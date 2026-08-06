@@ -109,9 +109,9 @@ export default async function PlatformHomePage() {
                 <Typography variant="body2" color="text.secondary">
                   {section.description}
                 </Typography>
-                <Button component={Link} href={section.href} variant="outlined">
-                  Open
-                </Button>
+                <Link href={section.href} style={{ textDecoration: "none" }}>
+                  <Button variant="outlined">Open</Button>
+                </Link>
               </Stack>
             </Paper>
           </Grid>

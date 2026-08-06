@@ -152,7 +152,7 @@ export async function isTenantSubscriptionSyncPending(tenantId: string): Promise
      if (!current) return true;
 
      const accessState = String(current.access_state ?? "");
-     const syncStatus = String(current.sync_status ?? "");
+     const syncStatus = String(current.status ?? "");
      if (!accessState) return true;
      return syncStatus !== "synced";
 }

@@ -62,7 +62,7 @@ export default async function PlatformBillingSubscriptionDetailPage({
                          <Typography>Polar customer: {String(subscription.polar_customer_id ?? "-")}</Typography>
                          <Typography>Status: {String(subscription.status ?? "-")}</Typography>
                          <Typography>Access state: {String(subscription.access_state ?? "-")}</Typography>
-                         <Typography>Sync status: {String(subscription.sync_status ?? "-")}</Typography>
+                         <Typography>Sync status: {String(subscription.status ?? "-")}</Typography>
                          <Typography>Last synced: {String(subscription.last_synced_at ?? "-")}</Typography>
                          <Typography>Current period: {String(subscription.current_period_start ?? "-")} - {String(subscription.current_period_end ?? "-")}</Typography>
                          <Typography>Trial: {String(subscription.trial_start ?? "-")} - {String(subscription.trial_end ?? "-")}</Typography>

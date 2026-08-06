@@ -20,6 +20,28 @@ function asRecord(value: unknown): UnknownRecord {
      return {};
 }
 
+function deriveSubscriptionAccessState(
+     row: Record<string, unknown>
+): PlatformSubscriptionListItem["accessState"] {
+     const status = String(row.status ?? "").trim().toLowerCase();
+     const cancelAtPeriodEnd = Boolean(row.cancel_at_period_end);
+     const hasTrialEnd = typeof row.trial_end === "string" && row.trial_end.length > 0;
+     const hasCurrentPeriodEnd =
+          typeof row.current_period_end === "string" && row.current_period_end.length > 0;
+
+     if (status === "incomplete") return "pending";
+     if (status === "incomplete_expired") return "revoked";
+     if (status === "trialing") {
+          return cancelAtPeriodEnd || hasTrialEnd ? "ending" : "trial";
+     }
+     if (status === "active") {
+          return cancelAtPeriodEnd || hasCurrentPeriodEnd ? "ending" : "active";
+     }
+     if (status === "past_due") return "grace_period";
+     if (status === "canceled" || status === "unpaid") return "revoked";
+     return "revoked";
+}
+
 export async function listPlatformBillingPlanSummaries(): Promise<
      PlatformBillingPlanSummary[]
 > {
@@ -249,16 +271,13 @@ export async function listPlatformSubscriptions(input?: {
      let query = adminClient
           .from("tenant_subscriptions" as never)
           .select(
-               "id,tenant_id,polar_subscription_id,polar_customer_id,polar_product_id,polar_price_id,status,access_state,billing_interval,billing_interval_count,current_period_end,cancel_at_period_end,trial_end,last_synced_at,sync_status,billing_plans(name,plan_key),tenants(name,slug)"
+               "id,tenant_id,polar_subscription_id,polar_customer_id,polar_product_id,polar_price_id,status,billing_interval,billing_interval_count,current_period_end,cancel_at_period_end,trial_end,last_synced_at,status ,billing_plans(name,plan_key),tenants(name,slug)"
           )
           .order("last_synced_at" as never, { ascending: false })
           .limit(limit);
 
      if (input?.polarStatus) {
           query = query.eq("status" as never, input.polarStatus);
-     }
-     if (input?.accessState) {
-          query = query.eq("access_state" as never, input.accessState);
      }
      if (input?.planId) {
           query = query.eq("billing_plan_id" as never, input.planId);
@@ -270,10 +289,10 @@ export async function listPlatformSubscriptions(input?: {
           query = query.eq("cancel_at_period_end" as never, true);
      }
      if (input?.mappingIssueOnly) {
-          query = query.eq("sync_status" as never, "requires_mapping");
+          query = query.eq("status " as never, "requires_mapping");
      }
      if (input?.staleOnly) {
-          query = query.eq("sync_status" as never, "stale_event");
+          query = query.eq("status " as never, "stale_event");
      }
 
      const { data, error } = await query;
@@ -281,7 +300,12 @@ export async function listPlatformSubscriptions(input?: {
           throw new Error(`[platform-billing] Unable to load subscriptions: ${error.message}`);
      }
 
-     return ((data as Array<Record<string, unknown>> | null) ?? []).map((row) => {
+     const rows = ((data as Array<Record<string, unknown>> | null) ?? []).filter((row) => {
+          if (!input?.accessState) return true;
+          return deriveSubscriptionAccessState(row) === input.accessState;
+     });
+
+     return rows.map((row) => {
           const tenant = asRecord(row.tenants);
           const plan = asRecord(row.billing_plans);
 
@@ -298,7 +322,7 @@ export async function listPlatformSubscriptions(input?: {
                planName: typeof plan.name === "string" ? plan.name : null,
                planKey: typeof plan.plan_key === "string" ? plan.plan_key : null,
                status: String(row.status ?? "unknown") as PlatformSubscriptionListItem["status"],
-               accessState: String(row.access_state ?? "revoked") as PlatformSubscriptionListItem["accessState"],
+               accessState: deriveSubscriptionAccessState(row),
                billingInterval:
                     typeof row.billing_interval === "string" ? row.billing_interval : null,
                billingIntervalCount:
@@ -310,7 +334,7 @@ export async function listPlatformSubscriptions(input?: {
                cancelAtPeriodEnd: Boolean(row.cancel_at_period_end),
                trialEnd: typeof row.trial_end === "string" ? row.trial_end : null,
                lastSyncedAt: String(row.last_synced_at ?? ""),
-               syncStatus: String(row.sync_status ?? "synced"),
+               syncStatus: String(row.status ?? "synced"),
           };
      });
 }
@@ -381,7 +405,7 @@ export async function getPlatformSubscriptionStatusCounts() {
 
      const { data, error } = await adminClient
           .from("tenant_subscriptions" as never)
-          .select("access_state,status,sync_status");
+          .select("status,status ,cancel_at_period_end,current_period_end,trial_end");
 
      if (error) {
           throw new Error(
@@ -398,9 +422,9 @@ export async function getPlatformSubscriptionStatusCounts() {
      let stale = 0;
 
      for (const row of (data as Array<Record<string, unknown>> | null) ?? []) {
-          const accessState = String(row.access_state ?? "");
+          const accessState = deriveSubscriptionAccessState(row);
           const status = String(row.status ?? "");
-          const syncStatus = String(row.sync_status ?? "");
+          const syncStatus = String(row.status ?? "");
 
           if (accessState === "trial") trial += 1;
           if (accessState === "active") active += 1;

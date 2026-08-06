@@ -77,7 +77,7 @@ export async function getBusinessDashboard(
     supabase
       .from("tenant_subscriptions")
       .select(
-        "status, trial_ends_at, current_period_ends_at, cancel_at_period_end, subscription_plans(name, billing_interval)"
+        "status, trial_end, current_period_end, cancel_at_period_end, billing_plans(name, billing_interval)"
       )
       .eq("tenant_id", tenantId)
       .limit(1)
@@ -112,32 +112,38 @@ export async function getBusinessDashboard(
   // Map primary location
   const primaryLocation = primaryLocationResult.data
     ? {
-        id: primaryLocationResult.data.id,
-        name: primaryLocationResult.data.name,
-        slug: primaryLocationResult.data.slug,
-        locationType: primaryLocationResult.data.location_type,
-        timezone: primaryLocationResult.data.timezone,
-        city: primaryLocationResult.data.city,
-        country: primaryLocationResult.data.country,
-      }
+      id: primaryLocationResult.data.id,
+      name: primaryLocationResult.data.name,
+      slug: primaryLocationResult.data.slug,
+      locationType: primaryLocationResult.data.location_type,
+      timezone: primaryLocationResult.data.timezone,
+      city: primaryLocationResult.data.city,
+      country: primaryLocationResult.data.country,
+    }
     : null;
 
   // Map subscription
   let subscription: BusinessDashboardData["subscription"] = null;
   if (subscriptionResult.data) {
-    const sub = subscriptionResult.data;
-    const plan = sub.subscription_plans as unknown as {
-      name: string;
-      billing_interval: string;
-    } | null;
+    const sub = subscriptionResult.data as {
+      status?: string | null;
+      trial_end?: string | null;
+      current_period_end?: string | null;
+      cancel_at_period_end?: boolean | null;
+      billing_plans?: {
+        name?: string | null;
+        billing_interval?: string | null;
+      } | null;
+    };
+    const plan = sub.billing_plans ?? null;
 
     subscription = {
-      status: sub.status,
+      status: sub.status ?? "unknown",
       planName: plan?.name ?? null,
       billingInterval: plan?.billing_interval ?? null,
-      trialEndsAt: sub.trial_ends_at,
-      currentPeriodEndsAt: sub.current_period_ends_at,
-      cancelAtPeriodEnd: sub.cancel_at_period_end,
+      trialEndsAt: sub.trial_end ?? null,
+      currentPeriodEndsAt: sub.current_period_end ?? null,
+      cancelAtPeriodEnd: Boolean(sub.cancel_at_period_end),
     };
   }
 

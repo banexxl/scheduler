@@ -24,12 +24,12 @@ import type {
   PublicBookingConfirmation,
   PublicAvailabilityOption,
 } from "../types/public-booking";
+import PublicBookingConfirmationView from "./public-booking-confirmation";
 import PublicServiceStep from "./public-service-step";
-import PublicLocationStep from "./public-location-step";
 import PublicDateTimeStep from "./public-date-time-step";
+import PublicLocationStep from "./public-location-step";
 import PublicCustomerStep from "./public-customer-step";
 import PublicBookingReview from "./public-booking-review";
-import PublicBookingConfirmationView from "./public-booking-confirmation";
 
 type Props = {
   tenantSlug: string;
@@ -56,7 +56,7 @@ export default function PublicBookingFlow({
   const [selectedService, setSelectedService] = useState<PublicBookableService | null>(null);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [, setSelectedDate] = useState<string | null>(null);
   const [selectedOption, setSelectedOption] = useState<PublicAvailabilityOption | null>(null);
   const [selectedResourceForSlot, setSelectedResourceForSlot] = useState<string | null>(null);
 

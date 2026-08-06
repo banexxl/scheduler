@@ -28,7 +28,7 @@ export async function resolvePublicTenant(
 
   const { data } = await supabase
     .from("tenants")
-    .select("id, slug, name, default_timezone, logo_url, cover_url, description")
+    .select("id, slug, name, default_timezone, description")
     .eq("slug", slug)
     .eq("status", "active")
     .single();
@@ -40,8 +40,8 @@ export async function resolvePublicTenant(
     slug: data.slug,
     name: data.name,
     defaultTimeZone: data.default_timezone,
-    logoUrl: data.logo_url ?? null,
-    coverUrl: data.cover_url ?? null,
+    logoUrl: null,
+    coverUrl: null,
     description: data.description ?? null,
   };
 }

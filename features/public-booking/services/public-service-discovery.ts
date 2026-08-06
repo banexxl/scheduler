@@ -83,10 +83,10 @@ export async function getPublicBookableServices(
   const categoryIds = [...new Set(
     services
       .map((s) => (s as Record<string, unknown>).service_category_id as string | null)
-      .filter(Boolean)
+      .filter((id): id is string => id != null)
   )];
 
-  let categoryMap = new Map<string, string>();
+  const categoryMap = new Map<string, string>();
   if (categoryIds.length > 0) {
     const { data: categories } = await supabase
       .from("service_categories")

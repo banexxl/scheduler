@@ -28,7 +28,6 @@ export default function PublicDateTimeStep({
   serviceId,
   locationId,
   resourceId,
-  settings,
   timeZone,
   onSelect,
   onBack,

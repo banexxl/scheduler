@@ -214,7 +214,7 @@ export async function createPublicBookingAction(
             await supabase.rpc("complete_public_booking_request", {
                 p_tenant_id: tenantId,
                 p_idempotency_key: validated.idempotencyKey,
-                p_appointment_id: undefined,
+                p_appointment_id: null as unknown as string,
                 p_status: isConflict ? "conflict" : "failed",
             });
 
@@ -297,7 +297,7 @@ async function markRequestFailed(
     await supabase.rpc("complete_public_booking_request", {
         p_tenant_id: tenantId,
         p_idempotency_key: idempotencyKey,
-        p_appointment_id: undefined,
+        p_appointment_id: null as unknown as string,
         p_status: "failed",
     });
 }

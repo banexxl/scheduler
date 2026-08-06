@@ -25,7 +25,7 @@ export default async function EditTimeOffPage({ params }: { params: Promise<{ te
   const startsAtDate = new Date(entry.startsAt);
   const endsAtDate = new Date(entry.endsAt);
 
-  let startDate = startsAtDate.toISOString().split("T")[0];
+  const startDate = startsAtDate.toISOString().split("T")[0] ?? "";
   let endDate: string;
   let startTime = "";
   let endTime = "";
@@ -34,9 +34,9 @@ export default async function EditTimeOffPage({ params }: { params: Promise<{ te
     // End is exclusive — subtract one day for inclusive display
     const inclusiveEnd = new Date(endsAtDate);
     inclusiveEnd.setDate(inclusiveEnd.getDate() - 1);
-    endDate = inclusiveEnd.toISOString().split("T")[0];
+    endDate = inclusiveEnd.toISOString().split("T")[0] ?? "";
   } else {
-    endDate = endsAtDate.toISOString().split("T")[0];
+    endDate = endsAtDate.toISOString().split("T")[0] ?? "";
     startTime = startsAtDate.toTimeString().slice(0, 5);
     endTime = endsAtDate.toTimeString().slice(0, 5);
   }

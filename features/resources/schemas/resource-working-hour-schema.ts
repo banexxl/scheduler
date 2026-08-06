@@ -83,8 +83,8 @@ export const setResourceWorkingHoursSchema = yup.object({
         const active = value.filter((p) => p.isActive !== false);
         for (let i = 0; i < active.length; i++) {
           for (let j = i + 1; j < active.length; j++) {
-            const a = active[i];
-            const b = active[j];
+            const a = active[i]!;
+            const b = active[j]!;
             if (a.dayOfWeek !== b.dayOfWeek) continue;
             // Same location scope
             const sameLocation =
@@ -92,7 +92,7 @@ export const setResourceWorkingHoursSchema = yup.object({
               (a.locationId != null && a.locationId === b.locationId);
             if (!sameLocation) continue;
             // Check overlap
-            if (a.startTime! < b.endTime! && a.endTime! > b.startTime!) {
+            if (a.startTime < b.endTime && a.endTime > b.startTime) {
               return false;
             }
           }

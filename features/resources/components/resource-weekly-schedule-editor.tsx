@@ -71,7 +71,7 @@ export default function ResourceWeeklyScheduleEditor({
       ...prev,
       {
         key: nextKey(),
-        locationId: locations.length === 1 ? locations[0].id : null,
+        locationId: locations.length === 1 ? locations[0]!.id : null,
         dayOfWeek: day,
         startTime: "09:00",
         endTime: "17:00",
@@ -111,8 +111,8 @@ export default function ResourceWeeklyScheduleEditor({
     periods.filter((p) => p.dayOfWeek === day);
 
   const isDirty =
-    JSON.stringify(periods.map(({ key, ...rest }) => rest)) !==
-    JSON.stringify(initPeriods(initialSchedule).map(({ key, ...rest }) => rest));
+    JSON.stringify(periods.map(({ key: _k, ...rest }) => rest)) !==
+    JSON.stringify(initPeriods(initialSchedule).map(({ key: _k2, ...rest }) => rest));
 
   return (
     <Box>

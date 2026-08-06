@@ -14,7 +14,7 @@ export default async function NewTimeOffPage({ params }: { params: Promise<{ ten
 
   const locations = await getBusinessLocations(tenant.id);
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().split("T")[0] ?? "";
 
   const initialValues = {
     resourceId,

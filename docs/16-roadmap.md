@@ -428,6 +428,47 @@ Implemented recurring weekly working hours and date-specific time off for resour
 
 See `docs/29-resource-schedules.md` for full details.
 
+### Milestone 6.6 — Location Business Hours and Closures
+
+Implemented recurring weekly business hours and date-specific closures/custom hours for locations.
+
+**Implemented:**
+- `location_business_hours` table with day 1–7 ISO, time ranges, overlap prevention
+- `location_schedule_exceptions_v2` table with date, type (closed/custom_hours), unique per location+date
+- `location_exception_periods` table with custom opening times for custom_hours exceptions
+- Tenant-consistency triggers on all tables
+- Overlap triggers (recurring hours per location+day; exception periods within exception)
+- Type-enforcement trigger (periods only for custom_hours)
+- RLS policies (read: all members; write: owner/admin) on all 3 tables
+- `set_location_business_hours` RPC (atomic weekly schedule replacement)
+- `create_location_exception_v2`, `update_location_exception_v2`, `delete_location_exception_v2` RPCs
+- Shared scheduling utilities (`lib/scheduling/scheduling-constants.ts`)
+- Domain types, Yup validation schemas with overlap detection
+- Query services (business hours, exceptions with periods)
+- Resolution utility (`resolveLocationOperatingPeriods`) — exception replaces weekly hours
+- Server actions for business hours save and exception CRUD
+- Weekly business-hours editor component (7-day view)
+- Schedule exception list and form components (closed/custom_hours with period editor)
+- Location edit page extended with Business Hours, Exceptions, and Assigned Services sections
+- Exception create/edit route pages
+- CASCADE deletion on location/tenant delete
+
+**Exception model:**
+- `closed`: location fully closed for that date
+- `custom_hours`: custom periods replace normal weekly hours
+- One exception per location per date (unique constraint)
+
+**Not implemented (deferred):**
+- Availability calculations
+- Resource/location hours intersection
+- Time-slot generation
+- Booking rules, appointments
+- Calendar UI, public pages
+- Business-wide holiday templates
+- External calendar sync
+
+See `docs/30-location-business-hours.md` for full details.
+
 ## Planned
 
 - Foundation

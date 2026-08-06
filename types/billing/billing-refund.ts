@@ -1,0 +1,23 @@
+export type BillingRefund = {
+     id: string;
+     tenantId: string;
+     billingOrderId: string;
+     polarRefundId: string;
+     polarOrderId: string;
+     status: string;
+     amount: number;
+     currency: string;
+     reason: string | null;
+     providerReason: string | null;
+     polarCreatedAt: string | null;
+     polarModifiedAt: string | null;
+     lastEventAt: string | null;
+     lastEventId: string | null;
+     lastSyncedAt: string;
+     syncStatus: string;
+     syncErrorCode: string | null;
+     syncErrorMessage: string | null;
+     refundMetadata: Record<string, unknown>;
+     createdAt: string;
+     updatedAt: string;
+};

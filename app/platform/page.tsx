@@ -62,6 +62,7 @@ const METRIC_LABELS: Array<{ key: keyof Awaited<ReturnType<typeof getPlatformBil
 
 export default async function PlatformHomePage() {
   const metrics = await getPlatformBillingDashboardMetrics();
+  const financialMetrics = await import("@/features/platform/services/platform-billing-order-queries").then((mod) => mod.getPlatformFinancialCounters());
 
   return (
     <Stack spacing={3}>
@@ -78,6 +79,20 @@ export default async function PlatformHomePage() {
         <Stack spacing={2}>
           <Stack direction="row" spacing={1} alignItems="center">
             <Typography variant="h6">Billing Health Snapshot</Typography>
+            <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ mt: 1 }}>
+              <Paper variant="outlined" sx={{ p: 2, minWidth: 180 }}>
+                <Typography variant="body2" color="text.secondary">Paid orders</Typography>
+                <Typography variant="h6">{financialMetrics.paidOrders}</Typography>
+              </Paper>
+              <Paper variant="outlined" sx={{ p: 2, minWidth: 180 }}>
+                <Typography variant="body2" color="text.secondary">Refunded orders</Typography>
+                <Typography variant="h6">{financialMetrics.refundedOrders}</Typography>
+              </Paper>
+              <Paper variant="outlined" sx={{ p: 2, minWidth: 180 }}>
+                <Typography variant="body2" color="text.secondary">Failed order syncs</Typography>
+                <Typography variant="h6">{financialMetrics.failedOrderSyncs}</Typography>
+              </Paper>
+            </Stack>
             <Chip label="No subscription activation in this milestone" size="small" />
           </Stack>
           <Grid container spacing={2}>

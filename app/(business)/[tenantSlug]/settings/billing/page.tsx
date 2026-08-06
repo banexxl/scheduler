@@ -65,6 +65,9 @@ export default async function TenantBillingOverviewPage({
                               <Button component={Link} href={`/${tenantSlug}/settings/billing/plans`} variant="contained">
                                    View Plans
                               </Button>
+                              <Button component={Link} href={`/${tenantSlug}/settings/billing/history`} variant="outlined">
+                                   View Billing History
+                              </Button>
                               <form action={openPortalAction}>
                                    <input type="hidden" name="tenantSlug" value={tenantSlug} />
                                    <Button type="submit" variant="outlined">
@@ -111,9 +114,14 @@ export default async function TenantBillingOverviewPage({
                     </TableContainer>
                </Paper>
 
-               <Typography variant="body2" color="text.secondary">
-                    Next milestone: local subscription lifecycle projection and activation checks.
-               </Typography>
+               <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Typography variant="h6" gutterBottom>
+                         Billing Snapshot
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                         Orders and refunds are now synchronized into local projections for tenant billing history and future diagnostics.
+                    </Typography>
+               </Paper>
           </Stack>
      );
 }

@@ -22,6 +22,8 @@ import { handleSubscriptionCanceled } from "./handle-subscription-canceled";
 import { handleSubscriptionUncanceled } from "./handle-subscription-uncanceled";
 import { handleSubscriptionPastDue } from "./handle-subscription-past-due";
 import { handleSubscriptionRevoked } from "./handle-subscription-revoked";
+import { handleOrderWebhook } from "./handle-order-webhook";
+import { handleRefundWebhook } from "./handle-refund-webhook";
 import type { ProcessWebhookResult } from "../types/billing";
 
 const DEFAULT_BATCH_SIZE = 10;
@@ -190,6 +192,32 @@ async function dispatchWebhookEvent(
                     throw new BillingProcessingError(
                          "subscription_resolution_failed",
                          result.reason ?? "Unable to resolve subscription tenant/customer",
+                         false
+                    );
+               }
+               return "processed" as const;
+          }
+          case "order.created":
+          case "order.updated":
+          case "order.paid":
+          case "order.refunded": {
+               const result = await handleOrderWebhook(payload, eventTimestamp, eventId);
+               if (result.status === "failed") {
+                    throw new BillingProcessingError(
+                         "order_sync_failed",
+                         result.reason ?? "Unable to synchronize order",
+                         false
+                    );
+               }
+               return "processed" as const;
+          }
+          case "refund.created":
+          case "refund.updated": {
+               const result = await handleRefundWebhook(payload, eventTimestamp, eventId);
+               if (result.status === "failed") {
+                    throw new BillingProcessingError(
+                         "refund_sync_failed",
+                         result.reason ?? "Unable to synchronize refund",
                          false
                     );
                }

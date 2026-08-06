@@ -30,6 +30,18 @@ const BILLING_AREAS = [
                "Inspect synchronized subscription lifecycle state for all tenants.",
           href: "/platform/billing/subscriptions",
      },
+     {
+          title: "Orders",
+          description:
+               "Inspect synchronized Polar orders and payment/refund state for all tenants.",
+          href: "/platform/billing/orders",
+     },
+     {
+          title: "Refunds",
+          description:
+               "Inspect synchronized Polar refunds and their reconciliation state.",
+          href: "/platform/billing/refunds",
+     },
 ];
 
 export default async function PlatformBillingHomePage() {

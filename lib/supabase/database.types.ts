@@ -648,6 +648,231 @@ export type Database = {
           },
         ]
       }
+      billing_financial_state_history: {
+        Row: {
+          billing_order_id: string
+          change_source: string
+          change_summary: Json
+          created_at: string
+          effective_at: string
+          event_type: string
+          id: string
+          new_paid_state: boolean
+          new_refunded_amount: number
+          new_status: string
+          previous_paid_state: boolean | null
+          previous_refunded_amount: number | null
+          previous_status: string | null
+          tenant_id: string
+        }
+        Insert: {
+          billing_order_id: string
+          change_source?: string
+          change_summary?: Json
+          created_at?: string
+          effective_at?: string
+          event_type: string
+          id?: string
+          new_paid_state: boolean
+          new_refunded_amount: number
+          new_status: string
+          previous_paid_state?: boolean | null
+          previous_refunded_amount?: number | null
+          previous_status?: string | null
+          tenant_id: string
+        }
+        Update: {
+          billing_order_id?: string
+          change_source?: string
+          change_summary?: Json
+          created_at?: string
+          effective_at?: string
+          event_type?: string
+          id?: string
+          new_paid_state?: boolean
+          new_refunded_amount?: number
+          new_status?: string
+          previous_paid_state?: boolean | null
+          previous_refunded_amount?: number | null
+          previous_status?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_financial_state_history_billing_order_id_fkey"
+            columns: ["billing_order_id"]
+            isOneToOne: false
+            referencedRelation: "billing_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_financial_state_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_orders: {
+        Row: {
+          billing_plan_id: string | null
+          billing_plan_price_id: string | null
+          billing_reason: string | null
+          created_at: string
+          currency: string
+          discount_amount: number
+          id: string
+          invoice_number: string | null
+          invoice_url: string | null
+          is_paid: boolean
+          last_event_at: string | null
+          last_event_id: string | null
+          last_synced_at: string
+          net_amount: number
+          order_metadata: Json
+          order_number: string | null
+          paid_at: string | null
+          polar_checkout_id: string | null
+          polar_created_at: string | null
+          polar_customer_id: string
+          polar_modified_at: string | null
+          polar_order_id: string
+          polar_price_id: string | null
+          polar_product_id: string | null
+          polar_subscription_id: string | null
+          receipt_url: string | null
+          refunded_amount: number
+          status: string
+          subtotal_amount: number
+          sync_error_code: string | null
+          sync_error_message: string | null
+          sync_status: string
+          tax_amount: number
+          tenant_billing_customer_id: string
+          tenant_id: string
+          tenant_subscription_id: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          billing_plan_id?: string | null
+          billing_plan_price_id?: string | null
+          billing_reason?: string | null
+          created_at?: string
+          currency: string
+          discount_amount?: number
+          id?: string
+          invoice_number?: string | null
+          invoice_url?: string | null
+          is_paid?: boolean
+          last_event_at?: string | null
+          last_event_id?: string | null
+          last_synced_at?: string
+          net_amount?: number
+          order_metadata?: Json
+          order_number?: string | null
+          paid_at?: string | null
+          polar_checkout_id?: string | null
+          polar_created_at?: string | null
+          polar_customer_id: string
+          polar_modified_at?: string | null
+          polar_order_id: string
+          polar_price_id?: string | null
+          polar_product_id?: string | null
+          polar_subscription_id?: string | null
+          receipt_url?: string | null
+          refunded_amount?: number
+          status: string
+          subtotal_amount?: number
+          sync_error_code?: string | null
+          sync_error_message?: string | null
+          sync_status?: string
+          tax_amount?: number
+          tenant_billing_customer_id: string
+          tenant_id: string
+          tenant_subscription_id?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          billing_plan_id?: string | null
+          billing_plan_price_id?: string | null
+          billing_reason?: string | null
+          created_at?: string
+          currency?: string
+          discount_amount?: number
+          id?: string
+          invoice_number?: string | null
+          invoice_url?: string | null
+          is_paid?: boolean
+          last_event_at?: string | null
+          last_event_id?: string | null
+          last_synced_at?: string
+          net_amount?: number
+          order_metadata?: Json
+          order_number?: string | null
+          paid_at?: string | null
+          polar_checkout_id?: string | null
+          polar_created_at?: string | null
+          polar_customer_id?: string
+          polar_modified_at?: string | null
+          polar_order_id?: string
+          polar_price_id?: string | null
+          polar_product_id?: string | null
+          polar_subscription_id?: string | null
+          receipt_url?: string | null
+          refunded_amount?: number
+          status?: string
+          subtotal_amount?: number
+          sync_error_code?: string | null
+          sync_error_message?: string | null
+          sync_status?: string
+          tax_amount?: number
+          tenant_billing_customer_id?: string
+          tenant_id?: string
+          tenant_subscription_id?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_orders_billing_plan_id_fkey"
+            columns: ["billing_plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_orders_billing_plan_price_id_fkey"
+            columns: ["billing_plan_price_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plan_prices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_orders_tenant_billing_customer_id_fkey"
+            columns: ["tenant_billing_customer_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_billing_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_orders_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_orders_tenant_subscription_id_fkey"
+            columns: ["tenant_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_plan_prices: {
         Row: {
           amount: number | null
@@ -781,6 +1006,93 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      billing_refunds: {
+        Row: {
+          amount: number
+          billing_order_id: string
+          created_at: string
+          currency: string
+          id: string
+          last_event_at: string | null
+          last_event_id: string | null
+          last_synced_at: string
+          polar_created_at: string | null
+          polar_modified_at: string | null
+          polar_order_id: string
+          polar_refund_id: string
+          provider_reason: string | null
+          reason: string | null
+          refund_metadata: Json
+          status: string
+          sync_error_code: string | null
+          sync_error_message: string | null
+          sync_status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          billing_order_id: string
+          created_at?: string
+          currency: string
+          id?: string
+          last_event_at?: string | null
+          last_event_id?: string | null
+          last_synced_at?: string
+          polar_created_at?: string | null
+          polar_modified_at?: string | null
+          polar_order_id: string
+          polar_refund_id: string
+          provider_reason?: string | null
+          reason?: string | null
+          refund_metadata?: Json
+          status: string
+          sync_error_code?: string | null
+          sync_error_message?: string | null
+          sync_status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          billing_order_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          last_event_at?: string | null
+          last_event_id?: string | null
+          last_synced_at?: string
+          polar_created_at?: string | null
+          polar_modified_at?: string | null
+          polar_order_id?: string
+          polar_refund_id?: string
+          provider_reason?: string | null
+          reason?: string | null
+          refund_metadata?: Json
+          status?: string
+          sync_error_code?: string | null
+          sync_error_message?: string | null
+          sync_status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_refunds_billing_order_id_fkey"
+            columns: ["billing_order_id"]
+            isOneToOne: false
+            referencedRelation: "billing_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_refunds_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       billing_subscription_state_history: {
         Row: {

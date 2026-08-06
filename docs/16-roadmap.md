@@ -387,6 +387,47 @@ Implemented tenant-safe assignments between services and resources with optional
 
 See `docs/28-service-resources.md` for full details.
 
+### Milestone 6.5 — Resource Working Hours and Time Off
+
+Implemented recurring weekly working hours and date-specific time off for resources.
+
+**Implemented:**
+- `resource_working_hours` table with day_of_week (ISO 1-7), time ranges, location scope
+- `resource_time_off` table with timestamptz half-open intervals, full-day support
+- Overlap prevention triggers (concurrency-safe, per resource+day+location for working hours; global-blocks-specific for time off)
+- Tenant-consistency triggers on both tables
+- RLS policies (read: all members; write: owner/admin)
+- `set_resource_working_hours` RPC (atomic JSONB-based schedule replacement with overlap validation)
+- `create_resource_time_off`, `update_resource_time_off`, `delete_resource_time_off` RPCs
+- Domain types with ISO day constants and labels
+- Yup validation schemas with overlap detection and cross-field checks
+- Query services (weekly schedule, time-off by range/future/id)
+- Server actions for schedule save and time-off CRUD
+- Weekly schedule editor component (7-day view, add/remove periods, location selector)
+- Time-off list and form components (full-day toggle, date/time inputs)
+- Resource edit page extended with Working Hours, Time Off, and Assigned Services sections
+- Time-off create/edit route pages
+- CASCADE deletion on resource/location/tenant delete
+
+**Scheduling model:**
+- Times in tenant-local wall clock (not UTC)
+- No overnight periods (start < end enforced)
+- Split shifts supported via multiple periods
+- Half-open interval for time off: [starts_at, ends_at)
+- Full-day: midnight to next midnight (exclusive end)
+
+**Not implemented (deferred):**
+- Availability calculations
+- Time-slot generation
+- Appointment creation or management
+- Calendar UI
+- Booking rules
+- Public booking pages
+- External calendar sync
+- Overnight shift support
+
+See `docs/29-resource-schedules.md` for full details.
+
 ## Planned
 
 - Foundation

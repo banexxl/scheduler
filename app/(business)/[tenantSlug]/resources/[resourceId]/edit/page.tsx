@@ -9,10 +9,16 @@ import { getResource } from "@/features/resources/services/get-business-resource
 import { getResourceTypes } from "@/features/resources/services/get-resource-types";
 import { getBusinessLocations } from "@/features/locations/services/get-business-locations";
 import { getServicesForResource } from "@/features/services/services/get-service-resources";
+import { getResourceWorkingHours } from "@/features/resources/services/get-resource-working-hours";
+import { getFutureResourceTimeOff } from "@/features/resources/services/get-resource-time-off";
 import ResourceForm from "@/features/resources/components/resource-form";
 import ResourceAssignedServices from "@/features/services/components/resource-assigned-services";
+import ResourceWeeklyScheduleEditor from "@/features/resources/components/resource-weekly-schedule-editor";
+import ResourceTimeOffList from "@/features/resources/components/resource-time-off-list";
 import { updateResourceAction } from "@/features/resources/actions/update-resource";
+import { setResourceWorkingHoursAction } from "@/features/resources/actions/set-resource-working-hours";
 import type { ResourceFormValues } from "@/features/resources/schemas/resource-schema";
+import type { ResourceWorkingHourInput } from "@/features/resources/types/resource-working-hour";
 
 const EDITABLE_ROLES = ["owner", "admin"];
 
@@ -21,11 +27,13 @@ export default async function EditResourcePage({ params }: { params: Promise<{ t
   const { tenant, membership } = await requireTenantMember(tenantSlug);
   const canEdit = EDITABLE_ROLES.includes(membership.role);
 
-  const [resource, types, locations, assignedServices] = await Promise.all([
+  const [resource, types, locations, assignedServices, workingHours, timeOff] = await Promise.all([
     getResource(tenant.id, resourceId),
     getResourceTypes(tenant.id),
     getBusinessLocations(tenant.id),
     getServicesForResource(tenant.id, resourceId),
+    getResourceWorkingHours(tenant.id, resourceId),
+    getFutureResourceTimeOff(tenant.id, resourceId),
   ]);
 
   if (!resource) notFound();
@@ -42,12 +50,40 @@ export default async function EditResourcePage({ params }: { params: Promise<{ t
 
   async function handleSubmit(values: ResourceFormValues) { "use server"; return updateResourceAction(tenantSlug, resourceId, values); }
 
+  async function handleScheduleSave(periods: ResourceWorkingHourInput[]) {
+    "use server";
+    return setResourceWorkingHoursAction(tenantSlug, resourceId, periods);
+  }
+
+  const locationOptions = locations.map((l) => ({ id: l.id, name: l.name }));
+
   return (
     <Box>
       <Box sx={{ mb: 3 }}><Link component={NextLink} href={`/${tenantSlug}/resources`} variant="body2">&larr; Back to Resources</Link></Box>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>Edit Resource: {resource.name}</Typography>
+
       <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 } }}>
-        <ResourceForm initialValues={initialValues} onSubmit={handleSubmit} submitLabel="Save Changes" canEdit={canEdit} resourceTypes={types} locations={locations.map((l) => ({ id: l.id, name: l.name }))} />
+        <ResourceForm initialValues={initialValues} onSubmit={handleSubmit} submitLabel="Save Changes" canEdit={canEdit} resourceTypes={types} locations={locationOptions} />
+      </Paper>
+
+      <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 }, mt: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>Working Hours</Typography>
+        <ResourceWeeklyScheduleEditor
+          initialSchedule={workingHours}
+          locations={locationOptions}
+          onSave={handleScheduleSave}
+          canEdit={canEdit}
+        />
+      </Paper>
+
+      <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 }, mt: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>Time Off</Typography>
+        <ResourceTimeOffList
+          entries={timeOff}
+          tenantSlug={tenantSlug}
+          resourceId={resourceId}
+          canEdit={canEdit}
+        />
       </Paper>
 
       <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 }, mt: 3 }}>

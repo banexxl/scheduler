@@ -481,3 +481,42 @@ See `docs/30-location-business-hours.md` for full details.
 - Payments
 - Analytics
 - AI Assistant
+
+### Milestone 6.12 — Appointment Notifications Foundation
+
+Implemented transactional email notifications for appointment events using an outbox pattern.
+
+**Implemented:**
+- `tenant_notification_settings` table with per-event toggles, sender identity
+- `notification_templates` table with 3 types (created, rescheduled, cancelled)
+- `notification_outbox` table with idempotency, retry, locking, rendered snapshots
+- `notification_deliveries` table with per-attempt records
+- Constraints, indexes, triggers, RLS policies on all 4 tables
+- 5 SECURITY DEFINER RPCs (enqueue, claim_batch, mark_sent, mark_failed, retry)
+- Email provider abstraction (interface + console + nodemailer implementations)
+- Template renderer (variable substitution, HTML escaping, plain-text generation)
+- Default templates for all 3 event types
+- Template variable validation (13 supported variables)
+- Settings resolution with defaults and tenant name fallback
+- Enqueue service with settings checks, template rendering, idempotency
+- Integration into appointment creation, rescheduling, and cancellation actions
+- Integration into public booking creation action
+- Notification processing service with batch claiming and delivery recording
+- Protected processing route (POST /api/internal/notifications/process)
+- Notification settings UI (/{tenantSlug}/settings/notifications)
+- Template management UI with preview and reset-to-default
+- Appointment detail notification section with status display
+- Manual retry action for failed notifications
+- Public booking confirmation conditional email message
+- 59 automated tests (schemas, types, template renderer, console provider)
+- Full documentation (docs/36-appointment-notifications.md)
+
+**Not implemented (deferred):**
+- SMS, WhatsApp, push notifications
+- Marketing emails, newsletters, reminders
+- Payment receipts, customer accounts
+- Calendar attachments, external calendar sync
+- Provider delivery webhooks (bounce/delivered/opened)
+- Bulk messaging, notification campaigns
+
+See `docs/36-appointment-notifications.md` for full details.

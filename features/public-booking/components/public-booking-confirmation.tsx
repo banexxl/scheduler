@@ -50,6 +50,12 @@ export default function PublicBookingConfirmationView({ confirmation }: Props) {
       <Typography variant="body2" color="text.secondary" sx={{ mt: 3, fontWeight: 500 }}>
         Please save your appointment number: {confirmation.appointmentNumber}
       </Typography>
+
+      {confirmation.emailConfirmationEnqueued && (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          A confirmation email will be sent to the address provided.
+        </Typography>
+      )}
     </Paper>
   );
 }

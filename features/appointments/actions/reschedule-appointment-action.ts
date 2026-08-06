@@ -2,14 +2,19 @@
 
 /**
  * Server action for rescheduling an appointment — Milestone 6.9.
+ * Notification integration added in Milestone 6.12.
  *
  * Changes appointment time and optionally service/location/resource.
  * Recalculates all service snapshots from current configuration.
+ * Enqueues a rescheduling notification on success.
  */
 
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { appointmentRescheduleSchema } from "../schemas/appointment-schemas";
 import { rescheduleAppointment } from "../services/update-appointment";
+import { getAppointmentById } from "../services/appointment-queries";
+import { enqueueAppointmentRescheduledNotification } from "@/features/notifications/services/enqueue-notification";
+import { loadTenantTimezone } from "@/features/availability/services/availability-queries";
 import type { Appointment } from "../types/appointment";
 
 type ActionSuccess = { success: true; data: Appointment };
@@ -39,6 +44,11 @@ export async function rescheduleAppointmentAction(
       stripUnknown: true,
     });
 
+    // Load existing appointment to capture previous times for notification
+    const existing = await getAppointmentById(tenant.id, appointmentId);
+    const previousStartsAt = existing?.startsAt;
+    const previousEndsAt = existing?.endsAt;
+
     const result = await rescheduleAppointment({
       tenantId: tenant.id,
       appointmentId,
@@ -52,6 +62,31 @@ export async function rescheduleAppointmentAction(
 
     if (!result.success) {
       return { success: false, error: result.error, code: result.code };
+    }
+
+    // Enqueue rescheduling notification only if scheduling actually changed
+    const schedulingChanged =
+      result.appointment.startsAt !== previousStartsAt ||
+      result.appointment.endsAt !== previousEndsAt ||
+      result.appointment.serviceId !== existing?.serviceId ||
+      result.appointment.locationId !== existing?.locationId ||
+      result.appointment.resourceId !== existing?.resourceId;
+
+    if (schedulingChanged && previousStartsAt && previousEndsAt) {
+      try {
+        const tenantTz = await loadTenantTimezone(tenant.id);
+        const timeZone = tenantTz?.defaultTimezone ?? "UTC";
+        await enqueueAppointmentRescheduledNotification(
+          tenant.id,
+          tenant.name,
+          timeZone,
+          result.appointment,
+          previousStartsAt,
+          previousEndsAt
+        );
+      } catch {
+        // Notification failure must never block rescheduling
+      }
     }
 
     return { success: true, data: result.appointment };

@@ -12,6 +12,8 @@ import { getAppointmentById } from "@/features/appointments/services/appointment
 import { APPOINTMENT_STATUS_LABELS } from "@/features/appointments/types/appointment";
 import type { AppointmentStatus } from "@/features/appointments/types/appointment";
 import AppointmentStatusActions from "@/features/appointments/components/appointment-status-actions";
+import { getNotificationsForAppointment } from "@/features/notifications/services/notification-outbox-service";
+import AppointmentNotificationsSection from "@/features/notifications/components/appointment-notifications-section";
 
 const EDITABLE_ROLES = ["owner", "admin"];
 
@@ -43,6 +45,11 @@ export default async function AppointmentDetailPage({
 
   const appointment = await getAppointmentById(tenant.id, appointmentId);
   if (!appointment) notFound();
+
+  // Load notifications for this appointment (owner/admin only)
+  const notifications = canEdit
+    ? await getNotificationsForAppointment(tenant.id, appointmentId)
+    : [];
 
   const price = parseFloat(appointment.price);
 
@@ -185,6 +192,14 @@ export default async function AppointmentDetailPage({
           </Box>
         </Box>
       </Paper>
+
+      {canEdit && notifications.length > 0 && (
+        <AppointmentNotificationsSection
+          tenantSlug={tenantSlug}
+          notifications={notifications}
+          canRetry={canEdit}
+        />
+      )}
 
       {canEdit && (
         <>

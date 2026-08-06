@@ -2,11 +2,14 @@
 
 /**
  * Server action for cancelling an appointment — Milestone 6.9.
+ * Notification integration added in Milestone 6.12.
  */
 
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { appointmentCancellationSchema } from "../schemas/appointment-schemas";
 import { cancelAppointment } from "../services/update-appointment";
+import { enqueueAppointmentCancelledNotification } from "@/features/notifications/services/enqueue-notification";
+import { loadTenantTimezone } from "@/features/availability/services/availability-queries";
 import type { Appointment } from "../types/appointment";
 
 type ActionSuccess = { success: true; data: Appointment };
@@ -39,6 +42,21 @@ export async function cancelAppointmentAction(
 
     if (!result.success) {
       return { success: false, error: result.error, code: result.code };
+    }
+
+    // Enqueue cancellation notification (non-blocking)
+    try {
+      const tenantTz = await loadTenantTimezone(tenant.id);
+      const timeZone = tenantTz?.defaultTimezone ?? "UTC";
+      await enqueueAppointmentCancelledNotification(
+        tenant.id,
+        tenant.name,
+        timeZone,
+        result.appointment,
+        validated.reason
+      );
+    } catch {
+      // Notification failure must never block cancellation
     }
 
     return { success: true, data: result.appointment };

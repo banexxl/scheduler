@@ -34,6 +34,7 @@ import { resolvePublicBookingContext } from "../services/public-tenant-resolver"
 import { createAppointment } from "@/features/appointments/services/create-appointment";
 import { getResolvedBookingRules } from "@/features/booking-rules/services/get-booking-rules";
 import { calculateAvailability } from "@/features/availability/services/calculate-availability";
+import { enqueueAppointmentCreatedNotification } from "@/features/notifications/services/enqueue-notification";
 import { toZonedTime } from "date-fns-tz";
 import { format } from "date-fns";
 import type { PublicBookingConfirmation, PublicBookingErrorCode } from "../types/public-booking";
@@ -241,6 +242,20 @@ export async function createPublicBookingAction(
             p_status: "completed",
         });
 
+        // 11b. Enqueue booking confirmation notification (non-blocking)
+        let emailConfirmationEnqueued = false;
+        try {
+            const enqueueResult = await enqueueAppointmentCreatedNotification(
+                tenantId,
+                tenant.name,
+                tenant.defaultTimeZone,
+                createResult.appointment
+            );
+            emailConfirmationEnqueued = enqueueResult.status === "created" || enqueueResult.status === "duplicate";
+        } catch {
+            // Notification failure must never block public booking
+        }
+
         // 12. Build public-safe confirmation
         const appt = createResult.appointment;
         const timeZone = tenant.defaultTimeZone;
@@ -262,6 +277,7 @@ export async function createPublicBookingAction(
             currency: appt.currency,
             customerName: appt.customerName,
             confirmationMessage: settings.confirmationMessage,
+            emailConfirmationEnqueued,
         };
 
         return { success: true, data: confirmation };
@@ -343,6 +359,7 @@ async function buildConfirmationFromAppointment(
             currency: row.currency as string,
             customerName: row.customer_name as string,
             confirmationMessage,
+            emailConfirmationEnqueued: true, // Already completed — email was enqueued on first attempt
         },
     };
 }

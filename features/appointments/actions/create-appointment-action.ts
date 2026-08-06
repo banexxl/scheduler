@@ -2,14 +2,18 @@
 
 /**
  * Server action for creating an appointment — Milestone 6.9.
+ * Notification integration added in Milestone 6.12.
  *
  * Authenticates the user, verifies tenant membership (owner/admin),
- * validates input, and delegates to the creation service.
+ * validates input, delegates to the creation service, and enqueues
+ * a booking confirmation notification on success.
  */
 
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { appointmentCreateSchema } from "../schemas/appointment-schemas";
 import { createAppointment } from "../services/create-appointment";
+import { enqueueAppointmentCreatedNotification } from "@/features/notifications/services/enqueue-notification";
+import { loadTenantTimezone } from "@/features/availability/services/availability-queries";
 import type { Appointment } from "../types/appointment";
 
 // ─── Action Types ────────────────────────────────────────────────────────────
@@ -73,6 +77,20 @@ export async function createAppointmentAction(
 
     if (!result.success) {
       return { success: false, error: result.error, code: result.code };
+    }
+
+    // Enqueue booking confirmation notification (non-blocking)
+    try {
+      const tenantTz = await loadTenantTimezone(tenant.id);
+      const timeZone = tenantTz?.defaultTimezone ?? "UTC";
+      await enqueueAppointmentCreatedNotification(
+        tenant.id,
+        tenant.name,
+        timeZone,
+        result.appointment
+      );
+    } catch {
+      // Notification failure must never block appointment creation
     }
 
     return { success: true, data: result.appointment };

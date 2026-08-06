@@ -658,6 +658,206 @@ export type Database = {
           },
         ]
       }
+      notification_deliveries: {
+        Row: {
+          attempt_number: number
+          completed_at: string | null
+          created_at: string
+          error_code: string | null
+          error_message: string | null
+          id: string
+          outbox_id: string
+          provider: string
+          provider_message_id: string | null
+          response_metadata: Json | null
+          started_at: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          attempt_number: number
+          completed_at?: string | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          outbox_id: string
+          provider: string
+          provider_message_id?: string | null
+          response_metadata?: Json | null
+          started_at?: string
+          status: string
+          tenant_id: string
+        }
+        Update: {
+          attempt_number?: number
+          completed_at?: string | null
+          created_at?: string
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          outbox_id?: string
+          provider?: string
+          provider_message_id?: string | null
+          response_metadata?: Json | null
+          started_at?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_outbox_id_fkey"
+            columns: ["outbox_id"]
+            isOneToOne: false
+            referencedRelation: "notification_outbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_deliveries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_outbox: {
+        Row: {
+          appointment_id: string
+          attempt_count: number
+          channel: string
+          created_at: string
+          event_type: string
+          id: string
+          idempotency_key: string
+          last_error_code: string | null
+          last_error_message: string | null
+          locked_at: string | null
+          locked_by: string | null
+          next_attempt_at: string
+          payload: Json
+          processed_at: string | null
+          recipient_email: string
+          rendered_html: string | null
+          rendered_subject: string | null
+          rendered_text: string | null
+          reply_to_email: string | null
+          sender_name: string | null
+          status: string
+          template_type: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id: string
+          attempt_count?: number
+          channel?: string
+          created_at?: string
+          event_type: string
+          id?: string
+          idempotency_key: string
+          last_error_code?: string | null
+          last_error_message?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
+          next_attempt_at?: string
+          payload: Json
+          processed_at?: string | null
+          recipient_email: string
+          rendered_html?: string | null
+          rendered_subject?: string | null
+          rendered_text?: string | null
+          reply_to_email?: string | null
+          sender_name?: string | null
+          status?: string
+          template_type: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          attempt_count?: number
+          channel?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          idempotency_key?: string
+          last_error_code?: string | null
+          last_error_message?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
+          next_attempt_at?: string
+          payload?: Json
+          processed_at?: string | null
+          recipient_email?: string
+          rendered_html?: string | null
+          rendered_subject?: string | null
+          rendered_text?: string | null
+          reply_to_email?: string | null
+          sender_name?: string | null
+          status?: string
+          template_type?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_outbox_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_outbox_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_templates: {
+        Row: {
+          body_template: string
+          created_at: string
+          id: string
+          is_active: boolean
+          subject_template: string
+          template_type: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          body_template: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          subject_template: string
+          template_type: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          body_template?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          subject_template?: string
+          template_type?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_admins: {
         Row: {
           created_at: string
@@ -1655,6 +1855,53 @@ export type Database = {
           },
         ]
       }
+      tenant_notification_settings: {
+        Row: {
+          created_at: string
+          email_notifications_enabled: boolean
+          id: string
+          reply_to_email: string | null
+          send_booking_confirmation: boolean
+          send_cancellation_confirmation: boolean
+          send_reschedule_confirmation: boolean
+          sender_name: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email_notifications_enabled?: boolean
+          id?: string
+          reply_to_email?: string | null
+          send_booking_confirmation?: boolean
+          send_cancellation_confirmation?: boolean
+          send_reschedule_confirmation?: boolean
+          sender_name?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email_notifications_enabled?: boolean
+          id?: string
+          reply_to_email?: string | null
+          send_booking_confirmation?: boolean
+          send_cancellation_confirmation?: boolean
+          send_reschedule_confirmation?: boolean
+          sender_name?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_notification_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_public_booking_settings: {
         Row: {
           allow_no_preference: boolean
@@ -1897,6 +2144,41 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      claim_notification_outbox_batch: {
+        Args: { p_batch_size?: number; p_worker_id: string }
+        Returns: {
+          appointment_id: string
+          attempt_count: number
+          channel: string
+          created_at: string
+          event_type: string
+          id: string
+          idempotency_key: string
+          last_error_code: string | null
+          last_error_message: string | null
+          locked_at: string | null
+          locked_by: string | null
+          next_attempt_at: string
+          payload: Json
+          processed_at: string | null
+          recipient_email: string
+          rendered_html: string | null
+          rendered_subject: string | null
+          rendered_text: string | null
+          reply_to_email: string | null
+          sender_name: string | null
+          status: string
+          template_type: string
+          tenant_id: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "notification_outbox"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       claim_public_booking_request: {
         Args: {
           p_idempotency_key: string
@@ -2039,6 +2321,22 @@ export type Database = {
         Args: { p_resource_type_id: string; p_tenant_id: string }
         Returns: boolean
       }
+      enqueue_appointment_notification: {
+        Args: {
+          p_appointment_id: string
+          p_event_type: string
+          p_idempotency_key: string
+          p_payload: Json
+          p_recipient_email: string
+          p_rendered_html?: string
+          p_rendered_subject?: string
+          p_rendered_text?: string
+          p_reply_to_email?: string
+          p_sender_name?: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
       generate_appointment_number: {
         Args: { p_tenant_id: string }
         Returns: string
@@ -2117,6 +2415,26 @@ export type Database = {
         Args: { candidate_slug: string }
         Returns: boolean
       }
+      mark_notification_failed: {
+        Args: {
+          p_error_code: string
+          p_error_message: string
+          p_outbox_id: string
+          p_provider: string
+          p_retryable?: boolean
+          p_worker_id: string
+        }
+        Returns: undefined
+      }
+      mark_notification_sent: {
+        Args: {
+          p_outbox_id: string
+          p_provider: string
+          p_provider_message_id?: string
+          p_worker_id: string
+        }
+        Returns: undefined
+      }
       register_as_tenant_customer: {
         Args: {
           allow_marketing?: boolean
@@ -2162,6 +2480,10 @@ export type Database = {
       replace_location_working_hours: {
         Args: { hours: Json; target_location_id: string }
         Returns: boolean
+      }
+      retry_failed_notification: {
+        Args: { p_outbox_id: string; p_tenant_id: string }
+        Returns: Json
       }
       set_location_business_hours: {
         Args: { p_location_id: string; p_periods: Json; p_tenant_id: string }

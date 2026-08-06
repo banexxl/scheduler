@@ -155,4 +155,6 @@ export type PublicBookingConfirmation = {
   currency: string;
   customerName: string;
   confirmationMessage: string | null;
+  /** Whether a confirmation email was enqueued for the customer */
+  emailConfirmationEnqueued: boolean;
 };

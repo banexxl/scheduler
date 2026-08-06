@@ -132,6 +132,15 @@ export type AvailabilityResult = {
   };
 };
 
+// ─── Trusted Public Reschedule Context ──────────────────────────────────────
+
+export type PublicRescheduleContext = {
+  appointmentId: string;
+  tenantId: string;
+  serviceId: string;
+  locationId: string;
+};
+
 // ─── Slot Interval ───────────────────────────────────────────────────────────
 
 export const SLOT_INTERVAL_MIN = 5;

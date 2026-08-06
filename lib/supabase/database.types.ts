@@ -14,6 +14,235 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointment_access_tokens: {
+        Row: {
+          appointment_id: string
+          created_at: string
+          encryption_key_version: number
+          expires_at: string
+          id: string
+          last_used_at: string | null
+          purpose: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          tenant_id: string
+          token_auth_tag: string
+          token_ciphertext: string
+          token_hash: string
+          token_iv: string
+          token_prefix: string
+          updated_at: string
+          use_count: number
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string
+          encryption_key_version?: number
+          expires_at: string
+          id?: string
+          last_used_at?: string | null
+          purpose?: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          tenant_id: string
+          token_auth_tag: string
+          token_ciphertext: string
+          token_hash: string
+          token_iv: string
+          token_prefix: string
+          updated_at?: string
+          use_count?: number
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string
+          encryption_key_version?: number
+          expires_at?: string
+          id?: string
+          last_used_at?: string | null
+          purpose?: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          tenant_id?: string
+          token_auth_tag?: string
+          token_ciphertext?: string
+          token_hash?: string
+          token_iv?: string
+          token_prefix?: string
+          updated_at?: string
+          use_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_access_tokens_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_access_tokens_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointment_customer_actions: {
+        Row: {
+          access_token_id: string | null
+          action_type: string
+          appointment_id: string
+          created_at: string
+          failure_code: string | null
+          id: string
+          ip_hash: string | null
+          new_resource_id: string | null
+          new_starts_at: string | null
+          previous_resource_id: string | null
+          previous_starts_at: string | null
+          reason: string | null
+          status: string
+          tenant_id: string
+          user_agent_summary: string | null
+        }
+        Insert: {
+          access_token_id?: string | null
+          action_type: string
+          appointment_id: string
+          created_at?: string
+          failure_code?: string | null
+          id?: string
+          ip_hash?: string | null
+          new_resource_id?: string | null
+          new_starts_at?: string | null
+          previous_resource_id?: string | null
+          previous_starts_at?: string | null
+          reason?: string | null
+          status: string
+          tenant_id: string
+          user_agent_summary?: string | null
+        }
+        Update: {
+          access_token_id?: string | null
+          action_type?: string
+          appointment_id?: string
+          created_at?: string
+          failure_code?: string | null
+          id?: string
+          ip_hash?: string | null
+          new_resource_id?: string | null
+          new_starts_at?: string | null
+          previous_resource_id?: string | null
+          previous_starts_at?: string | null
+          reason?: string | null
+          status?: string
+          tenant_id?: string
+          user_agent_summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_customer_actions_access_token_id_fkey"
+            columns: ["access_token_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_access_tokens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_customer_actions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_customer_actions_new_resource_id_fkey"
+            columns: ["new_resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_customer_actions_previous_resource_id_fkey"
+            columns: ["previous_resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_customer_actions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointment_customer_requests: {
+        Row: {
+          access_token_id: string
+          appointment_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          idempotency_key: string
+          request_hash: string
+          request_type: string
+          result_snapshot: Json | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          access_token_id: string
+          appointment_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          request_hash: string
+          request_type: string
+          result_snapshot?: Json | null
+          status: string
+          tenant_id: string
+        }
+        Update: {
+          access_token_id?: string
+          appointment_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          request_hash?: string
+          request_type?: string
+          result_snapshot?: Json | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_customer_requests_access_token_id_fkey"
+            columns: ["access_token_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_access_tokens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_customer_requests_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_customer_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointment_reminders: {
         Row: {
           appointment_id: string
@@ -2667,6 +2896,31 @@ export type Database = {
       retry_failed_notification: {
         Args: { p_outbox_id: string; p_tenant_id: string }
         Returns: Json
+      }
+      rotate_appointment_access_token: {
+        Args: {
+          p_appointment_id: string
+          p_encryption_key_version: number
+          p_expires_at: string
+          p_revocation_reason?: string
+          p_tenant_id: string
+          p_token_auth_tag: string
+          p_token_ciphertext: string
+          p_token_hash: string
+          p_token_iv: string
+          p_token_prefix: string
+        }
+        Returns: {
+          appointment_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          purpose: string
+          revoked_at: string
+          tenant_id: string
+          token_prefix: string
+          updated_at: string
+        }[]
       }
       set_location_business_hours: {
         Args: { p_location_id: string; p_periods: Json; p_tenant_id: string }

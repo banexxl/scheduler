@@ -10,9 +10,14 @@
  */
 
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
+import {
+  createAppointmentAccessToken,
+  getManageAppointmentUrl,
+} from "@/features/appointments/self-service/services/appointment-self-service";
+import { enqueueAppointmentCreatedNotification as enqueueSelfServiceAppointmentCreatedNotification } from "@/features/appointments/self-service/services/self-service-side-effects";
+import { enqueueAppointmentCreatedNotification as enqueueCoreAppointmentCreatedNotification } from "@/features/notifications/services/enqueue-notification";
 import { appointmentCreateSchema } from "../schemas/appointment-schemas";
 import { createAppointment } from "../services/create-appointment";
-import { enqueueAppointmentCreatedNotification } from "@/features/notifications/services/enqueue-notification";
 import { syncRemindersAfterCreation } from "@/features/notifications/services/reminder-sync-service";
 import { loadTenantTimezone } from "@/features/availability/services/availability-queries";
 import type { Appointment } from "../types/appointment";
@@ -80,11 +85,34 @@ export async function createAppointmentAction(
       return { success: false, error: result.error, code: result.code };
     }
 
+    // Best effort: appointment creation remains successful even if token/notification fails.
+    if (result.appointment.customerEmail) {
+      try {
+        const token = await createAppointmentAccessToken({
+          tenantId: tenant.id,
+          appointmentId: result.appointment.id,
+          revocationReason: "initial_generation",
+        });
+
+        await enqueueSelfServiceAppointmentCreatedNotification({
+          tenantId: tenant.id,
+          appointmentId: result.appointment.id,
+          manageAppointmentUrl: getManageAppointmentUrl(token.rawToken),
+        });
+      } catch (sideEffectError) {
+        console.warn("[create-appointment-action] Self-service token side-effect failed", {
+          tenantId: tenant.id,
+          appointmentId: result.appointment.id,
+          error: sideEffectError instanceof Error ? sideEffectError.message : "unknown",
+        });
+      }
+    }
+
     // Enqueue booking confirmation notification (non-blocking)
     try {
       const tenantTz = await loadTenantTimezone(tenant.id);
       const timeZone = tenantTz?.defaultTimezone ?? "UTC";
-      await enqueueAppointmentCreatedNotification(
+      await enqueueCoreAppointmentCreatedNotification(
         tenant.id,
         tenant.name,
         timeZone,

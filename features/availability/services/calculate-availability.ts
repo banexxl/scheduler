@@ -71,7 +71,10 @@ import {
   type ResourceWorkingHourRow,
   type ResourceTimeOffRow,
 } from "./availability-queries";
-import { loadBlockingAppointments } from "@/features/appointments/services/appointment-queries";
+import {
+  loadBlockingAppointments,
+  loadBlockingAppointmentsExcluding,
+} from "@/features/appointments/services/appointment-queries";
 import type { BlockingAppointmentInterval } from "@/features/appointments/types/appointment";
 
 // ─── Public API ──────────────────────────────────────────────────────────────
@@ -85,7 +88,10 @@ import type { BlockingAppointmentInterval } from "@/features/appointments/types/
  */
 export async function calculateAvailability(
   request: AvailabilityRequest,
-  now: Date = new Date()
+  now: Date = new Date(),
+  options?: {
+    excludeAppointmentId?: string;
+  }
 ): Promise<AvailabilityResult> {
   const {
     tenantId,
@@ -196,12 +202,20 @@ export async function calculateAvailability(
   ]);
 
   // ─── Step 9b: Load blocking appointments in bulk ───────────────────────────
-  const allBlockingAppointments = await loadBlockingAppointments(
-    tenantId,
-    eligibleResourceIds,
-    dayStartInstant,
-    dayEndInstant
-  );
+  const allBlockingAppointments = options?.excludeAppointmentId
+    ? await loadBlockingAppointmentsExcluding(
+      tenantId,
+      eligibleResourceIds,
+      dayStartInstant,
+      dayEndInstant,
+      options.excludeAppointmentId
+    )
+    : await loadBlockingAppointments(
+      tenantId,
+      eligibleResourceIds,
+      dayStartInstant,
+      dayEndInstant
+    );
 
   // ─── Step 10: Calculate per resource ────────────────────────────────────────
   const isoWeekday = getIsoDayOfWeek(toZonedTime(dayStartDate, timeZone));

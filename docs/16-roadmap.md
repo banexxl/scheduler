@@ -469,6 +469,34 @@ Implemented recurring weekly business hours and date-specific closures/custom ho
 
 See `docs/30-location-business-hours.md` for full details.
 
+### Milestone 6.14 - Secure Customer Appointment Self-Service
+
+Implemented secure tokenized guest management for single appointments.
+
+**Implemented:**
+- Migration `20250805000019_appointment_self_service.sql`
+- Appointment access tokens with hash + authenticated encryption metadata
+- Token rotation RPC, revocation support, expiry policy, tenant trigger validation
+- Customer action log and idempotent customer request table
+- Public route `/manage-appointment/[token]`
+- Public appointment projection with safe fields only
+- Customer cancellation and rescheduling actions by token
+- Availability exclusion for the appointment being rescheduled
+- Rate limiting buckets for page/availability/mutation actions
+- Token usage tracking (last_used_at, use_count)
+- Generic unavailable behavior for invalid/expired/revoked states
+- Internal appointment detail section for link lifecycle and action history
+- Appointment creation best-effort token generation for email-backed bookings
+- Security headers for token route (noindex/nofollow/no-store/no-referrer)
+- Milestone documentation in `docs/38-customer-appointment-self-service.md`
+
+**Current constraints:**
+- Notification/reminder queue transport is not yet implemented; side-effect hooks are explicit safe stubs.
+- Public self-service supports fixed service/location scope during rescheduling.
+
+See `docs/38-customer-appointment-self-service.md` for full details.
+Rollout checklist: `docs/39-self-service-rollout-checklist.md`.
+
 ## Planned
 
 - Foundation

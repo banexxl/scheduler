@@ -12,6 +12,12 @@ import { getAppointmentById } from "@/features/appointments/services/appointment
 import { APPOINTMENT_STATUS_LABELS } from "@/features/appointments/types/appointment";
 import type { AppointmentStatus } from "@/features/appointments/types/appointment";
 import AppointmentStatusActions from "@/features/appointments/components/appointment-status-actions";
+import {
+  getActiveTokenMetadataForAppointment,
+  getCustomerActionHistoryForAppointment,
+  getTokenHistoryForAppointment,
+} from "@/features/appointments/self-service/services/appointment-self-service";
+import InternalAppointmentSelfServiceSection from "@/features/appointments/self-service/components/internal-appointment-self-service-section";
 import { getNotificationsForAppointment } from "@/features/notifications/services/notification-outbox-service";
 import { getRemindersForAppointment } from "@/features/notifications/services/reminder-queries";
 import AppointmentNotificationsSection from "@/features/notifications/components/appointment-notifications-section";
@@ -47,6 +53,12 @@ export default async function AppointmentDetailPage({
 
   const appointment = await getAppointmentById(tenant.id, appointmentId);
   if (!appointment) notFound();
+
+  const [activeToken, tokenHistory, customerActions] = await Promise.all([
+    getActiveTokenMetadataForAppointment(tenant.id, appointmentId),
+    getTokenHistoryForAppointment(tenant.id, appointmentId, 20),
+    getCustomerActionHistoryForAppointment(tenant.id, appointmentId, 100),
+  ]);
 
   // Load notifications and reminders for this appointment (owner/admin only)
   const [notifications, reminders] = canEdit
@@ -197,6 +209,23 @@ export default async function AppointmentDetailPage({
           </Box>
         </Box>
       </Paper>
+
+      {canEdit && (
+        <InternalAppointmentSelfServiceSection
+          tenantSlug={tenantSlug}
+          appointmentId={appointmentId}
+          initialActiveToken={activeToken}
+          initialTokenHistory={tokenHistory}
+          initialCustomerActions={customerActions.map((item) => ({
+            id: item.id,
+            actionType: item.actionType,
+            status: item.status,
+            reason: item.reason,
+            failureCode: item.failureCode,
+            createdAt: item.createdAt,
+          }))}
+        />
+      )}
 
       {canEdit && (reminders.length > 0 || notifications.length > 0) && (
         <AppointmentRemindersSection

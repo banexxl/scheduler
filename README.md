@@ -41,6 +41,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run type-check` | TypeScript type checking |
 | `npm run clean` | Remove `.next` build cache |
 | `npm run db:types` | Generate Supabase database types |
+| `npm run test:self-service:integration` | Run self-service integration tests (env-gated) |
+| `npm run test:self-service:integration:required` | Fail if required integration env is missing, then run self-service integration tests |
 
 ## Environment Variables
 
@@ -54,6 +56,13 @@ Copy `.env.example` to `.env.local`:
 | `SUPABASE_PROJECT_ID` | For type gen | Used by `npm run db:types` |
 | `NEXT_PUBLIC_APP_NAME` | Yes | Application display name |
 | `NEXT_PUBLIC_APP_URL` | Yes | Full origin including protocol (e.g. `http://localhost:3000`) |
+| `PUBLIC_APP_URL` | Recommended | Server-side canonical app origin for manage links (fallback: `NEXT_PUBLIC_APP_URL`) |
+| `APPOINTMENT_TOKEN_ENCRYPTION_KEY` | For self-service tokens | 32-byte server-only encryption key for appointment token ciphertext |
+| `TEST_SELF_SERVICE_TENANT_ID` | Optional (integration tests) | Tenant fixture for self-service integration tests |
+| `TEST_SELF_SERVICE_APPOINTMENT_ID` | Optional (integration tests) | Appointment fixture for self-service integration tests |
+| `TEST_SELF_SERVICE_OWNER_JWT` | Optional (integration tests) | Owner/admin JWT for privileged self-service integration tests |
+| `TEST_SELF_SERVICE_OWNER_EMAIL` | Optional (integration tests) | Owner/admin email used to derive JWT at runtime |
+| `TEST_SELF_SERVICE_OWNER_PASSWORD` | Optional (integration tests) | Owner/admin password used to derive JWT at runtime |
 | `NEXT_PUBLIC_ROOT_DOMAIN` | Yes | Hostname for subdomain routing (e.g. `localhost:3000`) |
 
 ## Database Types

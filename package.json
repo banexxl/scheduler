@@ -12,7 +12,10 @@
     "clean": "rimraf .next",
     "db:types": "node scripts/generate-database-types.mjs",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:self-service:integration": "vitest run features/appointments/self-service/appointment-self-service.integration.test.ts",
+    "test:self-service:integration:required": "node scripts/check-self-service-integration-env.mjs && cross-env SELF_SERVICE_INTEGRATION_REQUIRED=1 vitest run features/appointments/self-service/appointment-self-service.integration.test.ts",
+    "run:all": "npm run db:types && npm run lint && npm run type-check && npm run test && npm run build"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
@@ -37,6 +40,7 @@
     "@types/nodemailer": "8.0.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "cross-env": "^7.0.3",
     "eslint": "^9.0.0",
     "eslint-config-next": "16.3.0",
     "rimraf": "^6.1.3",

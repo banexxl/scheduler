@@ -14,6 +14,175 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointment_sequences: {
+        Row: {
+          created_at: string
+          current_value: number
+          id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_value?: number
+          id?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_value?: number
+          id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_sequences_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointments: {
+        Row: {
+          appointment_number: string
+          buffer_after_minutes: number
+          buffer_before_minutes: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_notes: string | null
+          customer_phone: string | null
+          duration_minutes: number
+          ends_at: string
+          id: string
+          internal_notes: string | null
+          location_id: string
+          location_name_snapshot: string
+          occupied_ends_at: string
+          occupied_starts_at: string
+          price: number
+          resource_id: string
+          resource_name_snapshot: string
+          service_id: string
+          service_name_snapshot: string
+          source: string
+          starts_at: string
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          appointment_number: string
+          buffer_after_minutes?: number
+          buffer_before_minutes?: number
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_notes?: string | null
+          customer_phone?: string | null
+          duration_minutes: number
+          ends_at: string
+          id?: string
+          internal_notes?: string | null
+          location_id: string
+          location_name_snapshot: string
+          occupied_ends_at: string
+          occupied_starts_at: string
+          price?: number
+          resource_id: string
+          resource_name_snapshot: string
+          service_id: string
+          service_name_snapshot: string
+          source?: string
+          starts_at: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          appointment_number?: string
+          buffer_after_minutes?: number
+          buffer_before_minutes?: number
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_notes?: string | null
+          customer_phone?: string | null
+          duration_minutes?: number
+          ends_at?: string
+          id?: string
+          internal_notes?: string | null
+          location_id?: string
+          location_name_snapshot?: string
+          occupied_ends_at?: string
+          occupied_starts_at?: string
+          price?: number
+          resource_id?: string
+          resource_name_snapshot?: string
+          service_id?: string
+          service_name_snapshot?: string
+          source?: string
+          starts_at?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -1575,6 +1744,55 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_appointment: {
+        Args: {
+          p_appointment_id: string
+          p_cancelled_by?: string
+          p_reason?: string
+          p_tenant_id: string
+        }
+        Returns: {
+          appointment_number: string
+          buffer_after_minutes: number
+          buffer_before_minutes: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_notes: string | null
+          customer_phone: string | null
+          duration_minutes: number
+          ends_at: string
+          id: string
+          internal_notes: string | null
+          location_id: string
+          location_name_snapshot: string
+          occupied_ends_at: string
+          occupied_starts_at: string
+          price: number
+          resource_id: string
+          resource_name_snapshot: string
+          service_id: string
+          service_name_snapshot: string
+          source: string
+          starts_at: string
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "appointments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       create_location_exception_v2: {
         Args: {
           p_exception_date: string
@@ -1684,6 +1902,80 @@ export type Database = {
       delete_resource_type: {
         Args: { p_resource_type_id: string; p_tenant_id: string }
         Returns: boolean
+      }
+      generate_appointment_number: {
+        Args: { p_tenant_id: string }
+        Returns: string
+      }
+      insert_appointment_atomic: {
+        Args: {
+          p_buffer_after_minutes?: number
+          p_buffer_before_minutes?: number
+          p_created_by?: string
+          p_currency?: string
+          p_customer_email?: string
+          p_customer_id?: string
+          p_customer_name?: string
+          p_customer_notes?: string
+          p_customer_phone?: string
+          p_duration_minutes?: number
+          p_ends_at?: string
+          p_internal_notes?: string
+          p_location_id: string
+          p_location_name_snapshot?: string
+          p_occupied_ends_at?: string
+          p_occupied_starts_at?: string
+          p_price?: number
+          p_resource_id: string
+          p_resource_name_snapshot?: string
+          p_service_id: string
+          p_service_name_snapshot?: string
+          p_source?: string
+          p_starts_at?: string
+          p_status?: string
+          p_tenant_id: string
+        }
+        Returns: {
+          appointment_number: string
+          buffer_after_minutes: number
+          buffer_before_minutes: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_notes: string | null
+          customer_phone: string | null
+          duration_minutes: number
+          ends_at: string
+          id: string
+          internal_notes: string | null
+          location_id: string
+          location_name_snapshot: string
+          occupied_ends_at: string
+          occupied_starts_at: string
+          price: number
+          resource_id: string
+          resource_name_snapshot: string
+          service_id: string
+          service_name_snapshot: string
+          source: string
+          starts_at: string
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "appointments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       is_tenant_slug_available: {
         Args: { candidate_slug: string }

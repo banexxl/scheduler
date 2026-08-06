@@ -71,6 +71,8 @@ import {
   type ResourceWorkingHourRow,
   type ResourceTimeOffRow,
 } from "./availability-queries";
+import { loadBlockingAppointments } from "@/features/appointments/services/appointment-queries";
+import type { BlockingAppointmentInterval } from "@/features/appointments/types/appointment";
 
 // ─── Public API ──────────────────────────────────────────────────────────────
 
@@ -193,6 +195,14 @@ export async function calculateAvailability(
     loadResourceTimeOff(tenantId, eligibleResourceIds, dayStartInstant, dayEndInstant),
   ]);
 
+  // ─── Step 9b: Load blocking appointments in bulk ───────────────────────────
+  const allBlockingAppointments = await loadBlockingAppointments(
+    tenantId,
+    eligibleResourceIds,
+    dayStartInstant,
+    dayEndInstant
+  );
+
   // ─── Step 10: Calculate per resource ────────────────────────────────────────
   const isoWeekday = getIsoDayOfWeek(toZonedTime(dayStartDate, timeZone));
 
@@ -207,6 +217,7 @@ export async function calculateAvailability(
       locationPeriodsSource: locationPeriods.source,
       allWorkingHours,
       allTimeOff,
+      allBlockingAppointments,
       isoWeekday,
       localDate,
       locationId,
@@ -261,6 +272,8 @@ export async function calculateAvailability(
       topReasonCode = "SAME_DAY_BOOKING_DISABLED";
     } else if (totalRemovedCounts.minimumNotice > 0 && totalRemoved > 0) {
       topReasonCode = "MINIMUM_NOTICE_NOT_MET";
+    } else if (resourceResults.every((r) => r.reasonCode === "FULLY_BLOCKED_BY_APPOINTMENTS")) {
+      topReasonCode = "FULLY_BLOCKED_BY_APPOINTMENTS";
     } else {
       topReasonCode = "NO_SLOTS";
     }
@@ -400,6 +413,7 @@ type ResourceCalcInput = {
   locationPeriodsSource: "weekly" | "custom_exception";
   allWorkingHours: ResourceWorkingHourRow[];
   allTimeOff: ResourceTimeOffRow[];
+  allBlockingAppointments: BlockingAppointmentInterval[];
   isoWeekday: number;
   localDate: string;
   locationId: string;
@@ -419,6 +433,7 @@ function calculateForResource(input: ResourceCalcInput): ResourceAvailabilityRes
     locationPeriodsSource,
     allWorkingHours,
     allTimeOff,
+    allBlockingAppointments,
     isoWeekday,
     localDate,
     locationId,
@@ -481,6 +496,21 @@ function calculateForResource(input: ResourceCalcInput): ResourceAvailabilityRes
     };
   }
 
+  // ─── Subtract blocking appointments (Milestone 6.9) ────────────────────────
+  const appointmentBlocks = getResourceAppointmentBlocks(resource.id, allBlockingAppointments);
+  const rangesAfterAppointments = appointmentBlocks.length > 0
+    ? subtractInstantRanges(rangesAfterTimeOff, appointmentBlocks)
+    : rangesAfterTimeOff;
+
+  if (rangesAfterAppointments.length === 0) {
+    return {
+      resourceId: resource.id,
+      resourceName: resource.name,
+      slots: [],
+      reasonCode: "FULLY_BLOCKED_BY_APPOINTMENTS",
+    };
+  }
+
   // ─── Resolve service values ────────────────────────────────────────────────
   const resolved = resolveServiceResourceValues(
     {
@@ -521,7 +551,7 @@ function calculateForResource(input: ResourceCalcInput): ResourceAvailabilityRes
 
   // ─── Generate candidate slots ─────────────────────────────────────────────
   const candidateSlots = generateCandidateSlots({
-    availableRanges: rangesAfterTimeOff,
+    availableRanges: rangesAfterAppointments,
     durationMinutes: resolved.duration,
     bufferBeforeMinutes: resolved.bufferBefore,
     bufferAfterMinutes: resolved.bufferAfter,
@@ -666,6 +696,24 @@ function getResourceTimeOffBlocks(
     .map((to) => ({
       start: to.startsAt,
       end: to.endsAt,
+    }));
+}
+
+// ─── Appointment Block Resolution (Milestone 6.9) ────────────────────────────
+
+/**
+ * Extracts blocking appointment intervals for a specific resource.
+ * All non-cancelled appointments occupy their full occupied window.
+ */
+function getResourceAppointmentBlocks(
+  resourceId: string,
+  allBlockingAppointments: BlockingAppointmentInterval[]
+): InstantRange[] {
+  return allBlockingAppointments
+    .filter((appt) => appt.resourceId === resourceId)
+    .map((appt) => ({
+      start: appt.occupiedStartsAt,
+      end: appt.occupiedEndsAt,
     }));
 }
 

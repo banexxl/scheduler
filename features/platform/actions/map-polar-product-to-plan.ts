@@ -22,6 +22,23 @@ export async function mapPolarProductToPlanAction(
      const normalizedProductId = polarProductId?.trim() || null;
 
      const adminClient = createAdminClient();
+     const { data: plan, error: planError } = await adminClient
+          .from("billing_plans" as never)
+          .select("id, is_free")
+          .eq("id" as never, planId)
+          .maybeSingle();
+
+     if (planError || !plan) {
+          return { success: false, message: "Billing plan was not found." };
+     }
+
+     if ((plan as { is_free: boolean }).is_free && normalizedProductId) {
+          return {
+               success: false,
+               message: "Free plans cannot be mapped to Polar products.",
+          };
+     }
+
      const { error } = await adminClient
           .from("billing_plans" as never)
           .update(

@@ -15,14 +15,20 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import {
-     listBillingPlansWithPrices,
+     getPlatformBillingDashboardMetrics,
+     discoverPolarProductsForMapping,
+     listBillingWebhookDiagnostics,
      listRecentBillingSyncRuns,
-     listRecentBillingWebhookEvents,
-     getBillingDiagnosticsSummary,
-} from "@/features/platform/services/billing-catalog-queries";
-import { refreshPolarProductsAction } from "@/features/platform/actions/refresh-polar-products";
+} from "@/features/platform/services/platform-billing-admin-queries";
+import { listBillingPlansWithPrices } from "@/features/platform/services/billing-catalog-queries";
 import { mapPolarProductToPlanAction } from "@/features/platform/actions/map-polar-product-to-plan";
+import {
+     refreshAllMappedProductsAction,
+     refreshSinglePolarProductAction,
+} from "@/features/platform/actions/billing-plan-admin-actions";
 import { requirePlatformAdmin } from "@/lib/platform/require-platform-admin";
+import { getBillingDiagnosticsConfig } from "@/features/platform/services/polar-config";
+import { formatMinorCurrency } from "@/lib/helpers/format-minor-currency";
 
 async function mapAction(formData: FormData) {
      "use server";
@@ -34,21 +40,28 @@ async function mapAction(formData: FormData) {
      await mapPolarProductToPlanAction(planId, polarProductId);
 }
 
-async function refreshAction() {
+async function refreshAllAction() {
      "use server";
-     await refreshPolarProductsAction();
+     await refreshAllMappedProductsAction();
+}
+
+async function refreshSingleAction(formData: FormData) {
+     "use server";
+     await refreshSinglePolarProductAction(String(formData.get("polarProductId") ?? ""));
 }
 
 export default async function PlatformBillingProductsPage() {
      await requirePlatformAdmin();
 
-     const [plans, recentEvents, recentRuns] = await Promise.all([
+     const [plans, recentEvents, recentRuns, discovered, metrics] = await Promise.all([
           listBillingPlansWithPrices(),
-          listRecentBillingWebhookEvents(20),
+          listBillingWebhookDiagnostics(20),
           listRecentBillingSyncRuns(10),
+          discoverPolarProductsForMapping(),
+          getPlatformBillingDashboardMetrics(),
      ]);
 
-     const diagnostics = getBillingDiagnosticsSummary();
+     const diagnostics = getBillingDiagnosticsConfig();
 
      return (
           <Stack spacing={3}>
@@ -66,9 +79,9 @@ export default async function PlatformBillingProductsPage() {
                               Sync Polar products and map them to local plan keys.
                          </Typography>
                     </Box>
-                    <form action={refreshAction}>
+                    <form action={refreshAllAction}>
                          <Button type="submit" variant="contained">
-                              Refresh Polar Products
+                              Refresh All Mapped Products
                          </Button>
                     </form>
                </Stack>
@@ -76,6 +89,18 @@ export default async function PlatformBillingProductsPage() {
                <Alert severity={diagnostics.hasAccessToken ? "success" : "warning"}>
                     Polar API: {diagnostics.apiBaseUrl} | Access token: {diagnostics.hasAccessToken ? "configured" : "missing"} | Webhook secret: {diagnostics.hasWebhookSecret ? "configured" : "missing"}
                </Alert>
+
+               <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Stack spacing={1}>
+                         <Typography variant="h6">Discovery Snapshot</Typography>
+                         <Typography variant="body2" color="text.secondary">
+                              Discovered products: {discovered.products.length} | mapped: {discovered.mappedCount} | unmapped: {discovered.unmappedCount}
+                         </Typography>
+                         <Typography variant="body2" color="text.secondary">
+                              Pending webhook events: {metrics.pendingWebhookEvents} | failed webhook events: {metrics.failedWebhookEvents}
+                         </Typography>
+                    </Stack>
+               </Paper>
 
                <Paper variant="outlined" sx={{ p: 2 }}>
                     <Typography variant="h6" gutterBottom>
@@ -116,6 +141,15 @@ export default async function PlatformBillingProductsPage() {
                                              </Stack>
                                         </form>
 
+                                        {plan.polar_product_id ? (
+                                             <form action={refreshSingleAction}>
+                                                  <input type="hidden" name="polarProductId" value={plan.polar_product_id} />
+                                                  <Button type="submit" variant="text" size="small">
+                                                       Refresh This Product
+                                                  </Button>
+                                             </form>
+                                        ) : null}
+
                                         <Divider />
 
                                         <TableContainer>
@@ -145,9 +179,7 @@ export default async function PlatformBillingProductsPage() {
                                                                                 : ""}
                                                                       </TableCell>
                                                                       <TableCell>
-                                                                           {price.amount !== null && price.currency
-                                                                                ? `${(price.amount / 100).toFixed(2)} ${price.currency}`
-                                                                                : "-"}
+                                                                           {formatMinorCurrency(price.amount, price.currency)}
                                                                       </TableCell>
                                                                       <TableCell>
                                                                            {price.is_checkout_eligible ? "eligible" : "not eligible"}
@@ -166,6 +198,38 @@ export default async function PlatformBillingProductsPage() {
                                    </Stack>
                               </Paper>
                          ))}
+                    </Stack>
+               </Paper>
+
+               <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Typography variant="h6" gutterBottom>
+                         Unmapped Polar Products
+                    </Typography>
+                    <Stack spacing={2}>
+                         {discovered.products.filter((row) => !row.isMapped).length === 0 ? (
+                              <Typography variant="body2" color="text.secondary">
+                                   No unmapped products found.
+                              </Typography>
+                         ) : (
+                              discovered.products
+                                   .filter((row) => !row.isMapped)
+                                   .map((product) => (
+                                        <Paper key={product.id} variant="outlined" sx={{ p: 2 }}>
+                                             <Stack spacing={1}>
+                                                  <Stack direction="row" spacing={1} alignItems="center">
+                                                       <Typography fontWeight={600}>{product.name}</Typography>
+                                                       <Chip label={product.id} size="small" />
+                                                  </Stack>
+                                                  <Typography variant="body2" color="text.secondary">
+                                                       {product.description ?? "No description"}
+                                                  </Typography>
+                                                  <Typography variant="caption" color="text.secondary">
+                                                       {product.prices.length} discovered prices
+                                                  </Typography>
+                                             </Stack>
+                                        </Paper>
+                                   ))
+                         )}
                     </Stack>
                </Paper>
 

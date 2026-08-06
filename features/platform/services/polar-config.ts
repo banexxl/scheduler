@@ -30,16 +30,36 @@ function getRequiredEnv(name: string): string {
      return value;
 }
 
+function getFirstNonEmptyEnv(names: string[]): string | null {
+     for (const name of names) {
+          const value = process.env[name]?.trim();
+          if (value) return value;
+     }
+     return null;
+}
+
 export function getPolarEnvironment(): PolarEnvironment {
+     const processorSecret =
+          getFirstNonEmptyEnv([
+               "POLAR_WEBHOOK_PROCESSOR_SECRET",
+               "BILLING_PROCESSOR_SECRET",
+          ]) ?? getRequiredEnv("POLAR_WEBHOOK_PROCESSOR_SECRET");
+
+     const syncSecret =
+          getFirstNonEmptyEnv([
+               "POLAR_RECONCILIATION_SECRET",
+               "BILLING_SYNC_SECRET",
+               "POLAR_WEBHOOK_PROCESSOR_SECRET",
+               "BILLING_PROCESSOR_SECRET",
+          ]) ?? getRequiredEnv("POLAR_RECONCILIATION_SECRET");
+
      return {
           apiBaseUrl: normalizeBaseUrl(process.env.POLAR_API_BASE_URL),
           accessToken: getRequiredEnv("POLAR_ACCESS_TOKEN"),
           organizationId: process.env.POLAR_ORGANIZATION_ID?.trim() || null,
           webhookSecret: getRequiredEnv("POLAR_WEBHOOK_SECRET"),
-          processorSecret: getRequiredEnv("BILLING_PROCESSOR_SECRET"),
-          syncSecret:
-               process.env.BILLING_SYNC_SECRET?.trim() ||
-               getRequiredEnv("BILLING_PROCESSOR_SECRET"),
+          processorSecret,
+          syncSecret,
      };
 }
 
@@ -53,15 +73,23 @@ export function getBillingSyncSecret(): string {
 
 export function getBillingDiagnosticsConfig() {
      const baseUrl = normalizeBaseUrl(process.env.POLAR_API_BASE_URL);
+     const processorSecret = getFirstNonEmptyEnv([
+          "POLAR_WEBHOOK_PROCESSOR_SECRET",
+          "BILLING_PROCESSOR_SECRET",
+     ]);
+     const syncSecret = getFirstNonEmptyEnv([
+          "POLAR_RECONCILIATION_SECRET",
+          "BILLING_SYNC_SECRET",
+          "POLAR_WEBHOOK_PROCESSOR_SECRET",
+          "BILLING_PROCESSOR_SECRET",
+     ]);
+
      return {
           apiBaseUrl: baseUrl,
           hasAccessToken: Boolean(process.env.POLAR_ACCESS_TOKEN?.trim()),
           hasOrganizationId: Boolean(process.env.POLAR_ORGANIZATION_ID?.trim()),
           hasWebhookSecret: Boolean(process.env.POLAR_WEBHOOK_SECRET?.trim()),
-          hasProcessorSecret: Boolean(process.env.BILLING_PROCESSOR_SECRET?.trim()),
-          hasSyncSecret: Boolean(
-               process.env.BILLING_SYNC_SECRET?.trim() ||
-               process.env.BILLING_PROCESSOR_SECRET?.trim()
-          ),
+          hasProcessorSecret: Boolean(processorSecret),
+          hasSyncSecret: Boolean(syncSecret),
      };
 }

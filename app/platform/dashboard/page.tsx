@@ -1,11 +1,5 @@
-import PlaceholderPage from "@/components/common/PlaceholderPage";
+import { redirect } from "next/navigation";
 
 export default function PlatformDashboardPage() {
-  return (
-    <PlaceholderPage
-      title="Platform Dashboard"
-      area="Platform Admin"
-      route="/platform/dashboard"
-    />
-  );
+  redirect("/platform");
 }

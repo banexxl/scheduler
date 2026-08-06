@@ -532,6 +532,50 @@ Implemented the billing catalog and webhook ingestion foundation for Polar integ
 
 See `docs/40-polar-foundation-products-prices.md` for full details.
 
+### Milestone 7.2 - Platform Admin Billing Catalog, Polar Checkout, and Billing Customers
+
+Implemented the first functional billing-admin and tenant checkout foundation on top of Milestone 7.1.
+
+**Implemented:**
+- Migration `20250805000021_polar_checkout_customers.sql`
+- `tenant_billing_customers` table with trusted `external_id` strategy (`tenant:{tenantId}`)
+- `billing_checkout_sessions` table with idempotent `UNIQUE (tenant_id, request_key)`
+- Checkout consistency trigger for:
+	- plan-price relationship
+	- price-product relationship
+	- owner/admin requester membership
+	- callback URL shape and external customer id format
+- RLS policies for tenant owner/admin read access and no direct client writes
+- Platform admin shell components and billing navigation
+- Platform billing routes:
+	- `/platform/billing`
+	- `/platform/billing/plans`
+	- `/platform/billing/products`
+	- `/platform/billing/webhooks`
+- Plan admin actions:
+	- create/update/toggle active/toggle public/reorder
+	- webhook retry (failed-only)
+	- product sync controls (single/all)
+- Polar product discovery projection for mapping diagnostics
+- Tenant billing routes:
+	- `/{tenantSlug}/settings/billing`
+	- `/{tenantSlug}/settings/billing/plans`
+	- `/{tenantSlug}/settings/billing/return`
+- Hosted checkout creation service + tenant action
+- Customer portal session creation service + tenant action
+- Webhook processor extensions:
+	- checkout events (`checkout.created`, `checkout.updated`, `checkout.expired`)
+	- customer events (`customer.created`, `customer.updated`, `customer.deleted`, `customer.state_changed`)
+
+**Deliberately not implemented:**
+- Subscription activation/entitlements
+- Subscription lifecycle projection
+- Orders/payment history/refunds
+- Usage and plan-limit enforcement
+- Appointment payment handling
+
+See `docs/41-platform-admin-polar-checkout-customers.md` for full details.
+
 ## Planned
 
 - Foundation

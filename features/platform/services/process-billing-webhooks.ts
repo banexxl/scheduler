@@ -9,9 +9,12 @@ import {
 } from "./billing-webhook-events";
 import {
      normalizeWebhookEventType,
+     extractWebhookEventTimestamp,
      type UnknownRecord,
 } from "./polar-normalize";
 import { syncPolarProduct } from "./sync-polar-product";
+import { syncPolarCheckout } from "./sync-polar-checkout";
+import { syncPolarCustomer } from "./sync-polar-customer";
 import type { ProcessWebhookResult } from "../types/billing";
 
 const DEFAULT_BATCH_SIZE = 10;
@@ -63,6 +66,8 @@ async function processProductEvent(payload: UnknownRecord) {
 }
 
 async function dispatchWebhookEvent(eventType: string, payload: UnknownRecord) {
+     const eventTimestamp = extractWebhookEventTimestamp(payload);
+
      switch (eventType) {
           case "product.created":
           case "product.updated":
@@ -70,6 +75,38 @@ async function dispatchWebhookEvent(eventType: string, payload: UnknownRecord) {
           case "products.updated":
                await processProductEvent(payload);
                return "processed" as const;
+          case "checkout.created":
+          case "checkout.updated":
+          case "checkout.expired": {
+               const result = await syncPolarCheckout(payload, eventTimestamp);
+
+               if (result.status === "unresolved" || result.status === "mismatch") {
+                    throw new BillingProcessingError(
+                         "checkout_resolution_failed",
+                         result.reason ?? "Unable to resolve checkout event",
+                         false
+                    );
+               }
+
+               return "processed" as const;
+          }
+          case "customer.created":
+          case "customer.updated":
+          case "customer.deleted":
+          case "customer.state.changed":
+          case "customer.state_changed": {
+               const result = await syncPolarCustomer(payload, eventTimestamp);
+
+               if (result.status === "unresolved") {
+                    throw new BillingProcessingError(
+                         "customer_resolution_failed",
+                         result.reason ?? "Unable to resolve customer event",
+                         false
+                    );
+               }
+
+               return "processed" as const;
+          }
           default:
                return "ignored" as const;
      }

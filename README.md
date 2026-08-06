@@ -67,9 +67,12 @@ Copy `.env.example` to `.env.local`:
 | `POLAR_API_BASE_URL` | Optional | Polar API host (default: `https://api.polar.sh`) |
 | `POLAR_ACCESS_TOKEN` | Billing sync/webhooks | Polar server-side API token |
 | `POLAR_ORGANIZATION_ID` | Optional | Polar organization context for diagnostics/future filtering |
+| `POLAR_SERVER` | Optional | Polar mode marker (`sandbox` or production-like label) |
 | `POLAR_WEBHOOK_SECRET` | Billing webhooks | Signature verification secret for `/api/webhooks/polar` |
-| `BILLING_PROCESSOR_SECRET` | Internal billing routes | Bearer secret for `/api/internal/billing/process-webhooks` |
-| `BILLING_SYNC_SECRET` | Optional | Bearer secret for sync/reconciliation routes (fallback: `BILLING_PROCESSOR_SECRET`) |
+| `POLAR_WEBHOOK_PROCESSOR_SECRET` | Internal billing routes | Bearer secret for `/api/internal/billing/process-webhooks` |
+| `POLAR_RECONCILIATION_SECRET` | Optional | Bearer secret for sync/reconciliation routes (fallback: `POLAR_WEBHOOK_PROCESSOR_SECRET`) |
+| `BILLING_PROCESSOR_SECRET` | Optional legacy alias | Backward-compatible alias for `POLAR_WEBHOOK_PROCESSOR_SECRET` |
+| `BILLING_SYNC_SECRET` | Optional legacy alias | Backward-compatible alias for `POLAR_RECONCILIATION_SECRET` |
 
 ## Database Types
 

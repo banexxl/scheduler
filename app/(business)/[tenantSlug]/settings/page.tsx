@@ -2,6 +2,9 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
+import Link from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getBusinessSettings } from "@/features/business/services/get-business-settings";
 import BusinessSettingsForm from "@/features/business/components/business-settings-form";
@@ -43,6 +46,23 @@ export default async function SettingsPage({
           tenantSlug={tenantSlug}
           canEdit={canEdit}
         />
+      </Paper>
+
+      <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 }, mt: 3 }}>
+        <Stack spacing={1.5}>
+          <Typography variant="h6">Billing</Typography>
+          <Typography variant="body2" color="text.secondary">
+            Open billing plans, checkout status, and customer portal controls.
+          </Typography>
+          <Button
+            component={Link}
+            href={`/${tenantSlug}/settings/billing`}
+            variant="outlined"
+            sx={{ width: "fit-content" }}
+          >
+            Open Billing Settings
+          </Button>
+        </Stack>
       </Paper>
     </Box>
   );

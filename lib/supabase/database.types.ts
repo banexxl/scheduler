@@ -554,6 +554,100 @@ export type Database = {
           },
         ]
       }
+      billing_checkout_sessions: {
+        Row: {
+          billing_plan_id: string
+          billing_plan_price_id: string
+          checkout_metadata: Json
+          checkout_url: string | null
+          completed_at: string | null
+          created_at: string
+          expires_at: string | null
+          external_customer_id: string
+          id: string
+          polar_checkout_id: string | null
+          polar_created_at: string | null
+          polar_modified_at: string | null
+          polar_price_id: string
+          polar_product_id: string
+          request_key: string
+          requested_by: string
+          return_url: string
+          status: string
+          success_url: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          billing_plan_id: string
+          billing_plan_price_id: string
+          checkout_metadata?: Json
+          checkout_url?: string | null
+          completed_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          external_customer_id: string
+          id?: string
+          polar_checkout_id?: string | null
+          polar_created_at?: string | null
+          polar_modified_at?: string | null
+          polar_price_id: string
+          polar_product_id: string
+          request_key: string
+          requested_by: string
+          return_url: string
+          status?: string
+          success_url: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          billing_plan_id?: string
+          billing_plan_price_id?: string
+          checkout_metadata?: Json
+          checkout_url?: string | null
+          completed_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          external_customer_id?: string
+          id?: string
+          polar_checkout_id?: string | null
+          polar_created_at?: string | null
+          polar_modified_at?: string | null
+          polar_price_id?: string
+          polar_product_id?: string
+          request_key?: string
+          requested_by?: string
+          return_url?: string
+          status?: string
+          success_url?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_checkout_sessions_billing_plan_id_fkey"
+            columns: ["billing_plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_checkout_sessions_billing_plan_price_id_fkey"
+            columns: ["billing_plan_price_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plan_prices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_checkout_sessions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_plan_prices: {
         Row: {
           amount: number | null
@@ -2227,6 +2321,68 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      tenant_billing_customers: {
+        Row: {
+          created_at: string
+          customer_metadata: Json
+          customer_type: string | null
+          email: string | null
+          external_id: string
+          id: string
+          is_deleted: boolean
+          last_event_at: string | null
+          last_synced_at: string
+          name: string | null
+          polar_created_at: string | null
+          polar_customer_id: string
+          polar_modified_at: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_metadata?: Json
+          customer_type?: string | null
+          email?: string | null
+          external_id: string
+          id?: string
+          is_deleted?: boolean
+          last_event_at?: string | null
+          last_synced_at?: string
+          name?: string | null
+          polar_created_at?: string | null
+          polar_customer_id: string
+          polar_modified_at?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_metadata?: Json
+          customer_type?: string | null
+          email?: string | null
+          external_id?: string
+          id?: string
+          is_deleted?: boolean
+          last_event_at?: string | null
+          last_synced_at?: string
+          name?: string | null
+          polar_created_at?: string | null
+          polar_customer_id?: string
+          polar_modified_at?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_billing_customers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tenant_booking_rules: {
         Row: {

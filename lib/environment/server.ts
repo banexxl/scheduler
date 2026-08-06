@@ -10,6 +10,9 @@ const serverEnvironmentSchema = yup.object({
   polarWebhookSecret: yup.string().optional().default(""),
   billingProcessorSecret: yup.string().optional().default(""),
   billingSyncSecret: yup.string().optional().default(""),
+  polarServer: yup.string().optional().default("sandbox"),
+  polarWebhookProcessorSecret: yup.string().optional().default(""),
+  polarReconciliationSecret: yup.string().optional().default(""),
 });
 
 export type ServerEnvironment = yup.InferType<typeof serverEnvironmentSchema>;
@@ -25,6 +28,9 @@ function validateServerEnvironment(): ServerEnvironment {
       polarWebhookSecret: process.env.POLAR_WEBHOOK_SECRET,
       billingProcessorSecret: process.env.BILLING_PROCESSOR_SECRET,
       billingSyncSecret: process.env.BILLING_SYNC_SECRET,
+      polarServer: process.env.POLAR_SERVER,
+      polarWebhookProcessorSecret: process.env.POLAR_WEBHOOK_PROCESSOR_SECRET,
+      polarReconciliationSecret: process.env.POLAR_RECONCILIATION_SECRET,
     });
   } catch (error) {
     if (error instanceof yup.ValidationError) {

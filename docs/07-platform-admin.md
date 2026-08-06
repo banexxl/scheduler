@@ -38,9 +38,12 @@ The shell displays:
 |-------|---------|
 | `/platform` | Platform home |
 | `/platform/dashboard` | Admin dashboard |
+| `/platform/billing` | Billing administration home |
+| `/platform/billing/plans` | Billing plan administration |
+| `/platform/billing/products` | Polar product and price diagnostics |
+| `/platform/billing/webhooks` | Webhook diagnostics and retry |
 | `/platform/tenants` | Tenant management |
 | `/platform/tenants/[id]` | Tenant detail |
 | `/platform/subscriptions` | Subscription management |
-| `/platform/billing/products` | Polar product and price diagnostics |
 | `/platform/users` | User management |
 | `/platform/audit-logs` | Audit trail |

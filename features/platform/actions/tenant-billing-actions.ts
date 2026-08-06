@@ -9,8 +9,13 @@ import { createPolarCustomerPortalSessionForTenant } from "../services/create-po
 import {
      checkoutCreationSchema,
      customerPortalSessionSchema,
+     tenantSubscriptionRefreshSchema,
 } from "../schemas/tenant-billing-schema";
-import { getCheckoutSessionForReturn } from "../services/tenant-billing-queries";
+import {
+     getCheckoutSessionForReturn,
+     getTenantBillingCustomer,
+} from "../services/tenant-billing-queries";
+import { reconcileSubscriptionsForPolarCustomer } from "../services/reconcile-polar-subscriptions";
 
 type TenantBillingActionResult<T = undefined> = {
      success: boolean;
@@ -25,6 +30,11 @@ const CHECKOUT_RATE_LIMIT = {
 
 const PORTAL_RATE_LIMIT = {
      maxRequests: 10,
+     windowMs: 10 * 60 * 1000,
+};
+
+const SUBSCRIPTION_REFRESH_RATE_LIMIT = {
+     maxRequests: 8,
      windowMs: 10 * 60 * 1000,
 };
 
@@ -174,4 +184,67 @@ export async function refreshCheckoutStatusAction(
                status: session ? String(session.status ?? null) : null,
           },
      };
+}
+
+export async function refreshTenantSubscriptionAction(
+     tenantSlug: string,
+     input: { intent: "refresh" }
+): Promise<TenantBillingActionResult<Record<string, number>>> {
+     const { tenant, user } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
+
+     const allowed = await enforceTenantRateLimit({
+          tenantId: tenant.id,
+          userId: user.id,
+          action: "subscription-refresh",
+          config: SUBSCRIPTION_REFRESH_RATE_LIMIT,
+     });
+
+     if (!allowed) {
+          return {
+               success: false,
+               message: "Too many refresh attempts. Please wait and try again.",
+          };
+     }
+
+     try {
+          await tenantSubscriptionRefreshSchema.validate(input, {
+               abortEarly: false,
+               stripUnknown: true,
+          });
+
+          const billingCustomer = await getTenantBillingCustomer(tenant.id);
+          const polarCustomerId =
+               typeof billingCustomer?.polar_customer_id === "string"
+                    ? String(billingCustomer.polar_customer_id)
+                    : null;
+
+          if (!polarCustomerId) {
+               return {
+                    success: false,
+                    message: "Billing customer has not been synchronized yet.",
+               };
+          }
+
+          const counters = await reconcileSubscriptionsForPolarCustomer({
+               polarCustomerId,
+               source: "manual_refresh",
+               limit: 100,
+          });
+
+          revalidateTenantBillingRoutes(tenant.slug);
+
+          return {
+               success: true,
+               message: "Subscription refresh completed.",
+               data: counters,
+          };
+     } catch (error) {
+          return {
+               success: false,
+               message:
+                    error instanceof Error
+                         ? error.message
+                         : "Unable to refresh tenant subscription.",
+          };
+     }
 }

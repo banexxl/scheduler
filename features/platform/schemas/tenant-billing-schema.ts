@@ -13,3 +13,7 @@ export const checkoutReturnQuerySchema = yup.object({
 export const customerPortalSessionSchema = yup.object({
      intent: yup.string().oneOf(["open"]).required(),
 });
+
+export const tenantSubscriptionRefreshSchema = yup.object({
+     intent: yup.string().oneOf(["refresh"]).required(),
+});

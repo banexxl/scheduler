@@ -93,16 +93,86 @@ export async function listCheckoutEligiblePlansForTenant() {
 }
 
 export async function getTenantBillingOverview(tenantId: string) {
-     const [billingCustomer, checkoutSessions] = await Promise.all([
+     const [billingCustomer, checkoutSessions, currentSubscription] = await Promise.all([
           getTenantBillingCustomer(tenantId),
           listRecentTenantCheckoutSessions(tenantId, 10),
+          getCurrentTenantSubscription(tenantId),
      ]);
 
      return {
           hasBillingCustomer: Boolean(billingCustomer),
           billingCustomer,
           checkoutSessions,
+          currentSubscription,
+          hasSubscription: Boolean(currentSubscription),
      };
+}
+
+export async function getCurrentTenantSubscription(tenantId: string) {
+     const adminClient = createAdminClient();
+
+     const { data, error } = await adminClient
+          .from("tenant_subscriptions" as never)
+          .select(
+               "*, billing_plans(name,plan_key), billing_plan_prices(billing_interval,billing_interval_count,amount,currency)"
+          )
+          .eq("tenant_id" as never, tenantId)
+          .order("current_period_end" as never, { ascending: false, nullsFirst: false })
+          .order("updated_at" as never, { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+     if (error) {
+          throw new Error(`[tenant-billing] Failed to load subscription: ${error.message}`);
+     }
+
+     return (data as Record<string, unknown> | null) ?? null;
+}
+
+export async function listTenantSubscriptionHistory(tenantId: string, limit = 20) {
+     const adminClient = createAdminClient();
+     const safeLimit = Math.min(Math.max(limit, 1), 100);
+
+     const { data, error } = await adminClient
+          .from("billing_subscription_state_history" as never)
+          .select("*")
+          .eq("tenant_id" as never, tenantId)
+          .order("effective_at" as never, { ascending: false })
+          .limit(safeLimit);
+
+     if (error) {
+          throw new Error(`[tenant-billing] Failed to load subscription history: ${error.message}`);
+     }
+
+     return (data as Array<Record<string, unknown>> | null) ?? [];
+}
+
+export async function isTenantSubscriptionSyncPending(tenantId: string): Promise<boolean> {
+     const current = await getCurrentTenantSubscription(tenantId);
+     if (!current) return true;
+
+     const accessState = String(current.access_state ?? "");
+     const syncStatus = String(current.sync_status ?? "");
+     if (!accessState) return true;
+     return syncStatus !== "synced";
+}
+
+export async function getSubscriptionByPolarId(
+     polarSubscriptionId: string
+): Promise<Record<string, unknown> | null> {
+     const adminClient = createAdminClient();
+
+     const { data, error } = await adminClient
+          .from("tenant_subscriptions" as never)
+          .select("*")
+          .eq("polar_subscription_id" as never, polarSubscriptionId)
+          .maybeSingle();
+
+     if (error) {
+          throw new Error(`[tenant-billing] Failed to load subscription by polar id: ${error.message}`);
+     }
+
+     return (data as Record<string, unknown> | null) ?? null;
 }
 
 export async function getCheckoutSessionForReturn(params: {

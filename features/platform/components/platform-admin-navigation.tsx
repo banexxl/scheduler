@@ -12,6 +12,7 @@ const NAV_ITEMS: NavItem[] = [
      { href: "/platform/billing", label: "Billing" },
      { href: "/platform/billing/plans", label: "Billing Plans" },
      { href: "/platform/billing/products", label: "Polar Products" },
+     { href: "/platform/billing/subscriptions", label: "Subscriptions" },
      { href: "/platform/billing/webhooks", label: "Webhooks" },
      { href: "/platform/tenants", label: "Tenants" },
 ];

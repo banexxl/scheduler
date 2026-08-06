@@ -24,6 +24,12 @@ const BILLING_AREAS = [
                "Review billing webhook processing state and retry failed events.",
           href: "/platform/billing/webhooks",
      },
+     {
+          title: "Subscriptions",
+          description:
+               "Inspect synchronized subscription lifecycle state for all tenants.",
+          href: "/platform/billing/subscriptions",
+     },
 ];
 
 export default async function PlatformBillingHomePage() {

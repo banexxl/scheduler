@@ -15,6 +15,13 @@ import {
 import { syncPolarProduct } from "./sync-polar-product";
 import { syncPolarCheckout } from "./sync-polar-checkout";
 import { syncPolarCustomer } from "./sync-polar-customer";
+import { handleSubscriptionCreated } from "./handle-subscription-created";
+import { handleSubscriptionUpdated } from "./handle-subscription-updated";
+import { handleSubscriptionActive } from "./handle-subscription-active";
+import { handleSubscriptionCanceled } from "./handle-subscription-canceled";
+import { handleSubscriptionUncanceled } from "./handle-subscription-uncanceled";
+import { handleSubscriptionPastDue } from "./handle-subscription-past-due";
+import { handleSubscriptionRevoked } from "./handle-subscription-revoked";
 import type { ProcessWebhookResult } from "../types/billing";
 
 const DEFAULT_BATCH_SIZE = 10;
@@ -65,7 +72,11 @@ async function processProductEvent(payload: UnknownRecord) {
      }
 }
 
-async function dispatchWebhookEvent(eventType: string, payload: UnknownRecord) {
+async function dispatchWebhookEvent(
+     eventType: string,
+     payload: UnknownRecord,
+     eventId: string
+) {
      const eventTimestamp = extractWebhookEventTimestamp(payload);
 
      switch (eventType) {
@@ -107,6 +118,83 @@ async function dispatchWebhookEvent(eventType: string, payload: UnknownRecord) {
 
                return "processed" as const;
           }
+          case "subscription.created": {
+               const result = await handleSubscriptionCreated(payload, eventTimestamp, eventId);
+               if (result.status === "unresolved_customer" || result.status === "conflict") {
+                    throw new BillingProcessingError(
+                         "subscription_resolution_failed",
+                         result.reason ?? "Unable to resolve subscription tenant/customer",
+                         false
+                    );
+               }
+               return "processed" as const;
+          }
+          case "subscription.updated": {
+               const result = await handleSubscriptionUpdated(payload, eventTimestamp, eventId);
+               if (result.status === "unresolved_customer" || result.status === "conflict") {
+                    throw new BillingProcessingError(
+                         "subscription_resolution_failed",
+                         result.reason ?? "Unable to resolve subscription tenant/customer",
+                         false
+                    );
+               }
+               return "processed" as const;
+          }
+          case "subscription.active": {
+               const result = await handleSubscriptionActive(payload, eventTimestamp, eventId);
+               if (result.status === "unresolved_customer" || result.status === "conflict") {
+                    throw new BillingProcessingError(
+                         "subscription_resolution_failed",
+                         result.reason ?? "Unable to resolve subscription tenant/customer",
+                         false
+                    );
+               }
+               return "processed" as const;
+          }
+          case "subscription.canceled": {
+               const result = await handleSubscriptionCanceled(payload, eventTimestamp, eventId);
+               if (result.status === "unresolved_customer" || result.status === "conflict") {
+                    throw new BillingProcessingError(
+                         "subscription_resolution_failed",
+                         result.reason ?? "Unable to resolve subscription tenant/customer",
+                         false
+                    );
+               }
+               return "processed" as const;
+          }
+          case "subscription.uncanceled": {
+               const result = await handleSubscriptionUncanceled(payload, eventTimestamp, eventId);
+               if (result.status === "unresolved_customer" || result.status === "conflict") {
+                    throw new BillingProcessingError(
+                         "subscription_resolution_failed",
+                         result.reason ?? "Unable to resolve subscription tenant/customer",
+                         false
+                    );
+               }
+               return "processed" as const;
+          }
+          case "subscription.past_due": {
+               const result = await handleSubscriptionPastDue(payload, eventTimestamp, eventId);
+               if (result.status === "unresolved_customer" || result.status === "conflict") {
+                    throw new BillingProcessingError(
+                         "subscription_resolution_failed",
+                         result.reason ?? "Unable to resolve subscription tenant/customer",
+                         false
+                    );
+               }
+               return "processed" as const;
+          }
+          case "subscription.revoked": {
+               const result = await handleSubscriptionRevoked(payload, eventTimestamp, eventId);
+               if (result.status === "unresolved_customer" || result.status === "conflict") {
+                    throw new BillingProcessingError(
+                         "subscription_resolution_failed",
+                         result.reason ?? "Unable to resolve subscription tenant/customer",
+                         false
+                    );
+               }
+               return "processed" as const;
+          }
           default:
                return "ignored" as const;
      }
@@ -115,6 +203,7 @@ async function dispatchWebhookEvent(eventType: string, payload: UnknownRecord) {
 function mapWebhookRow(row: Record<string, unknown>) {
      return {
           id: String(row.id ?? ""),
+          polarEventId: String(row.polar_event_id ?? ""),
           eventType: String(row.event_type ?? "unknown"),
           attemptCount: Number(row.attempt_count ?? 0),
           payload: asRecord(row.payload),
@@ -148,7 +237,8 @@ export async function processBillingWebhookBatch(batchSize = DEFAULT_BATCH_SIZE)
           try {
                const outcome = await dispatchWebhookEvent(
                     toEventType(event.eventType),
-                    event.payload
+                    event.payload,
+                    event.polarEventId || event.id
                );
 
                if (outcome === "ignored") {

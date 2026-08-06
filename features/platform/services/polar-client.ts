@@ -77,6 +77,16 @@ function extractList<T>(payload: PolarListResponse<T> | T[]): T[] {
      return payload.items ?? payload.result ?? payload.data ?? [];
 }
 
+function createQueryString(params: Record<string, string | number | null | undefined>) {
+     const query = new URLSearchParams();
+     for (const [key, value] of Object.entries(params)) {
+          if (value === null || value === undefined) continue;
+          query.set(key, String(value));
+     }
+     const result = query.toString();
+     return result ? `?${result}` : "";
+}
+
 export async function listPolarProducts(): Promise<NormalizedPolarProduct[]> {
      const payload = await polarFetch<PolarListResponse<UnknownRecord>>(
           "/v1/products"
@@ -176,4 +186,71 @@ export async function createPolarCustomerPortalSession(input: {
      }
 
      return { portalUrl };
+}
+
+export async function getPolarSubscription(subscriptionId: string): Promise<UnknownRecord> {
+     const payload = await polarFetch<unknown>(`/v1/subscriptions/${subscriptionId}`);
+     const subscription = extractObject(extractFirst<UnknownRecord>(payload));
+
+     if (!subscription.id || typeof subscription.id !== "string") {
+          throw new Error("[polar-client] Subscription response missing id");
+     }
+
+     return subscription;
+}
+
+export async function listPolarSubscriptions(input?: {
+     customerId?: string | null;
+     status?: string | null;
+     limit?: number;
+     cursor?: string | null;
+}): Promise<UnknownRecord[]> {
+     const query = createQueryString({
+          customer_id: input?.customerId ?? null,
+          status: input?.status ?? null,
+          limit: input?.limit ?? null,
+          cursor: input?.cursor ?? null,
+     });
+
+     const payload = await polarFetch<PolarListResponse<UnknownRecord>>(`/v1/subscriptions${query}`);
+     return extractList(payload).map((row) => extractObject(row));
+}
+
+export async function listPolarCustomerSubscriptions(input: {
+     polarCustomerId: string;
+     limit?: number;
+     cursor?: string | null;
+}): Promise<UnknownRecord[]> {
+     return listPolarSubscriptions({
+          customerId: input.polarCustomerId,
+          limit: input.limit,
+          cursor: input.cursor ?? null,
+     });
+}
+
+export async function getPolarCustomer(polarCustomerId: string): Promise<UnknownRecord> {
+     const payload = await polarFetch<unknown>(`/v1/customers/${polarCustomerId}`);
+     const customer = extractObject(extractFirst<UnknownRecord>(payload));
+
+     if (!customer.id || typeof customer.id !== "string") {
+          throw new Error("[polar-client] Customer response missing id");
+     }
+
+     return customer;
+}
+
+export async function findPolarCustomerByExternalId(
+     externalCustomerId: string
+): Promise<UnknownRecord | null> {
+     const query = createQueryString({ external_id: externalCustomerId, limit: 10 });
+     const payload = await polarFetch<PolarListResponse<UnknownRecord>>(`/v1/customers${query}`);
+     const rows = extractList(payload).map((row) => extractObject(row));
+
+     const match = rows.find(
+          (row) =>
+               typeof row.external_id === "string" &&
+               row.external_id.toLowerCase() === externalCustomerId.toLowerCase()
+     );
+
+     return match ?? null;
 }

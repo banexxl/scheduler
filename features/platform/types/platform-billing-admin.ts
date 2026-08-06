@@ -39,3 +39,39 @@ export type PolarProductDiscoveryResult = {
      mappedCount: number;
      unmappedCount: number;
 };
+
+export type PlatformSubscriptionListItem = {
+     id: string;
+     tenantId: string;
+     tenantName: string | null;
+     tenantSlug: string | null;
+     polarSubscriptionId: string;
+     polarCustomerId: string;
+     polarProductId: string;
+     polarPriceId: string | null;
+     planName: string | null;
+     planKey: string | null;
+     status:
+     | "incomplete"
+     | "incomplete_expired"
+     | "trialing"
+     | "active"
+     | "past_due"
+     | "canceled"
+     | "unpaid"
+     | "unknown";
+     accessState:
+     | "pending"
+     | "trial"
+     | "active"
+     | "grace_period"
+     | "ending"
+     | "revoked";
+     billingInterval: string | null;
+     billingIntervalCount: number | null;
+     currentPeriodEnd: string | null;
+     cancelAtPeriodEnd: boolean;
+     trialEnd: string | null;
+     lastSyncedAt: string;
+     syncStatus: string;
+};

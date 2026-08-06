@@ -51,6 +51,13 @@ const METRIC_LABELS: Array<{ key: keyof Awaited<ReturnType<typeof getPlatformBil
   { key: "archivedPrices", label: "Archived prices" },
   { key: "pendingWebhookEvents", label: "Pending webhook events" },
   { key: "failedWebhookEvents", label: "Failed webhook events" },
+  { key: "trialSubscriptions", label: "Trial subscriptions" },
+  { key: "activeSubscriptions", label: "Active subscriptions" },
+  { key: "pastDueSubscriptions", label: "Past-due subscriptions" },
+  { key: "endingSubscriptions", label: "Ending subscriptions" },
+  { key: "revokedSubscriptions", label: "Revoked subscriptions" },
+  { key: "subscriptionsRequiringMapping", label: "Subscriptions requiring mapping" },
+  { key: "staleSubscriptionSyncs", label: "Stale subscription syncs" },
 ];
 
 export default async function PlatformHomePage() {

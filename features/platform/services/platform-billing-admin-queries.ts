@@ -8,6 +8,7 @@ import {
 import { listPolarProductPrices, listPolarProducts } from "./polar-client";
 import type {
      DiscoveredPolarProduct,
+     PlatformSubscriptionListItem,
      PlatformBillingPlanSummary,
      PolarProductDiscoveryResult,
 } from "../types/platform-billing-admin";
@@ -87,10 +88,11 @@ export async function listPlatformBillingPlanSummaries(): Promise<
 }
 
 export async function getPlatformBillingDashboardMetrics() {
-     const [plans, webhookRows, syncRows] = await Promise.all([
+     const [plans, webhookRows, syncRows, subscriptionCounts] = await Promise.all([
           listPlatformBillingPlanSummaries(),
           listBillingWebhookDiagnostics(100),
           listRecentBillingSyncRuns(1),
+          getPlatformSubscriptionStatusCounts(),
      ]);
 
      const activePlans = plans.filter((plan) => plan.isActive).length;
@@ -116,6 +118,13 @@ export async function getPlatformBillingDashboardMetrics() {
           archivedPrices,
           pendingWebhookEvents,
           failedWebhookEvents,
+          trialSubscriptions: subscriptionCounts.trial,
+          activeSubscriptions: subscriptionCounts.active,
+          pastDueSubscriptions: subscriptionCounts.pastDue,
+          endingSubscriptions: subscriptionCounts.ending,
+          revokedSubscriptions: subscriptionCounts.revoked,
+          subscriptionsRequiringMapping: subscriptionCounts.requiresMapping,
+          staleSubscriptionSyncs: subscriptionCounts.stale,
           lastProductReconciliation:
                syncRows[0]?.started_at && typeof syncRows[0].started_at === "string"
                     ? syncRows[0].started_at
@@ -222,4 +231,201 @@ export async function listRecentBillingSyncRuns(limit = 10) {
      }
 
      return (data as Array<Record<string, unknown>> | null) ?? [];
+}
+
+export async function listPlatformSubscriptions(input?: {
+     polarStatus?: string;
+     accessState?: string;
+     planId?: string;
+     pastDueOnly?: boolean;
+     scheduledCancellationOnly?: boolean;
+     mappingIssueOnly?: boolean;
+     staleOnly?: boolean;
+     limit?: number;
+}): Promise<PlatformSubscriptionListItem[]> {
+     const adminClient = createAdminClient();
+     const limit = Math.min(Math.max(input?.limit ?? 100, 1), 200);
+
+     let query = adminClient
+          .from("tenant_subscriptions" as never)
+          .select(
+               "id,tenant_id,polar_subscription_id,polar_customer_id,polar_product_id,polar_price_id,status,access_state,billing_interval,billing_interval_count,current_period_end,cancel_at_period_end,trial_end,last_synced_at,sync_status,billing_plans(name,plan_key),tenants(name,slug)"
+          )
+          .order("last_synced_at" as never, { ascending: false })
+          .limit(limit);
+
+     if (input?.polarStatus) {
+          query = query.eq("status" as never, input.polarStatus);
+     }
+     if (input?.accessState) {
+          query = query.eq("access_state" as never, input.accessState);
+     }
+     if (input?.planId) {
+          query = query.eq("billing_plan_id" as never, input.planId);
+     }
+     if (input?.pastDueOnly) {
+          query = query.eq("status" as never, "past_due");
+     }
+     if (input?.scheduledCancellationOnly) {
+          query = query.eq("cancel_at_period_end" as never, true);
+     }
+     if (input?.mappingIssueOnly) {
+          query = query.eq("sync_status" as never, "requires_mapping");
+     }
+     if (input?.staleOnly) {
+          query = query.eq("sync_status" as never, "stale_event");
+     }
+
+     const { data, error } = await query;
+     if (error) {
+          throw new Error(`[platform-billing] Unable to load subscriptions: ${error.message}`);
+     }
+
+     return ((data as Array<Record<string, unknown>> | null) ?? []).map((row) => {
+          const tenant = asRecord(row.tenants);
+          const plan = asRecord(row.billing_plans);
+
+          return {
+               id: String(row.id ?? ""),
+               tenantId: String(row.tenant_id ?? ""),
+               tenantName: typeof tenant.name === "string" ? tenant.name : null,
+               tenantSlug: typeof tenant.slug === "string" ? tenant.slug : null,
+               polarSubscriptionId: String(row.polar_subscription_id ?? ""),
+               polarCustomerId: String(row.polar_customer_id ?? ""),
+               polarProductId: String(row.polar_product_id ?? ""),
+               polarPriceId:
+                    typeof row.polar_price_id === "string" ? row.polar_price_id : null,
+               planName: typeof plan.name === "string" ? plan.name : null,
+               planKey: typeof plan.plan_key === "string" ? plan.plan_key : null,
+               status: String(row.status ?? "unknown") as PlatformSubscriptionListItem["status"],
+               accessState: String(row.access_state ?? "revoked") as PlatformSubscriptionListItem["accessState"],
+               billingInterval:
+                    typeof row.billing_interval === "string" ? row.billing_interval : null,
+               billingIntervalCount:
+                    typeof row.billing_interval_count === "number"
+                         ? row.billing_interval_count
+                         : null,
+               currentPeriodEnd:
+                    typeof row.current_period_end === "string" ? row.current_period_end : null,
+               cancelAtPeriodEnd: Boolean(row.cancel_at_period_end),
+               trialEnd: typeof row.trial_end === "string" ? row.trial_end : null,
+               lastSyncedAt: String(row.last_synced_at ?? ""),
+               syncStatus: String(row.sync_status ?? "synced"),
+          };
+     });
+}
+
+export async function getPlatformSubscriptionDetail(subscriptionId: string) {
+     const adminClient = createAdminClient();
+
+     const [subscriptionResult, historyResult, relatedWebhookResult] = await Promise.all([
+          adminClient
+               .from("tenant_subscriptions" as never)
+               .select(
+                    "*, tenants(name,slug), billing_plans(name,plan_key), billing_plan_prices(amount,currency,billing_interval,billing_interval_count), tenant_billing_customers(external_id,email,name)"
+               )
+               .eq("id" as never, subscriptionId)
+               .maybeSingle(),
+          adminClient
+               .from("billing_subscription_state_history" as never)
+               .select("*")
+               .eq("tenant_subscription_id" as never, subscriptionId)
+               .order("effective_at" as never, { ascending: false })
+               .limit(100),
+          adminClient
+               .from("billing_webhook_events" as never)
+               .select("id,polar_event_id,event_type,event_timestamp,status,last_error_code,last_error_message")
+               .eq("resource_id" as never, subscriptionId)
+               .order("event_timestamp" as never, { ascending: false })
+               .limit(50),
+     ]);
+
+     if (subscriptionResult.error) {
+          throw new Error(
+               `[platform-billing] Unable to load subscription detail: ${subscriptionResult.error.message}`
+          );
+     }
+
+     const subscription =
+          (subscriptionResult.data as Record<string, unknown> | null) ?? null;
+
+     let checkoutCorrelation: Record<string, unknown> | null = null;
+     const polarCheckoutId =
+          typeof subscription?.polar_checkout_id === "string"
+               ? String(subscription.polar_checkout_id)
+               : null;
+
+     if (polarCheckoutId) {
+          const checkoutResult = await adminClient
+               .from("billing_checkout_sessions" as never)
+               .select("id,status,request_key,created_at")
+               .eq("polar_checkout_id" as never, polarCheckoutId)
+               .maybeSingle();
+
+          checkoutCorrelation =
+               (checkoutResult.data as Record<string, unknown> | null) ?? null;
+     }
+
+     return {
+          subscription,
+          checkoutCorrelation,
+          history:
+               (historyResult.data as Array<Record<string, unknown>> | null) ?? [],
+          relatedWebhookEvents:
+               (relatedWebhookResult.data as Array<Record<string, unknown>> | null) ?? [],
+     };
+}
+
+export async function getPlatformSubscriptionStatusCounts() {
+     const adminClient = createAdminClient();
+
+     const { data, error } = await adminClient
+          .from("tenant_subscriptions" as never)
+          .select("access_state,status,sync_status");
+
+     if (error) {
+          throw new Error(
+               `[platform-billing] Unable to load subscription counts: ${error.message}`
+          );
+     }
+
+     let trial = 0;
+     let active = 0;
+     let pastDue = 0;
+     let ending = 0;
+     let revoked = 0;
+     let requiresMapping = 0;
+     let stale = 0;
+
+     for (const row of (data as Array<Record<string, unknown>> | null) ?? []) {
+          const accessState = String(row.access_state ?? "");
+          const status = String(row.status ?? "");
+          const syncStatus = String(row.sync_status ?? "");
+
+          if (accessState === "trial") trial += 1;
+          if (accessState === "active") active += 1;
+          if (status === "past_due") pastDue += 1;
+          if (accessState === "ending") ending += 1;
+          if (accessState === "revoked") revoked += 1;
+          if (syncStatus === "requires_mapping") requiresMapping += 1;
+          if (syncStatus === "stale_event") stale += 1;
+     }
+
+     return {
+          trial,
+          active,
+          pastDue,
+          ending,
+          revoked,
+          requiresMapping,
+          stale,
+     };
+}
+
+export async function listPlatformSubscriptionMappingFailures(limit = 100) {
+     return listPlatformSubscriptions({ mappingIssueOnly: true, limit });
+}
+
+export async function listPlatformStaleSubscriptions(limit = 100) {
+     return listPlatformSubscriptions({ staleOnly: true, limit });
 }

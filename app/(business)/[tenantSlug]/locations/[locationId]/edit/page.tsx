@@ -8,6 +8,8 @@ import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getLocation } from "@/features/locations/services/get-location";
 import LocationForm from "@/features/locations/components/location-form";
 import { updateLocationAction } from "@/features/locations/actions/update-location";
+import { getServicesForLocation } from "@/features/services/services/get-service-locations";
+import LocationAssignedServices from "@/features/services/components/location-assigned-services";
 import type { LocationFormValues } from "@/features/locations/schemas/location-schema";
 
 const EDITABLE_ROLES = ["owner", "admin"];
@@ -21,7 +23,11 @@ export default async function EditLocationPage({
   const { tenant, membership } = await requireTenantMember(tenantSlug);
   const canEdit = EDITABLE_ROLES.includes(membership.role);
 
-  const location = await getLocation(tenant.id, locationId);
+  const [location, assignedServices] = await Promise.all([
+    getLocation(tenant.id, locationId),
+    getServicesForLocation(tenant.id, locationId),
+  ]);
+
   if (!location) {
     notFound();
   }
@@ -66,6 +72,11 @@ export default async function EditLocationPage({
           submitLabel="Save Changes"
           canEdit={canEdit}
         />
+      </Paper>
+
+      <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 }, mt: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>Assigned Services</Typography>
+        <LocationAssignedServices services={assignedServices} tenantSlug={tenantSlug} />
       </Paper>
     </Box>
   );

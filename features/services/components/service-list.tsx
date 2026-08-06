@@ -20,9 +20,17 @@ import type { Service } from "../types/service";
 import { deleteServiceAction } from "../actions/delete-service";
 import { toggleServiceStatusAction } from "../actions/toggle-service-status";
 
-type Props = { services: Service[]; tenantSlug: string; canEdit: boolean };
+type LocationInfo = { count: number; locationNames: string[] };
 
-export default function ServiceList({ services, tenantSlug, canEdit }: Props) {
+type Props = {
+  services: Service[];
+  tenantSlug: string;
+  canEdit: boolean;
+  /** Map of serviceId → location assignment info */
+  locationMap?: Map<string, LocationInfo>;
+};
+
+export default function ServiceList({ services, tenantSlug, canEdit, locationMap }: Props) {
   const [isPending, startTransition] = useTransition();
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [menuAnchor, setMenuAnchor] = useState<{ el: HTMLElement; id: string } | null>(null);
@@ -58,6 +66,16 @@ export default function ServiceList({ services, tenantSlug, canEdit }: Props) {
               {svc.durationMinutes} min &bull; {svc.price > 0 ? `${svc.price} ${svc.currency}` : "Free"}
               {(svc.bufferBeforeMinutes > 0 || svc.bufferAfterMinutes > 0) && ` \u2022 Buffers: ${svc.bufferBeforeMinutes}/${svc.bufferAfterMinutes} min`}
             </Typography>
+            {locationMap && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+                {(() => {
+                  const info = locationMap.get(svc.id);
+                  if (!info || info.count === 0) return "Not assigned to a location";
+                  if (info.count <= 3) return info.locationNames.join(", ");
+                  return `${info.count} locations`;
+                })()}
+              </Typography>
+            )}
           </Box>
           {canEdit && (
             <Box>

@@ -6,6 +6,7 @@ import Alert from "@mui/material/Alert";
 import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getServices } from "@/features/services/services/get-services";
+import { getServiceLocationCounts } from "@/features/services/services/get-service-locations";
 import ServiceList from "@/features/services/components/service-list";
 
 const EDITABLE_ROLES = ["owner", "admin"];
@@ -16,8 +17,15 @@ export default async function ServicesPage({ params }: { params: Promise<{ tenan
   const canEdit = EDITABLE_ROLES.includes(membership.role);
 
   let services;
-  try { services = await getServices(tenant.id); }
-  catch { return <Box><Alert severity="error">Unable to load services.</Alert></Box>; }
+  let locationMap;
+  try {
+    [services, locationMap] = await Promise.all([
+      getServices(tenant.id),
+      getServiceLocationCounts(tenant.id),
+    ]);
+  } catch {
+    return <Box><Alert severity="error">Unable to load services.</Alert></Box>;
+  }
 
   return (
     <Box>
@@ -28,7 +36,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ tenan
           {canEdit && <Button component={NextLink} href={`/${tenantSlug}/services/new`} variant="contained">Add Service</Button>}
         </Box>
       </Box>
-      <ServiceList services={services} tenantSlug={tenantSlug} canEdit={canEdit} />
+      <ServiceList services={services} tenantSlug={tenantSlug} canEdit={canEdit} locationMap={locationMap} />
     </Box>
   );
 }

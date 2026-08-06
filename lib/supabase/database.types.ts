@@ -572,6 +572,61 @@ export type Database = {
           },
         ]
       }
+      service_locations: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          location_id: string
+          service_id: string
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          location_id: string
+          service_id: string
+          sort_order?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          location_id?: string
+          service_id?: string
+          sort_order?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_locations_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_locations_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_locations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           buffer_after_minutes: number
@@ -1108,6 +1163,14 @@ export type Database = {
         Args: { ordered_category_ids: string[]; target_tenant_id: string }
         Returns: boolean
       }
+      reorder_service_locations: {
+        Args: {
+          p_location_id: string
+          p_ordered_assignment_ids: string[]
+          p_tenant_id: string
+        }
+        Returns: boolean
+      }
       reorder_services: {
         Args: {
           ordered_service_ids: string[]
@@ -1131,6 +1194,29 @@ export type Database = {
           p_tenant_id: string
         }
         Returns: boolean
+      }
+      set_service_locations: {
+        Args: {
+          p_location_ids: string[]
+          p_service_id: string
+          p_tenant_id: string
+        }
+        Returns: {
+          created_at: string
+          id: string
+          is_active: boolean
+          location_id: string
+          service_id: string
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "service_locations"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       update_location_schedule_exception: {
         Args: {

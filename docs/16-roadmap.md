@@ -317,6 +317,40 @@ Implemented the core service entity for the scheduling application.
 
 See `docs/26-services.md` for full details.
 
+### Milestone 6.3 — Service Location Assignments
+
+Implemented tenant-safe assignments between services and business locations.
+
+**Implemented:**
+- `service_locations` junction table with constraints, indexes, unique (tenant_id, service_id, location_id)
+- Tenant-consistency trigger (validates service and location belong to same tenant on insert/update)
+- RLS policies (read: all members; write: owner/admin)
+- `set_service_locations` RPC (atomic sync: replaces full location set for a service)
+- `reorder_service_locations` RPC (atomic location-specific ordering)
+- Updated-at trigger (shared function)
+- Domain types, Yup validation schema
+- Query services (locations for service, services for location, counts, existence check)
+- Server action using atomic RPC
+- Service form: location picker (multi-select checkboxes) in create and edit modes
+- Service list: shows assigned location names or count
+- Location edit page: read-only assigned services section with links
+- Combined create action (service + locations atomically before redirect)
+- CASCADE deletion on service/location/tenant delete
+
+**Active-state semantics:**
+- Assignment usable when: service active AND location active AND assignment active
+- Assignment `is_active` exists but not toggled separately in current UI
+
+**Not implemented (deferred):**
+- Service-to-resource assignments
+- Location-specific pricing, duration, or buffers
+- Resource availability or scheduling
+- Booking rules, appointments, public pages
+- Drag-and-drop reordering UI
+- Assignment-level active toggle UI
+
+See `docs/27-service-locations.md` for full details.
+
 ## Planned
 
 - Foundation

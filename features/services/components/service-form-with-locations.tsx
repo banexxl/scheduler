@@ -16,59 +16,45 @@ import { generateTenantSlug } from "@/lib/tenants/generate-tenant-slug";
 import type { ServiceCategory } from "@/features/service-categories/types/service-category";
 import type { LocationListItem } from "@/features/locations/services/get-business-locations";
 import ServiceLocationPicker from "./service-location-picker";
+import { createServiceWithLocationsAction } from "../actions/create-service-with-locations";
 
-type ServiceFormProps = {
+type ServiceFormWithLocationsProps = {
   initialValues: ServiceFormValues;
-  onSubmit: (values: ServiceFormValues) => Promise<{ success: boolean; message?: string; fieldErrors?: Record<string, string> }>;
   submitLabel: string;
   canEdit: boolean;
   categories: ServiceCategory[];
-  /** All tenant locations for the assignment picker */
-  locations?: LocationListItem[];
-  /** Currently assigned location IDs (edit mode) */
-  assignedLocationIds?: string[];
-  /** Callback to save location assignments after service save */
-  onLocationsSave?: (locationIds: string[]) => Promise<{ success: boolean; message?: string }>;
+  locations: LocationListItem[];
+  tenantSlug: string;
 };
 
-export default function ServiceForm({ initialValues, onSubmit, submitLabel, canEdit, categories, locations, assignedLocationIds, onLocationsSave }: ServiceFormProps) {
+/**
+ * Service creation form that includes location assignment.
+ * Uses createServiceWithLocationsAction to create service + assign locations atomically.
+ */
+export default function ServiceFormWithLocations({
+  initialValues,
+  submitLabel,
+  canEdit,
+  categories,
+  locations,
+  tenantSlug,
+}: ServiceFormWithLocationsProps) {
   const [isPending, startTransition] = useTransition();
   const [actionResult, setActionResult] = useState<{ success: boolean; message?: string; fieldErrors?: Record<string, string> } | null>(null);
-  const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>(assignedLocationIds ?? []);
-  const [locationError, setLocationError] = useState<string | null>(null);
+  const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>([]);
   const slugEdited = useRef<boolean | null>(null);
   if (slugEdited.current == null) slugEdited.current = initialValues.slug !== "";
 
-  const handleSubmit = (values: ServiceFormValues, { resetForm }: { resetForm: (o: { values: ServiceFormValues }) => void }) => {
+  const handleSubmit = (values: ServiceFormValues) => {
     if (!canEdit) return;
     setActionResult(null);
-    setLocationError(null);
     startTransition(async () => {
-      const r = await onSubmit(values);
-      if (r.success && onLocationsSave) {
-        const locResult = await onLocationsSave(selectedLocationIds);
-        if (!locResult.success) {
-          setLocationError(locResult.message ?? "Unable to save location assignments.");
-          setActionResult({ success: true, message: "Service saved, but location assignments failed." });
-          return;
-        }
-      }
+      const r = await createServiceWithLocationsAction(tenantSlug, values, selectedLocationIds);
       setActionResult(r);
-      if (r.success) resetForm({ values });
     });
   };
 
   const activeCategories = categories.filter((c) => c.isActive);
-
-  const locationsChanged = () => {
-    const initial = new Set(assignedLocationIds ?? []);
-    const current = new Set(selectedLocationIds);
-    if (initial.size !== current.size) return true;
-    for (const id of initial) {
-      if (!current.has(id)) return true;
-    }
-    return false;
-  };
 
   return (
     <Formik initialValues={initialValues} validationSchema={serviceSchema} onSubmit={handleSubmit} validateOnBlur validateOnChange={false}>
@@ -123,7 +109,7 @@ export default function ServiceForm({ initialValues, onSubmit, submitLabel, canE
               {({ field }: { field: { name: string; value: string | number; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
                 <TextField {...field} label="Duration (minutes)" type="number" fullWidth margin="normal" disabled={isPending || !canEdit}
                   error={!!formik.touched.durationMinutes && !!formik.errors.durationMinutes}
-                  helperText={(formik.touched.durationMinutes && formik.errors.durationMinutes) || "5–1440 min"} slotProps={{ htmlInput: { min: 5, max: 1440 } }} />
+                  helperText={(formik.touched.durationMinutes && formik.errors.durationMinutes) || "5\u20131440 min"} slotProps={{ htmlInput: { min: 5, max: 1440 } }} />
               )}
             </Field>
             <Field name="price">
@@ -165,7 +151,7 @@ export default function ServiceForm({ initialValues, onSubmit, submitLabel, canE
 
           <FormControlLabel control={<Switch checked={formik.values.isActive} onChange={(e) => formik.setFieldValue("isActive", e.target.checked)} disabled={isPending || !canEdit} />} label="Active" sx={{ mt: 2 }} />
 
-          {locations && locations.length > 0 && (
+          {locations.length > 0 && (
             <>
               <Divider sx={{ my: 3 }} />
               <Typography variant="h6" sx={{ mb: 1 }}>Locations</Typography>
@@ -175,12 +161,11 @@ export default function ServiceForm({ initialValues, onSubmit, submitLabel, canE
                 onChange={setSelectedLocationIds}
                 disabled={isPending}
                 canEdit={canEdit}
-                error={locationError}
               />
             </>
           )}
 
-          {locations && locations.length === 0 && (
+          {locations.length === 0 && (
             <>
               <Divider sx={{ my: 3 }} />
               <Typography variant="h6" sx={{ mb: 1 }}>Locations</Typography>
@@ -190,7 +175,7 @@ export default function ServiceForm({ initialValues, onSubmit, submitLabel, canE
             </>
           )}
 
-          {canEdit && <Box sx={{ mt: 3 }}><Button type="submit" variant="contained" size="large" disabled={isPending || (!formik.dirty && !locationsChanged())}>{isPending ? "Saving..." : submitLabel}</Button></Box>}
+          {canEdit && <Box sx={{ mt: 3 }}><Button type="submit" variant="contained" size="large" disabled={isPending}>{isPending ? "Creating..." : submitLabel}</Button></Box>}
         </Box>
       )}
     </Formik>

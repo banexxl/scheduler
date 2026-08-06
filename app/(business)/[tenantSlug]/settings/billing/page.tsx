@@ -16,6 +16,7 @@ import {
      createPolarCustomerPortalSessionAction,
 } from "@/features/platform/actions/tenant-billing-actions";
 import { getTenantBillingOverview } from "@/features/platform/services/tenant-billing-queries";
+import { resolveBillingState, type BillingState } from "@/features/billing/services/tenant-entitlements";
 
 async function openPortalAction(formData: FormData) {
      "use server";
@@ -30,6 +31,21 @@ async function openPortalAction(formData: FormData) {
      }
 }
 
+function formatBillingStateLabel(state: BillingState): string {
+     switch (state) {
+          case "trial":
+               return "Trial";
+          case "active":
+               return "Active";
+          case "grace_period":
+               return "Grace Period";
+          case "restricted":
+               return "Restricted";
+          default:
+               return "Free";
+     }
+}
+
 export default async function TenantBillingOverviewPage({
      params,
 }: {
@@ -39,6 +55,20 @@ export default async function TenantBillingOverviewPage({
      const { tenant } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
 
      const overview = await getTenantBillingOverview(tenant.id);
+     const subscription = (overview.currentSubscription as Record<string, unknown> | null) ?? null;
+     const billingState = resolveBillingState(subscription ?? {});
+     const currentPlanName = typeof subscription?.billing_plans === "object" && subscription.billing_plans
+          ? String((subscription.billing_plans as Record<string, unknown>).name ?? "Free")
+          : "Free";
+     const currentPlanKey = typeof subscription?.billing_plans === "object" && subscription.billing_plans
+          ? String((subscription.billing_plans as Record<string, unknown>).plan_key ?? "free")
+          : "free";
+     const currentAmount = typeof subscription?.billing_plan_prices === "object" && subscription.billing_plan_prices
+          ? Number((subscription.billing_plan_prices as Record<string, unknown>).amount ?? 0)
+          : 0;
+     const currentCurrency = typeof subscription?.billing_plan_prices === "object" && subscription.billing_plan_prices
+          ? String((subscription.billing_plan_prices as Record<string, unknown>).currency ?? "USD")
+          : "USD";
 
      return (
           <Stack spacing={3}>
@@ -50,6 +80,24 @@ export default async function TenantBillingOverviewPage({
                          Subscription synchronization is in progress. Checkout completion does not activate a plan yet.
                     </Typography>
                </Box>
+
+               <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Stack spacing={1.5}>
+                         <Typography variant="h6">Subscription Overview</Typography>
+                         <Typography variant="body2" color="text.secondary">
+                              Current state: <strong>{formatBillingStateLabel(billingState)}</strong>
+                         </Typography>
+                         <Typography variant="body2" color="text.secondary">
+                              Current plan: <strong>{currentPlanName}</strong>
+                         </Typography>
+                         <Typography variant="body2" color="text.secondary">
+                              Billing cadence: <strong>{currentPlanKey === "free" ? "Free" : `${currentAmount} ${currentCurrency}`}</strong>
+                         </Typography>
+                         <Typography variant="body2" color="text.secondary">
+                              Sync status: <strong>{subscription ? String(subscription.sync_status ?? "synced") : "No subscription"}</strong>
+                         </Typography>
+                    </Stack>
+               </Paper>
 
                <Paper variant="outlined" sx={{ p: 2 }}>
                     <Stack spacing={1.5}>

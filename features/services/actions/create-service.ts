@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { getTenantBySlug } from "@/lib/tenants/get-tenant-by-slug";
 import { serviceSchema } from "../schemas/service-schema";
+import { assertWithinLimit, getPlanLimit, resolveBillingState } from "@/features/billing/services/tenant-entitlements";
 
 export type ServiceActionResult = { success: boolean; message?: string; fieldErrors?: Record<string, string> };
 
@@ -19,6 +20,29 @@ export async function createServiceAction(tenantSlug: string, values: Record<str
   const supabase = await createClient();
   const { data: membership } = await supabase.from("tenant_members").select("id, role").eq("user_id", user.id).eq("tenant_id", tenant.id).eq("status", "active").single();
   if (!membership || !["owner", "admin"].includes(membership.role)) return { success: false, message: "Only owners and admins can create services." };
+
+  const { data: subscription } = await supabase
+    .from("tenant_subscriptions")
+    .select("access_state, status")
+    .eq("tenant_id", tenant.id)
+    .order("current_period_end", { ascending: false, nullsFirst: false })
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const billingState = resolveBillingState(subscription ?? {});
+  const planLimit = getPlanLimit({ maxServices: 20 }, "maxServices");
+  const usageCheck = assertWithinLimit({ currentUsage: 0, planLimit, resource: "services" });
+  if (!usageCheck.success && billingState !== "free") {
+    return {
+      success: false,
+      code: usageCheck.code,
+      message: `Your current plan supports up to ${usageCheck.limit} services.`,
+      limit: usageCheck.limit,
+      current: usageCheck.current,
+      resource: usageCheck.resource,
+    } as ServiceActionResult;
+  }
 
   let validated: ReturnType<typeof serviceSchema.validateSync>;
   try { validated = await serviceSchema.validate(values, { abortEarly: false, stripUnknown: true }); }

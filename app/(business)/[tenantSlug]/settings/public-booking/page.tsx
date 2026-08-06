@@ -5,6 +5,7 @@ import NextLink from "next/link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getPublicBookingSettings } from "@/features/public-booking/services/public-tenant-resolver";
 import PublicBookingSettingsForm from "@/features/public-booking/components/public-booking-settings-form";
+import { hasFeature, resolveBillingState } from "@/features/billing/services/tenant-entitlements";
 
 export default async function PublicBookingSettingsPage({
   params,
@@ -15,6 +16,10 @@ export default async function PublicBookingSettingsPage({
   const { tenant } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
 
   const settings = await getPublicBookingSettings(tenant.id);
+  const billingState = resolveBillingState({ accessState: null, status: null });
+  const enabled = hasFeature("public_booking", {
+    publicBookingEnabled: billingState === "active" || billingState === "trial",
+  });
 
   return (
     <Box>
@@ -26,11 +31,16 @@ export default async function PublicBookingSettingsPage({
       <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 1 }}>
         Public Booking
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
         Configure your public booking page. When enabled, customers can book appointments at:{" "}
         <Typography component="span" variant="body2" fontWeight={600}>
           /book/{tenantSlug}
         </Typography>
+      </Typography>
+      <Typography variant="body2" color={enabled ? "text.secondary" : "warning.main"} sx={{ mb: 3 }}>
+        {enabled
+          ? "Public booking is available for your current plan."
+          : "Public booking is currently restricted by your billing state; upgrade to enable it."}
       </Typography>
 
       <PublicBookingSettingsForm

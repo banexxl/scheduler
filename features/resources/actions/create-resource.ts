@@ -7,6 +7,7 @@ import { getUser } from "@/lib/auth/get-user";
 import { getTenantBySlug } from "@/lib/tenants/get-tenant-by-slug";
 import { resourceSchema } from "../schemas/resource-schema";
 import type { ResourceActionResult } from "./create-resource-type";
+import { assertWithinLimit, getPlanLimit, resolveBillingState } from "@/features/billing/services/tenant-entitlements";
 
 export async function createResourceAction(tenantSlug: string, values: Record<string, unknown>): Promise<ResourceActionResult> {
   const user = await getUser();
@@ -14,6 +15,31 @@ export async function createResourceAction(tenantSlug: string, values: Record<st
 
   const tenant = await getTenantBySlug(tenantSlug);
   if (!tenant || tenant.status !== "active") return { success: false, message: "Business not found." };
+
+  const supabase = await createClient();
+
+  const { data: subscription } = await supabase
+    .from("tenant_subscriptions")
+    .select("access_state, status")
+    .eq("tenant_id", tenant.id)
+    .order("current_period_end", { ascending: false, nullsFirst: false })
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const billingState = resolveBillingState(subscription ?? {});
+  const planLimit = getPlanLimit({ maxResources: 10 }, "maxResources");
+  const usageCheck = assertWithinLimit({ currentUsage: 0, planLimit, resource: "resources" });
+  if (!usageCheck.success && billingState !== "free") {
+    return {
+      success: false,
+      code: usageCheck.code,
+      message: `Your current plan supports up to ${usageCheck.limit} resources.`,
+      limit: usageCheck.limit,
+      current: usageCheck.current,
+      resource: usageCheck.resource,
+    } as ResourceActionResult;
+  }
 
   let validated: ReturnType<typeof resourceSchema.validateSync>;
   try { validated = await resourceSchema.validate(values, { abortEarly: false, stripUnknown: true }); }
@@ -25,8 +51,6 @@ export async function createResourceAction(tenantSlug: string, values: Record<st
     }
     return { success: false, message: "Invalid form data." };
   }
-
-  const supabase = await createClient();
 
   const { error } = await supabase.rpc("create_resource_with_locations", {
     p_tenant_id: tenant.id,

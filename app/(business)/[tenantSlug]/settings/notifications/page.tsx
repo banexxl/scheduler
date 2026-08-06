@@ -9,6 +9,7 @@ import { isEmailProviderConfigured, getEmailProviderName } from "@/features/noti
 import { getReminderRules, rulesToListItems } from "@/features/notifications/services/reminder-rule-service";
 import NotificationSettingsForm from "@/features/notifications/components/notification-settings-form";
 import ReminderRulesSection from "@/features/notifications/components/reminder-rules-section";
+import { hasFeature, resolveBillingState } from "@/features/billing/services/tenant-entitlements";
 
 export default async function NotificationSettingsPage({
   params,
@@ -24,6 +25,13 @@ export default async function NotificationSettingsPage({
   ]);
   const providerConfigured = isEmailProviderConfigured();
   const providerName = getEmailProviderName();
+  const billingState = resolveBillingState({ accessState: null, status: null });
+  const notificationsEnabled = hasFeature("email_notifications", {
+    emailNotificationsEnabled: billingState === "active" || billingState === "trial",
+  });
+  const remindersEnabled = hasFeature("appointment_reminders", {
+    appointmentRemindersEnabled: billingState === "active" || billingState === "trial",
+  });
 
   return (
     <Box>
@@ -36,9 +44,14 @@ export default async function NotificationSettingsPage({
       <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 1 }}>
         Notifications
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
         Configure email notification preferences for appointment confirmations,
         rescheduling, cancellations, and reminders.
+      </Typography>
+      <Typography variant="body2" color={notificationsEnabled && remindersEnabled ? "text.secondary" : "warning.main"} sx={{ mb: 3 }}>
+        {notificationsEnabled && remindersEnabled
+          ? "Notifications and reminders are available for your current plan."
+          : "Advanced notification features are restricted by your billing state; upgrade to enable them."}
       </Typography>
 
       <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 }, mb: 3 }}>

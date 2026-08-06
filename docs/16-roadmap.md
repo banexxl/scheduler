@@ -536,6 +536,56 @@ See `docs/40-polar-foundation-products-prices.md` for full details.
 
 Implemented the first functional billing-admin and tenant checkout foundation on top of Milestone 7.1.
 
+### Milestone 7.3 - Subscription Lifecycle Projection and Tenant Billing Foundation
+
+Implemented the synchronized subscription projection layer and the initial tenant billing surfaces.
+
+**Implemented:**
+- Migration `20250805000022_polar_subscriptions.sql`
+- `tenant_subscriptions` projection table with lifecycle, access-state, and sync tracking
+- Billing subscription state history for webhook-driven transitions
+- Tenant billing overview and plan-selection routes
+- Initial subscription-aware dashboard wiring for business tenants
+
+**Not implemented (deferred):**
+- Full entitlement enforcement
+- Feature gating and plan-limit enforcement
+- Tenant-specific billing dashboard experience
+
+### Milestone 7.4 - Orders, Refunds, and Billing History
+
+Implemented local projection tables and tenant/platform surfaces for financial history.
+
+**Implemented:**
+- Migration `20250805000023_polar_orders_refunds.sql`
+- `billing_orders` and `billing_refunds` projection tables
+- Tenant billing history view and platform billing order/refund pages
+- Webhook routing for orders and refunds
+- Financial counters on the platform dashboard
+
+**Not implemented (deferred):**
+- Deep reconciliation workflows
+- Full admin detail views
+- Production payload validation against real Polar data
+
+### Milestone 7.5 - Tenant Subscription Experience & Plan Enforcement
+
+Implemented the tenant billing experience foundation with centralized entitlement helpers and initial plan-limit enforcement.
+
+**Implemented:**
+- Centralized billing entitlement resolver and billing-state model
+- Tenant billing plans and billing overview improvements
+- Initial enforcement for location/resource/service creation based on effective plan limits
+- Feature gating helpers for public booking, notifications, reminders, and self-service
+- Regression tests for billing-state mapping and limit checks
+- Milestone documentation in `docs/44-tenant-subscription-experience.md`
+
+**Not implemented (deferred):**
+- Platform-admin entitlement editor
+- Revenue analytics and metered billing
+- Full UI rollout for all restricted actions across every route
+- Real production validation against live Polar subscription payloads
+
 **Implemented:**
 - Migration `20250805000021_polar_checkout_customers.sql`
 - `tenant_billing_customers` table with trusted `external_id` strategy (`tenant:{tenantId}`)

@@ -144,6 +144,21 @@ Security measures:
 - Normal authenticated server client with RLS
 - No raw database errors exposed
 
+## Location Management Security
+
+`/${tenantSlug}/locations`
+
+- RLS policies restrict writes (INSERT/UPDATE/DELETE) to owner/admin only
+- All active tenant members can read locations (SELECT)
+- Server Actions verify role before any mutation
+- Primary-location switch uses SECURITY DEFINER RPC (atomic, verified)
+- Deletion uses SECURITY DEFINER RPC (prevents primary/last deletion)
+- Location slug uniqueness enforced server-side + database index
+- Explicit insert/update payloads (no mass assignment)
+- Location must belong to authorized tenant (verified in every action)
+- No cross-tenant data exposure
+- No raw database errors exposed
+
 ## Rules for Development
 
 1. Never import `lib/supabase/admin.ts` from client code

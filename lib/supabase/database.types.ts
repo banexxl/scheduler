@@ -572,6 +572,10 @@ export type Database = {
         }
         Returns: string
       }
+      delete_business_location: {
+        Args: { target_location_id: string; target_tenant_id: string }
+        Returns: boolean
+      }
       is_tenant_slug_available: {
         Args: { candidate_slug: string }
         Returns: boolean
@@ -585,6 +589,10 @@ export type Database = {
           target_tenant_id: string
         }
         Returns: string
+      }
+      set_primary_location: {
+        Args: { target_location_id: string; target_tenant_id: string }
+        Returns: boolean
       }
     }
     Enums: {

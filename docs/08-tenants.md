@@ -130,7 +130,7 @@ The shell displays:
 |-------|---------|
 | `/create-business` | Create business (onboarding form) |
 | `/[slug]/dashboard` | Business dashboard (real data) |
-| `/[slug]/locations` | Location management |
+| `/[slug]/locations` | Location management (CRUD for owner/admin) |
 | `/[slug]/customers` | Customer management |
 | `/[slug]/team` | Team management |
 | `/[slug]/billing` | Billing & subscription |

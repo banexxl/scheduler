@@ -135,6 +135,34 @@ Implemented the business settings page with editable form for authorized roles.
 
 See `docs/19-business-settings.md` for full details.
 
+### Milestone 5.2 — Location Management
+
+Replaced the locations placeholder with full CRUD location management.
+
+**Implemented:**
+- Location list with status badges, type labels, and action menus
+- Create location form with auto-slug generation
+- Edit location form with all fields
+- Atomic primary-location switching via `set_primary_location` RPC
+- Safe location deletion via `delete_business_location` RPC
+- Activate/deactivate toggle (primary cannot be deactivated)
+- Location slug uniqueness within tenant
+- RLS policies restricting writes to owner/admin only
+- Role enforcement in all Server Actions
+- Delete confirmation dialog
+- Formik + Yup validation
+- Dashboard revalidation after mutations
+
+**Not implemented (deferred):**
+- Working hours / business hours
+- Holidays and closures
+- Maps / geocoding
+- Resources per location
+- Services per location
+- Media uploads
+
+See `docs/20-location-management.md` for full details.
+
 ## Planned
 
 - Foundation

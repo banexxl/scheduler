@@ -190,6 +190,35 @@ Business → Location Working Hours → Resource Hours (future) → Service Dura
 
 See `docs/21-working-hours.md` for full details.
 
+### Milestone 5.4 — Location Schedule Exceptions
+
+Implemented date-specific schedule overrides (holidays, special hours) for locations.
+
+**Implemented:**
+- `location_schedule_exceptions` table with constraints and unique(location_id, date)
+- CRUD RPCs (create, update, delete) with SECURITY DEFINER + role verification
+- RLS policies (read: all members; write: owner/admin)
+- Updated-at trigger
+- Exception list with Upcoming/Past grouping
+- Create/Edit form with date picker, closed toggle, time inputs, name suggestions
+- Past-date protection (no create/edit for past dates, delete allowed)
+- Duplicate-date handling with safe field error
+- Effective schedule preview on form
+- Delete confirmation dialog
+- Read-only mode for manager/staff
+- Location nav integration (Schedule Exceptions menu item)
+
+**Scheduling evaluation order documented:**
+Location hours → Date exception → Resource override (future) → Service duration (future) → Bookings (future)
+
+**Not implemented (deferred):**
+- Recurring holidays, country imports
+- Multiple intervals per date
+- Resource-level exceptions
+- Availability calculation
+
+See `docs/22-location-schedule-exceptions.md` for full details.
+
 ## Planned
 
 - Foundation

@@ -64,6 +64,66 @@ export type Database = {
           },
         ]
       }
+      location_schedule_exceptions: {
+        Row: {
+          closes_at: string | null
+          created_at: string
+          created_by: string
+          exception_date: string
+          id: string
+          is_closed: boolean
+          location_id: string
+          name: string
+          notes: string | null
+          opens_at: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          closes_at?: string | null
+          created_at?: string
+          created_by: string
+          exception_date: string
+          id?: string
+          is_closed?: boolean
+          location_id: string
+          name: string
+          notes?: string | null
+          opens_at?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          closes_at?: string | null
+          created_at?: string
+          created_by?: string
+          exception_date?: string
+          id?: string
+          is_closed?: boolean
+          location_id?: string
+          name?: string
+          notes?: string | null
+          opens_at?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_schedule_exceptions_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "location_schedule_exceptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location_working_hours: {
         Row: {
           closes_at: string | null
@@ -600,6 +660,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_location_schedule_exception: {
+        Args: {
+          p_closes_at?: string
+          p_exception_date: string
+          p_is_closed: boolean
+          p_name: string
+          p_notes?: string
+          p_opens_at?: string
+          target_location_id: string
+          target_tenant_id: string
+        }
+        Returns: string
+      }
       create_tenant: {
         Args: {
           currency_code?: string
@@ -615,6 +688,10 @@ export type Database = {
       }
       delete_business_location: {
         Args: { target_location_id: string; target_tenant_id: string }
+        Returns: boolean
+      }
+      delete_location_schedule_exception: {
+        Args: { target_exception_id: string; target_tenant_id: string }
         Returns: boolean
       }
       is_tenant_slug_available: {
@@ -637,6 +714,19 @@ export type Database = {
       }
       set_primary_location: {
         Args: { target_location_id: string; target_tenant_id: string }
+        Returns: boolean
+      }
+      update_location_schedule_exception: {
+        Args: {
+          p_closes_at?: string
+          p_exception_date: string
+          p_is_closed: boolean
+          p_name: string
+          p_notes?: string
+          p_opens_at?: string
+          target_exception_id: string
+          target_tenant_id: string
+        }
         Returns: boolean
       }
     }

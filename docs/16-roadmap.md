@@ -497,6 +497,41 @@ Implemented secure tokenized guest management for single appointments.
 See `docs/38-customer-appointment-self-service.md` for full details.
 Rollout checklist: `docs/39-self-service-rollout-checklist.md`.
 
+### Milestone 7.1 - Polar Foundation, Products, Prices, and Webhook Ingestion
+
+Implemented the billing catalog and webhook ingestion foundation for Polar integration.
+
+**Implemented:**
+- Migration `20250805000020_polar_foundation.sql`
+- `billing_plans` with stable local keys (`free`, `starter`, `professional`, `business`)
+- `billing_plan_prices` synchronized from Polar prices
+- `billing_webhook_events` durable event inbox with unique `polar_event_id`
+- `billing_sync_runs` diagnostics table for sync/reconciliation outcomes
+- `claim_billing_webhook_events` RPC with `FOR UPDATE SKIP LOCKED` + stale lock recovery
+- Server-only Polar config/client modules
+- Product sync service with:
+	- mapping via `polar_product_id` or metadata plan key
+	- event-order protection via `polar_modified_at`
+	- archive of missing local prices
+	- checkout-eligibility classification
+- Webhook ingestion route: `POST /api/webhooks/polar`
+- Internal processing route: `POST /api/internal/billing/process-webhooks`
+- Internal sync routes:
+	- `POST /api/internal/billing/sync-products`
+	- `POST /api/internal/billing/reconcile-products`
+- Platform admin actions:
+	- `mapPolarProductToPlanAction`
+	- `refreshPolarProductsAction`
+- Platform diagnostics page: `/platform/billing/products`
+
+**Not implemented (deferred):**
+- Checkout session creation
+- Subscription lifecycle writes (upgrade/downgrade/cancel)
+- Payment/invoice reconciliation
+- Entitlements enforcement and feature gating
+
+See `docs/40-polar-foundation-products-prices.md` for full details.
+
 ## Planned
 
 - Foundation

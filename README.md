@@ -64,6 +64,12 @@ Copy `.env.example` to `.env.local`:
 | `TEST_SELF_SERVICE_OWNER_EMAIL` | Optional (integration tests) | Owner/admin email used to derive JWT at runtime |
 | `TEST_SELF_SERVICE_OWNER_PASSWORD` | Optional (integration tests) | Owner/admin password used to derive JWT at runtime |
 | `NEXT_PUBLIC_ROOT_DOMAIN` | Yes | Hostname for subdomain routing (e.g. `localhost:3000`) |
+| `POLAR_API_BASE_URL` | Optional | Polar API host (default: `https://api.polar.sh`) |
+| `POLAR_ACCESS_TOKEN` | Billing sync/webhooks | Polar server-side API token |
+| `POLAR_ORGANIZATION_ID` | Optional | Polar organization context for diagnostics/future filtering |
+| `POLAR_WEBHOOK_SECRET` | Billing webhooks | Signature verification secret for `/api/webhooks/polar` |
+| `BILLING_PROCESSOR_SECRET` | Internal billing routes | Bearer secret for `/api/internal/billing/process-webhooks` |
+| `BILLING_SYNC_SECRET` | Optional | Bearer secret for sync/reconciliation routes (fallback: `BILLING_PROCESSOR_SECRET`) |
 
 ## Database Types
 

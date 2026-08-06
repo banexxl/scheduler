@@ -41,5 +41,6 @@ The shell displays:
 | `/platform/tenants` | Tenant management |
 | `/platform/tenants/[id]` | Tenant detail |
 | `/platform/subscriptions` | Subscription management |
+| `/platform/billing/products` | Polar product and price diagnostics |
 | `/platform/users` | User management |
 | `/platform/audit-logs` | Audit trail |

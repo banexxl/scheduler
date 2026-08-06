@@ -554,6 +554,272 @@ export type Database = {
           },
         ]
       }
+      billing_plan_prices: {
+        Row: {
+          amount: number | null
+          billing_interval: string | null
+          billing_interval_count: number | null
+          billing_plan_id: string
+          created_at: string
+          currency: string | null
+          id: string
+          is_active: boolean
+          is_archived: boolean
+          is_checkout_eligible: boolean
+          is_recurring: boolean
+          last_synced_at: string
+          polar_created_at: string | null
+          polar_modified_at: string | null
+          polar_price_id: string
+          polar_product_id: string
+          price_metadata: Json
+          price_type: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number | null
+          billing_interval?: string | null
+          billing_interval_count?: number | null
+          billing_plan_id: string
+          created_at?: string
+          currency?: string | null
+          id?: string
+          is_active?: boolean
+          is_archived?: boolean
+          is_checkout_eligible?: boolean
+          is_recurring?: boolean
+          last_synced_at?: string
+          polar_created_at?: string | null
+          polar_modified_at?: string | null
+          polar_price_id: string
+          polar_product_id: string
+          price_metadata?: Json
+          price_type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number | null
+          billing_interval?: string | null
+          billing_interval_count?: number | null
+          billing_plan_id?: string
+          created_at?: string
+          currency?: string | null
+          id?: string
+          is_active?: boolean
+          is_archived?: boolean
+          is_checkout_eligible?: boolean
+          is_recurring?: boolean
+          last_synced_at?: string
+          polar_created_at?: string | null
+          polar_modified_at?: string | null
+          polar_price_id?: string
+          polar_product_id?: string
+          price_metadata?: Json
+          price_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_plan_prices_billing_plan_id_fkey"
+            columns: ["billing_plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_free: boolean
+          is_public: boolean
+          last_synced_at: string | null
+          name: string
+          plan_key: string
+          polar_created_at: string | null
+          polar_modified_at: string | null
+          polar_product_description: string | null
+          polar_product_id: string | null
+          polar_product_name: string | null
+          product_metadata: Json
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_free?: boolean
+          is_public?: boolean
+          last_synced_at?: string | null
+          name: string
+          plan_key: string
+          polar_created_at?: string | null
+          polar_modified_at?: string | null
+          polar_product_description?: string | null
+          polar_product_id?: string | null
+          polar_product_name?: string | null
+          product_metadata?: Json
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_free?: boolean
+          is_public?: boolean
+          last_synced_at?: string | null
+          name?: string
+          plan_key?: string
+          polar_created_at?: string | null
+          polar_modified_at?: string | null
+          polar_product_description?: string | null
+          polar_product_id?: string | null
+          polar_product_name?: string | null
+          product_metadata?: Json
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      billing_sync_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          details: Json
+          id: string
+          prices_archived: number
+          prices_created: number
+          prices_updated: number
+          products_conflict: number
+          products_failed: number
+          products_seen: number
+          products_synced: number
+          products_unmapped: number
+          requested_by: string | null
+          run_type: string
+          started_at: string
+          status: string
+          sync_source: string
+          updated_at: string
+          worker_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          prices_archived?: number
+          prices_created?: number
+          prices_updated?: number
+          products_conflict?: number
+          products_failed?: number
+          products_seen?: number
+          products_synced?: number
+          products_unmapped?: number
+          requested_by?: string | null
+          run_type: string
+          started_at?: string
+          status?: string
+          sync_source: string
+          updated_at?: string
+          worker_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          prices_archived?: number
+          prices_created?: number
+          prices_updated?: number
+          products_conflict?: number
+          products_failed?: number
+          products_seen?: number
+          products_synced?: number
+          products_unmapped?: number
+          requested_by?: string | null
+          run_type?: string
+          started_at?: string
+          status?: string
+          sync_source?: string
+          updated_at?: string
+          worker_id?: string | null
+        }
+        Relationships: []
+      }
+      billing_webhook_events: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          event_timestamp: string
+          event_type: string
+          id: string
+          ignored_at: string | null
+          last_error_code: string | null
+          last_error_message: string | null
+          next_attempt_at: string
+          organization_id: string | null
+          payload: Json
+          payload_hash: string
+          polar_event_id: string
+          processed_at: string | null
+          processing_started_at: string | null
+          processing_worker_id: string | null
+          resource_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          event_timestamp: string
+          event_type: string
+          id?: string
+          ignored_at?: string | null
+          last_error_code?: string | null
+          last_error_message?: string | null
+          next_attempt_at?: string
+          organization_id?: string | null
+          payload: Json
+          payload_hash: string
+          polar_event_id: string
+          processed_at?: string | null
+          processing_started_at?: string | null
+          processing_worker_id?: string | null
+          resource_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          event_timestamp?: string
+          event_type?: string
+          id?: string
+          ignored_at?: string | null
+          last_error_code?: string | null
+          last_error_message?: string | null
+          next_attempt_at?: string
+          organization_id?: string | null
+          payload?: Json
+          payload_hash?: string
+          polar_event_id?: string
+          processed_at?: string | null
+          processing_started_at?: string | null
+          processing_worker_id?: string | null
+          resource_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       location_business_hours: {
         Row: {
           created_at: string
@@ -2526,6 +2792,36 @@ export type Database = {
           p_tenant_id: string
         }
         Returns: number
+      }
+      claim_billing_webhook_events: {
+        Args: { p_batch_size?: number; p_worker_id: string }
+        Returns: {
+          attempt_count: number
+          created_at: string
+          event_timestamp: string
+          event_type: string
+          id: string
+          ignored_at: string | null
+          last_error_code: string | null
+          last_error_message: string | null
+          next_attempt_at: string
+          organization_id: string | null
+          payload: Json
+          payload_hash: string
+          polar_event_id: string
+          processed_at: string | null
+          processing_started_at: string | null
+          processing_worker_id: string | null
+          resource_id: string | null
+          status: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "billing_webhook_events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       claim_due_appointment_reminders: {
         Args: { p_batch_size?: number; p_worker_id: string }

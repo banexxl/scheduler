@@ -147,7 +147,7 @@ The shell displays:
 
 When multiple active tenant memberships exist, the first one ordered alphabetically by tenant name is used.
 
-`/create-business` is a fully implemented form (UI + validation). Actual database creation is deferred to Milestone 4.3. See `docs/17-business-onboarding.md` for details.
+`/create-business` creates a business via the `create_tenant` RPC. On success, redirects to `/${slug}/dashboard`. See `docs/17-business-onboarding.md` for details.
 
 ## Status Behavior
 

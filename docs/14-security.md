@@ -102,6 +102,22 @@ Security measures:
 - Server-side format validation before database query
 - Reserved slugs rejected before database query
 
+## Business Creation Security
+
+`features/business/actions/create-business.ts` (Server Action)
+
+Security measures:
+- Requires authenticated user (never trusts client state)
+- Full server-side Yup validation (never trusts browser validation alone)
+- Existing-membership check prevents creating multiple businesses
+- Final slug recheck via RPC before creation
+- Uses normal authenticated server client (never admin client)
+- `create_tenant` RPC uses `auth.uid()` for owner relationship
+- Duplicate-slug unique-index violations mapped to safe field error
+- Raw PostgreSQL/Supabase errors never exposed to client
+- No separate table inserts — atomic RPC only
+- No client-provided owner ID or user lookup
+
 ## Rules for Development
 
 1. Never import `lib/supabase/admin.ts` from client code

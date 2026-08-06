@@ -4,7 +4,7 @@
 
 The business onboarding flow guides new authenticated users through creating their business on the platform. The form collects the minimum required information and validates it client-side before submission.
 
-**Current status:** Milestone 4.3 implements slug availability checking. The form validates locally and confirms availability with the server. No database write or `create_tenant()` RPC call occurs yet. Actual business creation begins in Milestone 4.4.
+**Current status:** Milestone 4.4 is complete. The form validates locally, confirms slug availability with the server, and creates the business via the `create_tenant` RPC. On success, the user is redirected to their new business dashboard.
 
 ## Route
 
@@ -206,7 +206,7 @@ If the user edits the slug after confirmation, the available state clears immedi
 
 ### Race Conditions
 
-The live availability check is **advisory only**. Another user may take the same slug between check and submission. The database unique index on `tenants.slug` is the final authority. Duplicate-slug error handling at submission time is deferred to Milestone 4.4.
+The live availability check is **advisory only**. Another user may take the same slug between check and submission. The database unique index on `tenants.slug` is the final authority. If a race condition causes a duplicate, the server action returns a safe field error: "This business address was just taken. Choose another one."
 
 ### Shared Slug Validation Utilities
 
@@ -217,12 +217,74 @@ Located in `lib/tenants/validate-tenant-slug.ts`:
 - `isReservedTenantSlug(slug)` — checks against reserved slug set
 - `validateTenantSlugLocally(slug)` — full local validation, returns error message or null
 
-Used by: Yup schema, server availability service, client hook.
+Used by: Yup schema, server availability service, client hook, server action.
 
-## Next Steps (Milestone 4.4+)
+## Business Creation (Milestone 4.4)
 
-- Server Action for business creation
-- `create_tenant()` RPC call
-- Duplicate-slug conflict handling at submission
-- Location record creation
-- Redirect to new business dashboard on success
+### Server Action
+
+`features/business/actions/create-business.ts`
+
+Steps:
+1. Require authenticated user
+2. Validate all fields with canonical Yup schema (server-side)
+3. Check user doesn't already have an active tenant membership
+4. Revalidate slug: format, reserved, availability (via `is_tenant_slug_available` RPC)
+5. Resolve active subscription plan (annual preferred, fallback any active)
+6. Call `create_tenant` RPC with normalized values
+7. Handle duplicate-slug race condition (unique index violation → field error)
+8. Redirect to `/${tenantSlug}/dashboard`
+
+### What the RPC Creates Atomically
+
+- `tenants` record
+- `tenant_members` record (owner role, active status)
+- `locations` record (primary location)
+- `tenant_subscriptions` record (with plan and trial)
+- `audit_logs` entry (action: `tenant.created`)
+
+If any operation fails, the entire transaction rolls back. No partial data.
+
+### Why Not the Admin Client
+
+The `create_tenant` RPC uses `auth.uid()` internally to create the owner relationship. Using the service-role client would remove the authenticated user context and could cause incorrect ownership. The normal authenticated server client is always used.
+
+### Existing-Membership Prevention
+
+Before calling the RPC, the action queries `tenant_members` for the authenticated user. If an active membership with an active tenant exists, the action redirects to that business's dashboard without calling the RPC.
+
+This is application-level enforcement. Stronger RPC-level enforcement may be added in a future milestone.
+
+### Subscription Plan Resolution
+
+The action queries `subscription_plans` for an active annual plan. If none exists, it falls back to any active plan. If no active plan exists at all, it returns a safe error without creating the tenant.
+
+Default trial duration: 14 days.
+
+### Error Handling
+
+| Scenario | Response |
+|----------|----------|
+| Authentication lost | Safe auth error message |
+| Invalid form data | Field-level errors from Yup |
+| Reserved slug | Slug field error, no RPC call |
+| Unavailable slug (recheck) | Slug field error, no RPC call |
+| Duplicate slug (race condition) | Slug field error: "just taken" |
+| Missing subscription plan | General configuration error |
+| Unexpected RPC failure | General retry message |
+
+### Formik Integration
+
+- Uses `useTransition` for pending state
+- Server action called with plain serializable values
+- Action errors displayed as field-level or general alerts
+- Slug field errors cleared when user edits the slug
+- Submit disabled during pending transition
+- On success, server action redirects (no client-side navigation)
+
+## Next Steps (Milestone 4.5+)
+
+- Business dashboard with real data
+- Team management
+- Additional locations
+- Payment integration

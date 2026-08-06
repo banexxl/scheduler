@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useTransition } from "react";
 import { Formik, Form, Field, type FormikProps } from "formik";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
-import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -27,6 +26,10 @@ import { getSafeDefaultCurrency } from "../utils/get-default-currency";
 import { SUPPORTED_CURRENCIES } from "../utils/supported-currencies";
 import { getTimezoneListWithDetected } from "../utils/timezone-list";
 import { useBusinessSlugAvailability } from "../hooks/use-business-slug-availability";
+import {
+  createBusinessAction,
+  type CreateBusinessActionResult,
+} from "../actions/create-business";
 import BusinessUrlPreview from "./business-url-preview";
 import SlugAvailabilityIndicator from "./slug-availability-indicator";
 
@@ -55,14 +58,13 @@ function detectCurrency(): string {
 /**
  * Business creation form.
  *
- * Milestone 4.3: Includes live slug availability checking.
- * No database write occurs on submission.
- * A normalized payload is shown for verification.
+ * Milestone 4.4: Calls the create_tenant RPC via server action.
+ * On success, the server action redirects to /${tenantSlug}/dashboard.
  */
 export default function CreateBusinessForm() {
-  const [submitted, setSubmitted] = useState(false);
-  const [normalizedPayload, setNormalizedPayload] =
-    useState<CreateBusinessFormValues | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [actionResult, setActionResult] =
+    useState<CreateBusinessActionResult | null>(null);
 
   // Track whether the user has manually edited the slug
   const slugManuallyEdited = useRef<boolean | null>(null);
@@ -138,8 +140,12 @@ export default function CreateBusinessForm() {
       const raw = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
       formik.setFieldValue("tenantSlug", raw);
       setCurrentSlug(raw);
+      // Clear slug-related action errors when user edits
+      if (actionResult?.fieldErrors?.tenantSlug) {
+        setActionResult(null);
+      }
     },
-    []
+    [actionResult]
   );
 
   const handleResetSlug = useCallback(
@@ -149,8 +155,11 @@ export default function CreateBusinessForm() {
       const generated = generateTenantSlug(currentName);
       formik.setFieldValue("tenantSlug", generated);
       setCurrentSlug(generated);
+      if (actionResult?.fieldErrors?.tenantSlug) {
+        setActionResult(null);
+      }
     },
-    []
+    [actionResult]
   );
 
   // Submission eligibility: all fields valid + slug confirmed available
@@ -164,64 +173,22 @@ export default function CreateBusinessForm() {
       return;
     }
 
-    const payload: CreateBusinessFormValues = {
-      businessName: values.businessName.trim(),
-      tenantSlug: values.tenantSlug.trim().toLowerCase(),
-      primaryLocationName: values.primaryLocationName.trim(),
-      timezone: values.timezone,
-      currency: values.currency,
-    };
+    setActionResult(null);
 
-    setNormalizedPayload(payload);
-    setSubmitted(true);
+    startTransition(async () => {
+      const result = await createBusinessAction({
+        businessName: values.businessName.trim(),
+        tenantSlug: values.tenantSlug.trim().toLowerCase(),
+        primaryLocationName: values.primaryLocationName.trim(),
+        timezone: values.timezone,
+        currency: values.currency,
+      });
+      // If we reach here, the action did NOT redirect (i.e. there was an error)
+      setActionResult(result);
+    });
   };
 
-  if (submitted && normalizedPayload) {
-    return (
-      <Box>
-        <Alert severity="info" sx={{ mb: 3 }}>
-          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-            Form validated successfully (no business created yet)
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            Actual business creation will be implemented in the next phase.
-          </Typography>
-        </Alert>
-
-        <Box
-          component="pre"
-          sx={{
-            bgcolor: "grey.100",
-            p: 2,
-            borderRadius: 1,
-            fontSize: "0.8rem",
-            overflow: "auto",
-            mb: 2,
-          }}
-          aria-label="Normalized form payload"
-        >
-          {JSON.stringify(
-            {
-              ...normalizedPayload,
-              primaryLocationSlug:
-                generateTenantSlug(normalizedPayload.primaryLocationName) ||
-                "main",
-            },
-            null,
-            2
-          )}
-        </Box>
-
-        <Button
-          variant="outlined"
-          onClick={() => setSubmitted(false)}
-          fullWidth
-        >
-          Edit form
-        </Button>
-      </Box>
-    );
-  }
+  const isSubmitting = isPending;
 
   return (
     <Formik<CreateBusinessFormValues>
@@ -237,6 +204,13 @@ export default function CreateBusinessForm() {
           noValidate
           aria-label="Create business form"
         >
+          {/* General action error */}
+          {actionResult && !actionResult.success && actionResult.message && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {actionResult.message}
+            </Alert>
+          )}
+
           {/* Business Name */}
           <Field name="businessName">
             {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
@@ -250,13 +224,15 @@ export default function CreateBusinessForm() {
                 fullWidth
                 margin="normal"
                 error={
-                  !!formik.touched.businessName && !!formik.errors.businessName
+                  (!!formik.touched.businessName && !!formik.errors.businessName) ||
+                  !!actionResult?.fieldErrors?.businessName
                 }
                 helperText={
                   (formik.touched.businessName && formik.errors.businessName) ||
+                  actionResult?.fieldErrors?.businessName ||
                   "The name your customers will see"
                 }
-                disabled={formik.isSubmitting}
+                disabled={isSubmitting}
                 autoFocus
                 slotProps={{ htmlInput: { maxLength: 120 } }}
               />
@@ -277,13 +253,15 @@ export default function CreateBusinessForm() {
                 margin="normal"
                 error={
                   (!!formik.touched.tenantSlug && !!formik.errors.tenantSlug) ||
-                  availability.status === "unavailable"
+                  availability.status === "unavailable" ||
+                  !!actionResult?.fieldErrors?.tenantSlug
                 }
                 helperText={
                   (formik.touched.tenantSlug && formik.errors.tenantSlug) ||
+                  actionResult?.fieldErrors?.tenantSlug ||
                   "Lowercase letters, numbers, and hyphens. This becomes your unique URL."
                 }
-                disabled={formik.isSubmitting}
+                disabled={isSubmitting}
                 slotProps={{
                   htmlInput: { maxLength: 63 },
                   input: {
@@ -298,7 +276,7 @@ export default function CreateBusinessForm() {
                               edge="end"
                               size="small"
                               aria-label="Reset slug suggestion from business name"
-                              disabled={formik.isSubmitting}
+                              disabled={isSubmitting}
                             >
                               ↺
                             </IconButton>
@@ -313,7 +291,7 @@ export default function CreateBusinessForm() {
           </Field>
 
           {/* Slug Availability Status */}
-          {currentSlug && !formik.errors.tenantSlug && (
+          {currentSlug && !formik.errors.tenantSlug && !actionResult?.fieldErrors?.tenantSlug && (
             <SlugAvailabilityIndicator
               status={availability.status}
               message={availability.message}
@@ -336,15 +314,17 @@ export default function CreateBusinessForm() {
                 fullWidth
                 margin="normal"
                 error={
-                  !!formik.touched.primaryLocationName &&
-                  !!formik.errors.primaryLocationName
+                  (!!formik.touched.primaryLocationName &&
+                    !!formik.errors.primaryLocationName) ||
+                  !!actionResult?.fieldErrors?.primaryLocationName
                 }
                 helperText={
                   (formik.touched.primaryLocationName &&
                     formik.errors.primaryLocationName) ||
+                  actionResult?.fieldErrors?.primaryLocationName ||
                   "Your main business location. You can add more later."
                 }
-                disabled={formik.isSubmitting}
+                disabled={isSubmitting}
                 slotProps={{ htmlInput: { maxLength: 120 } }}
               />
             )}
@@ -359,12 +339,16 @@ export default function CreateBusinessForm() {
                 label="Timezone"
                 fullWidth
                 margin="normal"
-                error={!!formik.touched.timezone && !!formik.errors.timezone}
+                error={
+                  (!!formik.touched.timezone && !!formik.errors.timezone) ||
+                  !!actionResult?.fieldErrors?.timezone
+                }
                 helperText={
                   (formik.touched.timezone && formik.errors.timezone) ||
+                  actionResult?.fieldErrors?.timezone ||
                   "Business operating timezone"
                 }
-                disabled={formik.isSubmitting}
+                disabled={isSubmitting}
               >
                 {groupedTimezones.map(([group, tzList]) => [
                   <ListSubheader key={`group-${group}`}>
@@ -389,12 +373,16 @@ export default function CreateBusinessForm() {
                 label="Currency"
                 fullWidth
                 margin="normal"
-                error={!!formik.touched.currency && !!formik.errors.currency}
+                error={
+                  (!!formik.touched.currency && !!formik.errors.currency) ||
+                  !!actionResult?.fieldErrors?.currency
+                }
                 helperText={
                   (formik.touched.currency && formik.errors.currency) ||
+                  actionResult?.fieldErrors?.currency ||
                   "Primary billing currency"
                 }
-                disabled={formik.isSubmitting}
+                disabled={isSubmitting}
               >
                 {SUPPORTED_CURRENCIES.map((c) => (
                   <MenuItem key={c.code} value={c.code}>
@@ -411,19 +399,11 @@ export default function CreateBusinessForm() {
             variant="contained"
             fullWidth
             size="large"
-            disabled={formik.isSubmitting || !isSlugConfirmedAvailable}
+            disabled={isSubmitting || !isSlugConfirmedAvailable}
             sx={{ mt: 3 }}
           >
-            {formik.isSubmitting ? "Validating..." : "Continue"}
+            {isSubmitting ? "Creating business..." : "Create Business"}
           </Button>
-
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ display: "block", mt: 1.5, textAlign: "center" }}
-          >
-            No business will be created yet. This is a preview step.
-          </Typography>
         </Box>
       )}
     </Formik>

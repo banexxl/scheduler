@@ -54,6 +54,38 @@ Implemented secure, live tenant-slug availability checking.
 - Actual business/tenant record creation
 - Race-condition handling at submission time (unique index is final authority)
 
+### Milestone 4.4 — Business Creation and create_tenant Integration
+
+Connected the business creation form to the `create_tenant` database RPC.
+
+**Implemented:**
+- Server Action (`features/business/actions/create-business.ts`)
+- Server-side Yup validation (same canonical schema as browser)
+- Existing-membership prevention (query before RPC)
+- Final slug recheck via `is_tenant_slug_available` before creation
+- Subscription plan resolution (active annual preferred, fallback any active)
+- `create_tenant` RPC call via authenticated server client (never admin)
+- Duplicate-slug race-condition error mapping (unique index → field error)
+- Primary location slug generated server-side
+- Redirect to `/${tenantSlug}/dashboard` after success
+- Cache invalidation for `/create-business` and `/${tenantSlug}`
+- Formik integration with `useTransition`, action errors, and field errors
+- 14-day default trial
+
+**Atomic RPC creates:**
+- Tenant record
+- Owner `tenant_members` relationship
+- Primary location
+- Tenant subscription
+- Audit log entry
+
+**Not implemented (deferred):**
+- Dashboard analytics or scheduling features (Milestone 4.5+)
+- Payment checkout
+- Team invitations
+- Additional location management
+- Stronger RPC-level enforcement of one-business-per-owner
+
 ## Planned
 
 - Foundation

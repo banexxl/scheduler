@@ -130,4 +130,4 @@ All clients are typed with the generated `Database` type.
 | Customer-only | `/account` |
 | New user | `/create-business` |
 
-`/create-business` collects business name, slug, location, timezone, and currency. Slug availability is checked live via `GET /api/businesses/slug-availability`. See `docs/17-business-onboarding.md`.
+`/create-business` collects business name, slug, location, timezone, and currency. Slug availability is checked live. On submission, the `create_tenant` RPC atomically creates the business, owner membership, location, subscription, and audit log. See `docs/17-business-onboarding.md`.

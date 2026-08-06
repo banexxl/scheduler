@@ -271,6 +271,29 @@ Implemented a secure, reusable media system for business, location, and resource
 
 See `docs/24-business-media.md` for full details.
 
+### Milestone 6.1 — Service Categories
+
+Implemented tenant-scoped service categories for organizing future bookable services.
+
+**Implemented:**
+- `service_categories` table with constraints, indexes, tenant-scoped slug uniqueness
+- RLS policies (read: all members; write: owner/admin)
+- `reorder_service_categories` RPC (atomic ordering)
+- Updated-at trigger
+- Full CRUD: create, edit, toggle active, delete, reorder
+- Formik form with slug auto-generation
+- Category list with move up/down, status toggle, delete confirmation
+- Services placeholder page with link to categories
+- Route pages: list, new, edit
+
+**Not implemented (deferred to Milestone 6.2+):**
+- Actual services (duration, pricing, buffers)
+- Service-resource/location assignments
+- Booking rules and availability
+- Public booking pages
+
+See `docs/25-service-categories.md` for full details.
+
 ## Planned
 
 - Foundation

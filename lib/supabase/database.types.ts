@@ -685,6 +685,54 @@ export type Database = {
         }
         Relationships: []
       }
+      public_booking_requests: {
+        Row: {
+          appointment_id: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          idempotency_key: string
+          request_hash: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          request_hash: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          appointment_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          request_hash?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_booking_requests_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_booking_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resource_locations: {
         Row: {
           created_at: string
@@ -1607,6 +1655,62 @@ export type Database = {
           },
         ]
       }
+      tenant_public_booking_settings: {
+        Row: {
+          allow_no_preference: boolean
+          allow_resource_selection: boolean
+          booking_page_description: string | null
+          booking_page_title: string | null
+          confirmation_message: string | null
+          created_at: string
+          id: string
+          is_enabled: boolean
+          show_resource_names: boolean
+          show_service_duration: boolean
+          show_service_prices: boolean
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          allow_no_preference?: boolean
+          allow_resource_selection?: boolean
+          booking_page_description?: string | null
+          booking_page_title?: string | null
+          confirmation_message?: string | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          show_resource_names?: boolean
+          show_service_duration?: boolean
+          show_service_prices?: boolean
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          allow_no_preference?: boolean
+          allow_resource_selection?: boolean
+          booking_page_description?: string | null
+          booking_page_title?: string | null
+          confirmation_message?: string | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          show_resource_names?: boolean
+          show_service_duration?: boolean
+          show_service_prices?: boolean
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_public_booking_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_subscriptions: {
         Row: {
           cancel_at_period_end: boolean
@@ -1792,6 +1896,38 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      claim_public_booking_request: {
+        Args: {
+          p_idempotency_key: string
+          p_request_hash: string
+          p_tenant_id: string
+        }
+        Returns: {
+          appointment_id: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          idempotency_key: string
+          request_hash: string
+          status: string
+          tenant_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "public_booking_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      complete_public_booking_request: {
+        Args: {
+          p_appointment_id: string
+          p_idempotency_key: string
+          p_status?: string
+          p_tenant_id: string
+        }
+        Returns: undefined
       }
       create_location_exception_v2: {
         Args: {

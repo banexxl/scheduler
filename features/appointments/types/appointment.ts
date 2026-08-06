@@ -117,6 +117,7 @@ export const APPOINTMENT_SOURCES = [
   "online",
   "walk_in",
   "phone",
+  "public_booking",
 ] as const;
 
 export type AppointmentSource = (typeof APPOINTMENT_SOURCES)[number];
@@ -126,6 +127,7 @@ export const APPOINTMENT_SOURCE_LABELS: Record<AppointmentSource, string> = {
   online: "Online",
   walk_in: "Walk-in",
   phone: "Phone",
+  public_booking: "Public Booking",
 };
 
 // ─── Core Appointment Type ───────────────────────────────────────────────────

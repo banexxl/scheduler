@@ -219,6 +219,30 @@ Location hours → Date exception → Resource override (future) → Service dur
 
 See `docs/22-location-schedule-exceptions.md` for full details.
 
+### Milestone 5.5 — Resource Foundation
+
+Introduced the generic resource model for scheduling.
+
+**Implemented:**
+- `resource_types` table (tenant-scoped categories with kinds: person, room, equipment, vehicle, other)
+- `resources` table (schedulable entities with type, slug, contact info)
+- `resource_locations` table (many-to-many with primary location and partial unique index)
+- RPCs: `create_resource_with_locations`, `set_primary_resource_location`, `delete_resource_type`, `delete_business_resource`
+- RLS policies (read: all members; write: owner/admin)
+- Full CRUD UI for resource types and resources
+- Location assignment with primary selection in resource form
+- Slug uniqueness per tenant
+- Type deletion guard (rejects if resources exist)
+- Resource deletion cascades assignments
+
+**Architecture decisions:**
+- Generic model (not separate employee/room tables)
+- Person resource ≠ tenant member (separate concepts)
+- Resources inherit location working hours (future)
+- Resource schedule overrides deferred
+
+See `docs/23-resource-foundation.md` for full details.
+
 ## Planned
 
 - Foundation

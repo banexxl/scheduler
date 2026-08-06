@@ -272,6 +272,174 @@ export type Database = {
         }
         Relationships: []
       }
+      resource_locations: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          is_primary: boolean
+          location_id: string
+          resource_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          location_id: string
+          resource_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_primary?: boolean
+          location_id?: string
+          resource_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_locations_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_locations_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_locations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resource_types: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_name_plural: string
+          display_name_singular: string
+          id: string
+          is_active: boolean
+          name: string
+          resource_kind: string
+          slug: string
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_name_plural: string
+          display_name_singular: string
+          id?: string
+          is_active?: boolean
+          name: string
+          resource_kind: string
+          slug: string
+          sort_order?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_name_plural?: string
+          display_name_singular?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          resource_kind?: string
+          slug?: string
+          sort_order?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_types_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resources: {
+        Row: {
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          phone_number: string | null
+          resource_type_id: string
+          slug: string
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          phone_number?: string | null
+          resource_type_id: string
+          slug: string
+          sort_order?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          phone_number?: string | null
+          resource_type_id?: string
+          slug?: string
+          sort_order?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_resource_type_id_fkey"
+            columns: ["resource_type_id"]
+            isOneToOne: false
+            referencedRelation: "resource_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_events: {
         Row: {
           created_at: string
@@ -673,6 +841,21 @@ export type Database = {
         }
         Returns: string
       }
+      create_resource_with_locations: {
+        Args: {
+          p_description?: string
+          p_email?: string
+          p_is_active?: boolean
+          p_location_ids?: string[]
+          p_name: string
+          p_phone_number?: string
+          p_primary_location_id?: string
+          p_resource_type_id: string
+          p_slug: string
+          p_tenant_id: string
+        }
+        Returns: string
+      }
       create_tenant: {
         Args: {
           currency_code?: string
@@ -690,8 +873,16 @@ export type Database = {
         Args: { target_location_id: string; target_tenant_id: string }
         Returns: boolean
       }
+      delete_business_resource: {
+        Args: { p_resource_id: string; p_tenant_id: string }
+        Returns: boolean
+      }
       delete_location_schedule_exception: {
         Args: { target_exception_id: string; target_tenant_id: string }
+        Returns: boolean
+      }
+      delete_resource_type: {
+        Args: { p_resource_type_id: string; p_tenant_id: string }
         Returns: boolean
       }
       is_tenant_slug_available: {
@@ -714,6 +905,14 @@ export type Database = {
       }
       set_primary_location: {
         Args: { target_location_id: string; target_tenant_id: string }
+        Returns: boolean
+      }
+      set_primary_resource_location: {
+        Args: {
+          p_location_id: string
+          p_resource_id: string
+          p_tenant_id: string
+        }
         Returns: boolean
       }
       update_location_schedule_exception: {

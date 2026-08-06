@@ -163,6 +163,33 @@ Replaced the locations placeholder with full CRUD location management.
 
 See `docs/20-location-management.md` for full details.
 
+### Milestone 5.3 — Location Working Hours
+
+Implemented weekly working hours for each location.
+
+**Implemented:**
+- `location_working_hours` table (7 rows per location, unique day constraint)
+- Auto-initialization trigger (default Mon–Fri 9–17, Sat 9–13, Sun closed)
+- `replace_location_working_hours` RPC (atomic 7-row replacement)
+- RLS policies (read: all members; write: owner/admin only via RPC)
+- Reusable `features/working-hours/` module (types, schema, service, action, components)
+- Weekly schedule UI with day cards, time inputs, open/closed toggle
+- Convenience actions: Apply Monday to All, Apply Weekdays, Apply Weekends
+- Formik + Yup validation (opens < closes, closed = null times)
+- Dirty-state indicator and conditional Save button
+- Working Hours link from location action menu
+
+**Scheduling hierarchy established:**
+Business → Location Working Hours → Resource Hours (future) → Service Duration (future) → Bookings (future)
+
+**Not implemented (deferred):**
+- Split shifts, lunch breaks, overnight schedules
+- Holiday exceptions, seasonal hours, temporary overrides
+- Resource-level schedule overrides
+- Availability calculation engine
+
+See `docs/21-working-hours.md` for full details.
+
 ## Planned
 
 - Foundation

@@ -124,6 +124,9 @@ export default function LocationList({ locations, tenantSlug, canEdit }: Locatio
                 <MenuItem component={NextLink} href={`/${tenantSlug}/locations/${loc.id}/edit`}>
                   Edit
                 </MenuItem>
+                <MenuItem component={NextLink} href={`/${tenantSlug}/locations/${loc.id}/working-hours`}>
+                  Working Hours
+                </MenuItem>
                 {!loc.isPrimary && (
                   <MenuItem onClick={() => handleAction(() => setPrimaryLocationAction(tenantSlug, loc.id))}>
                     Make Primary

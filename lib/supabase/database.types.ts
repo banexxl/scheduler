@@ -64,6 +64,47 @@ export type Database = {
           },
         ]
       }
+      location_working_hours: {
+        Row: {
+          closes_at: string | null
+          created_at: string
+          day_of_week: number
+          id: string
+          is_closed: boolean
+          location_id: string
+          opens_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          closes_at?: string | null
+          created_at?: string
+          day_of_week: number
+          id?: string
+          is_closed?: boolean
+          location_id: string
+          opens_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          closes_at?: string | null
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          is_closed?: boolean
+          location_id?: string
+          opens_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_working_hours_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           city: string | null
@@ -589,6 +630,10 @@ export type Database = {
           target_tenant_id: string
         }
         Returns: string
+      }
+      replace_location_working_hours: {
+        Args: { hours: Json; target_location_id: string }
+        Returns: boolean
       }
       set_primary_location: {
         Args: { target_location_id: string; target_tenant_id: string }

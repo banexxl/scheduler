@@ -67,6 +67,7 @@ export default function ResourceList({ resources, tenantSlug, canEdit }: Props) 
                 <IconButton size="small" onClick={(e) => setMenuAnchor({ el: e.currentTarget, id: r.id })} disabled={isPending}>&#8942;</IconButton>
                 <Menu anchorEl={menuAnchor?.id === r.id ? menuAnchor.el : null} open={menuAnchor?.id === r.id} onClose={() => setMenuAnchor(null)}>
                   <MenuItem component={NextLink} href={`/${tenantSlug}/resources/${r.id}/edit`} onClick={() => setMenuAnchor(null)}>Edit</MenuItem>
+                  <MenuItem component={NextLink} href={`/${tenantSlug}/resources/${r.id}/media`} onClick={() => setMenuAnchor(null)}>Media</MenuItem>
                   <MenuItem onClick={() => { setMenuAnchor(null); setDelDialog({ id: r.id, name: r.name }); }} sx={{ color: "error.main" }}>Delete</MenuItem>
                 </Menu>
               </Box>

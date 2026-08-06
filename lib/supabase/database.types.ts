@@ -245,6 +245,94 @@ export type Database = {
           },
         ]
       }
+      media_assets: {
+        Row: {
+          alt_text: string | null
+          caption: string | null
+          created_at: string
+          created_by: string
+          height: number | null
+          id: string
+          is_primary: boolean
+          location_id: string | null
+          media_role: string
+          mime_type: string
+          original_filename: string | null
+          resource_id: string | null
+          size_bytes: number
+          sort_order: number
+          storage_bucket: string
+          storage_path: string
+          tenant_id: string
+          updated_at: string
+          width: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          created_by: string
+          height?: number | null
+          id?: string
+          is_primary?: boolean
+          location_id?: string | null
+          media_role: string
+          mime_type: string
+          original_filename?: string | null
+          resource_id?: string | null
+          size_bytes: number
+          sort_order?: number
+          storage_bucket?: string
+          storage_path: string
+          tenant_id: string
+          updated_at?: string
+          width?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          created_by?: string
+          height?: number | null
+          id?: string
+          is_primary?: boolean
+          location_id?: string | null
+          media_role?: string
+          mime_type?: string
+          original_filename?: string | null
+          resource_id?: string | null
+          size_bytes?: number
+          sort_order?: number
+          storage_bucket?: string
+          storage_path?: string
+          tenant_id?: string
+          updated_at?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_assets_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_assets_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_assets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_admins: {
         Row: {
           created_at: string
@@ -898,6 +986,10 @@ export type Database = {
           target_tenant_id: string
         }
         Returns: string
+      }
+      reorder_media_assets: {
+        Args: { ordered_ids: string[]; target_tenant_id: string }
+        Returns: boolean
       }
       replace_location_working_hours: {
         Args: { hours: Json; target_location_id: string }

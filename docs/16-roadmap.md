@@ -243,6 +243,34 @@ Introduced the generic resource model for scheduling.
 
 See `docs/23-resource-foundation.md` for full details.
 
+### Milestone 5.6 — Business Media Foundation
+
+Implemented a secure, reusable media system for business, location, and resource images.
+
+**Implemented:**
+- `media_assets` table with ownership model, role constraints, partial unique indexes
+- `business-media` Storage bucket (public read, authenticated owner/admin write)
+- Storage RLS policies enforcing tenant-scoped paths
+- Upload flow: prepare (server auth + path) → upload (browser client) → complete (server metadata)
+- Safe single-image replacement (logo, cover, profile) with old-image cleanup
+- Gallery ordering via `reorder_media_assets` RPC
+- Delete with confirmation and Storage + metadata cleanup
+- `MediaUploader` and `MediaGallery` reusable components
+- Routes: business media, location media, resource media
+- Nav integration (Media menu item on locations and resources)
+- Next.js image remote patterns for Supabase Storage
+
+**Not implemented (deferred):**
+- Public site rendering
+- Image cropping/optimization
+- Video/SVG/PDF uploads
+- AI image generation
+- CDN transformations
+- Drag-and-drop
+- Background orphan cleanup
+
+See `docs/24-business-media.md` for full details.
+
 ## Planned
 
 - Foundation

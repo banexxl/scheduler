@@ -64,6 +64,108 @@ export type Database = {
           },
         ]
       }
+      location_business_hours: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          location_id: string
+          sort_order: number
+          start_time: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean
+          location_id: string
+          sort_order?: number
+          start_time: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          location_id?: string
+          sort_order?: number
+          start_time?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_business_hours_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "location_business_hours_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      location_exception_periods: {
+        Row: {
+          created_at: string
+          end_time: string
+          exception_id: string
+          id: string
+          sort_order: number
+          start_time: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          exception_id: string
+          id?: string
+          sort_order?: number
+          start_time: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          exception_id?: string
+          id?: string
+          sort_order?: number
+          start_time?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_exception_periods_exception_id_fkey"
+            columns: ["exception_id"]
+            isOneToOne: false
+            referencedRelation: "location_schedule_exceptions_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "location_exception_periods_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location_schedule_exceptions: {
         Row: {
           closes_at: string | null
@@ -117,6 +219,60 @@ export type Database = {
           },
           {
             foreignKeyName: "location_schedule_exceptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      location_schedule_exceptions_v2: {
+        Row: {
+          created_at: string
+          exception_date: string
+          exception_type: string
+          id: string
+          is_active: boolean
+          location_id: string
+          notes: string | null
+          tenant_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          exception_date: string
+          exception_type: string
+          id?: string
+          is_active?: boolean
+          location_id: string
+          notes?: string | null
+          tenant_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          exception_date?: string
+          exception_type?: string
+          id?: string
+          is_active?: boolean
+          location_id?: string
+          notes?: string | null
+          tenant_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_schedule_exceptions_v2_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "location_schedule_exceptions_v2_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -415,6 +571,73 @@ export type Database = {
           },
         ]
       }
+      resource_time_off: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          is_active: boolean
+          is_all_day: boolean
+          location_id: string | null
+          notes: string | null
+          resource_id: string
+          starts_at: string
+          tenant_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          is_active?: boolean
+          is_all_day?: boolean
+          location_id?: string | null
+          notes?: string | null
+          resource_id: string
+          starts_at: string
+          tenant_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          is_all_day?: boolean
+          location_id?: string | null
+          notes?: string | null
+          resource_id?: string
+          starts_at?: string
+          tenant_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_time_off_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_time_off_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_time_off_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resource_types: {
         Row: {
           created_at: string
@@ -461,6 +684,70 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "resource_types_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resource_working_hours: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          location_id: string | null
+          resource_id: string
+          sort_order: number
+          start_time: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean
+          location_id?: string | null
+          resource_id: string
+          sort_order?: number
+          start_time: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          location_id?: string | null
+          resource_id?: string
+          sort_order?: number
+          start_time?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_working_hours_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_working_hours_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_working_hours_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -620,6 +907,76 @@ export type Database = {
           },
           {
             foreignKeyName: "service_locations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_resources: {
+        Row: {
+          buffer_after_override_minutes: number | null
+          buffer_before_override_minutes: number | null
+          created_at: string
+          currency_override: string | null
+          duration_override_minutes: number | null
+          id: string
+          is_active: boolean
+          price_override: number | null
+          resource_id: string
+          service_id: string
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          buffer_after_override_minutes?: number | null
+          buffer_before_override_minutes?: number | null
+          created_at?: string
+          currency_override?: string | null
+          duration_override_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          price_override?: number | null
+          resource_id: string
+          service_id: string
+          sort_order?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          buffer_after_override_minutes?: number | null
+          buffer_before_override_minutes?: number | null
+          created_at?: string
+          currency_override?: string | null
+          duration_override_minutes?: number | null
+          id?: string
+          is_active?: boolean
+          price_override?: number | null
+          resource_id?: string
+          service_id?: string
+          sort_order?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_resources_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_resources_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_resources_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -1084,6 +1441,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_location_exception_v2: {
+        Args: {
+          p_exception_date: string
+          p_exception_type: string
+          p_is_active?: boolean
+          p_location_id: string
+          p_notes?: string
+          p_periods?: Json
+          p_tenant_id: string
+          p_title?: string
+        }
+        Returns: string
+      }
       create_location_schedule_exception: {
         Args: {
           p_closes_at?: string
@@ -1094,6 +1464,19 @@ export type Database = {
           p_opens_at?: string
           target_location_id: string
           target_tenant_id: string
+        }
+        Returns: string
+      }
+      create_resource_time_off: {
+        Args: {
+          p_ends_at?: string
+          p_is_all_day?: boolean
+          p_location_id?: string
+          p_notes?: string
+          p_resource_id: string
+          p_starts_at?: string
+          p_tenant_id: string
+          p_title?: string
         }
         Returns: string
       }
@@ -1108,6 +1491,25 @@ export type Database = {
           p_primary_location_id?: string
           p_resource_type_id: string
           p_slug: string
+          p_tenant_id: string
+        }
+        Returns: string
+      }
+      create_service_with_assignments: {
+        Args: {
+          p_buffer_after_minutes?: number
+          p_buffer_before_minutes?: number
+          p_currency?: string
+          p_description?: string
+          p_duration_minutes?: number
+          p_is_active?: boolean
+          p_location_ids?: string[]
+          p_name?: string
+          p_price?: number
+          p_resource_assignments?: Json
+          p_service_category_id?: string
+          p_slug?: string
+          p_sort_order?: number
           p_tenant_id: string
         }
         Returns: string
@@ -1133,8 +1535,16 @@ export type Database = {
         Args: { p_resource_id: string; p_tenant_id: string }
         Returns: boolean
       }
+      delete_location_exception_v2: {
+        Args: { p_exception_id: string; p_tenant_id: string }
+        Returns: boolean
+      }
       delete_location_schedule_exception: {
         Args: { target_exception_id: string; target_tenant_id: string }
+        Returns: boolean
+      }
+      delete_resource_time_off: {
+        Args: { p_tenant_id: string; p_time_off_id: string }
         Returns: boolean
       }
       delete_resource_type: {
@@ -1171,6 +1581,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      reorder_service_resources: {
+        Args: {
+          p_ordered_assignment_ids: string[]
+          p_service_id: string
+          p_tenant_id: string
+        }
+        Returns: boolean
+      }
       reorder_services: {
         Args: {
           ordered_service_ids: string[]
@@ -1183,6 +1601,27 @@ export type Database = {
         Args: { hours: Json; target_location_id: string }
         Returns: boolean
       }
+      set_location_business_hours: {
+        Args: { p_location_id: string; p_periods: Json; p_tenant_id: string }
+        Returns: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          location_id: string
+          sort_order: number
+          start_time: string
+          tenant_id: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "location_business_hours"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       set_primary_location: {
         Args: { target_location_id: string; target_tenant_id: string }
         Returns: boolean
@@ -1194,6 +1633,28 @@ export type Database = {
           p_tenant_id: string
         }
         Returns: boolean
+      }
+      set_resource_working_hours: {
+        Args: { p_periods: Json; p_resource_id: string; p_tenant_id: string }
+        Returns: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          location_id: string | null
+          resource_id: string
+          sort_order: number
+          start_time: string
+          tenant_id: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "resource_working_hours"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       set_service_locations: {
         Args: {
@@ -1218,6 +1679,42 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      set_service_resources: {
+        Args: { p_assignments: Json; p_service_id: string; p_tenant_id: string }
+        Returns: {
+          buffer_after_override_minutes: number | null
+          buffer_before_override_minutes: number | null
+          created_at: string
+          currency_override: string | null
+          duration_override_minutes: number | null
+          id: string
+          is_active: boolean
+          price_override: number | null
+          resource_id: string
+          service_id: string
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "service_resources"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      update_location_exception_v2: {
+        Args: {
+          p_exception_id: string
+          p_exception_type?: string
+          p_is_active?: boolean
+          p_notes?: string
+          p_periods?: Json
+          p_tenant_id: string
+          p_title?: string
+        }
+        Returns: boolean
+      }
       update_location_schedule_exception: {
         Args: {
           p_closes_at?: string
@@ -1228,6 +1725,20 @@ export type Database = {
           p_opens_at?: string
           target_exception_id: string
           target_tenant_id: string
+        }
+        Returns: boolean
+      }
+      update_resource_time_off: {
+        Args: {
+          p_ends_at?: string
+          p_is_active?: boolean
+          p_is_all_day?: boolean
+          p_location_id?: string
+          p_notes?: string
+          p_starts_at?: string
+          p_tenant_id: string
+          p_time_off_id: string
+          p_title?: string
         }
         Returns: boolean
       }

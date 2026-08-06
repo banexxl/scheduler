@@ -504,13 +504,17 @@ export type Database = {
           created_at: string
           created_by: string | null
           default_currency: string
+          default_language: string
           default_timezone: string
+          description: string | null
           id: string
           logo_path: string | null
           name: string
           slug: string
+          social_links: Json
           status: string
           updated_at: string
+          website_url: string | null
         }
         Insert: {
           contact_email?: string | null
@@ -518,13 +522,17 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           default_currency?: string
+          default_language?: string
           default_timezone?: string
+          description?: string | null
           id?: string
           logo_path?: string | null
           name: string
           slug: string
+          social_links?: Json
           status?: string
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
           contact_email?: string | null
@@ -532,13 +540,17 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           default_currency?: string
+          default_language?: string
           default_timezone?: string
+          description?: string | null
           id?: string
           logo_path?: string | null
           name?: string
           slug?: string
+          social_links?: Json
           status?: string
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }

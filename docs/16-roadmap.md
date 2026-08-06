@@ -86,6 +86,55 @@ Connected the business creation form to the `create_tenant` database RPC.
 - Additional location management
 - Stronger RPC-level enforcement of one-business-per-owner
 
+### Milestone 4.5 — First Real Business Dashboard
+
+Replaced the placeholder dashboard with a server-rendered business overview.
+
+**Implemented:**
+- Dashboard service with parallel database queries
+- Business header (name, status, role, public URL preview)
+- Stat cards (locations, team members, customers, subscription status)
+- Primary location detail card with empty state
+- Subscription summary card with plan, dates, cancellation status
+- Getting started section with next-action links
+- Status label and date formatting utilities
+- Proper missing-data handling (no crashes on null data)
+- All queries via authenticated server client with RLS
+
+**Not implemented (deferred to future milestones):**
+- Scheduling, services, resources, appointments
+- Charts, analytics history
+- Reviews, themes, uploads
+- Payment checkout
+- Notifications
+
+See `docs/18-business-dashboard.md` for full details.
+
+### Milestone 5.1 — Business Settings
+
+Implemented the business settings page with editable form for authorized roles.
+
+**Implemented:**
+- Database migration: `description`, `website_url`, `default_language`, `social_links` columns
+- Settings service loading current values
+- Yup validation schema (name, email, phone, timezone, currency, description, URL, language, social links)
+- Server Action with owner/admin role enforcement and explicit update payload
+- Formik form with all field sections
+- Read-only mode for manager/staff with clear notice
+- URL validation (HTTP/HTTPS only, rejects javascript: and protocol-relative)
+- Social links stored as JSONB, validated per-platform
+- Slug displayed read-only with URL preview
+- Dirty-state indicator and conditional save button
+- Character counter for description
+
+**Not implemented (deferred):**
+- Slug change flow
+- Logo upload
+- Audit logging of settings changes
+- Browser navigation blocking for unsaved changes
+
+See `docs/19-business-settings.md` for full details.
+
 ## Planned
 
 - Foundation

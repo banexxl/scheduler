@@ -118,6 +118,32 @@ Security measures:
 - No separate table inserts — atomic RPC only
 - No client-provided owner ID or user lookup
 
+## Business Dashboard Security
+
+`/${tenantSlug}/dashboard`
+
+- Protected by `requireTenantMember(tenantSlug)` in the layout
+- Changing URL slug to another tenant returns 404 (no data leakage)
+- Dashboard service receives already-authorized tenant ID
+- Normal authenticated server client used (never admin)
+- RLS active on all queries
+- No customer-private data beyond aggregate count
+- No subscription provider secrets displayed
+- No raw database errors reach the UI
+- Service errors show safe generic alert
+
+## Business Settings Security
+
+`/${tenantSlug}/settings`
+
+- Server-side role enforcement: only owner and admin can update
+- Manager and staff get read-only view (Server Action rejects their updates)
+- Explicit update payload prevents mass assignment (never updates slug, status, created_by)
+- URL fields validated as absolute HTTP/HTTPS only (rejects javascript:, ftp:, protocol-relative)
+- Social links individually validated
+- Normal authenticated server client with RLS
+- No raw database errors exposed
+
 ## Rules for Development
 
 1. Never import `lib/supabase/admin.ts` from client code

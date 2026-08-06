@@ -129,12 +129,12 @@ The shell displays:
 | Route | Purpose |
 |-------|---------|
 | `/create-business` | Create business (onboarding form) |
-| `/[slug]/dashboard` | Business dashboard |
+| `/[slug]/dashboard` | Business dashboard (real data) |
 | `/[slug]/locations` | Location management |
 | `/[slug]/customers` | Customer management |
 | `/[slug]/team` | Team management |
 | `/[slug]/billing` | Billing & subscription |
-| `/[slug]/settings` | Business settings |
+| `/[slug]/settings` | Business settings (editable for owner/admin) |
 
 ## Login Flow
 

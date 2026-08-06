@@ -815,6 +815,78 @@ export type Database = {
           },
         ]
       }
+      service_booking_rules: {
+        Row: {
+          allow_customer_cancellation: boolean | null
+          allow_customer_rescheduling: boolean | null
+          allow_same_day_booking: boolean | null
+          cancellation_notice_minutes: number | null
+          created_at: string
+          id: string
+          is_active: boolean
+          maximum_advance_days: number | null
+          minimum_notice_minutes: number | null
+          require_customer_email: boolean | null
+          require_customer_phone: boolean | null
+          reschedule_notice_minutes: number | null
+          service_id: string
+          slot_interval_minutes: number | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          allow_customer_cancellation?: boolean | null
+          allow_customer_rescheduling?: boolean | null
+          allow_same_day_booking?: boolean | null
+          cancellation_notice_minutes?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          maximum_advance_days?: number | null
+          minimum_notice_minutes?: number | null
+          require_customer_email?: boolean | null
+          require_customer_phone?: boolean | null
+          reschedule_notice_minutes?: number | null
+          service_id: string
+          slot_interval_minutes?: number | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          allow_customer_cancellation?: boolean | null
+          allow_customer_rescheduling?: boolean | null
+          allow_same_day_booking?: boolean | null
+          cancellation_notice_minutes?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          maximum_advance_days?: number | null
+          minimum_notice_minutes?: number | null
+          require_customer_email?: boolean | null
+          require_customer_phone?: boolean | null
+          reschedule_notice_minutes?: number | null
+          service_id?: string
+          slot_interval_minutes?: number | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_booking_rules_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_booking_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_categories: {
         Row: {
           created_at: string
@@ -1151,6 +1223,68 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      tenant_booking_rules: {
+        Row: {
+          allow_customer_cancellation: boolean
+          allow_customer_rescheduling: boolean
+          allow_same_day_booking: boolean
+          cancellation_notice_minutes: number
+          created_at: string
+          id: string
+          is_active: boolean
+          maximum_advance_days: number
+          minimum_notice_minutes: number
+          require_customer_email: boolean
+          require_customer_phone: boolean
+          reschedule_notice_minutes: number
+          slot_interval_minutes: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          allow_customer_cancellation?: boolean
+          allow_customer_rescheduling?: boolean
+          allow_same_day_booking?: boolean
+          cancellation_notice_minutes?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          maximum_advance_days?: number
+          minimum_notice_minutes?: number
+          require_customer_email?: boolean
+          require_customer_phone?: boolean
+          reschedule_notice_minutes?: number
+          slot_interval_minutes?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          allow_customer_cancellation?: boolean
+          allow_customer_rescheduling?: boolean
+          allow_same_day_booking?: boolean
+          cancellation_notice_minutes?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          maximum_advance_days?: number
+          minimum_notice_minutes?: number
+          require_customer_email?: boolean
+          require_customer_phone?: boolean
+          reschedule_notice_minutes?: number
+          slot_interval_minutes?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_booking_rules_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tenant_customer_private: {
         Row: {

@@ -294,6 +294,29 @@ Implemented tenant-scoped service categories for organizing future bookable serv
 
 See `docs/25-service-categories.md` for full details.
 
+### Milestone 6.2 — Service Foundation
+
+Implemented the core service entity for the scheduling application.
+
+**Implemented:**
+- `services` table with duration, price, currency, buffers, category FK
+- Tenant-category ownership trigger (prevents cross-tenant category refs)
+- RLS policies (read: all members; write: owner/admin)
+- `reorder_services` RPC (category-scoped atomic ordering)
+- Full CRUD: create, edit, toggle active, delete, reorder
+- Formik form with slug auto-gen, category selector, duration/price/buffer fields
+- Service list with category chips, duration/price display, action menus
+- Routes: list, new, edit (replaces services placeholder)
+
+**Not implemented (deferred):**
+- Service-resource/location assignments
+- Availability calculations
+- Booking rules and appointments
+- Public booking pages
+- Packages, payments, notifications
+
+See `docs/26-services.md` for full details.
+
 ## Planned
 
 - Foundation

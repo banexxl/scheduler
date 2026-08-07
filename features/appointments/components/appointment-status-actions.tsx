@@ -26,6 +26,16 @@ import {
 } from "../types/appointment";
 import type { AppointmentStatus } from "../types/appointment";
 
+const OPERATIONAL_ACTIONS: Record<AppointmentStatus, AppointmentStatus[]> = {
+  pending: ["confirmed"],
+  confirmed: ["checked_in", "in_progress"],
+  checked_in: ["in_progress"],
+  in_progress: [],
+  completed: [],
+  cancelled: [],
+  no_show: [],
+};
+
 type Props = {
   tenantSlug: string;
   appointmentId: string;
@@ -45,6 +55,9 @@ export default function AppointmentStatusActions({
 
   const allowedTransitions = STATUS_TRANSITIONS[currentStatus].filter(
     (s) => s !== "cancelled"
+  );
+  const operationalTransitions = OPERATIONAL_ACTIONS[currentStatus].filter((s) =>
+    allowedTransitions.includes(s as (typeof allowedTransitions)[number]) && s !== "cancelled"
   );
   const canCancel = !isTerminalStatus(currentStatus);
 
@@ -90,7 +103,7 @@ export default function AppointmentStatusActions({
       )}
 
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-        {allowedTransitions.map((status) => (
+        {operationalTransitions.map((status) => (
           <Button
             key={status}
             variant="outlined"
@@ -98,9 +111,30 @@ export default function AppointmentStatusActions({
             onClick={() => handleStatusChange(status)}
             disabled={isPending}
           >
-            {APPOINTMENT_STATUS_LABELS[status]}
+            {status === "checked_in" ? "Check In" : status === "in_progress" ? "Start Service" : APPOINTMENT_STATUS_LABELS[status]}
           </Button>
         ))}
+        {allowedTransitions.includes("completed") && (
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => handleStatusChange("completed")}
+            disabled={isPending}
+          >
+            Complete
+          </Button>
+        )}
+        {allowedTransitions.includes("no_show") && (
+          <Button
+            variant="outlined"
+            size="small"
+            color="warning"
+            onClick={() => handleStatusChange("no_show")}
+            disabled={isPending}
+          >
+            Mark No-show
+          </Button>
+        )}
         {canCancel && (
           <Button
             variant="outlined"

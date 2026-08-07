@@ -1,0 +1,53 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "type-check",
+			"type": "shell",
+			"command": "npm.cmd run type-check",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "type-check",
+			"type": "shell",
+			"command": "npm.cmd run type-check",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "test-appointments",
+			"type": "shell",
+			"command": "npx vitest run features/appointments/utils/appointment-operational-state.test.ts",
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "test-appointments",
+			"type": "shell",
+			"command": "npx vitest run features/appointments/utils/appointment-operational-state.test.ts",
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "type-check",
+			"type": "shell",
+			"command": "npm.cmd run type-check",
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "test-appointments",
+			"type": "shell",
+			"command": "npx vitest run features/appointments/utils/appointment-operational-state.test.ts",
+			"problemMatcher": [],
+			"group": "test"
+		}
+	]
+}

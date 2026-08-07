@@ -62,15 +62,24 @@ export default async function AppointmentsPage({
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
           Appointments
         </Typography>
-        {canEdit && (
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
           <Button
             component="a"
-            href={`/${tenantSlug}/appointments/new`}
-            variant="contained"
+            href={`/${tenantSlug}/appointments/today`}
+            variant="outlined"
           >
-            New Appointment
+            Today
           </Button>
-        )}
+          {canEdit && (
+            <Button
+              component="a"
+              href={`/${tenantSlug}/appointments/new`}
+              variant="contained"
+            >
+              New Appointment
+            </Button>
+          )}
+        </Box>
       </Box>
 
       <AppointmentListTable

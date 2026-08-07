@@ -59,6 +59,10 @@ function mapRow(row: Record<string, unknown>): Appointment {
     endsAt: row.ends_at as string,
     occupiedStartsAt: row.occupied_starts_at as string,
     occupiedEndsAt: row.occupied_ends_at as string,
+    checkedInAt: (row.checked_in_at as string) ?? null,
+    serviceStartedAt: (row.service_started_at as string) ?? null,
+    completedAt: (row.completed_at as string) ?? null,
+    noShowAt: (row.no_show_at as string) ?? null,
     durationMinutes: row.duration_minutes as number,
     bufferBeforeMinutes: row.buffer_before_minutes as number,
     bufferAfterMinutes: row.buffer_after_minutes as number,
@@ -168,17 +172,13 @@ export async function updateAppointmentStatus(
   const supabase = await createClient();
 
   const updates: Record<string, unknown> = {
-    status: targetStatus,
+    p_appointment_id: appointmentId,
+    p_tenant_id: tenantId,
+    p_target_status: targetStatus,
+    p_updated_by: updatedBy ?? null,
   };
-  if (updatedBy) updates.updated_by = updatedBy;
 
-  const { data, error } = await supabase
-    .from("appointments")
-    .update(updates as never)
-    .eq("id", appointmentId)
-    .eq("tenant_id", tenantId)
-    .select("*")
-    .single();
+  const { data, error } = await supabase.rpc("transition_appointment_status" as never, updates as never);
 
   if (error) {
     // Handle database-level transition rejection

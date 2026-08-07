@@ -44,7 +44,7 @@ export async function updateCustomerProfileAction(
 
      try {
           if (Object.keys(updates).length > 0) {
-               const { error } = await supabase.from("tenant_customers").update(updates).eq("tenant_id", tenant.id).eq("id", customerId);
+               const { error } = await supabase.from("tenant_customers").update(updates as never).eq("tenant_id", tenant.id).eq("id", customerId);
                if (error) throw error;
           }
 

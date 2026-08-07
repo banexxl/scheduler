@@ -364,6 +364,54 @@ export type Database = {
           },
         ]
       }
+      appointment_status_history: {
+        Row: {
+          appointment_id: string
+          changed_at: string
+          changed_by: string | null
+          created_at: string
+          from_status: string
+          id: string
+          tenant_id: string
+          to_status: string
+        }
+        Insert: {
+          appointment_id: string
+          changed_at?: string
+          changed_by?: string | null
+          created_at?: string
+          from_status: string
+          id?: string
+          tenant_id: string
+          to_status: string
+        }
+        Update: {
+          appointment_id?: string
+          changed_at?: string
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string
+          id?: string
+          tenant_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_status_history_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_status_history_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           appointment_number: string
@@ -372,6 +420,8 @@ export type Database = {
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
+          checked_in_at: string | null
+          completed_at: string | null
           created_at: string
           created_by: string | null
           currency: string
@@ -386,6 +436,7 @@ export type Database = {
           internal_notes: string | null
           location_id: string
           location_name_snapshot: string
+          no_show_at: string | null
           occupied_ends_at: string
           occupied_starts_at: string
           price: number
@@ -394,6 +445,7 @@ export type Database = {
           schedule_version: number
           service_id: string
           service_name_snapshot: string
+          service_started_at: string | null
           source: string
           starts_at: string
           status: string
@@ -408,6 +460,8 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          checked_in_at?: string | null
+          completed_at?: string | null
           created_at?: string
           created_by?: string | null
           currency: string
@@ -422,6 +476,7 @@ export type Database = {
           internal_notes?: string | null
           location_id: string
           location_name_snapshot: string
+          no_show_at?: string | null
           occupied_ends_at: string
           occupied_starts_at: string
           price?: number
@@ -430,6 +485,7 @@ export type Database = {
           schedule_version?: number
           service_id: string
           service_name_snapshot: string
+          service_started_at?: string | null
           source?: string
           starts_at: string
           status?: string
@@ -444,6 +500,8 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          checked_in_at?: string | null
+          completed_at?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
@@ -458,6 +516,7 @@ export type Database = {
           internal_notes?: string | null
           location_id?: string
           location_name_snapshot?: string
+          no_show_at?: string | null
           occupied_ends_at?: string
           occupied_starts_at?: string
           price?: number
@@ -466,6 +525,7 @@ export type Database = {
           schedule_version?: number
           service_id?: string
           service_name_snapshot?: string
+          service_started_at?: string | null
           source?: string
           starts_at?: string
           status?: string
@@ -3420,6 +3480,8 @@ export type Database = {
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
+          checked_in_at: string | null
+          completed_at: string | null
           created_at: string
           created_by: string | null
           currency: string
@@ -3434,6 +3496,7 @@ export type Database = {
           internal_notes: string | null
           location_id: string
           location_name_snapshot: string
+          no_show_at: string | null
           occupied_ends_at: string
           occupied_starts_at: string
           price: number
@@ -3442,6 +3505,7 @@ export type Database = {
           schedule_version: number
           service_id: string
           service_name_snapshot: string
+          service_started_at: string | null
           source: string
           starts_at: string
           status: string
@@ -3754,6 +3818,8 @@ export type Database = {
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
+          checked_in_at: string | null
+          completed_at: string | null
           created_at: string
           created_by: string | null
           currency: string
@@ -3768,6 +3834,7 @@ export type Database = {
           internal_notes: string | null
           location_id: string
           location_name_snapshot: string
+          no_show_at: string | null
           occupied_ends_at: string
           occupied_starts_at: string
           price: number
@@ -3776,6 +3843,7 @@ export type Database = {
           schedule_version: number
           service_id: string
           service_name_snapshot: string
+          service_started_at: string | null
           source: string
           starts_at: string
           status: string
@@ -3994,6 +4062,60 @@ export type Database = {
       sync_appointment_reminders: {
         Args: { p_appointment_id: string; p_tenant_id: string }
         Returns: Json
+      }
+      transition_appointment_status: {
+        Args: {
+          p_appointment_id: string
+          p_target_status: string
+          p_tenant_id: string
+          p_updated_by?: string
+        }
+        Returns: {
+          appointment_number: string
+          buffer_after_minutes: number
+          buffer_before_minutes: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          checked_in_at: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_notes: string | null
+          customer_phone: string | null
+          duration_minutes: number
+          ends_at: string
+          id: string
+          internal_notes: string | null
+          location_id: string
+          location_name_snapshot: string
+          no_show_at: string | null
+          occupied_ends_at: string
+          occupied_starts_at: string
+          price: number
+          resource_id: string
+          resource_name_snapshot: string
+          schedule_version: number
+          service_id: string
+          service_name_snapshot: string
+          service_started_at: string | null
+          source: string
+          starts_at: string
+          status: string
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "appointments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       update_location_exception_v2: {
         Args: {

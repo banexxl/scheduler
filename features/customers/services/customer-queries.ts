@@ -113,7 +113,7 @@ export async function getCustomersList(
           query = query.eq("preferred_location_id", filters.locationId);
      }
 
-     const { data, error, count } = await query.order("updated_at", { ascending: false }).range(offset, offset + limit - 1);
+     const { data, error } = await query.order("updated_at", { ascending: false }).range(offset, offset + limit - 1);
 
      if (error || !data) return { items: [], total: 0 };
 

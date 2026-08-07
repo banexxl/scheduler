@@ -14,6 +14,7 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import type { CalendarAppointment } from "../types/calendar";
 import { APPOINTMENT_STATUS_LABELS } from "@/features/appointments/types/appointment";
+import AppointmentQuickActions from "@/features/appointments/components/appointment-quick-actions";
 import { toZonedTime } from "date-fns-tz";
 import { format } from "date-fns";
 
@@ -117,15 +118,18 @@ export default function CalendarAppointmentDrawer({
             View Full Details
           </Button>
           {canEdit && (
-            <Button
-              component="a"
-              href={`/${tenantSlug}/appointments/${appointment.id}/edit`}
-              variant="outlined"
-              size="small"
-              fullWidth
-            >
-              Edit Appointment
-            </Button>
+            <>
+              <AppointmentQuickActions tenantSlug={tenantSlug} appointmentId={appointment.id} currentStatus={appointment.status} />
+              <Button
+                component="a"
+                href={`/${tenantSlug}/appointments/${appointment.id}/edit`}
+                variant="outlined"
+                size="small"
+                fullWidth
+              >
+                Edit Appointment
+              </Button>
+            </>
           )}
         </Box>
       </Box>

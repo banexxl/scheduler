@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
@@ -11,6 +12,8 @@ import { getAppointmentById } from "@/features/appointments/services/appointment
 import { APPOINTMENT_STATUS_LABELS } from "@/features/appointments/types/appointment";
 import type { AppointmentStatus } from "@/features/appointments/types/appointment";
 import AppointmentStatusActions from "@/features/appointments/components/appointment-status-actions";
+import { buildAppointmentTimeline } from "@/features/appointments/utils/appointment-timeline";
+import { getAppointmentStatusHistory } from "@/features/appointments/services/appointment-status-history";
 import {
   getActiveTokenMetadataForAppointment,
   getCustomerActionHistoryForAppointment,
@@ -21,6 +24,7 @@ import { getNotificationsForAppointment } from "@/features/notifications/service
 import { getRemindersForAppointment } from "@/features/notifications/services/reminder-queries";
 import AppointmentNotificationsSection from "@/features/notifications/components/appointment-notifications-section";
 import AppointmentRemindersSection from "@/features/notifications/components/appointment-reminders-section";
+import { getAppointmentOperationalState } from "@/features/appointments/utils/appointment-operational-state";
 
 const EDITABLE_ROLES = ["owner", "admin"];
 
@@ -53,10 +57,11 @@ export default async function AppointmentDetailPage({
   const appointment = await getAppointmentById(tenant.id, appointmentId);
   if (!appointment) notFound();
 
-  const [activeToken, tokenHistory, customerActions] = await Promise.all([
+  const [activeToken, tokenHistory, customerActions, statusHistory] = await Promise.all([
     getActiveTokenMetadataForAppointment(tenant.id, appointmentId),
     getTokenHistoryForAppointment(tenant.id, appointmentId, 20),
     getCustomerActionHistoryForAppointment(tenant.id, appointmentId, 100),
+    getAppointmentStatusHistory(tenant.id, appointmentId),
   ]);
 
   // Load notifications and reminders for this appointment (owner/admin only)
@@ -68,6 +73,19 @@ export default async function AppointmentDetailPage({
     : [[], []];
 
   const price = parseFloat(appointment.price);
+  const timeline = buildAppointmentTimeline(
+    {
+      createdAt: appointment.createdAt,
+      updatedAt: appointment.updatedAt,
+      status: appointment.status,
+      checkedInAt: appointment.checkedInAt,
+      serviceStartedAt: appointment.serviceStartedAt,
+      completedAt: appointment.completedAt,
+      cancelledAt: appointment.cancelledAt,
+      cancellationReason: appointment.cancellationReason,
+    },
+    statusHistory
+  );
 
   return (
     <Box>
@@ -82,12 +100,30 @@ export default async function AppointmentDetailPage({
           <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
             {appointment.appointmentNumber}
           </Typography>
-          <Chip
-            label={APPOINTMENT_STATUS_LABELS[appointment.status]}
-            color={STATUS_COLORS[appointment.status]}
-            size="small"
-            sx={{ mt: 0.5 }}
-          />
+          <Stack direction="row" spacing={1} sx={{ mt: 0.75, flexWrap: "wrap" }}>
+            <Chip
+              label={APPOINTMENT_STATUS_LABELS[appointment.status]}
+              color={STATUS_COLORS[appointment.status]}
+              size="small"
+            />
+            <Chip
+              label={getAppointmentOperationalState(
+                {
+                  status: appointment.status,
+                  startsAt: appointment.startsAt,
+                  endsAt: appointment.endsAt,
+                  checkedInAt: null,
+                  serviceStartedAt: null,
+                  completedAt: null,
+                  noShowAt: null,
+                },
+                new Date(),
+                "UTC"
+              ).label}
+              size="small"
+              variant="outlined"
+            />
+          </Stack>
         </Box>
         {canEdit && (
           <Box sx={{ display: "flex", gap: 1 }}>
@@ -176,6 +212,20 @@ export default async function AppointmentDetailPage({
           <Typography sx={{ whiteSpace: "pre-wrap" }}>{appointment.internalNotes}</Typography>
         </Paper>
       )}
+
+      <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 }, mb: 3 }}>
+        <Typography variant="h6" gutterBottom>Operational timeline</Typography>
+        <Stack spacing={1.5}>
+          {timeline.map((entry) => (
+            <Box key={`${entry.label}-${entry.timestamp ?? "none"}`}>
+              <Typography variant="body2" fontWeight={600}>{entry.label}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {entry.timestamp ? formatDateTime(entry.timestamp) : "Pending"}
+              </Typography>
+            </Box>
+          ))}
+        </Stack>
+      </Paper>
 
       {appointment.status === "cancelled" && (
         <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 }, mb: 3 }}>

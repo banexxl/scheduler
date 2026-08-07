@@ -149,6 +149,10 @@ export type Appointment = {
   endsAt: string;
   occupiedStartsAt: string;
   occupiedEndsAt: string;
+  checkedInAt: string | null;
+  serviceStartedAt: string | null;
+  completedAt: string | null;
+  noShowAt: string | null;
   durationMinutes: number;
   bufferBeforeMinutes: number;
   bufferAfterMinutes: number;

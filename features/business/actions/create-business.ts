@@ -40,7 +40,7 @@ export type CreateBusinessActionResult = {
  * 5. Resolve active subscription plan
  * 6. Call create_tenant RPC
  * 7. Handle duplicate-slug race condition
- * 8. Redirect to /${tenantSlug}/dashboard
+ * 8. Redirect to /${tenantSlug}/onboarding
  *
  * Never uses the admin client. Uses the authenticated server client.
  * The RPC atomically creates: tenant, owner membership, location, subscription, audit log.
@@ -279,5 +279,5 @@ async function executeCreateTenant(
   revalidatePath("/create-business");
   revalidatePath(`/${normalizedSlug}`);
 
-  redirect(`/${normalizedSlug}/dashboard`);
+  redirect(`/${normalizedSlug}/onboarding`);
 }

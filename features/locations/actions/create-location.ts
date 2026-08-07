@@ -21,7 +21,8 @@ export type LocationActionResult = {
  */
 export async function createLocationAction(
   tenantSlug: string,
-  values: Record<string, unknown>
+  values: Record<string, unknown>,
+  options?: { shouldRedirect?: boolean }
 ): Promise<LocationActionResult> {
   const user = await getUser();
   if (!user) {
@@ -148,5 +149,10 @@ export async function createLocationAction(
 
   revalidatePath(`/${tenantSlug}/locations`);
   revalidatePath(`/${tenantSlug}/dashboard`);
+
+  if (options?.shouldRedirect === false) {
+    return { success: true, message: "Location created successfully." };
+  }
+
   redirect(`/${tenantSlug}/locations`);
 }

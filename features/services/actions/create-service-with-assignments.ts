@@ -20,7 +20,8 @@ export async function createServiceWithAssignmentsAction(
   tenantSlug: string,
   values: Record<string, unknown>,
   locationIds: string[],
-  resourceAssignments: ServiceResourceAssignmentInput[]
+  resourceAssignments: ServiceResourceAssignmentInput[],
+  options?: { shouldRedirect?: boolean }
 ): Promise<ServiceActionResult> {
   const user = await getUser();
   if (!user) return { success: false, message: "Authentication required." };
@@ -120,5 +121,10 @@ export async function createServiceWithAssignmentsAction(
   revalidatePath(`/${tenantSlug}/services`);
   revalidatePath(`/${tenantSlug}/locations`);
   revalidatePath(`/${tenantSlug}/resources`);
+
+  if (options?.shouldRedirect === false) {
+    return { success: true, message: "Service created successfully." };
+  }
+
   redirect(`/${tenantSlug}/services`);
 }

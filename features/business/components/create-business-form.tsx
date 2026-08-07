@@ -59,7 +59,7 @@ function detectCurrency(): string {
  * Business creation form.
  *
  * Milestone 4.4: Calls the create_tenant RPC via server action.
- * On success, the server action redirects to /${tenantSlug}/dashboard.
+ * On success, the server action redirects to /${tenantSlug}/onboarding.
  */
 export default function CreateBusinessForm() {
   const [isPending, startTransition] = useTransition();

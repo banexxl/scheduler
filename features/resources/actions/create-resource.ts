@@ -9,7 +9,11 @@ import { resourceSchema } from "../schemas/resource-schema";
 import type { ResourceActionResult } from "./create-resource-type";
 import { assertWithinLimit, getPlanLimit, resolveBillingState } from "@/features/billing/services/tenant-entitlements";
 
-export async function createResourceAction(tenantSlug: string, values: Record<string, unknown>): Promise<ResourceActionResult> {
+export async function createResourceAction(
+  tenantSlug: string,
+  values: Record<string, unknown>,
+  options?: { shouldRedirect?: boolean }
+): Promise<ResourceActionResult> {
   const user = await getUser();
   if (!user) return { success: false, message: "Authentication required." };
 
@@ -78,5 +82,10 @@ export async function createResourceAction(tenantSlug: string, values: Record<st
 
   revalidatePath(`/${tenantSlug}/resources`);
   revalidatePath(`/${tenantSlug}/dashboard`);
+
+  if (options?.shouldRedirect === false) {
+    return { success: true, message: "Resource created successfully." };
+  }
+
   redirect(`/${tenantSlug}/resources`);
 }

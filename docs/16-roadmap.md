@@ -86,6 +86,22 @@ Connected the business creation form to the `create_tenant` database RPC.
 - Additional location management
 - Stronger RPC-level enforcement of one-business-per-owner
 
+### Milestone 8.1 — Business Onboarding Wizard
+
+Implemented a guided onboarding flow for newly created businesses that reuses existing settings, location, resource, service, booking-rules, and public-booking primitives.
+
+**Implemented:**
+- Dedicated onboarding state table and server-side state helpers
+- Derived onboarding progress resolver from actual tenant data
+- New onboarding route under /[tenantSlug]/onboarding with server/client separation
+- Dashboard checklist and progress summary for incomplete setup
+- Tenant creation redirect into onboarding
+- Documentation summary in docs/45-business-onboarding.md
+
+**Not implemented (deferred):**
+- Full multi-step form UI for every domain object with full editing controls
+- Advanced plan-gated feature enforcement beyond the existing domain action guards
+
 ### Milestone 4.5 — First Real Business Dashboard
 
 Replaced the placeholder dashboard with a server-rendered business overview.

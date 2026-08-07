@@ -27,6 +27,10 @@ export class PolarApiError extends Error {
 
 async function polarFetch<T>(path: string, init?: RequestInit): Promise<T> {
      const env = getPolarEnvironment();
+     if (!env.accessToken) {
+          throw new Error("[polar-client] Polar billing is not configured. Add POLAR_ACCESS_TOKEN to the environment.");
+     }
+
      const url = `${env.apiBaseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 
      const response = await fetch(url, {

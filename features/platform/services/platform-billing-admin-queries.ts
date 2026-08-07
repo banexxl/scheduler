@@ -25,9 +25,9 @@ function deriveSubscriptionAccessState(
 ): PlatformSubscriptionListItem["accessState"] {
      const status = String(row.status ?? "").trim().toLowerCase();
      const cancelAtPeriodEnd = Boolean(row.cancel_at_period_end);
-     const hasTrialEnd = typeof row.trial_end === "string" && row.trial_end.length > 0;
+     const hasTrialEnd = typeof row.trial_ends_at === "string" && row.trial_ends_at.length > 0;
      const hasCurrentPeriodEnd =
-          typeof row.current_period_end === "string" && row.current_period_end.length > 0;
+          typeof row.current_period_ends_at === "string" && row.current_period_ends_at.length > 0;
 
      if (status === "incomplete") return "pending";
      if (status === "incomplete_expired") return "revoked";
@@ -271,7 +271,7 @@ export async function listPlatformSubscriptions(input?: {
      let query = adminClient
           .from("tenant_subscriptions" as never)
           .select(
-               "id,tenant_id,polar_subscription_id,polar_customer_id,polar_product_id,polar_price_id,status,billing_interval,billing_interval_count,current_period_end,cancel_at_period_end,trial_end,last_synced_at,status ,billing_plans(name,plan_key),tenants(name,slug)"
+               "id,tenant_id,polar_subscription_id,polar_customer_id,polar_product_id,polar_price_id,status,billing_interval,billing_interval_count,current_period_ends_at,cancel_at_period_end,trial_ends_at,last_synced_at,status ,billing_plans(name,plan_key),tenants(name,slug)"
           )
           .order("last_synced_at" as never, { ascending: false })
           .limit(limit);
@@ -330,9 +330,9 @@ export async function listPlatformSubscriptions(input?: {
                          ? row.billing_interval_count
                          : null,
                currentPeriodEnd:
-                    typeof row.current_period_end === "string" ? row.current_period_end : null,
+                    typeof row.current_period_ends_at === "string" ? row.current_period_ends_at : null,
                cancelAtPeriodEnd: Boolean(row.cancel_at_period_end),
-               trialEnd: typeof row.trial_end === "string" ? row.trial_end : null,
+               trialEnd: typeof row.trial_ends_at === "string" ? row.trial_ends_at : null,
                lastSyncedAt: String(row.last_synced_at ?? ""),
                syncStatus: String(row.status ?? "synced"),
           };
@@ -405,7 +405,7 @@ export async function getPlatformSubscriptionStatusCounts() {
 
      const { data, error } = await adminClient
           .from("tenant_subscriptions" as never)
-          .select("status,status ,cancel_at_period_end,current_period_end,trial_end");
+          .select("status,status ,cancel_at_period_end,current_period_ends_at,trial_ends_at");
 
      if (error) {
           throw new Error(

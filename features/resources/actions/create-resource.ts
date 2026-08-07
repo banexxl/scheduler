@@ -22,7 +22,7 @@ export async function createResourceAction(tenantSlug: string, values: Record<st
     .from("tenant_subscriptions")
     .select("access_state, status")
     .eq("tenant_id", tenant.id)
-    .order("current_period_end", { ascending: false, nullsFirst: false })
+    .order("current_period_ends_at", { ascending: false, nullsFirst: false })
     .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle();

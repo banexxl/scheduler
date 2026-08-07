@@ -1,6 +1,6 @@
 import "server-only";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/require-user";
 import { getTenantBySlug, type TenantRow } from "./get-tenant-by-slug";
 import type { User } from "@supabase/supabase-js";
@@ -37,13 +37,32 @@ export async function requireTenantMember(
 
   const supabase = await createClient();
 
-  const { data: membership } = await supabase
+  const { data: membership, error } = await supabase
     .from("tenant_members")
     .select("id, role")
     .eq("user_id", user.id)
     .eq("tenant_id", tenant.id)
     .eq("status", "active")
     .single();
+
+  if (!membership && (error?.code === "PGRST116" || error?.code === "42501")) {
+    try {
+      const serviceRoleClient = createServiceRoleClient();
+      const { data: fallbackMembership, error: fallbackError } = await serviceRoleClient
+        .from("tenant_members")
+        .select("id, role")
+        .eq("user_id", user.id)
+        .eq("tenant_id", tenant.id)
+        .eq("status", "active")
+        .single();
+
+      if (!fallbackError && fallbackMembership) {
+        return { user, tenant, membership: fallbackMembership };
+      }
+    } catch {
+      // Fall through to notFound below.
+    }
+  }
 
   if (!membership) {
     notFound();

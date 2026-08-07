@@ -117,7 +117,7 @@ export async function getCurrentTenantSubscription(tenantId: string) {
                "*, billing_plans(name,plan_key), billing_plan_prices(billing_interval,billing_interval_count,amount,currency)"
           )
           .eq("tenant_id" as never, tenantId)
-          .order("current_period_end" as never, { ascending: false, nullsFirst: false })
+          .order("current_period_ends_at" as never, { ascending: false, nullsFirst: false })
           .order("updated_at" as never, { ascending: false })
           .limit(1)
           .maybeSingle();

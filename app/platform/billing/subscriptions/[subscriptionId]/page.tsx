@@ -64,8 +64,8 @@ export default async function PlatformBillingSubscriptionDetailPage({
                          <Typography>Access state: {String(subscription.access_state ?? "-")}</Typography>
                          <Typography>Sync status: {String(subscription.status ?? "-")}</Typography>
                          <Typography>Last synced: {String(subscription.last_synced_at ?? "-")}</Typography>
-                         <Typography>Current period: {String(subscription.current_period_start ?? "-")} - {String(subscription.current_period_end ?? "-")}</Typography>
-                         <Typography>Trial: {String(subscription.trial_start ?? "-")} - {String(subscription.trial_end ?? "-")}</Typography>
+                         <Typography>Current period: {String(subscription.current_period_start ?? "-")} - {String(subscription.current_period_ends_at ?? "-")}</Typography>
+                         <Typography>Trial: {String(subscription.trial_start ?? "-")} - {String(subscription.trial_ends_at ?? "-")}</Typography>
                          <Typography>Cancel at period end: {String(subscription.cancel_at_period_end ?? false)}</Typography>
                          <Typography>Ends at: {String(subscription.ends_at ?? "-")}</Typography>
                     </Stack>

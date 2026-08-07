@@ -8,10 +8,7 @@ const serverEnvironmentSchema = yup.object({
   polarAccessToken: yup.string().optional().default(""),
   polarOrganizationId: yup.string().optional().default(""),
   polarWebhookSecret: yup.string().optional().default(""),
-  billingProcessorSecret: yup.string().optional().default(""),
-  billingSyncSecret: yup.string().optional().default(""),
   polarServer: yup.string().optional().default("sandbox"),
-  polarWebhookProcessorSecret: yup.string().optional().default(""),
   polarReconciliationSecret: yup.string().optional().default(""),
 });
 
@@ -26,10 +23,7 @@ function validateServerEnvironment(): ServerEnvironment {
       polarAccessToken: process.env.POLAR_ACCESS_TOKEN,
       polarOrganizationId: process.env.POLAR_ORGANIZATION_ID,
       polarWebhookSecret: process.env.POLAR_WEBHOOK_SECRET,
-      billingProcessorSecret: process.env.BILLING_PROCESSOR_SECRET,
-      billingSyncSecret: process.env.BILLING_SYNC_SECRET,
       polarServer: process.env.POLAR_SERVER,
-      polarWebhookProcessorSecret: process.env.POLAR_WEBHOOK_PROCESSOR_SECRET,
       polarReconciliationSecret: process.env.POLAR_RECONCILIATION_SECRET,
     });
   } catch (error) {

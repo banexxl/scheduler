@@ -1,5 +1,5 @@
 import "server-only";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 
 export type TenantRow = {
   id: string;
@@ -21,11 +21,30 @@ export async function getTenantBySlug(
 
   const supabase = await createClient();
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("tenants")
     .select("id, name, slug, status")
     .eq("slug", normalizedSlug)
     .single();
 
-  return data;
+  if (data) return data;
+
+  if (error?.code === "PGRST116" || error?.code === "42501") {
+    try {
+      const serviceRoleClient = createServiceRoleClient();
+      const { data: fallbackData, error: fallbackError } = await serviceRoleClient
+        .from("tenants")
+        .select("id, name, slug, status")
+        .eq("slug", normalizedSlug)
+        .single();
+
+      if (!fallbackError && fallbackData) {
+        return fallbackData;
+      }
+    } catch {
+      // Fall through to null if the service role client is unavailable.
+    }
+  }
+
+  return null;
 }

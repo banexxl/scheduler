@@ -1,7 +1,9 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { clientEnvironment } from "@/lib/environment/client";
+import { serverEnvironment } from "@/lib/environment/server";
 import type { Database } from "./database.types";
 
 /**
@@ -34,6 +36,23 @@ export async function createClient() {
                         // proxy handles session refresh and cookie updates.
                     }
                 },
+            },
+        }
+    );
+}
+
+export function createServiceRoleClient() {
+    if (!serverEnvironment.supabaseServiceRoleKey) {
+        throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
+    }
+
+    return createSupabaseClient<Database>(
+        clientEnvironment.supabaseUrl,
+        serverEnvironment.supabaseServiceRoleKey,
+        {
+            auth: {
+                persistSession: false,
+                autoRefreshToken: false,
             },
         }
     );

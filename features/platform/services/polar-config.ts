@@ -22,12 +22,9 @@ function normalizeBaseUrl(value: string | undefined): string {
      }
 }
 
-function getRequiredEnv(name: string): string {
+function getOptionalEnv(name: string): string | null {
      const value = process.env[name]?.trim();
-     if (!value) {
-          throw new Error(`${name} is required for billing operations`);
-     }
-     return value;
+     return value ? value : null;
 }
 
 function getFirstNonEmptyEnv(names: string[]): string | null {
@@ -39,25 +36,17 @@ function getFirstNonEmptyEnv(names: string[]): string | null {
 }
 
 export function getPolarEnvironment(): PolarEnvironment {
-     const processorSecret =
-          getFirstNonEmptyEnv([
-               "POLAR_WEBHOOK_PROCESSOR_SECRET",
-               "BILLING_PROCESSOR_SECRET",
-          ]) ?? getRequiredEnv("POLAR_WEBHOOK_PROCESSOR_SECRET");
+     const processorSecret = "";
 
-     const syncSecret =
-          getFirstNonEmptyEnv([
-               "POLAR_RECONCILIATION_SECRET",
-               "BILLING_SYNC_SECRET",
-               "POLAR_WEBHOOK_PROCESSOR_SECRET",
-               "BILLING_PROCESSOR_SECRET",
-          ]) ?? getRequiredEnv("POLAR_RECONCILIATION_SECRET");
+     const syncSecret = getFirstNonEmptyEnv([
+          "POLAR_RECONCILIATION_SECRET",
+     ]) ?? "";
 
      return {
           apiBaseUrl: normalizeBaseUrl(process.env.POLAR_API_BASE_URL),
-          accessToken: getRequiredEnv("POLAR_ACCESS_TOKEN"),
+          accessToken: getOptionalEnv("POLAR_ACCESS_TOKEN") ?? "",
           organizationId: process.env.POLAR_ORGANIZATION_ID?.trim() || null,
-          webhookSecret: getRequiredEnv("POLAR_WEBHOOK_SECRET"),
+          webhookSecret: getOptionalEnv("POLAR_WEBHOOK_SECRET") ?? "",
           processorSecret,
           syncSecret,
      };
@@ -73,15 +62,9 @@ export function getBillingSyncSecret(): string {
 
 export function getBillingDiagnosticsConfig() {
      const baseUrl = normalizeBaseUrl(process.env.POLAR_API_BASE_URL);
-     const processorSecret = getFirstNonEmptyEnv([
-          "POLAR_WEBHOOK_PROCESSOR_SECRET",
-          "BILLING_PROCESSOR_SECRET",
-     ]);
+     const processorSecret = "";
      const syncSecret = getFirstNonEmptyEnv([
           "POLAR_RECONCILIATION_SECRET",
-          "BILLING_SYNC_SECRET",
-          "POLAR_WEBHOOK_PROCESSOR_SECRET",
-          "BILLING_PROCESSOR_SECRET",
      ]);
 
      return {

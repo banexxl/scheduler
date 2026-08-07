@@ -77,7 +77,7 @@ export async function getBusinessDashboard(
     supabase
       .from("tenant_subscriptions")
       .select(
-        "status, trial_end, current_period_end, cancel_at_period_end, billing_plans(name, billing_interval)"
+        "status, trial_ends_at, current_period_ends_at, cancel_at_period_end, billing_plans(name, billing_interval)"
       )
       .eq("tenant_id", tenantId)
       .limit(1)
@@ -127,8 +127,8 @@ export async function getBusinessDashboard(
   if (subscriptionResult.data) {
     const sub = subscriptionResult.data as {
       status?: string | null;
-      trial_end?: string | null;
-      current_period_end?: string | null;
+      trial_ends_at?: string | null;
+      current_period_ends_at?: string | null;
       cancel_at_period_end?: boolean | null;
       billing_plans?: {
         name?: string | null;
@@ -141,8 +141,8 @@ export async function getBusinessDashboard(
       status: sub.status ?? "unknown",
       planName: plan?.name ?? null,
       billingInterval: plan?.billing_interval ?? null,
-      trialEndsAt: sub.trial_end ?? null,
-      currentPeriodEndsAt: sub.current_period_end ?? null,
+      trialEndsAt: sub.trial_ends_at ?? null,
+      currentPeriodEndsAt: sub.current_period_ends_at ?? null,
       cancelAtPeriodEnd: Boolean(sub.cancel_at_period_end),
     };
   }

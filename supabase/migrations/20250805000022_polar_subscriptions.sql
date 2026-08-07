@@ -15,7 +15,7 @@ BEGIN
     CREATE TABLE public.tenant_subscriptions (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       tenant_id uuid NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
-      tenant_billing_customer_id uuid NOT NULL REFERENCES public.tenant_billing_customers(id) ON DELETE RESTRICT,
+      tenant_billing_customer_id uuid NULL REFERENCES public.tenant_billing_customers(id) ON DELETE RESTRICT,
       billing_plan_id uuid NULL REFERENCES public.billing_plans(id) ON DELETE SET NULL,
       billing_plan_price_id uuid NULL REFERENCES public.billing_plan_prices(id) ON DELETE SET NULL,
       polar_subscription_id uuid NOT NULL,
@@ -31,9 +31,9 @@ BEGIN
       currency text NULL,
       quantity integer NULL,
       current_period_start timestamptz NULL,
-      current_period_end timestamptz NULL,
+      current_period_ends_at timestamptz NULL,
       trial_start timestamptz NULL,
-      trial_end timestamptz NULL,
+      trial_ends_at timestamptz NULL,
       started_at timestamptz NULL,
       cancel_at_period_end boolean NOT NULL DEFAULT false,
       canceled_at timestamptz NULL,
@@ -93,10 +93,10 @@ BEGIN
         sync_error_message IS NULL OR char_length(sync_error_message) <= 1000
       ),
       CONSTRAINT tenant_subscriptions_period_order_check CHECK (
-        current_period_start IS NULL OR current_period_end IS NULL OR current_period_start < current_period_end
+        current_period_start IS NULL OR current_period_ends_at IS NULL OR current_period_start < current_period_ends_at
       ),
       CONSTRAINT tenant_subscriptions_trial_order_check CHECK (
-        trial_start IS NULL OR trial_end IS NULL OR trial_start < trial_end
+        trial_start IS NULL OR trial_ends_at IS NULL OR trial_start < trial_ends_at
       ),
       CONSTRAINT tenant_subscriptions_lifecycle_order_check CHECK (
         started_at IS NULL OR ended_at IS NULL OR started_at <= ended_at
@@ -122,9 +122,9 @@ ALTER TABLE public.tenant_subscriptions
   ADD COLUMN IF NOT EXISTS currency text,
   ADD COLUMN IF NOT EXISTS quantity integer,
   ADD COLUMN IF NOT EXISTS current_period_start timestamptz,
-  ADD COLUMN IF NOT EXISTS current_period_end timestamptz,
+  ADD COLUMN IF NOT EXISTS current_period_ends_at timestamptz,
   ADD COLUMN IF NOT EXISTS trial_start timestamptz,
-  ADD COLUMN IF NOT EXISTS trial_end timestamptz,
+  ADD COLUMN IF NOT EXISTS trial_ends_at timestamptz,
   ADD COLUMN IF NOT EXISTS started_at timestamptz,
   ADD COLUMN IF NOT EXISTS cancel_at_period_end boolean,
   ADD COLUMN IF NOT EXISTS canceled_at timestamptz,
@@ -143,6 +143,20 @@ ALTER TABLE public.tenant_subscriptions
   ADD COLUMN IF NOT EXISTS subscription_metadata jsonb,
   ADD COLUMN IF NOT EXISTS created_at timestamptz,
   ADD COLUMN IF NOT EXISTS updated_at timestamptz;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'tenant_subscriptions'
+      AND column_name = 'tenant_billing_customer_id'
+  ) THEN
+    ALTER TABLE public.tenant_subscriptions
+      ALTER COLUMN tenant_billing_customer_id DROP NOT NULL;
+  END IF;
+END $$;
 
 UPDATE public.tenant_subscriptions
 SET status = COALESCE(status, 'unknown'),
@@ -186,48 +200,68 @@ CREATE INDEX IF NOT EXISTS idx_tenant_subscriptions_tenant_status
   ON public.tenant_subscriptions (tenant_id, status);
 
 CREATE INDEX IF NOT EXISTS idx_tenant_subscriptions_tenant_period_end
-  ON public.tenant_subscriptions (tenant_id, current_period_end DESC);
+  ON public.tenant_subscriptions (tenant_id, current_period_ends_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_tenant_subscriptions_access_period_end
-  ON public.tenant_subscriptions (access_state, current_period_end DESC);
+  ON public.tenant_subscriptions (access_state, current_period_ends_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_tenant_subscriptions_sync_status_last_synced
   ON public.tenant_subscriptions (sync_status, last_synced_at DESC);
 
-CREATE TRIGGER trg_tenant_subscriptions_updated_at
-  BEFORE UPDATE ON public.tenant_subscriptions
-  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'trg_tenant_subscriptions_updated_at'
+      AND tgrelid = 'public.tenant_subscriptions'::regclass
+  ) THEN
+    CREATE TRIGGER trg_tenant_subscriptions_updated_at
+      BEFORE UPDATE ON public.tenant_subscriptions
+      FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+  END IF;
+END $$;
 
 -- ============================================================
 -- PART B: Optional State History
 -- ============================================================
 
-CREATE TABLE public.billing_subscription_state_history (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id uuid NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
-  tenant_subscription_id uuid NOT NULL REFERENCES public.tenant_subscriptions(id) ON DELETE CASCADE,
-  polar_event_id text NULL,
-  previous_status text NULL,
-  new_status text NOT NULL,
-  previous_access_state text NULL,
-  new_access_state text NOT NULL,
-  effective_at timestamptz NOT NULL,
-  change_source text NOT NULL,
-  change_summary jsonb NOT NULL DEFAULT '{}'::jsonb,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT billing_subscription_state_history_change_source_check CHECK (
-    change_source IN ('webhook', 'reconciliation', 'manual_refresh')
-  ),
-  CONSTRAINT billing_subscription_state_history_summary_object_check CHECK (
-    jsonb_typeof(change_summary) = 'object'
-  )
-);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+      AND table_name = 'billing_subscription_state_history'
+  ) THEN
+    CREATE TABLE public.billing_subscription_state_history (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      tenant_id uuid NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
+      tenant_subscription_id uuid NOT NULL REFERENCES public.tenant_subscriptions(id) ON DELETE CASCADE,
+      polar_event_id text NULL,
+      previous_status text NULL,
+      new_status text NOT NULL,
+      previous_access_state text NULL,
+      new_access_state text NOT NULL,
+      effective_at timestamptz NOT NULL,
+      change_source text NOT NULL,
+      change_summary jsonb NOT NULL DEFAULT '{}'::jsonb,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT billing_subscription_state_history_change_source_check CHECK (
+        change_source IN ('webhook', 'reconciliation', 'manual_refresh')
+      ),
+      CONSTRAINT billing_subscription_state_history_summary_object_check CHECK (
+        jsonb_typeof(change_summary) = 'object'
+      )
+    );
+  END IF;
+END $$;
 
-CREATE UNIQUE INDEX uq_subscription_state_history_event_once
+CREATE UNIQUE INDEX IF NOT EXISTS uq_subscription_state_history_event_once
   ON public.billing_subscription_state_history (tenant_subscription_id, polar_event_id)
   WHERE polar_event_id IS NOT NULL;
 
-CREATE INDEX idx_subscription_state_history_tenant_subscription_time
+CREATE INDEX IF NOT EXISTS idx_subscription_state_history_tenant_subscription_time
   ON public.billing_subscription_state_history (tenant_subscription_id, effective_at DESC);
 
 -- ============================================================
@@ -247,6 +281,10 @@ DECLARE
   v_checkout public.billing_checkout_sessions%ROWTYPE;
   v_conflicting_effective_count integer;
 BEGIN
+  IF NEW.tenant_billing_customer_id IS NULL THEN
+    RETURN NEW;
+  END IF;
+
   SELECT *
   INTO v_customer
   FROM public.tenant_billing_customers
@@ -345,9 +383,19 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER trg_verify_tenant_subscription_relationships
-  BEFORE INSERT OR UPDATE ON public.tenant_subscriptions
-  FOR EACH ROW EXECUTE FUNCTION public.verify_tenant_subscription_relationships();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'trg_verify_tenant_subscription_relationships'
+      AND tgrelid = 'public.tenant_subscriptions'::regclass
+  ) THEN
+    CREATE TRIGGER trg_verify_tenant_subscription_relationships
+      BEFORE INSERT OR UPDATE ON public.tenant_subscriptions
+      FOR EACH ROW EXECUTE FUNCTION public.verify_tenant_subscription_relationships();
+  END IF;
+END $$;
 
 -- ============================================================
 -- PART D: RLS
@@ -356,31 +404,50 @@ CREATE TRIGGER trg_verify_tenant_subscription_relationships
 ALTER TABLE public.tenant_subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.billing_subscription_state_history ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY tenant_subscriptions_owner_admin_select
-  ON public.tenant_subscriptions FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1
-      FROM public.tenant_members tm
-      WHERE tm.tenant_id = tenant_subscriptions.tenant_id
-        AND tm.user_id = auth.uid()
-        AND tm.status = 'active'
-        AND tm.role IN ('owner', 'admin')
-    )
-  );
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'tenant_subscriptions'
+      AND policyname = 'tenant_subscriptions_owner_admin_select'
+  ) THEN
+    CREATE POLICY tenant_subscriptions_owner_admin_select
+      ON public.tenant_subscriptions FOR SELECT
+      USING (
+        EXISTS (
+          SELECT 1
+          FROM public.tenant_members tm
+          WHERE tm.tenant_id = tenant_subscriptions.tenant_id
+            AND tm.user_id = auth.uid()
+            AND tm.status = 'active'
+            AND tm.role IN ('owner', 'admin')
+        )
+      );
+  END IF;
 
-CREATE POLICY billing_subscription_state_history_owner_admin_select
-  ON public.billing_subscription_state_history FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1
-      FROM public.tenant_members tm
-      WHERE tm.tenant_id = billing_subscription_state_history.tenant_id
-        AND tm.user_id = auth.uid()
-        AND tm.status = 'active'
-        AND tm.role IN ('owner', 'admin')
-    )
-  );
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'billing_subscription_state_history'
+      AND policyname = 'billing_subscription_state_history_owner_admin_select'
+  ) THEN
+    CREATE POLICY billing_subscription_state_history_owner_admin_select
+      ON public.billing_subscription_state_history FOR SELECT
+      USING (
+        EXISTS (
+          SELECT 1
+          FROM public.tenant_members tm
+          WHERE tm.tenant_id = billing_subscription_state_history.tenant_id
+            AND tm.user_id = auth.uid()
+            AND tm.status = 'active'
+            AND tm.role IN ('owner', 'admin')
+        )
+      );
+  END IF;
+END $$;
 
 REVOKE ALL ON TABLE public.tenant_subscriptions FROM anon;
 REVOKE ALL ON TABLE public.tenant_subscriptions FROM authenticated;

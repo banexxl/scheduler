@@ -729,3 +729,34 @@ Implemented scheduled email reminders sent before appointments using the existin
 - Provider delivery webhooks
 
 See `docs/37-appointment-reminders.md` for full details.
+
+### Milestone 8.4 — Business Dashboard & Analytics
+
+Implemented a tenant dashboard with operational metrics and business insights.
+
+**Implemented:**
+- Analytics query orchestrator with period/comparison resolution
+- Date range model (today/7days/this_month/prev_month) using tenant timezone
+- Summary cards: today operations + period metrics + comparison deltas
+- Appointment trend SVG line chart (total/completed/cancelled)
+- Top services ranking (bookings, completed, value)
+- Resource analytics (appointment count, scheduled minutes)
+- Location breakdown (multi-location support)
+- Customer metrics (new vs returning, return rate)
+- Booking source breakdown (internal/public/walk-in/phone)
+- Status breakdown with colored progress bars
+- Comparison period with percentage/percentage-point changes
+- Server/client architecture (page.tsx → client-page.tsx)
+- URL-based period filter
+- Empty state handling for all components
+- 15 automated tests for date ranges and constants
+- Documentation (docs/48-business-dashboard-analytics.md)
+
+**Not implemented (deferred):**
+- Platform-admin analytics, MRR/ARR
+- Appointment payment revenue
+- Resource utilization (working-hour intersection)
+- CSV exports, scheduled reports
+- Forecasting, AI insights
+
+See `docs/48-business-dashboard-analytics.md` for full details.

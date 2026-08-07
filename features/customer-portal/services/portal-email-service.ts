@@ -9,9 +9,6 @@ import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveNotificationSettings } from "@/features/notifications/services/notification-settings-service";
-import {
-  renderNotificationTemplate,
-} from "@/features/notifications/services/template-renderer";
 import type { RenderedTemplate } from "@/features/notifications/types/notification";
 
 // ─── Default Template ────────────────────────────────────────────────────────

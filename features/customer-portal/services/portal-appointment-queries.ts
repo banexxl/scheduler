@@ -38,17 +38,11 @@ export async function getCustomerPortalAppointments(
   const now = new Date();
 
   // Load booking rules once for cancel/reschedule eligibility
-  let defaultRules: { allowCustomerCancellation: boolean; customerCancellationNoticeMinutes: number; allowCustomerRescheduling: boolean; customerRescheduleNoticeMinutes: number } | null = null;
+  let defaultRules: Awaited<ReturnType<typeof getResolvedBookingRules>> | null = null;
   try {
     const firstServiceId = rows[0]?.service_id as string | undefined;
     if (firstServiceId) {
-      const rules = await getResolvedBookingRules(tenantId, firstServiceId);
-      defaultRules = {
-        allowCustomerCancellation: rules.allowCustomerCancellation,
-        customerCancellationNoticeMinutes: rules.customerCancellationNoticeMinutes,
-        allowCustomerRescheduling: rules.allowCustomerRescheduling,
-        customerRescheduleNoticeMinutes: rules.customerRescheduleNoticeMinutes,
-      };
+      defaultRules = await getResolvedBookingRules(tenantId, firstServiceId);
     }
   } catch {
     // Use conservative defaults
@@ -69,22 +63,10 @@ export async function getCustomerPortalAppointments(
     let canReschedule = false;
 
     if (defaultRules && ["pending", "confirmed"].includes(status)) {
-      canCancel = canCustomerCancelAppointment(
-        { status, startsAt },
-        {
-          allowCustomerCancellation: defaultRules.allowCustomerCancellation,
-          customerCancellationNoticeMinutes: defaultRules.customerCancellationNoticeMinutes,
-        },
-        now
-      );
-      canReschedule = canCustomerRescheduleAppointment(
-        { status, startsAt },
-        {
-          allowCustomerRescheduling: defaultRules.allowCustomerRescheduling,
-          customerRescheduleNoticeMinutes: defaultRules.customerRescheduleNoticeMinutes,
-        },
-        now
-      );
+      const cancelResult = canCustomerCancelAppointment(defaultRules, startsAt, now);
+      canCancel = cancelResult.allowed;
+      const rescheduleResult = canCustomerRescheduleAppointment(defaultRules, startsAt, now);
+      canReschedule = rescheduleResult.allowed;
     }
 
     const appointment: CustomerPortalAppointment = {

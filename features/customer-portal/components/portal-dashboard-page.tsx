@@ -106,8 +106,8 @@ export default function PortalDashboardPage({
             {tabs[tab]!.items.length === 0 ? (
               <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 4 }}>
                 {tab === 0 ? "No upcoming appointments." :
-                 tab === 1 ? "No past appointments." :
-                 "No cancelled appointments."}
+                  tab === 1 ? "No past appointments." :
+                    "No cancelled appointments."}
               </Typography>
             ) : (
               <Stack spacing={1.5}>
@@ -138,7 +138,6 @@ export default function PortalDashboardPage({
 function AppointmentCard({
   appointment,
   tenantSlug,
-  timeZone,
   showActions,
 }: {
   appointment: CustomerPortalAppointment;
@@ -170,9 +169,9 @@ function AppointmentCard({
             variant="outlined"
             color={
               appointment.status === "confirmed" ? "primary" :
-              appointment.status === "completed" ? "success" :
-              appointment.status === "cancelled" ? "error" :
-              "default"
+                appointment.status === "completed" ? "success" :
+                  appointment.status === "cancelled" ? "error" :
+                    "default"
             }
           />
           {price > 0 && (

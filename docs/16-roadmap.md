@@ -782,3 +782,28 @@ Polished the public booking flow into a premium mobile-first customer experience
 - Custom domains, recurring appointments
 
 See `docs/49-public-booking-ux-branding.md` for full details.
+
+### Milestone 8.6 — Customer Portal & Booking History
+
+Implemented email-based magic-link customer portal for viewing and managing appointments.
+
+**Implemented:**
+- Portal access tokens (single-use, 15-min TTL, SHA-256 hash storage)
+- Portal sessions (7-day TTL, HTTP-only secure cookies, tenant-scoped)
+- Magic-link email via existing notification outbox
+- Email enumeration protection (identical response regardless of match)
+- Rate limiting (5 requests per 15 min per IP+tenant)
+- Portal dashboard with Upcoming/History/Cancelled tabs
+- Appointment cards with cancel/reschedule/book-again actions
+- Booking rules integration for action eligibility
+- Portal entry points in public booking shell
+- Token consumption with session creation and redirect
+- Logout with session revocation
+- Documentation (docs/50-customer-portal-booking-history.md)
+
+**Not implemented (deferred):**
+- Permanent customer accounts, passwords, social login
+- Cross-tenant customer identity
+- Loyalty, reviews, payments
+
+See `docs/50-customer-portal-booking-history.md` for full details.

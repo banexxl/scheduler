@@ -126,6 +126,18 @@ export default function PublicBookingShell({
         >
           Powered by {tenant.name}
         </Typography>
+        <Typography
+          variant="caption"
+          sx={{ display: "block", textAlign: "center", mt: 0.5 }}
+        >
+          <Box
+            component="a"
+            href={`/book/${tenant.slug}/portal`}
+            sx={{ color: "text.secondary", textDecoration: "underline", "&:hover": { color: "primary.main" } }}
+          >
+            Already booked? View your appointments
+          </Box>
+        </Typography>
       </Box>
     </Box>
   );

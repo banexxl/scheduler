@@ -4,6 +4,7 @@ import Link from "@mui/material/Link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getPublicBookingSettings } from "@/features/public-booking/services/public-tenant-resolver";
 import PublicBookingSettingsForm from "@/features/public-booking/components/public-booking-settings-form";
+import BookingLinkPreview from "@/features/public-booking/components/booking-link-preview";
 import { hasFeature, resolveBillingState } from "@/features/billing/services/tenant-entitlements";
 
 export default async function PublicBookingSettingsPage({
@@ -46,6 +47,8 @@ export default async function PublicBookingSettingsPage({
         tenantSlug={tenantSlug}
         initialSettings={settings}
       />
+
+      <BookingLinkPreview tenantSlug={tenantSlug} isEnabled={settings.isEnabled} />
     </Box>
   );
 }

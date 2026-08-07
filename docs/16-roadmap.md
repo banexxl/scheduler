@@ -760,3 +760,25 @@ Implemented a tenant dashboard with operational metrics and business insights.
 - Forecasting, AI insights
 
 See `docs/48-business-dashboard-analytics.md` for full details.
+
+### Milestone 8.5 — Public Booking UX & Branding Polish
+
+Polished the public booking flow into a premium mobile-first customer experience.
+
+**Implemented:**
+- PublicBookingShell with branded hero header, MUI Stepper, responsive layout
+- Enhanced service discovery with category chips, search, polished cards
+- Improved location cards with auto-select, skeleton loading, empty states
+- Horizontal date strip with week navigation and "Next available" shortcut
+- Time slots grouped by morning/afternoon/evening with stale-request handling
+- Customer form with autofill attributes, mobile keyboards, inline validation, privacy notice
+- Enhanced confirmation with appointment number card, email/reminder notice, book-another
+- Consistent public-safe error/empty/loading states (no technical wording)
+- Booking link preview/copy and preview action on settings page
+- Full documentation (docs/49-public-booking-ux-branding.md)
+
+**Not implemented (deferred):**
+- Customer accounts, ICS generation, appointment payments
+- Custom domains, recurring appointments
+
+See `docs/49-public-booking-ux-branding.md` for full details.

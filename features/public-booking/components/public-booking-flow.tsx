@@ -1,29 +1,26 @@
 "use client";
 
 /**
- * Public booking multi-step flow — Milestone 6.11.
+ * Public booking multi-step flow — Milestones 6.11, 8.5.
  *
  * Steps:
  * 1. Service selection
  * 2. Location selection
- * 3. Resource preference (optional)
- * 4. Date & time selection
- * 5. Customer details
- * 6. Review
- * 7. Confirmation (after successful creation)
+ * 3. Date & time selection
+ * 4. Customer details
+ * 5. Review
+ * 6. Confirmation (after successful creation)
  */
 
 import { useState, useCallback } from "react";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
-import LinearProgress from "@mui/material/LinearProgress";
 import type {
   PublicBookableService,
   PublicBookingSettings,
+  PublicBookingTenant,
   PublicBookingConfirmation,
   PublicAvailabilityOption,
 } from "../types/public-booking";
+import PublicBookingShell from "./public-booking-shell";
 import PublicBookingConfirmationView from "./public-booking-confirmation";
 import PublicServiceStep from "./public-service-step";
 import PublicDateTimeStep from "./public-date-time-step";
@@ -33,8 +30,7 @@ import PublicBookingReview from "./public-booking-review";
 
 type Props = {
   tenantSlug: string;
-  tenantName: string;
-  tenantId: string;
+  tenant: PublicBookingTenant;
   timeZone: string;
   settings: PublicBookingSettings;
   services: PublicBookableService[];
@@ -44,8 +40,7 @@ const STEP_LABELS = ["Service", "Location", "Date & Time", "Details", "Review"];
 
 export default function PublicBookingFlow({
   tenantSlug,
-  tenantName,
-  tenantId,
+  tenant,
   timeZone,
   settings,
   services,
@@ -111,38 +106,34 @@ export default function PublicBookingFlow({
 
   // Progress
   const totalSteps = STEP_LABELS.length;
-  const progress = confirmation ? 100 : ((step + 1) / totalSteps) * 100;
 
   // ─── Render ──────────────────────────────────────────────────────────────
 
   if (confirmation) {
     return (
-      <PublicBookingConfirmationView
-        confirmation={confirmation}
-      />
+      <PublicBookingShell
+        tenant={tenant}
+        settings={settings}
+        currentStep={totalSteps - 1}
+        totalSteps={totalSteps}
+        isConfirmed={true}
+      >
+        <PublicBookingConfirmationView
+          confirmation={confirmation}
+          tenantSlug={tenantSlug}
+        />
+      </PublicBookingShell>
     );
   }
 
   return (
-    <Paper elevation={2} sx={{ p: { xs: 2, sm: 4 } }}>
-      {/* Header */}
-      <Typography variant="h5" component="h1" sx={{ fontWeight: 600, mb: 0.5 }}>
-        {settings.bookingPageTitle ?? `Book with ${tenantName}`}
-      </Typography>
-      {settings.bookingPageDescription && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {settings.bookingPageDescription}
-        </Typography>
-      )}
-
-      {/* Progress */}
-      <Box sx={{ mb: 3 }}>
-        <LinearProgress variant="determinate" value={progress} sx={{ height: 6, borderRadius: 3 }} />
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
-          Step {step + 1} of {totalSteps}: {STEP_LABELS[step]}
-        </Typography>
-      </Box>
-
+    <PublicBookingShell
+      tenant={tenant}
+      settings={settings}
+      currentStep={step}
+      totalSteps={totalSteps}
+      isConfirmed={false}
+    >
       {/* Steps */}
       {step === 0 && (
         <PublicServiceStep
@@ -156,7 +147,7 @@ export default function PublicBookingFlow({
       {step === 1 && selectedService && (
         <PublicLocationStep
           tenantSlug={tenantSlug}
-          tenantId={tenantId}
+          tenantId={tenant.id}
           serviceId={selectedService.id}
           onSelect={handleLocationSelect}
           onBack={handleBack}
@@ -166,7 +157,7 @@ export default function PublicBookingFlow({
       {step === 2 && selectedService && selectedLocationId && (
         <PublicDateTimeStep
           tenantSlug={tenantSlug}
-          tenantId={tenantId}
+          tenantId={tenant.id}
           serviceId={selectedService.id}
           locationId={selectedLocationId}
           resourceId={selectedResourceId}
@@ -195,7 +186,7 @@ export default function PublicBookingFlow({
       {step === 4 && selectedService && selectedOption && selectedResourceForSlot && (
         <PublicBookingReview
           tenantSlug={tenantSlug}
-          tenantName={tenantName}
+          tenantName={tenant.name}
           service={selectedService}
           locationId={selectedLocationId!}
           resourceId={selectedResourceForSlot}
@@ -210,6 +201,6 @@ export default function PublicBookingFlow({
           onBack={handleBack}
         />
       )}
-    </Paper>
+    </PublicBookingShell>
   );
 }

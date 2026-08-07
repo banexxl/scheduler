@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getLocation } from "@/features/locations/services/get-location";
 import ScheduleExceptionForm from "@/features/schedule-exceptions/components/schedule-exception-form";
@@ -40,7 +39,7 @@ export default async function NewExceptionPage({
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Link component={NextLink} href={`/${tenantSlug}/locations/${locationId}/exceptions`} variant="body2">
+        <Link component="a" href={`/${tenantSlug}/locations/${locationId}/exceptions`} variant="body2">
           &larr; Back to Exceptions
         </Link>
       </Box>

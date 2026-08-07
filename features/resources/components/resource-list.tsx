@@ -15,7 +15,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import type { Resource } from "../types/resource";
 import { RESOURCE_KIND_LABELS, type ResourceKind } from "../types/resource";
 import { deleteResourceAction } from "../actions/delete-resource";
@@ -38,7 +37,7 @@ export default function ResourceList({ resources, tenantSlug, canEdit }: Props) 
     return (
       <Paper variant="outlined" sx={{ p: 4, textAlign: "center" }}>
         <Typography color="text.secondary" sx={{ mb: 2 }}>No resources yet. Add the first resource that customers will eventually be able to book.</Typography>
-        {canEdit && <Button component={NextLink} href={`/${tenantSlug}/resources/new`} variant="contained">Add Resource</Button>}
+        {canEdit && <Button component="a" href={`/${tenantSlug}/resources/new`} variant="contained">Add Resource</Button>}
       </Paper>
     );
   }
@@ -66,8 +65,8 @@ export default function ResourceList({ resources, tenantSlug, canEdit }: Props) 
               <Box>
                 <IconButton size="small" onClick={(e) => setMenuAnchor({ el: e.currentTarget, id: r.id })} disabled={isPending}>&#8942;</IconButton>
                 <Menu anchorEl={menuAnchor?.id === r.id ? menuAnchor.el : null} open={menuAnchor?.id === r.id} onClose={() => setMenuAnchor(null)}>
-                  <MenuItem component={NextLink} href={`/${tenantSlug}/resources/${r.id}/edit`} onClick={() => setMenuAnchor(null)}>Edit</MenuItem>
-                  <MenuItem component={NextLink} href={`/${tenantSlug}/resources/${r.id}/media`} onClick={() => setMenuAnchor(null)}>Media</MenuItem>
+                  <MenuItem component="a" href={`/${tenantSlug}/resources/${r.id}/edit`} onClick={() => setMenuAnchor(null)}>Edit</MenuItem>
+                  <MenuItem component="a" href={`/${tenantSlug}/resources/${r.id}/media`} onClick={() => setMenuAnchor(null)}>Media</MenuItem>
                   <MenuItem onClick={() => { setMenuAnchor(null); setDelDialog({ id: r.id, name: r.name }); }} sx={{ color: "error.main" }}>Delete</MenuItem>
                 </Menu>
               </Box>

@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getService } from "@/features/services/services/get-services";
 import { getServiceCategories } from "@/features/service-categories/services/get-service-categories";
@@ -70,7 +69,7 @@ export default async function EditServicePage({ params }: { params: Promise<{ te
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}><Link component={NextLink} href={`/${tenantSlug}/services`} variant="body2">&larr; Back to Services</Link></Box>
+      <Box sx={{ mb: 3 }}><Link component="a" href={`/${tenantSlug}/services`} variant="body2">&larr; Back to Services</Link></Box>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>Edit Service: {service.name}</Typography>
       <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 } }}>
         <ServiceForm

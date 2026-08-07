@@ -1,5 +1,5 @@
 import "server-only";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 
 export type BusinessDashboardData = {
   business: {
@@ -45,7 +45,7 @@ export type BusinessDashboardData = {
 export async function getBusinessDashboard(
   tenantId: string
 ): Promise<BusinessDashboardData> {
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
 
   // Load all independent data in parallel
   const [
@@ -102,6 +102,10 @@ export async function getBusinessDashboard(
       .select("id", { count: "exact", head: true })
       .eq("tenant_id", tenantId),
   ]);
+
+  if (tenantResult.error) {
+    throw new Error(`Tenant lookup failed: ${tenantResult.error.message}`);
+  }
 
   // Map tenant data
   const tenant = tenantResult.data;

@@ -2,7 +2,6 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 
 type GettingStartedCardProps = {
   tenantSlug: string;
@@ -42,7 +41,7 @@ export default function GettingStartedCard({
         {steps.map((step) => (
           <Box component="li" key={step.label} sx={{ mb: 0.75 }}>
             {step.href ? (
-              <Link component={NextLink} href={step.href} variant="body2">
+              <Link component="a" href={step.href} variant="body2">
                 {step.label}
               </Link>
             ) : (

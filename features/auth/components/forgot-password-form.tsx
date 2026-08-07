@@ -6,7 +6,6 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import {
   forgotPasswordSchema,
   type ForgotPasswordFormValues,
@@ -82,7 +81,7 @@ export default function ForgotPasswordForm() {
           </Button>
 
           <Box sx={{ textAlign: "center" }}>
-            <Link component={NextLink} href="/login" variant="body2">
+            <Link component="a" href="/login" variant="body2">
               Back to sign in
             </Link>
           </Box>

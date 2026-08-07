@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { resolveTemplate } from "@/features/notifications/services/notification-template-service";
 import NotificationTemplateEditor from "@/features/notifications/components/notification-template-editor";
@@ -32,7 +31,7 @@ export default async function NotificationTemplatesPage({
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Link component={NextLink} href={`/${tenantSlug}/settings/notifications`} variant="body2">
+        <Link component="a" href={`/${tenantSlug}/settings/notifications`} variant="body2">
           &larr; Back to Notification Settings
         </Link>
       </Box>

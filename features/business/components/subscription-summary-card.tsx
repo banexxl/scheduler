@@ -3,7 +3,6 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import type { BusinessDashboardData } from "../services/get-business-dashboard";
 import {
   getSubscriptionStatusLabel,
@@ -75,7 +74,7 @@ export default function SubscriptionSummaryCard({
 
       <Box sx={{ mt: 2 }}>
         <Link
-          component={NextLink}
+          component="a"
           href={`/${tenantSlug}/billing`}
           variant="body2"
         >

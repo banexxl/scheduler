@@ -5,7 +5,6 @@ import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Link from "@mui/material/Link";
 import Chip from "@mui/material/Chip";
-import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getLocation } from "@/features/locations/services/get-location";
 import { getLocationScheduleExceptions } from "@/features/schedule-exceptions/services/get-location-schedule-exceptions";
@@ -41,7 +40,7 @@ export default async function ExceptionsPage({
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Link component={NextLink} href={`/${tenantSlug}/locations`} variant="body2">
+        <Link component="a" href={`/${tenantSlug}/locations`} variant="body2">
           &larr; Back to Locations
         </Link>
       </Box>
@@ -55,7 +54,7 @@ export default async function ExceptionsPage({
         </Box>
         {canEdit && (
           <Button
-            component={NextLink}
+            component="a"
             href={`/${tenantSlug}/locations/${locationId}/exceptions/new`}
             variant="contained"
           >

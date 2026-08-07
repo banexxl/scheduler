@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { resolveNotificationSettings } from "@/features/notifications/services/notification-settings-service";
 import { isEmailProviderConfigured, getEmailProviderName } from "@/features/notifications/services/providers";
@@ -36,7 +35,7 @@ export default async function NotificationSettingsPage({
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Link component={NextLink} href={`/${tenantSlug}/settings`} variant="body2">
+        <Link component="a" href={`/${tenantSlug}/settings`} variant="body2">
           &larr; Back to Settings
         </Link>
       </Box>
@@ -71,7 +70,7 @@ export default async function NotificationSettingsPage({
       </Paper>
 
       <Box sx={{ mt: 2 }}>
-        <Link component={NextLink} href={`/${tenantSlug}/settings/notifications/templates`} variant="body2">
+        <Link component="a" href={`/${tenantSlug}/settings/notifications/templates`} variant="body2">
           Manage email templates &rarr;
         </Link>
       </Box>

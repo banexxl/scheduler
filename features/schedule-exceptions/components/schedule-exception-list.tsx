@@ -15,7 +15,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import type { ScheduleException } from "../types/schedule-exception";
 import { deleteLocationScheduleExceptionAction } from "../actions/delete-location-schedule-exception";
 
@@ -60,7 +59,7 @@ export default function ScheduleExceptionList({
         </Typography>
         {canEdit && (
           <Button
-            component={NextLink}
+            component="a"
             href={`/${tenantSlug}/locations/${locationId}/exceptions/new`}
             variant="contained"
             sx={{ mt: 2 }}
@@ -125,7 +124,7 @@ export default function ScheduleExceptionList({
             >
               {!isPast && (
                 <MenuItem
-                  component={NextLink}
+                  component="a"
                   href={`/${tenantSlug}/locations/${locationId}/exceptions/${exc.id}/edit`}
                   onClick={() => setMenuAnchor(null)}
                 >

@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getResourceType } from "@/features/resources/services/get-resource-types";
 import ResourceTypeForm from "@/features/resources/components/resource-type-form";
@@ -30,7 +29,7 @@ export default async function EditResourceTypePage({ params }: { params: Promise
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}><Link component={NextLink} href={`/${tenantSlug}/resources/types`} variant="body2">&larr; Back to Resource Types</Link></Box>
+      <Box sx={{ mb: 3 }}><Link component="a" href={`/${tenantSlug}/resources/types`} variant="body2">&larr; Back to Resource Types</Link></Box>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>Edit Resource Type: {type.name}</Typography>
       <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 } }}>
         <ResourceTypeForm initialValues={initialValues} onSubmit={handleSubmit} submitLabel="Save Changes" canEdit={canEdit} />

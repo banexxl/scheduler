@@ -18,15 +18,15 @@ export default async function DashboardPage({
 }) {
   const { tenantSlug } = await params;
   const { tenant, membership } = await requireTenantMember(tenantSlug);
-
   let dashboard;
   try {
     dashboard = await getBusinessDashboard(tenant.id);
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown dashboard error";
     return (
       <Box>
         <Alert severity="error">
-          Unable to load dashboard data. Please try again later.
+          Unable to load dashboard data: {message}
         </Alert>
       </Box>
     );

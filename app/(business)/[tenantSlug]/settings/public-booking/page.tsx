@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getPublicBookingSettings } from "@/features/public-booking/services/public-tenant-resolver";
 import PublicBookingSettingsForm from "@/features/public-booking/components/public-booking-settings-form";
@@ -24,7 +23,7 @@ export default async function PublicBookingSettingsPage({
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Link component={NextLink} href={`/${tenantSlug}/settings`} variant="body2">
+        <Link component="a" href={`/${tenantSlug}/settings`} variant="body2">
           &larr; Back to Settings
         </Link>
       </Box>

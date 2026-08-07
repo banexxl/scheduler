@@ -15,7 +15,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import type { ServiceCategory } from "../types/service-category";
 import { deleteServiceCategoryAction } from "../actions/delete-service-category";
 import { toggleServiceCategoryStatusAction } from "../actions/toggle-service-category-status";
@@ -54,7 +53,7 @@ export default function ServiceCategoryList({ categories, tenantSlug, canEdit }:
       <Paper variant="outlined" sx={{ p: 4, textAlign: "center" }}>
         <Typography color="text.secondary" sx={{ mb: 1 }}>Organize your services into categories.</Typography>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>Examples: Hair, Massage, Consultations, Rooms, Rentals.</Typography>
-        {canEdit && <Button component={NextLink} href={`/${tenantSlug}/services/categories/new`} variant="contained">Create Category</Button>}
+        {canEdit && <Button component="a" href={`/${tenantSlug}/services/categories/new`} variant="contained">Create Category</Button>}
       </Paper>
     );
   }
@@ -77,7 +76,7 @@ export default function ServiceCategoryList({ categories, tenantSlug, canEdit }:
               {idx < categories.length - 1 && <IconButton size="small" onClick={() => handleMoveDown(idx)} disabled={isPending} aria-label="Move down">&#8595;</IconButton>}
               <IconButton size="small" onClick={(e) => setMenuAnchor({ el: e.currentTarget, id: cat.id })} disabled={isPending}>&#8942;</IconButton>
               <Menu anchorEl={menuAnchor?.id === cat.id ? menuAnchor.el : null} open={menuAnchor?.id === cat.id} onClose={() => setMenuAnchor(null)}>
-                <MenuItem component={NextLink} href={`/${tenantSlug}/services/categories/${cat.id}/edit`} onClick={() => setMenuAnchor(null)}>Edit</MenuItem>
+                <MenuItem component="a" href={`/${tenantSlug}/services/categories/${cat.id}/edit`} onClick={() => setMenuAnchor(null)}>Edit</MenuItem>
                 <MenuItem onClick={() => handleAction(() => toggleServiceCategoryStatusAction(tenantSlug, cat.id, !cat.isActive))}>{cat.isActive ? "Deactivate" : "Activate"}</MenuItem>
                 <MenuItem onClick={() => { setMenuAnchor(null); setDelDialog({ id: cat.id, name: cat.name }); }} sx={{ color: "error.main" }}>Delete</MenuItem>
               </Menu>

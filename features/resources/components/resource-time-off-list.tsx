@@ -13,7 +13,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import type { ResourceTimeOffWithLocation } from "../types/resource-time-off";
 import { deleteResourceTimeOffAction } from "../actions/resource-time-off-actions";
 
@@ -77,7 +76,7 @@ export default function ResourceTimeOffList({
         </Typography>
         {canEdit && (
           <Button
-            component={NextLink}
+            component="a"
             href={`/${tenantSlug}/resources/${resourceId}/time-off/new`}
             variant="outlined"
             size="small"
@@ -100,7 +99,7 @@ export default function ResourceTimeOffList({
       {canEdit && (
         <Box sx={{ mb: 2 }}>
           <Button
-            component={NextLink}
+            component="a"
             href={`/${tenantSlug}/resources/${resourceId}/time-off/new`}
             variant="outlined"
             size="small"
@@ -135,7 +134,7 @@ export default function ResourceTimeOffList({
           {canEdit && (
             <Box sx={{ display: "flex", gap: 0.5 }}>
               <Button
-                component={NextLink}
+                component="a"
                 href={`/${tenantSlug}/resources/${resourceId}/time-off/${entry.id}/edit`}
                 size="small"
                 disabled={isPending}

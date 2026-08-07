@@ -15,7 +15,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import type { LocationListItem } from "../services/get-business-locations";
 import { setPrimaryLocationAction } from "../actions/set-primary-location";
 import { toggleLocationStatusAction } from "../actions/toggle-location-status";
@@ -59,7 +58,7 @@ export default function LocationList({ locations, tenantSlug, canEdit }: Locatio
         </Typography>
         {canEdit && (
           <Button
-            component={NextLink}
+            component="a"
             href={`/${tenantSlug}/locations/new`}
             variant="contained"
             sx={{ mt: 2 }}
@@ -121,16 +120,16 @@ export default function LocationList({ locations, tenantSlug, canEdit }: Locatio
                 open={menuAnchor?.locationId === loc.id}
                 onClose={() => setMenuAnchor(null)}
               >
-                <MenuItem component={NextLink} href={`/${tenantSlug}/locations/${loc.id}/edit`}>
+                <MenuItem component="a" href={`/${tenantSlug}/locations/${loc.id}/edit`}>
                   Edit
                 </MenuItem>
-                <MenuItem component={NextLink} href={`/${tenantSlug}/locations/${loc.id}/working-hours`}>
+                <MenuItem component="a" href={`/${tenantSlug}/locations/${loc.id}/working-hours`}>
                   Working Hours
                 </MenuItem>
-                <MenuItem component={NextLink} href={`/${tenantSlug}/locations/${loc.id}/exceptions`}>
+                <MenuItem component="a" href={`/${tenantSlug}/locations/${loc.id}/exceptions`}>
                   Schedule Exceptions
                 </MenuItem>
-                <MenuItem component={NextLink} href={`/${tenantSlug}/locations/${loc.id}/media`}>
+                <MenuItem component="a" href={`/${tenantSlug}/locations/${loc.id}/media`}>
                   Media
                 </MenuItem>
                 {!loc.isPrimary && (

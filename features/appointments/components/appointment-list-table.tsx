@@ -18,7 +18,6 @@ import Paper from "@mui/material/Paper";
 import Chip from "@mui/material/Chip";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import type { AppointmentListItem, AppointmentStatus } from "../types/appointment";
 import { APPOINTMENT_STATUS_LABELS } from "../types/appointment";
 
@@ -112,7 +111,7 @@ export default function AppointmentListTable({
                             <TableRow key={appointment.id} hover>
                                 <TableCell>
                                     <Link
-                                        component={NextLink}
+                                        component="a"
                                         href={`/${tenantSlug}/appointments/${appointment.id}`}
                                         underline="hover"
                                         sx={{ fontFamily: "monospace", fontSize: "0.85rem" }}
@@ -141,7 +140,7 @@ export default function AppointmentListTable({
                                 {canEdit && (
                                     <TableCell>
                                         <Link
-                                            component={NextLink}
+                                            component="a"
                                             href={`/${tenantSlug}/appointments/${appointment.id}/edit`}
                                             variant="body2"
                                             underline="hover"

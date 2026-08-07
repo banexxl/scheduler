@@ -12,7 +12,6 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import NextLink from "next/link";
 import type { CalendarAppointment } from "../types/calendar";
 import { APPOINTMENT_STATUS_LABELS } from "@/features/appointments/types/appointment";
 import { toZonedTime } from "date-fns-tz";
@@ -109,7 +108,7 @@ export default function CalendarAppointmentDrawer({
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <Button
-            component={NextLink}
+            component="a"
             href={`/${tenantSlug}/appointments/${appointment.id}`}
             variant="outlined"
             size="small"
@@ -119,7 +118,7 @@ export default function CalendarAppointmentDrawer({
           </Button>
           {canEdit && (
             <Button
-              component={NextLink}
+              component="a"
               href={`/${tenantSlug}/appointments/${appointment.id}/edit`}
               variant="outlined"
               size="small"

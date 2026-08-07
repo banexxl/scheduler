@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getResource } from "@/features/resources/services/get-business-resources";
 import { getResourceTypes } from "@/features/resources/services/get-resource-types";
@@ -59,7 +58,7 @@ export default async function EditResourcePage({ params }: { params: Promise<{ t
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}><Link component={NextLink} href={`/${tenantSlug}/resources`} variant="body2">&larr; Back to Resources</Link></Box>
+      <Box sx={{ mb: 3 }}><Link component="a" href={`/${tenantSlug}/resources`} variant="body2">&larr; Back to Resources</Link></Box>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>Edit Resource: {resource.name}</Typography>
 
       <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 } }}>

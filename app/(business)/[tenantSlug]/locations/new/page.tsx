@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getBusinessSettings } from "@/features/business/services/get-business-settings";
 import LocationForm from "@/features/locations/components/location-form";
@@ -50,7 +49,7 @@ export default async function NewLocationPage({
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Link component={NextLink} href={`/${tenantSlug}/locations`} variant="body2">
+        <Link component="a" href={`/${tenantSlug}/locations`} variant="body2">
           &larr; Back to Locations
         </Link>
       </Box>

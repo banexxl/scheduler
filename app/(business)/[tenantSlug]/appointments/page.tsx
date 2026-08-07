@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getAppointmentsList } from "@/features/appointments/services/appointment-queries";
 import AppointmentListTable from "@/features/appointments/components/appointment-list-table";
@@ -65,7 +64,7 @@ export default async function AppointmentsPage({
         </Typography>
         {canEdit && (
           <Button
-            component={NextLink}
+            component="a"
             href={`/${tenantSlug}/appointments/new`}
             variant="contained"
           >

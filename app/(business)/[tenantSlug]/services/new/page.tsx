@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getServiceCategories } from "@/features/service-categories/services/get-service-categories";
 import { getBusinessSettings } from "@/features/business/services/get-business-settings";
@@ -32,7 +31,7 @@ export default async function NewServicePage({ params }: { params: Promise<{ ten
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}><Link component={NextLink} href={`/${tenantSlug}/services`} variant="body2">&larr; Back to Services</Link></Box>
+      <Box sx={{ mb: 3 }}><Link component="a" href={`/${tenantSlug}/services`} variant="body2">&larr; Back to Services</Link></Box>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>Add Service</Typography>
       <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 } }}>
         <ServiceFormWithLocations

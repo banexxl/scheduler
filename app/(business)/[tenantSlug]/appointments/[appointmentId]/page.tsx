@@ -5,7 +5,6 @@ import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import Divider from "@mui/material/Divider";
-import NextLink from "next/link";
 import { notFound } from "next/navigation";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getAppointmentById } from "@/features/appointments/services/appointment-queries";
@@ -73,7 +72,7 @@ export default async function AppointmentDetailPage({
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Link component={NextLink} href={`/${tenantSlug}/appointments`} variant="body2">
+        <Link component="a" href={`/${tenantSlug}/appointments`} variant="body2">
           &larr; Back to Appointments
         </Link>
       </Box>
@@ -92,7 +91,7 @@ export default async function AppointmentDetailPage({
         </Box>
         {canEdit && (
           <Box sx={{ display: "flex", gap: 1 }}>
-            <Button component={NextLink} href={`/${tenantSlug}/appointments/${appointmentId}/edit`} variant="outlined" size="small">
+            <Button component="a" href={`/${tenantSlug}/appointments/${appointmentId}/edit`} variant="outlined" size="small">
               Edit
             </Button>
           </Box>

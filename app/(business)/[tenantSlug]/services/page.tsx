@@ -3,7 +3,6 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getServices } from "@/features/services/services/get-services";
 import { getServiceLocationCounts } from "@/features/services/services/get-service-locations";
@@ -35,8 +34,8 @@ export default async function ServicesPage({ params }: { params: Promise<{ tenan
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexWrap: "wrap", gap: 1 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>Services</Typography>
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-          <Link component={NextLink} href={`/${tenantSlug}/services/categories`} variant="body2">Categories</Link>
-          {canEdit && <Button component={NextLink} href={`/${tenantSlug}/services/new`} variant="contained">Add Service</Button>}
+          <Link component="a" href={`/${tenantSlug}/services/categories`} variant="body2">Categories</Link>
+          {canEdit && <Button component="a" href={`/${tenantSlug}/services/new`} variant="contained">Add Service</Button>}
         </Box>
       </Box>
       <ServiceList services={services} tenantSlug={tenantSlug} canEdit={canEdit} locationMap={locationMap} resourceMap={resourceMap} />

@@ -5,7 +5,6 @@ import Divider from "@mui/material/Divider";
 import Alert from "@mui/material/Alert";
 import Link from "@mui/material/Link";
 import Chip from "@mui/material/Chip";
-import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getLocation } from "@/features/locations/services/get-location";
 import { getLocationMedia } from "@/features/media/services/get-business-media";
@@ -31,7 +30,7 @@ export default async function LocationMediaPage({ params }: { params: Promise<{ 
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}><Link component={NextLink} href={`/${tenantSlug}/locations`} variant="body2">&larr; Back to Locations</Link></Box>
+      <Box sx={{ mb: 3 }}><Link component="a" href={`/${tenantSlug}/locations`} variant="body2">&larr; Back to Locations</Link></Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>Location Media</Typography>
         <Chip label={location.name} variant="outlined" size="small" />

@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getServices } from "@/features/services/services/get-services";
 import { getBusinessLocations } from "@/features/locations/services/get-business-locations";
@@ -43,7 +42,7 @@ export default async function NewAppointmentPage({
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Link component={NextLink} href={`/${tenantSlug}/appointments`} variant="body2">
+        <Link component="a" href={`/${tenantSlug}/appointments`} variant="body2">
           &larr; Back to Appointments
         </Link>
       </Box>

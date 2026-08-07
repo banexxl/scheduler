@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getLocationExceptionById } from "@/features/locations/services/get-location-schedule-exceptions";
 import LocationScheduleExceptionForm from "@/features/locations/components/location-schedule-exception-form";
@@ -38,7 +37,7 @@ export default async function EditExceptionPage({ params }: { params: Promise<{ 
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Link component={NextLink} href={`/${tenantSlug}/locations/${locationId}/edit`} variant="body2">
+        <Link component="a" href={`/${tenantSlug}/locations/${locationId}/edit`} variant="body2">
           &larr; Back to Location
         </Link>
       </Box>

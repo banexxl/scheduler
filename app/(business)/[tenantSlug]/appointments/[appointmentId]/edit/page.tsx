@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { notFound } from "next/navigation";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getAppointmentById } from "@/features/appointments/services/appointment-queries";
@@ -22,7 +21,7 @@ export default async function EditAppointmentPage({
     <Box>
       <Box sx={{ mb: 3 }}>
         <Link
-          component={NextLink}
+          component="a"
           href={`/${tenantSlug}/appointments/${appointmentId}`}
           variant="body2"
         >

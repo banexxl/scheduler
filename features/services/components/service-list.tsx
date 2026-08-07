@@ -15,7 +15,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import type { Service } from "../types/service";
 import { deleteServiceAction } from "../actions/delete-service";
 import { toggleServiceStatusAction } from "../actions/toggle-service-status";
@@ -49,7 +48,7 @@ export default function ServiceList({ services, tenantSlug, canEdit, locationMap
     return (
       <Paper variant="outlined" sx={{ p: 4, textAlign: "center" }}>
         <Typography color="text.secondary" sx={{ mb: 2 }}>No services yet. Create your first bookable service.</Typography>
-        {canEdit && <Button component={NextLink} href={`/${tenantSlug}/services/new`} variant="contained">Add Service</Button>}
+        {canEdit && <Button component="a" href={`/${tenantSlug}/services/new`} variant="contained">Add Service</Button>}
       </Paper>
     );
   }
@@ -94,7 +93,7 @@ export default function ServiceList({ services, tenantSlug, canEdit, locationMap
             <Box>
               <IconButton size="small" onClick={(e) => setMenuAnchor({ el: e.currentTarget, id: svc.id })} disabled={isPending}>&#8942;</IconButton>
               <Menu anchorEl={menuAnchor?.id === svc.id ? menuAnchor.el : null} open={menuAnchor?.id === svc.id} onClose={() => setMenuAnchor(null)}>
-                <MenuItem component={NextLink} href={`/${tenantSlug}/services/${svc.id}/edit`} onClick={() => setMenuAnchor(null)}>Edit</MenuItem>
+                <MenuItem component="a" href={`/${tenantSlug}/services/${svc.id}/edit`} onClick={() => setMenuAnchor(null)}>Edit</MenuItem>
                 <MenuItem onClick={() => handleAction(() => toggleServiceStatusAction(tenantSlug, svc.id, !svc.isActive))}>{svc.isActive ? "Deactivate" : "Activate"}</MenuItem>
                 <MenuItem onClick={() => { setMenuAnchor(null); setDelDialog({ id: svc.id, name: svc.name }); }} sx={{ color: "error.main" }}>Delete</MenuItem>
               </Menu>

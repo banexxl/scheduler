@@ -6,7 +6,6 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { loginSchema, type LoginFormValues } from "../schemas/login-schema";
 import { loginAction } from "../actions/login";
 import AuthFormAlert from "./auth-form-alert";
@@ -106,10 +105,10 @@ export default function LoginForm() {
           </Button>
 
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Link component={NextLink} href="/forgot-password" variant="body2">
+            <Link component="a" href="/forgot-password" variant="body2">
               Forgot password?
             </Link>
-            <Link component={NextLink} href="/register" variant="body2">
+            <Link component="a" href="/register" variant="body2">
               Create an account
             </Link>
           </Box>

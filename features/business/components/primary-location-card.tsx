@@ -2,7 +2,6 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import type { BusinessDashboardData } from "../services/get-business-dashboard";
 
 type PrimaryLocationCardProps = {
@@ -47,11 +46,7 @@ export default function PrimaryLocationCard({
       )}
 
       <Box sx={{ mt: 2 }}>
-        <Link
-          component={NextLink}
-          href={`/${tenantSlug}/locations`}
-          variant="body2"
-        >
+        <Link component="a" href={`/${tenantSlug}/locations`} variant="body2">
           Manage locations
         </Link>
       </Box>

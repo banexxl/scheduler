@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import ResourceTypeForm from "@/features/resources/components/resource-type-form";
 import { createResourceTypeAction } from "@/features/resources/actions/create-resource-type";
@@ -22,7 +21,7 @@ export default async function NewResourceTypePage({ params }: { params: Promise<
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}><Link component={NextLink} href={`/${tenantSlug}/resources/types`} variant="body2">&larr; Back to Resource Types</Link></Box>
+      <Box sx={{ mb: 3 }}><Link component="a" href={`/${tenantSlug}/resources/types`} variant="body2">&larr; Back to Resource Types</Link></Box>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>Create Resource Type</Typography>
       <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 } }}>
         <ResourceTypeForm initialValues={initialValues} onSubmit={handleSubmit} submitLabel="Create Type" canEdit={true} />

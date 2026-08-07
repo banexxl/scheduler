@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import Alert from "@mui/material/Alert";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getService } from "@/features/services/services/get-services";
@@ -39,7 +38,7 @@ export default async function ServiceAvailabilityPage({
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Link component={NextLink} href={`/${tenantSlug}/services/${serviceId}/edit`} variant="body2">
+        <Link component="a" href={`/${tenantSlug}/services/${serviceId}/edit`} variant="body2">
           &larr; Back to Service
         </Link>
       </Box>

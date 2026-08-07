@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getBusinessLocations } from "@/features/locations/services/get-business-locations";
 import ResourceTimeOffForm from "@/features/resources/components/resource-time-off-form";
@@ -36,7 +35,7 @@ export default async function NewTimeOffPage({ params }: { params: Promise<{ ten
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Link component={NextLink} href={`/${tenantSlug}/resources/${resourceId}/edit`} variant="body2">
+        <Link component="a" href={`/${tenantSlug}/resources/${resourceId}/edit`} variant="body2">
           &larr; Back to Resource
         </Link>
       </Box>

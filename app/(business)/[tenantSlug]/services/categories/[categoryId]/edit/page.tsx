@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getServiceCategory } from "@/features/service-categories/services/get-service-categories";
 import ServiceCategoryForm from "@/features/service-categories/components/service-category-form";
@@ -28,7 +27,7 @@ export default async function EditCategoryPage({ params }: { params: Promise<{ t
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}><Link component={NextLink} href={`/${tenantSlug}/services/categories`} variant="body2">&larr; Back to Categories</Link></Box>
+      <Box sx={{ mb: 3 }}><Link component="a" href={`/${tenantSlug}/services/categories`} variant="body2">&larr; Back to Categories</Link></Box>
       <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>Edit Category: {category.name}</Typography>
       <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 } }}>
         <ServiceCategoryForm initialValues={initialValues} onSubmit={handleSubmit} submitLabel="Save Changes" canEdit={canEdit} />

@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getBusinessLocations } from "@/features/locations/services/get-business-locations";
 import LocationList from "@/features/locations/components/location-list";
@@ -37,7 +36,7 @@ export default async function LocationsPage({
         </Typography>
         {canEdit && (
           <Button
-            component={NextLink}
+            component="a"
             href={`/${tenantSlug}/locations/new`}
             variant="contained"
           >

@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getService } from "@/features/services/services/get-services";
 import {
@@ -35,7 +34,7 @@ export default async function ServiceBookingRulesPage({
     <Box>
       <Box sx={{ mb: 3 }}>
         <Link
-          component={NextLink}
+          component="a"
           href={`/${tenantSlug}/services/${serviceId}/edit`}
           variant="body2"
         >

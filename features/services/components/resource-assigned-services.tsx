@@ -5,7 +5,6 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Chip from "@mui/material/Chip";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import type { ServiceResourceWithService } from "../types/service-resource";
 import { resolveServiceResourceValues } from "../utils/resolve-service-resource-values";
 
@@ -62,7 +61,7 @@ export default function ResourceAssignedServices({
             <Box sx={{ flex: 1, minWidth: 150 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Link
-                  component={NextLink}
+                  component="a"
                   href={`/${tenantSlug}/services/${svc.serviceId}/edit`}
                   variant="body2"
                   sx={{ fontWeight: 600 }}

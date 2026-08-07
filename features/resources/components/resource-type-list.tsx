@@ -15,7 +15,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import type { ResourceType } from "../types/resource";
 import { RESOURCE_KIND_LABELS } from "../types/resource";
 import { deleteResourceTypeAction } from "../actions/delete-resource-type";
@@ -39,7 +38,7 @@ export default function ResourceTypeList({ types, tenantSlug, canEdit, resourceC
       <Paper variant="outlined" sx={{ p: 4, textAlign: "center" }}>
         <Typography color="text.secondary" sx={{ mb: 2 }}>Create a resource type first.</Typography>
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>Examples: Team member, Room, Court, Equipment</Typography>
-        {canEdit && <Button component={NextLink} href={`/${tenantSlug}/resources/types/new`} variant="contained">Create Resource Type</Button>}
+        {canEdit && <Button component="a" href={`/${tenantSlug}/resources/types/new`} variant="contained">Create Resource Type</Button>}
       </Paper>
     );
   }
@@ -61,7 +60,7 @@ export default function ResourceTypeList({ types, tenantSlug, canEdit, resourceC
             <Box>
               <IconButton size="small" onClick={(e) => setMenuAnchor({ el: e.currentTarget, id: t.id })} disabled={isPending}>&#8942;</IconButton>
               <Menu anchorEl={menuAnchor?.id === t.id ? menuAnchor.el : null} open={menuAnchor?.id === t.id} onClose={() => setMenuAnchor(null)}>
-                <MenuItem component={NextLink} href={`/${tenantSlug}/resources/types/${t.id}/edit`} onClick={() => setMenuAnchor(null)}>Edit</MenuItem>
+                <MenuItem component="a" href={`/${tenantSlug}/resources/types/${t.id}/edit`} onClick={() => setMenuAnchor(null)}>Edit</MenuItem>
                 <MenuItem onClick={() => { setMenuAnchor(null); setDelDialog({ id: t.id, name: t.name }); }} sx={{ color: "error.main" }} disabled={(resourceCounts[t.id] ?? 0) > 0}>Delete</MenuItem>
               </Menu>
             </Box>

@@ -13,7 +13,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import type { LocationExceptionWithPeriods } from "../types/location-schedule-exception";
 import { EXCEPTION_TYPE_LABELS } from "../types/location-schedule-exception";
 import { deleteLocationExceptionAction } from "../actions/location-exception-actions";
@@ -44,7 +43,7 @@ export default function LocationScheduleExceptionList({ exceptions, tenantSlug, 
       <Box>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>No schedule exceptions configured.</Typography>
         {canEdit && (
-          <Button component={NextLink} href={`/${tenantSlug}/locations/${locationId}/business-hours/exceptions/new`} variant="outlined" size="small">
+          <Button component="a" href={`/${tenantSlug}/locations/${locationId}/business-hours/exceptions/new`} variant="outlined" size="small">
             Add Exception
           </Button>
         )}
@@ -57,7 +56,7 @@ export default function LocationScheduleExceptionList({ exceptions, tenantSlug, 
       {msg && <Alert severity={msg.type} sx={{ mb: 2 }} onClose={() => setMsg(null)}>{msg.text}</Alert>}
       {canEdit && (
         <Box sx={{ mb: 2 }}>
-          <Button component={NextLink} href={`/${tenantSlug}/locations/${locationId}/business-hours/exceptions/new`} variant="outlined" size="small">
+          <Button component="a" href={`/${tenantSlug}/locations/${locationId}/business-hours/exceptions/new`} variant="outlined" size="small">
             Add Exception
           </Button>
         </Box>
@@ -83,7 +82,7 @@ export default function LocationScheduleExceptionList({ exceptions, tenantSlug, 
           </Box>
           {canEdit && (
             <Box sx={{ display: "flex", gap: 0.5 }}>
-              <Button component={NextLink} href={`/${tenantSlug}/locations/${locationId}/business-hours/exceptions/${exc.id}/edit`} size="small" disabled={isPending}>
+              <Button component="a" href={`/${tenantSlug}/locations/${locationId}/business-hours/exceptions/${exc.id}/edit`} size="small" disabled={isPending}>
                 Edit
               </Button>
               <IconButton size="small" onClick={() => setDelDialog({ id: exc.id, title: exc.title ?? exc.exceptionDate })} disabled={isPending} aria-label="Delete">

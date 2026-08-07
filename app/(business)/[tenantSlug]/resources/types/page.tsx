@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getResourceTypes } from "@/features/resources/services/get-resource-types";
 import { getBusinessResources } from "@/features/resources/services/get-business-resources";
@@ -27,7 +26,7 @@ export default async function ResourceTypesPage({ params }: { params: Promise<{ 
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>Resource Types</Typography>
-        {canEdit && <Button component={NextLink} href={`/${tenantSlug}/resources/types/new`} variant="contained">Add Type</Button>}
+        {canEdit && <Button component="a" href={`/${tenantSlug}/resources/types/new`} variant="contained">Add Type</Button>}
       </Box>
       <ResourceTypeList types={types} tenantSlug={tenantSlug} canEdit={canEdit} resourceCounts={resourceCounts} />
     </Box>

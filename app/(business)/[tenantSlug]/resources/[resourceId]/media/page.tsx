@@ -5,7 +5,6 @@ import Divider from "@mui/material/Divider";
 import Alert from "@mui/material/Alert";
 import Link from "@mui/material/Link";
 import Chip from "@mui/material/Chip";
-import NextLink from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getResource } from "@/features/resources/services/get-business-resources";
 import { getResourceMedia } from "@/features/media/services/get-business-media";
@@ -31,7 +30,7 @@ export default async function ResourceMediaPage({ params }: { params: Promise<{ 
 
   return (
     <Box>
-      <Box sx={{ mb: 3 }}><Link component={NextLink} href={`/${tenantSlug}/resources`} variant="body2">&larr; Back to Resources</Link></Box>
+      <Box sx={{ mb: 3 }}><Link component="a" href={`/${tenantSlug}/resources`} variant="body2">&larr; Back to Resources</Link></Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>Resource Media</Typography>
         <Chip label={resource.name} variant="outlined" size="small" />

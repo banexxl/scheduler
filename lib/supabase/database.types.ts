@@ -1346,6 +1346,97 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_portal_access_tokens: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          expires_at: string
+          id: string
+          normalized_email: string
+          revoked_at: string | null
+          tenant_id: string
+          token_hash: string
+          token_prefix: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          expires_at: string
+          id?: string
+          normalized_email: string
+          revoked_at?: string | null
+          tenant_id: string
+          token_hash: string
+          token_prefix: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          expires_at?: string
+          id?: string
+          normalized_email?: string
+          revoked_at?: string | null
+          tenant_id?: string
+          token_hash?: string
+          token_prefix?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_portal_access_tokens_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_portal_sessions: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          expires_at: string
+          id: string
+          last_used_at: string | null
+          normalized_email: string
+          revoked_at: string | null
+          session_hash: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          expires_at: string
+          id?: string
+          last_used_at?: string | null
+          normalized_email: string
+          revoked_at?: string | null
+          session_hash: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          expires_at?: string
+          id?: string
+          last_used_at?: string | null
+          normalized_email?: string
+          revoked_at?: string | null
+          session_hash?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_portal_sessions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location_business_hours: {
         Row: {
           created_at: string

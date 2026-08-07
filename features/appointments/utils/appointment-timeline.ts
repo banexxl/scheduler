@@ -29,24 +29,29 @@ export function buildAppointmentTimeline(
           { label: "Created", timestamp: appointment.createdAt, kind: "created" },
      ];
 
+     // Track which statuses are already represented by history entries
+     const historyStatuses = new Set<string>();
+
      for (const item of history) {
           const label = getStatusLabel(item.toStatus);
           timeline.push({ label, timestamp: item.changedAt, kind: "status" });
+          historyStatuses.add(item.toStatus);
      }
 
-     if (appointment.checkedInAt) {
+     // Only add operational timestamps if they aren't already covered by status history
+     if (appointment.checkedInAt && !historyStatuses.has("checked_in")) {
           timeline.push({ label: "Checked in", timestamp: appointment.checkedInAt, kind: "operational" });
      }
 
-     if (appointment.serviceStartedAt) {
+     if (appointment.serviceStartedAt && !historyStatuses.has("in_progress")) {
           timeline.push({ label: "Started service", timestamp: appointment.serviceStartedAt, kind: "operational" });
      }
 
-     if (appointment.completedAt) {
+     if (appointment.completedAt && !historyStatuses.has("completed")) {
           timeline.push({ label: "Completed", timestamp: appointment.completedAt, kind: "operational" });
      }
 
-     if (appointment.cancelledAt) {
+     if (appointment.cancelledAt && !historyStatuses.has("cancelled")) {
           timeline.push({ label: "Cancelled", timestamp: appointment.cancelledAt, kind: "operational" });
      }
 

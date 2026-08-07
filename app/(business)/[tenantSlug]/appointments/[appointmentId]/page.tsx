@@ -25,6 +25,9 @@ import { getRemindersForAppointment } from "@/features/notifications/services/re
 import AppointmentNotificationsSection from "@/features/notifications/components/appointment-notifications-section";
 import AppointmentRemindersSection from "@/features/notifications/components/appointment-reminders-section";
 import { getAppointmentOperationalState } from "@/features/appointments/utils/appointment-operational-state";
+import { getAppointmentCustomerContext } from "@/features/appointments/services/get-appointment-customer-context";
+import CustomerContextPanel from "@/features/appointments/components/customer-context-panel";
+import InternalNotesEditor from "@/features/appointments/components/internal-notes-editor";
 
 const EDITABLE_ROLES = ["owner", "admin"];
 
@@ -63,6 +66,18 @@ export default async function AppointmentDetailPage({
     getCustomerActionHistoryForAppointment(tenant.id, appointmentId, 100),
     getAppointmentStatusHistory(tenant.id, appointmentId),
   ]);
+
+  // Load customer context
+  const customerContext = await getAppointmentCustomerContext(
+    tenant.id,
+    tenantSlug,
+    {
+      customerId: appointment.customerId,
+      customerName: appointment.customerName,
+      customerEmail: appointment.customerEmail,
+      customerPhone: appointment.customerPhone,
+    }
+  );
 
   // Load notifications and reminders for this appointment (owner/admin only)
   const [notifications, reminders] = canEdit
@@ -178,40 +193,21 @@ export default async function AppointmentDetailPage({
         </Box>
       </Paper>
 
-      <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 }, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>Customer</Typography>
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
-          <Box>
-            <Typography variant="caption" color="text.secondary">Name</Typography>
-            <Typography>{appointment.customerName}</Typography>
-          </Box>
-          {appointment.customerEmail && (
-            <Box>
-              <Typography variant="caption" color="text.secondary">Email</Typography>
-              <Typography>{appointment.customerEmail}</Typography>
-            </Box>
-          )}
-          {appointment.customerPhone && (
-            <Box>
-              <Typography variant="caption" color="text.secondary">Phone</Typography>
-              <Typography>{appointment.customerPhone}</Typography>
-            </Box>
-          )}
-        </Box>
-        {appointment.customerNotes && (
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="caption" color="text.secondary">Customer Notes</Typography>
-            <Typography sx={{ whiteSpace: "pre-wrap" }}>{appointment.customerNotes}</Typography>
-          </Box>
-        )}
-      </Paper>
+      <CustomerContextPanel context={customerContext} />
 
-      {appointment.internalNotes && (
+      {appointment.customerNotes && (
         <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 }, mb: 3 }}>
-          <Typography variant="h6" gutterBottom>Internal Notes</Typography>
-          <Typography sx={{ whiteSpace: "pre-wrap" }}>{appointment.internalNotes}</Typography>
+          <Typography variant="h6" gutterBottom>Customer Notes</Typography>
+          <Typography sx={{ whiteSpace: "pre-wrap" }}>{appointment.customerNotes}</Typography>
         </Paper>
       )}
+
+      <InternalNotesEditor
+        tenantSlug={tenantSlug}
+        appointmentId={appointmentId}
+        initialNotes={appointment.internalNotes}
+        canEdit={canEdit}
+      />
 
       <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 }, mb: 3 }}>
         <Typography variant="h6" gutterBottom>Operational timeline</Typography>

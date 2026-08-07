@@ -2,11 +2,13 @@
 
 /**
  * Server action for updating appointment status — Milestone 6.9.
+ * Reminder integration added in Milestone 8.3.
  */
 
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { appointmentStatusUpdateSchema } from "../schemas/appointment-schemas";
 import { updateAppointmentStatus } from "../services/update-appointment";
+import { syncRemindersAfterStatusChange } from "@/features/notifications/services/reminder-sync-service";
 import type { Appointment, AppointmentStatus } from "../types/appointment";
 
 type ActionSuccess = { success: true; data: Appointment };
@@ -39,6 +41,13 @@ export async function updateAppointmentStatusAction(
 
     if (!result.success) {
       return { success: false, error: result.error, code: result.code };
+    }
+
+    // Cancel pending reminders when appointment becomes ineligible (non-blocking)
+    try {
+      await syncRemindersAfterStatusChange(tenant.id, result.appointment);
+    } catch {
+      // Reminder sync failure must never block status transitions
     }
 
     return { success: true, data: result.appointment };

@@ -13,6 +13,8 @@ import SubscriptionSummaryCard from "@/features/business/components/subscription
 import GettingStartedCard from "@/features/business/components/getting-started-card";
 import DashboardSetupChecklist from "@/features/onboarding/components/dashboard-setup-checklist";
 import { resolveOnboardingProgress } from "@/features/onboarding/services/get-onboarding-progress";
+import { getTodaySummary } from "@/features/appointments/services/get-today-summary";
+import DashboardTodayCard from "@/features/appointments/components/dashboard-today-card";
 
 export default async function DashboardPage({
   params,
@@ -61,6 +63,14 @@ export default async function DashboardPage({
     plan: { canUsePublicBooking: true },
   });
 
+  // Load today's appointment summary
+  let todaySummary;
+  try {
+    todaySummary = await getTodaySummary(dashboard.business.id, dashboard.business.defaultTimezone);
+  } catch {
+    todaySummary = { total: 0, upcoming: 0, checkedIn: 0, inProgress: 0, completed: 0 };
+  }
+
   return (
     <Box>
       {/* Header */}
@@ -107,6 +117,11 @@ export default async function DashboardPage({
           />
         </Grid>
       </Grid>
+
+      {/* Today's schedule card */}
+      <Box sx={{ mb: 3 }}>
+        <DashboardTodayCard tenantSlug={dashboard.business.slug} summary={todaySummary} />
+      </Box>
 
       {/* Detail cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>

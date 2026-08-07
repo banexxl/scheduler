@@ -2,7 +2,10 @@
  * Portal Token Service Tests — Milestone 8.6.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
+
 import { normalizeEmail } from "../services/portal-token-service";
 
 describe("normalizeEmail", () => {

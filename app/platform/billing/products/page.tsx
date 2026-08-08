@@ -1,5 +1,6 @@
 import Box from "@mui/material/Box";
 import Alert from "@mui/material/Alert";
+import Link from "next/link";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
@@ -304,7 +305,7 @@ export default async function PlatformBillingProductsPage() {
 
                <Typography variant="body2" color="text.secondary">
                     Existing placeholder subscriptions page remains available at{" "}
-                    <a href="/platform/subscriptions">/platform/subscriptions</a>.
+                    <Link href="/platform/subscriptions">/platform/subscriptions</Link>.
                </Typography>
           </Stack>
      );

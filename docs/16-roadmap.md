@@ -933,3 +933,21 @@ Built a customer-facing dashboard showing unified appointments, businesses, and 
 - Business marketplace, favorites, global loyalty/package aggregation, payments
 
 See `docs/57-unified-customer-dashboard.md` for full details.
+
+### Milestone 9.3 — Favorites, Rebooking & Customer Convenience
+
+Implemented customer favorites and rebooking convenience features.
+
+**Implemented:**
+- customer_favorite_tenants/services/resources tables with uniqueness
+- Tenant-consistency triggers (service/resource belong to tenant)
+- RLS (customer reads/writes own favorites only)
+- Toggle actions with active-link verification
+- Favorite types (business, service, resource, recent booking shortcut)
+- Book-again revalidation with fallback behavior
+- Documentation (docs/58-customer-favorites-rebooking.md)
+
+**Not implemented (deferred):**
+- Marketplace discovery, recommendations, recurring bookings
+
+See `docs/58-customer-favorites-rebooking.md` for full details.

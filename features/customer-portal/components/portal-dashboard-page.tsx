@@ -19,12 +19,14 @@ import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import { logoutPortalAction } from "../actions/logout-portal-action";
 import type { CustomerPortalData, CustomerPortalAppointment } from "../types/portal";
+import type { PublicWaitlistEntry } from "@/features/waitlist/types/waitlist";
 
 type Props = {
   tenantSlug: string;
   tenantName: string;
   appointments: CustomerPortalData;
   timeZone: string;
+  waitlistEntries?: PublicWaitlistEntry[];
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -42,6 +44,7 @@ export default function PortalDashboardPage({
   tenantName,
   appointments,
   timeZone,
+  waitlistEntries = [],
 }: Props) {
   const [tab, setTab] = useState(0);
   const [isPending, startTransition] = useTransition();
@@ -128,6 +131,44 @@ export default function PortalDashboardPage({
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", textAlign: "center", mt: 2 }}>
           Times shown in {timeZone}
         </Typography>
+
+        {/* Waitlist Section */}
+        {waitlistEntries.length > 0 && (
+          <Paper elevation={1} sx={{ borderRadius: 3, overflow: "hidden", mt: 2 }}>
+            <Box sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                Waitlist
+              </Typography>
+              <Stack spacing={1.5}>
+                {waitlistEntries.map((entry, i) => (
+                  <Paper key={i} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                    <Typography variant="subtitle2">{entry.serviceName}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {entry.locationName} • {entry.resourcePreference}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {entry.dateFrom} – {entry.dateTo}
+                      {entry.timeFrom && entry.timeTo && ` (${entry.timeFrom}–${entry.timeTo})`}
+                    </Typography>
+                    <Box sx={{ mt: 0.5 }}>
+                      <Chip label={entry.status} size="small" variant="outlined"
+                        color={entry.status === "active" ? "primary" : entry.status === "matched" ? "warning" : "default"} />
+                    </Box>
+                  </Paper>
+                ))}
+              </Stack>
+              <Button
+                component="a"
+                href={`/book/${tenantSlug}`}
+                size="small"
+                variant="text"
+                sx={{ mt: 1 }}
+              >
+                View current availability
+              </Button>
+            </Box>
+          </Paper>
+        )}
       </Box>
     </Box>
   );

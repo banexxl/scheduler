@@ -99,6 +99,25 @@ export async function rescheduleAppointmentAction(
       }
     }
 
+    // Trigger waitlist matching for the freed OLD slot (non-blocking)
+    if (schedulingChanged && previousStartsAt && previousEndsAt && existing) {
+      try {
+        const { triggerWaitlistMatchingForSlot } = await import("@/features/waitlist/services/waitlist-matching");
+        const tenantTz = await loadTenantTimezone(tenant.id);
+        await triggerWaitlistMatchingForSlot({
+          tenantId: tenant.id,
+          serviceId: existing.serviceId,
+          locationId: existing.locationId,
+          resourceId: existing.resourceId,
+          startsAt: previousStartsAt,
+          endsAt: previousEndsAt,
+          timeZone: tenantTz?.defaultTimezone ?? "UTC",
+        });
+      } catch {
+        // Waitlist matching failure must never block rescheduling
+      }
+    }
+
     return { success: true, data: result.appointment };
   } catch (error) {
     if (error instanceof Error && error.name === "ValidationError") {

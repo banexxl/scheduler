@@ -4,6 +4,7 @@ import { getPortalSessionFromCookie } from "@/features/customer-portal/services/
 import PortalAccessForm from "@/features/customer-portal/components/portal-access-form";
 import PortalDashboardPage from "@/features/customer-portal/components/portal-dashboard-page";
 import { getCustomerPortalAppointments } from "@/features/customer-portal/services/portal-appointment-queries";
+import { getCustomerWaitlistEntries } from "@/features/waitlist/services/waitlist-portal-queries";
 
 /**
  * Customer Portal — Milestone 8.6.
@@ -25,12 +26,15 @@ export default async function CustomerPortalPage({
   const session = await getPortalSessionFromCookie(tenantSlug);
 
   if (session && session.tenantId === tenant.id) {
-    // Authenticated portal — load appointments
-    const data = await getCustomerPortalAppointments(
-      session.tenantId,
-      session.normalizedEmail,
-      tenant.defaultTimeZone
-    );
+    // Authenticated portal — load appointments and waitlist
+    const [data, waitlistEntries] = await Promise.all([
+      getCustomerPortalAppointments(
+        session.tenantId,
+        session.normalizedEmail,
+        tenant.defaultTimeZone
+      ),
+      getCustomerWaitlistEntries(session.tenantId, session.normalizedEmail),
+    ]);
 
     return (
       <PortalDashboardPage
@@ -38,6 +42,7 @@ export default async function CustomerPortalPage({
         tenantName={tenant.name}
         appointments={data}
         timeZone={tenant.defaultTimeZone}
+        waitlistEntries={waitlistEntries}
       />
     );
   }

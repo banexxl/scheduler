@@ -67,6 +67,23 @@ export async function cancelAppointmentAction(
       // Reminder cancellation failure must never block appointment cancellation
     }
 
+    // Trigger waitlist matching for the freed slot (non-blocking)
+    try {
+      const { triggerWaitlistMatchingForSlot } = await import("@/features/waitlist/services/waitlist-matching");
+      const tenantTz = await loadTenantTimezone(tenant.id);
+      await triggerWaitlistMatchingForSlot({
+        tenantId: tenant.id,
+        serviceId: result.appointment.serviceId,
+        locationId: result.appointment.locationId,
+        resourceId: result.appointment.resourceId,
+        startsAt: result.appointment.startsAt,
+        endsAt: result.appointment.endsAt,
+        timeZone: tenantTz?.defaultTimezone ?? "UTC",
+      });
+    } catch {
+      // Waitlist matching failure must never block cancellation
+    }
+
     return { success: true, data: result.appointment };
   } catch (error) {
     if (error instanceof Error && error.name === "ValidationError") {

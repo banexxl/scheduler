@@ -873,3 +873,25 @@ Implemented tenant-scoped service packages with credit-based reservation/consump
 - Payment integration, gift cards, memberships, auto-renewal
 
 See `docs/54-service-packages.md` for full details.
+
+### Milestone 8.10 — Loyalty & Rewards
+
+Implemented tenant-scoped customer loyalty with points earning on completion and reward eligibility.
+
+**Implemented:**
+- tenant_loyalty_settings (enabled, points_per_appointment, visit tracking)
+- customer_loyalty_accounts (balance, lifetime earned, visit count)
+- customer_loyalty_transactions (append-only ledger with idempotency)
+- loyalty_rewards (points_threshold / visit_threshold definitions)
+- customer_reward_redemptions (redemption history)
+- Concurrency-safe award RPC (row locking + idempotency key)
+- Automatic earning on appointment completion (non-blocking)
+- Manual point adjustment with audit
+- Reward eligibility calculation
+- Portal loyalty data query
+- Documentation (docs/55-customer-loyalty-rewards.md)
+
+**Not implemented (deferred):**
+- Payment-based earning, gift cards, automatic discounts, tier memberships
+
+See `docs/55-customer-loyalty-rewards.md` for full details.

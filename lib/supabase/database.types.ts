@@ -332,6 +332,57 @@ export type Database = {
           },
         ]
       }
+      appointment_review_tokens: {
+        Row: {
+          appointment_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          revoked_at: string | null
+          tenant_id: string
+          token_hash: string
+          token_prefix: string
+          used_at: string | null
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          revoked_at?: string | null
+          tenant_id: string
+          token_hash: string
+          token_prefix: string
+          used_at?: string | null
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          revoked_at?: string | null
+          tenant_id?: string
+          token_hash?: string
+          token_prefix?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_review_tokens_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_review_tokens_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointment_sequences: {
         Row: {
           created_at: string
@@ -1430,6 +1481,111 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "customer_portal_sessions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_reviews: {
+        Row: {
+          appointment_id: string
+          business_response: string | null
+          comment: string | null
+          created_at: string
+          customer_id: string | null
+          customer_name_snapshot: string | null
+          id: string
+          is_featured: boolean
+          location_id: string | null
+          rating: number
+          resource_id: string | null
+          resource_name_snapshot: string | null
+          responded_at: string | null
+          responded_by: string | null
+          service_id: string | null
+          service_name_snapshot: string | null
+          status: string
+          submitted_at: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id: string
+          business_response?: string | null
+          comment?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name_snapshot?: string | null
+          id?: string
+          is_featured?: boolean
+          location_id?: string | null
+          rating: number
+          resource_id?: string | null
+          resource_name_snapshot?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          service_id?: string | null
+          service_name_snapshot?: string | null
+          status?: string
+          submitted_at?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          business_response?: string | null
+          comment?: string | null
+          created_at?: string
+          customer_id?: string | null
+          customer_name_snapshot?: string | null
+          id?: string
+          is_featured?: boolean
+          location_id?: string | null
+          rating?: number
+          resource_id?: string | null
+          resource_name_snapshot?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          service_id?: string | null
+          service_name_snapshot?: string | null
+          status?: string
+          submitted_at?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_reviews_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_reviews_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_reviews_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_reviews_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_reviews_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -3127,10 +3283,13 @@ export type Database = {
           email_notifications_enabled: boolean
           id: string
           reply_to_email: string | null
+          review_request_delay_minutes: number
+          review_requests_enabled: boolean
           send_booking_confirmation: boolean
           send_cancellation_confirmation: boolean
           send_reschedule_confirmation: boolean
           sender_name: string | null
+          show_public_reviews: boolean
           tenant_id: string
           updated_at: string
         }
@@ -3139,10 +3298,13 @@ export type Database = {
           email_notifications_enabled?: boolean
           id?: string
           reply_to_email?: string | null
+          review_request_delay_minutes?: number
+          review_requests_enabled?: boolean
           send_booking_confirmation?: boolean
           send_cancellation_confirmation?: boolean
           send_reschedule_confirmation?: boolean
           sender_name?: string | null
+          show_public_reviews?: boolean
           tenant_id: string
           updated_at?: string
         }
@@ -3151,10 +3313,13 @@ export type Database = {
           email_notifications_enabled?: boolean
           id?: string
           reply_to_email?: string | null
+          review_request_delay_minutes?: number
+          review_requests_enabled?: boolean
           send_booking_confirmation?: boolean
           send_cancellation_confirmation?: boolean
           send_reschedule_confirmation?: boolean
           sender_name?: string | null
+          show_public_reviews?: boolean
           tenant_id?: string
           updated_at?: string
         }

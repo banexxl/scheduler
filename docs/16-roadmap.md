@@ -807,3 +807,45 @@ Implemented email-based magic-link customer portal for viewing and managing appo
 - Loyalty, reviews, payments
 
 See `docs/50-customer-portal-booking-history.md` for full details.
+
+### Milestone 8.7 — Reviews & Customer Feedback
+
+Implemented tenant-scoped customer review system tied to completed appointments.
+
+**Implemented:**
+- customer_reviews table (rating 1–5, comment, status, featured, business_response, snapshots)
+- appointment_review_tokens (SHA-256 hash, 30-day TTL, single-use, one active per appointment)
+- Review submission via secure token route (/book/{slug}/review/{token})
+- Review request email triggered on appointment completion (configurable delay)
+- Internal reviews management page (list, summary, moderation, responses, featured toggle)
+- Public reviews on booking page (when enabled, first-name-only privacy)
+- Review settings (review_requests_enabled, delay, show_public_reviews)
+- Appointment detail review integration
+- Star rating form with accessibility (aria-label, aria-pressed)
+- Documentation (docs/51-customer-reviews-feedback.md)
+
+**Not implemented (deferred):**
+- Google Reviews sync, customer accounts, loyalty, AI sentiment
+
+See `docs/51-customer-reviews-feedback.md` for full details.
+
+### Milestone 8.8 — Waitlist & Cancellation Slot Recovery
+
+Implemented tenant-scoped waitlist for customers to register interest when no slots are available.
+
+**Implemented:**
+- waitlist_entries table (service/location/resource preferences, date/time range, duplicate protection)
+- waitlist_offers table (secure token hash, slot details, expiry, status lifecycle)
+- Waitlist matching engine triggered by cancellation
+- Offer generation with secure tokens and notification emails
+- Public join form and offer consumption route
+- Internal waitlist management route (list/filters/status chips)
+- Entry/offer expiration service and processing route
+- Waitlist settings (enabled, offer_expiry, date_range, batch_size)
+- Rate limiting on public join (10/10min)
+- Documentation (docs/52-waitlist-slot-recovery.md)
+
+**Not implemented (deferred):**
+- Automatic booking, slot holds, priority bidding, AI matching
+
+See `docs/52-waitlist-slot-recovery.md` for full details.

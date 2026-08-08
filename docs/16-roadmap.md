@@ -895,3 +895,23 @@ Implemented tenant-scoped customer loyalty with points earning on completion and
 - Payment-based earning, gift cards, automatic discounts, tier memberships
 
 See `docs/55-customer-loyalty-rewards.md` for full details.
+
+### Milestone 9.1 — Customer Accounts & Identity Linking
+
+Introduced global customer accounts with tenant-customer linking.
+
+**Implemented:**
+- customer_accounts table (global, one per auth user, user_id unique)
+- customer_account_tenant_links (links global account to tenant CRM records)
+- Verified-email auto-linking with conflict detection
+- Lazy account creation for existing auth users
+- Linked businesses query
+- Tenant-consistency trigger (prevents multi-account linking)
+- RLS (customer reads own, tenant members read their tenant's links)
+- Link service with safe matching rules
+- Documentation (docs/56-customer-accounts-identity-linking.md)
+
+**Not implemented (deferred):**
+- Unified cross-tenant appointment history, global loyalty, payments
+
+See `docs/56-customer-accounts-identity-linking.md` for full details.

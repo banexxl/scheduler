@@ -915,3 +915,21 @@ Introduced global customer accounts with tenant-customer linking.
 - Unified cross-tenant appointment history, global loyalty, payments
 
 See `docs/56-customer-accounts-identity-linking.md` for full details.
+
+### Milestone 9.2 — Unified Customer Dashboard & Cross-Tenant Appointment History
+
+Built a customer-facing dashboard showing unified appointments, businesses, and rewards across linked tenants.
+
+**Implemented:**
+- Unified appointment queries (link-based authorization, cross-tenant, paginated)
+- Customer dashboard route with greeting, upcoming, businesses, navigation
+- Unified appointment DTO with tenant timezone formatting
+- Dashboard summary (upcoming count, business count, next appointment)
+- Linked businesses display with book actions
+- Guest/portal compatibility preserved
+- Documentation (docs/57-unified-customer-dashboard.md)
+
+**Not implemented (deferred):**
+- Business marketplace, favorites, global loyalty/package aggregation, payments
+
+See `docs/57-unified-customer-dashboard.md` for full details.

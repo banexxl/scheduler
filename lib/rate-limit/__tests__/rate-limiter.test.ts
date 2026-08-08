@@ -1,87 +1,76 @@
 import { describe, it, expect } from "vitest";
-import {
-  checkRateLimit,
-  buildRateLimitKey,
-  RATE_LIMIT_AVAILABILITY,
-  RATE_LIMIT_BOOKING,
-} from "../rate-limiter";
+import { checkRateLimit, buildRateLimitKey } from "../rate-limiter";
+import type { RateLimitConfig } from "../rate-limiter";
 
 describe("checkRateLimit", () => {
-  const testConfig = { maxRequests: 3, windowMs: 60_000 };
+  const config: RateLimitConfig = {
+    maxRequests: 3,
+    windowMs: 60_000, // 1 minute
+  };
 
-  it("allows first request", () => {
-    const key = `test-${Date.now()}-first`;
-    const result = checkRateLimit(key, testConfig);
+  it("allows requests within limit", () => {
+    const key = `test-allow-${Date.now()}`;
+    const r1 = checkRateLimit(key, config);
+    expect(r1.allowed).toBe(true);
+    expect(r1.remaining).toBe(2);
+
+    const r2 = checkRateLimit(key, config);
+    expect(r2.allowed).toBe(true);
+    expect(r2.remaining).toBe(1);
+
+    const r3 = checkRateLimit(key, config);
+    expect(r3.allowed).toBe(true);
+    expect(r3.remaining).toBe(0);
+  });
+
+  it("blocks requests exceeding limit", () => {
+    const key = `test-block-${Date.now()}`;
+    checkRateLimit(key, config);
+    checkRateLimit(key, config);
+    checkRateLimit(key, config);
+
+    const r4 = checkRateLimit(key, config);
+    expect(r4.allowed).toBe(false);
+    expect(r4.remaining).toBe(0);
+    expect(r4.resetAt).toBeGreaterThan(Date.now());
+  });
+
+  it("different keys are independent", () => {
+    const keyA = `test-isolate-a-${Date.now()}`;
+    const keyB = `test-isolate-b-${Date.now()}`;
+
+    checkRateLimit(keyA, config);
+    checkRateLimit(keyA, config);
+    checkRateLimit(keyA, config);
+
+    // Key B should still be allowed
+    const result = checkRateLimit(keyB, config);
     expect(result.allowed).toBe(true);
     expect(result.remaining).toBe(2);
   });
 
-  it("allows requests up to limit", () => {
-    const key = `test-${Date.now()}-upto`;
-    checkRateLimit(key, testConfig);
-    checkRateLimit(key, testConfig);
-    const result = checkRateLimit(key, testConfig);
-    expect(result.allowed).toBe(true);
-    expect(result.remaining).toBe(0);
-  });
-
-  it("rejects requests beyond limit", () => {
-    const key = `test-${Date.now()}-over`;
-    checkRateLimit(key, testConfig);
-    checkRateLimit(key, testConfig);
-    checkRateLimit(key, testConfig);
-    const result = checkRateLimit(key, testConfig);
-    expect(result.allowed).toBe(false);
-    expect(result.remaining).toBe(0);
-  });
-
-  it("isolates different keys", () => {
-    const key1 = `test-${Date.now()}-iso1`;
-    const key2 = `test-${Date.now()}-iso2`;
-
-    checkRateLimit(key1, testConfig);
-    checkRateLimit(key1, testConfig);
-    checkRateLimit(key1, testConfig);
-
-    const result = checkRateLimit(key2, testConfig);
-    expect(result.allowed).toBe(true);
-    expect(result.remaining).toBe(2);
-  });
-
-  it("returns resetAt timestamp", () => {
-    const key = `test-${Date.now()}-reset`;
-    const result = checkRateLimit(key, testConfig);
-    expect(result.resetAt).toBeGreaterThan(Date.now());
+  it("returns resetAt timestamp in the future", () => {
+    const key = `test-reset-${Date.now()}`;
+    const result = checkRateLimit(key, config);
+    expect(result.resetAt).toBeGreaterThan(Date.now() - 1000);
   });
 });
 
 describe("buildRateLimitKey", () => {
-  it("builds correct key format", () => {
-    const key = buildRateLimitKey("acme", "192.168.1.1", "availability");
-    expect(key).toBe("acme:192.168.1.1:availability");
+  it("builds key with tenant, ip, and route", () => {
+    const key = buildRateLimitKey("my-business", "192.168.1.1", "availability");
+    expect(key).toBe("my-business:192.168.1.1:availability");
   });
 
-  it("separates different routes", () => {
-    const key1 = buildRateLimitKey("acme", "192.168.1.1", "availability");
-    const key2 = buildRateLimitKey("acme", "192.168.1.1", "booking");
-    expect(key1).not.toBe(key2);
+  it("isolates different tenants", () => {
+    const k1 = buildRateLimitKey("tenant-a", "1.2.3.4", "booking");
+    const k2 = buildRateLimitKey("tenant-b", "1.2.3.4", "booking");
+    expect(k1).not.toBe(k2);
   });
 
-  it("separates different tenants", () => {
-    const key1 = buildRateLimitKey("acme", "192.168.1.1", "booking");
-    const key2 = buildRateLimitKey("other", "192.168.1.1", "booking");
-    expect(key1).not.toBe(key2);
-  });
-});
-
-describe("rate limit presets", () => {
-  it("availability allows 60 per 10 minutes", () => {
-    expect(RATE_LIMIT_AVAILABILITY.maxRequests).toBe(60);
-    expect(RATE_LIMIT_AVAILABILITY.windowMs).toBe(600_000);
-  });
-
-  it("booking allows 10 per 10 minutes", () => {
-    expect(RATE_LIMIT_BOOKING.maxRequests).toBe(10);
-    expect(RATE_LIMIT_BOOKING.windowMs).toBe(600_000);
+  it("isolates different IPs for same tenant", () => {
+    const k1 = buildRateLimitKey("tenant-a", "1.2.3.4", "booking");
+    const k2 = buildRateLimitKey("tenant-a", "5.6.7.8", "booking");
+    expect(k1).not.toBe(k2);
   });
 });

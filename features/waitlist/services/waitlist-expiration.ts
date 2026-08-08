@@ -28,7 +28,7 @@ export async function expireWaitlistItems(): Promise<ExpirationResult> {
     .update({ status: "expired" } as never)
     .eq("status" as never, "active")
     .lt("preferred_date_to" as never, today)
-    .select("id" as never, { count: "exact", head: true });
+    .select("id" as never);
 
   // Expire pending/notified offers whose expires_at has passed
   const { count: offerCount } = await (supabase as never as ReturnType<typeof createAdminClient>)
@@ -36,7 +36,7 @@ export async function expireWaitlistItems(): Promise<ExpirationResult> {
     .update({ status: "expired" } as never)
     .in("status" as never, ["pending", "notified"] as never)
     .lt("expires_at" as never, now)
-    .select("id" as never, { count: "exact", head: true });
+    .select("id" as never);
 
   return {
     expiredEntries: entryCount ?? 0,

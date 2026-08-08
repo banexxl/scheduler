@@ -55,7 +55,7 @@ export async function findMatchingWaitlistEntries(
   const localTime = format(zonedStart, "HH:mm:ss");
 
   // Query matching entries
-  let query = (supabase as never as ReturnType<typeof createAdminClient>)
+  const query = (supabase as never as ReturnType<typeof createAdminClient>)
     .from("waitlist_entries" as never)
     .select("id, customer_name, customer_email, customer_phone, preferred_time_from, preferred_time_to, allow_any_resource, resource_id" as never)
     .eq("tenant_id" as never, slot.tenantId)

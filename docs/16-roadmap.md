@@ -1005,3 +1005,20 @@ Performed a full authorization and route-protection audit across the application
 - Full RLS integration test suite (requires test DB infrastructure)
 
 See `docs/60-authorization-security-audit.md` for full details.
+
+### Architectural Cleanup — Server/Client Page Separation
+
+Enforced the server page.tsx + client-page.tsx convention across all routes.
+
+**Fixed:**
+- Removed all `component={Link}` (next/link function reference) from server page.tsx files
+- Replaced with `component="a"` (serializable string) where appropriate
+- Removed unused `import Link from "next/link"` from server pages
+- 10 page.tsx files refactored
+
+**Convention documented:**
+- page.tsx = Server Component (auth, data, redirects, DTOs)
+- client-page.tsx = Client Component (hooks, state, events, icons, MUI component refs)
+- Server → Client props must be serializable (no functions, no component refs)
+
+See `docs/61-server-client-page-architecture.md` for full details.

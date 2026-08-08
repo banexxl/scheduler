@@ -304,7 +304,7 @@ export default async function PlatformBillingProductsPage() {
 
                <Typography variant="body2" color="text.secondary">
                     Existing placeholder subscriptions page remains available at{" "}
-                    <Link href="/platform/subscriptions">/platform/subscriptions</Link>.
+                    <a href="/platform/subscriptions">/platform/subscriptions</a>.
                </Typography>
           </Stack>
      );

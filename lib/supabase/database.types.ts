@@ -1741,6 +1741,47 @@ export type Database = {
           },
         ]
       }
+      customer_notification_preferences: {
+        Row: {
+          appointment_reminders_enabled: boolean
+          created_at: string
+          id: string
+          review_requests_enabled: boolean
+          tenant_customer_id: string
+          tenant_id: string
+          updated_at: string
+          waitlist_notifications_enabled: boolean
+        }
+        Insert: {
+          appointment_reminders_enabled?: boolean
+          created_at?: string
+          id?: string
+          review_requests_enabled?: boolean
+          tenant_customer_id: string
+          tenant_id: string
+          updated_at?: string
+          waitlist_notifications_enabled?: boolean
+        }
+        Update: {
+          appointment_reminders_enabled?: boolean
+          created_at?: string
+          id?: string
+          review_requests_enabled?: boolean
+          tenant_customer_id?: string
+          tenant_id?: string
+          updated_at?: string
+          waitlist_notifications_enabled?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_notification_preferences_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_package_adjustments: {
         Row: {
           adjusted_by: string | null

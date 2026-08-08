@@ -951,3 +951,22 @@ Implemented customer favorites and rebooking convenience features.
 - Marketplace discovery, recommendations, recurring bookings
 
 See `docs/58-customer-favorites-rebooking.md` for full details.
+
+### Milestone 9.4 — Customer Notification Preferences & Communication Center
+
+Implemented per-tenant customer communication preferences and communication center.
+
+**Implemented:**
+- customer_notification_preferences table (per tenant+customer, optional toggles)
+- Resolved preference model combining tenant capability + customer choice
+- Preference upsert with lazy row creation
+- Communication types (confirmation/reminder/review/waitlist)
+- Update action with link-based authorization
+- Transactional vs optional policy documented
+- RLS (tenant members + linked customer account access)
+- Documentation (docs/59-customer-notification-preferences.md)
+
+**Not implemented (deferred):**
+- Marketing consent, SMS, push, newsletters, payment receipts
+
+See `docs/59-customer-notification-preferences.md` for full details.

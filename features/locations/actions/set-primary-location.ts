@@ -26,6 +26,19 @@ export async function setPrimaryLocationAction(
 
   const supabase = await createClient();
 
+  // Verify owner/admin role before calling RPC (defense in depth)
+  const { data: membership } = await supabase
+    .from("tenant_members")
+    .select("id, role")
+    .eq("user_id", user.id)
+    .eq("tenant_id", tenant.id)
+    .eq("status", "active")
+    .single();
+
+  if (!membership || !["owner", "admin"].includes(membership.role)) {
+    return { success: false, message: "Only owners and admins can change the primary location." };
+  }
+
   const { error } = await supabase.rpc("set_primary_location", {
     target_tenant_id: tenant.id,
     target_location_id: locationId,

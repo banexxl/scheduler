@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processReminderBatch } from "@/features/notifications/services/process-reminders";
+import { isAuthorizedBearerSecret } from "@/lib/security/internal-route-auth";
 
 /**
  * POST /api/internal/reminders/process
@@ -10,6 +11,7 @@ import { processReminderBatch } from "@/features/notifications/services/process-
  * The separate notification processor handles actual SMTP delivery.
  *
  * Protected by NOTIFICATION_PROCESSOR_SECRET (shared with notification processor).
+ * Constant-time comparison prevents timing attacks.
  *
  * Query params:
  * - batchSize (optional): Number of reminders to process (default: 10, max: 50)
@@ -24,10 +26,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const authHeader = request.headers.get("authorization");
-  const providedSecret = authHeader?.replace("Bearer ", "");
-
-  if (providedSecret !== secret) {
+  if (
+    !isAuthorizedBearerSecret({
+      authorizationHeader: request.headers.get("authorization"),
+      expectedSecret: secret,
+    })
+  ) {
     return NextResponse.json(
       { error: "Unauthorized" },
       { status: 401 }

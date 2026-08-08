@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processNotificationBatch } from "@/features/notifications/services/process-notifications";
+import { isAuthorizedBearerSecret } from "@/lib/security/internal-route-auth";
 
 /**
  * POST /api/internal/notifications/process
@@ -18,6 +19,7 @@ import { processNotificationBatch } from "@/features/notifications/services/proc
  *
  * Security:
  * - Requires Authorization header matching NOTIFICATION_PROCESSOR_SECRET
+ * - Constant-time comparison prevents timing attacks
  * - No public access
  * - Does not expose recipient addresses in response
  */
@@ -31,10 +33,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const authHeader = request.headers.get("authorization");
-  const providedSecret = authHeader?.replace("Bearer ", "");
-
-  if (providedSecret !== secret) {
+  if (
+    !isAuthorizedBearerSecret({
+      authorizationHeader: request.headers.get("authorization"),
+      expectedSecret: secret,
+    })
+  ) {
     return NextResponse.json(
       { error: "Unauthorized" },
       { status: 401 }

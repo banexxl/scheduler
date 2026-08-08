@@ -1502,6 +1502,134 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_favorite_resources: {
+        Row: {
+          created_at: string
+          customer_account_id: string
+          id: string
+          resource_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_account_id: string
+          id?: string
+          resource_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_account_id?: string
+          id?: string
+          resource_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_favorite_resources_customer_account_id_fkey"
+            columns: ["customer_account_id"]
+            isOneToOne: false
+            referencedRelation: "customer_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_favorite_resources_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_favorite_resources_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_favorite_services: {
+        Row: {
+          created_at: string
+          customer_account_id: string
+          id: string
+          service_id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_account_id: string
+          id?: string
+          service_id: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_account_id?: string
+          id?: string
+          service_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_favorite_services_customer_account_id_fkey"
+            columns: ["customer_account_id"]
+            isOneToOne: false
+            referencedRelation: "customer_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_favorite_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_favorite_services_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_favorite_tenants: {
+        Row: {
+          created_at: string
+          customer_account_id: string
+          id: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_account_id: string
+          id?: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_account_id?: string
+          id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_favorite_tenants_customer_account_id_fkey"
+            columns: ["customer_account_id"]
+            isOneToOne: false
+            referencedRelation: "customer_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_favorite_tenants_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_loyalty_accounts: {
         Row: {
           completed_visit_count: number

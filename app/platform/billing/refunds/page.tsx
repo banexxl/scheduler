@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
@@ -27,7 +26,7 @@ export default async function PlatformBillingRefundsPage() {
                               Platform-level view of Polar refund projections and sync state.
                          </Typography>
                     </div>
-                    <Button component={Link} href="/platform/billing" variant="outlined">
+                    <Button component="a" href="/platform/billing" variant="outlined">
                          Back to billing
                     </Button>
                </Stack>

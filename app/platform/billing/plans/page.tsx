@@ -12,7 +12,6 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import Link from "next/link";
 import {
      createBillingPlanAction,
      refreshSinglePolarProductAction,
@@ -191,7 +190,7 @@ export default async function PlatformBillingPlansPage() {
                                                        <Button
                                                             size="small"
                                                             variant="outlined"
-                                                            component={Link}
+                                                            component="a"
                                                             href={`/platform/billing/products`}
                                                        >
                                                             Open Mapping

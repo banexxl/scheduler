@@ -4,7 +4,6 @@ import Alert from "@mui/material/Alert";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
-import Link from "next/link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getBusinessSettings } from "@/features/business/services/get-business-settings";
 import BusinessSettingsForm from "@/features/business/components/business-settings-form";
@@ -55,7 +54,7 @@ export default async function SettingsPage({
             Open billing plans, checkout status, and customer portal controls.
           </Typography>
           <Button
-            component={Link}
+            component="a"
             href={`/${tenantSlug}/settings/billing`}
             variant="outlined"
             sx={{ width: "fit-content" }}

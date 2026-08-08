@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -64,7 +63,7 @@ export default async function PlatformBillingHomePage() {
                                    <Typography variant="body2" color="text.secondary">
                                         {area.description}
                                    </Typography>
-                                   <Button component={Link} href={area.href} variant="outlined" sx={{ width: "fit-content" }}>
+                                   <Button component="a" href={area.href} variant="outlined" sx={{ width: "fit-content" }}>
                                         Open
                                    </Button>
                               </Stack>

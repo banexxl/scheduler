@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
@@ -79,22 +78,22 @@ export default async function PlatformBillingSubscriptionsPage({
 
                <Paper variant="outlined" sx={{ p: 2 }}>
                     <Stack spacing={1.5} direction={{ xs: "column", md: "row" }}>
-                         <Button component={Link} href="/platform/billing/subscriptions?accessState=trial" variant="outlined">
+                         <Button component="a" href="/platform/billing/subscriptions?accessState=trial" variant="outlined">
                               Trial
                          </Button>
-                         <Button component={Link} href="/platform/billing/subscriptions?accessState=active" variant="outlined">
+                         <Button component="a" href="/platform/billing/subscriptions?accessState=active" variant="outlined">
                               Active
                          </Button>
-                         <Button component={Link} href="/platform/billing/subscriptions?polarStatus=past_due" variant="outlined">
+                         <Button component="a" href="/platform/billing/subscriptions?polarStatus=past_due" variant="outlined">
                               Past due
                          </Button>
-                         <Button component={Link} href="/platform/billing/subscriptions?mappingIssueOnly=1" variant="outlined">
+                         <Button component="a" href="/platform/billing/subscriptions?mappingIssueOnly=1" variant="outlined">
                               Mapping issues
                          </Button>
-                         <Button component={Link} href="/platform/billing/subscriptions?staleOnly=1" variant="outlined">
+                         <Button component="a" href="/platform/billing/subscriptions?staleOnly=1" variant="outlined">
                               Stale sync
                          </Button>
-                         <Button component={Link} href="/platform/billing/subscriptions" variant="text">
+                         <Button component="a" href="/platform/billing/subscriptions" variant="text">
                               Clear
                          </Button>
                     </Stack>
@@ -164,7 +163,7 @@ export default async function PlatformBillingSubscriptionsPage({
                                                   <TableCell>
                                                        <Stack direction="row" spacing={1}>
                                                             <Button
-                                                                 component={Link}
+                                                                 component="a"
                                                                  href={`/platform/billing/subscriptions/${row.id}`}
                                                                  size="small"
                                                                  variant="outlined"

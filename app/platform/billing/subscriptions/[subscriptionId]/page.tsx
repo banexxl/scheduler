@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
@@ -36,7 +35,7 @@ export default async function PlatformBillingSubscriptionDetailPage({
           return (
                <Stack spacing={2}>
                     <Typography variant="h5">Subscription not found.</Typography>
-                    <Button component={Link} href="/platform/billing/subscriptions" variant="outlined">
+                    <Button component="a" href="/platform/billing/subscriptions" variant="outlined">
                          Back to Subscriptions
                     </Button>
                </Stack>
@@ -112,7 +111,7 @@ export default async function PlatformBillingSubscriptionDetailPage({
                </Paper>
 
                <Stack direction="row" spacing={1}>
-                    <Button component={Link} href="/platform/billing/subscriptions" variant="outlined">
+                    <Button component="a" href="/platform/billing/subscriptions" variant="outlined">
                          Back
                     </Button>
                     <form action={reconcileAction}>

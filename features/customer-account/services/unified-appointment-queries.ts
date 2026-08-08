@@ -25,11 +25,11 @@ export async function getUnifiedAppointments(
   const supabase = createAdminClient();
 
   // 1. Load active links
-  const { data: links } = await (supabase as never)
-    .from("customer_account_tenant_links")
-    .select("tenant_id, tenant_customer_id")
-    .eq("customer_account_id", customerAccountId)
-    .eq("link_status", "linked");
+  const { data: links } = await (supabase as never as ReturnType<typeof createAdminClient>)
+    .from("customer_account_tenant_links" as never)
+    .select("tenant_id, tenant_customer_id" as never)
+    .eq("customer_account_id" as never, customerAccountId)
+    .eq("link_status" as never, "linked");
 
   if (!links || (links as unknown[]).length === 0) return [];
 
@@ -40,10 +40,10 @@ export async function getUnifiedAppointments(
 
   // 2. Load tenants for names/timezones
   const tenantIds = [...new Set(linkRows.map((l) => l.tenant_id))];
-  const { data: tenantRows } = await (supabase as never)
-    .from("tenants")
-    .select("id, name, slug, default_timezone")
-    .in("id", tenantIds);
+  const { data: tenantRows } = await (supabase as never as ReturnType<typeof createAdminClient>)
+    .from("tenants" as never)
+    .select("id, name, slug, default_timezone" as never)
+    .in("id" as never, tenantIds as never);
 
   const tenantMap = new Map(
     ((tenantRows ?? []) as unknown as Array<{
@@ -55,25 +55,25 @@ export async function getUnifiedAppointments(
   const customerIds = linkRows.map((l) => l.tenant_customer_id);
   const now = new Date().toISOString();
 
-  let query = (supabase as never)
-    .from("appointments")
+  let query = (supabase as never as ReturnType<typeof createAdminClient>)
+    .from("appointments" as never)
     .select(
       "id, tenant_id, customer_id, appointment_number, status, starts_at, ends_at, " +
       "duration_minutes, price, currency, service_name_snapshot, resource_name_snapshot, " +
-      "location_name_snapshot"
+      "location_name_snapshot" as never
     )
-    .in("customer_id", customerIds)
-    .in("tenant_id", tenantIds);
+    .in("customer_id" as never, customerIds as never)
+    .in("tenant_id" as never, tenantIds as never);
 
   if (filter === "upcoming") {
-    query = query.gte("starts_at", now).not("status", "eq", "cancelled");
-    query = query.order("starts_at", { ascending: true });
+    query = query.gte("starts_at" as never, now).not("status" as never, "eq", "cancelled");
+    query = query.order("starts_at" as never, { ascending: true });
   } else if (filter === "past") {
-    query = query.lt("starts_at", now).not("status", "eq", "cancelled");
-    query = query.order("starts_at", { ascending: false });
+    query = query.lt("starts_at" as never, now).not("status" as never, "eq", "cancelled");
+    query = query.order("starts_at" as never, { ascending: false });
   } else {
-    query = query.eq("status", "cancelled");
-    query = query.order("starts_at", { ascending: false });
+    query = query.eq("status" as never, "cancelled");
+    query = query.order("starts_at" as never, { ascending: false });
   }
 
   const { data: apptRows } = await query.range(offset, offset + limit - 1);

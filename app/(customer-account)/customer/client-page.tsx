@@ -9,7 +9,6 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import type { CustomerDashboardSummary } from "@/features/customer-account/types/unified-customer";
 import type { LinkedBusiness } from "@/features/customer-account/types/customer-account";
 

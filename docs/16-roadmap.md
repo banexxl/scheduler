@@ -849,3 +849,27 @@ Implemented tenant-scoped waitlist for customers to register interest when no sl
 - Automatic booking, slot holds, priority bidding, AI matching
 
 See `docs/52-waitlist-slot-recovery.md` for full details.
+
+### Milestone 8.9 — Packages & Service Bundles
+
+Implemented tenant-scoped service packages with credit-based reservation/consumption.
+
+**Implemented:**
+- service_packages table (name, credits, validity, active/public)
+- service_package_services (multi-service eligibility with credits_required)
+- customer_packages (ownership with snapshot credits, expiry, status lifecycle)
+- customer_package_usage (reserved/consumed/released tracking)
+- customer_package_adjustments (manual credit audit trail)
+- Appointment columns for package correlation
+- 3 concurrency-safe RPCs (reserve/consume/release with row locking)
+- Package management route (list, create, edit, toggle)
+- Customer assignment with snapshot behavior
+- Credit reservation at booking, consumption at completion, release at cancellation
+- Manual credit adjustment with audit
+- Portal customer packages display
+- Tests and documentation (docs/54-service-packages.md)
+
+**Not implemented (deferred):**
+- Payment integration, gift cards, memberships, auto-renewal
+
+See `docs/54-service-packages.md` for full details.

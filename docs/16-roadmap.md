@@ -970,3 +970,38 @@ Implemented per-tenant customer communication preferences and communication cent
 - Marketing consent, SMS, push, newsletters, payment receipts
 
 See `docs/59-customer-notification-preferences.md` for full details.
+
+### Milestone 10.1 — Authorization, Route Protection & Security Audit
+
+Performed a full authorization and route-protection audit across the application.
+
+**Implemented:**
+- Consolidated authorization helpers: `requireCustomerAccount`, `requireLinkedTenantCustomer`, `requireCustomerAppointmentAccess`
+- Standardized auth error types: `UnauthenticatedError`, `UnauthorizedError`, `TenantAccessDeniedError`, `CustomerLinkRequiredError`, `ResourceNotFoundError`
+- Hardened internal API routes (notifications, reminders, waitlist) with timing-safe comparison
+- Added explicit role checks to `deleteLocationAction` and `setPrimaryLocationAction` (defense in depth)
+- Comprehensive authorization test suite (62 tests across 5 files)
+- Complete route inventory and role matrix documentation
+- Admin-client usage audit with trust model documentation
+- RLS inventory, SECURITY DEFINER audit, cookie audit, redirect audit
+- Environment/secret safety verification
+- Rate-limit inventory with documented production limitations
+
+**Security invariants verified:**
+- Navigation hiding is not relied upon for authorization
+- Authentication alone does not grant tenant access
+- Tenant slug/UUID knowledge does not grant access
+- Customer email equality alone does not grant unified-account access
+- Client-supplied tenant/customer/account IDs are not trusted
+- Platform-admin routes remain protected (development paused)
+- Public tokens independently verified (hash, expiry, revocation, tenant)
+- Internal processing endpoints not publicly executable
+- No new Polar/payment functionality implemented
+
+**Not implemented (deferred):**
+- Redis-backed distributed rate limiting
+- MFA/2FA
+- Enterprise SSO/SCIM
+- Full RLS integration test suite (requires test DB infrastructure)
+
+See `docs/60-authorization-security-audit.md` for full details.

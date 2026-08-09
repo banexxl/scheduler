@@ -1166,3 +1166,27 @@ Introduced provider-agnostic appointment payment domain model.
 - UI payment buttons (foundation only)
 
 See `docs/68-appointment-payment-foundation.md` for full details.
+
+### Milestone 11.2 — Polar Appointment Checkout Creation
+
+Connected appointment payment model to Polar via real checkout creation.
+
+**Implemented:**
+- Provider adapter interface (`AppointmentPaymentProvider`)
+- `PolarAppointmentPaymentProvider` using `/v1/checkouts/custom` API
+- Checkout orchestration service with full eligibility/reuse/idempotency logic
+- Server action (`createAppointmentCheckoutAction`) — amount from server only
+- Payment return route (`/book/{tenantSlug}/payment/return`) — read-only, never marks paid
+- 35 checkout-specific tests
+
+**Key security guarantees:**
+- Return URL visit does NOT confirm payment (webhook-only in 11.3)
+- Amount/currency never accepted from client
+- amount_paid stays 0 until webhook confirmation
+- Metadata contains only correlation IDs (no PII)
+
+**Not implemented (deferred):**
+- Webhook payment confirmation (11.3)
+- Deposits, refunds, tenant product management
+
+See `docs/69-polar-appointment-checkout.md` for full details.

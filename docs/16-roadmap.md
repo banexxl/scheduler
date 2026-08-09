@@ -1491,3 +1491,31 @@ Built focused daily operational experience for linked staff members.
 - Auto-login redirect to My Day, push notifications, clock in/out, payroll
 
 See `docs/80-staff-my-day-operational-dashboard.md` for full details.
+
+### Milestone 12.5 — Business Notification Center & Operational Inbox
+
+Built internal operational inbox for business users.
+
+**Implemented:**
+- `tenant_operational_notifications` table (8 categories, 4 severities, deduplication, resolution)
+- `tenant_operational_notification_reads` table (per-member read state)
+- Notification creation service (non-blocking, idempotent, action URL validated)
+- Query service with role-based visibility (staff sees only own-resource notifications)
+- Actions: mark-read, mark-all-read, resolve
+- Notification center route (`/{tenantSlug}/notifications`) with filters
+- 20 operational notification tests
+
+**Key guarantees:**
+- Separate from customer notification outbox
+- Read state is per-member (not global)
+- Staff visibility restricted to own resource
+- Unread count cannot leak hidden notifications
+- Deduplication prevents webhook replay duplicates
+- Creation failure never blocks critical business operations
+- Action URLs validated (internal only)
+- No tokens/secrets stored in metadata
+
+**Not implemented (deferred):**
+- WebSocket realtime, push notifications, AI prioritization, chat
+
+See `docs/81-business-notification-center.md` for full details.

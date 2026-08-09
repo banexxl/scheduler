@@ -5076,6 +5076,113 @@ export type Database = {
           },
         ]
       }
+      tenant_operational_notification_reads: {
+        Row: {
+          notification_id: string
+          read_at: string
+          tenant_member_id: string
+        }
+        Insert: {
+          notification_id: string
+          read_at?: string
+          tenant_member_id: string
+        }
+        Update: {
+          notification_id?: string
+          read_at?: string
+          tenant_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_operational_notification_reads_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_operational_notifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_operational_notification_reads_tenant_member_id_fkey"
+            columns: ["tenant_member_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_operational_notifications: {
+        Row: {
+          action_url: string | null
+          category: string
+          created_at: string
+          customer_id: string | null
+          deduplication_key: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          message: string | null
+          metadata: Json
+          occurred_at: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          resource_id: string | null
+          severity: string
+          tenant_id: string
+          title: string
+          type: string
+        }
+        Insert: {
+          action_url?: string | null
+          category: string
+          created_at?: string
+          customer_id?: string | null
+          deduplication_key?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          message?: string | null
+          metadata?: Json
+          occurred_at?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          resource_id?: string | null
+          severity?: string
+          tenant_id: string
+          title: string
+          type: string
+        }
+        Update: {
+          action_url?: string | null
+          category?: string
+          created_at?: string
+          customer_id?: string | null
+          deduplication_key?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          message?: string | null
+          metadata?: Json
+          occurred_at?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          resource_id?: string | null
+          severity?: string
+          tenant_id?: string
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_operational_notifications_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_public_booking_settings: {
         Row: {
           allow_no_preference: boolean

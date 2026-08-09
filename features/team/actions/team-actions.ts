@@ -96,10 +96,9 @@ export async function inviteTenantMemberAction(
     }
 
     // Enqueue invitation email (best effort)
-    const appUrl = process.env.PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const _inviteUrl = `${appUrl}/invite/${rawToken}`;
-
     // TODO: Enqueue via notification outbox with template 'tenant_member_invitation'
+    // const appUrl = process.env.PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    // const inviteUrl = `${appUrl}/invite/${rawToken}`;
     logger.info("team.invitation.created", {
       tenantId: tenant.id,
       operation: "invite_member",

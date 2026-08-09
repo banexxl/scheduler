@@ -59,7 +59,7 @@ export function validateConfiguration(): ConfigValidationResult {
   }
 
   // Check feature-dependent (warn only)
-  for (const [key, config] of Object.entries(FEATURE_CONFIGS)) {
+  for (const [_, config] of Object.entries(FEATURE_CONFIGS)) {
     const featureMissing = config.envs.filter((e) => !process.env[e]?.trim());
     if (featureMissing.length > 0 && featureMissing.length < config.envs.length) {
       // Partially configured — warn
@@ -71,9 +71,12 @@ export function validateConfiguration(): ConfigValidationResult {
 
   // Special case: nodemailer needs SMTP vars
   if (process.env.EMAIL_PROVIDER === "nodemailer") {
-    const smtpMissing = FEATURE_CONFIGS.smtp.envs.filter((e) => !process.env[e]?.trim());
-    if (smtpMissing.length > 0) {
-      warnings.push(`SMTP: EMAIL_PROVIDER=nodemailer but missing ${smtpMissing.join(", ")}`);
+    const smtpConfig = FEATURE_CONFIGS.smtp;
+    if (smtpConfig) {
+      const smtpMissing = smtpConfig.envs.filter((e) => !process.env[e]?.trim());
+      if (smtpMissing.length > 0) {
+        warnings.push(`SMTP: EMAIL_PROVIDER=nodemailer but missing ${smtpMissing.join(", ")}`);
+      }
     }
   }
 

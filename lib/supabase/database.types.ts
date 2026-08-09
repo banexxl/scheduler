@@ -4241,6 +4241,73 @@ export type Database = {
           },
         ]
       }
+      staff_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string
+          id: string
+          is_active: boolean
+          is_public: boolean
+          job_title: string | null
+          resource_id: string
+          tenant_id: string
+          tenant_member_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          job_title?: string | null
+          resource_id: string
+          tenant_id: string
+          tenant_member_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          job_title?: string | null
+          resource_id?: string
+          tenant_id?: string
+          tenant_member_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_profiles_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_profiles_tenant_member_id_fkey"
+            columns: ["tenant_member_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_events: {
         Row: {
           created_at: string

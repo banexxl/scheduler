@@ -1412,3 +1412,31 @@ Implemented complete team management with secure invitations.
 - Staff/resource profile linking (12.2), ownership transfer UI, resend with new token
 
 See `docs/77-team-management-staff-invitations.md` for full details.
+
+### Milestone 12.2 — Staff Profiles, Resource Linking & Staff Scheduling
+
+Connected team members to the scheduling system via optional staff profiles.
+
+**Implemented:**
+- `staff_profiles` table (resource link, optional member link, display fields)
+- Tenant consistency trigger (cross-tenant linking rejected at DB level)
+- Unique constraints (one profile per resource, one per linked member)
+- Staff query service (batched joins, no N+1)
+- Staff actions (create, update, link/unlink account)
+- Own-schedule resolution (member → profile → resource)
+- Public staff DTO (never exposes auth/member data)
+- 20 staff profile tests
+
+**Key guarantees:**
+- Member does not automatically become bookable
+- Resource does not require login
+- Removing member does not delete resource
+- Deactivating staff does not cancel appointments
+- Scheduling truth remains in resource model
+- Job titles never grant authorization
+- Cross-tenant linking rejected at database level
+
+**Not implemented (deferred):**
+- Staff commissions, payroll, shift generation, time-off approval workflow
+
+See `docs/78-staff-profiles-resource-linking.md` for full details.

@@ -47,19 +47,19 @@ describe("invitation authorization", () => {
   });
 
   it("manager cannot invite anyone", () => {
-    const canInvite = (actor: string, _target: string) => {
+    const canInvite = (actor: string) => {
       if (actor === "owner") return true;
       if (actor === "admin") return true;
       return false;
     };
-    expect(canInvite("manager", "staff")).toBe(false);
+    expect(canInvite("manager")).toBe(false);
   });
 
   it("staff cannot invite anyone", () => {
-    const canInvite = (actor: string, _target: string) => {
+    const canInvite = (actor: string) => {
       return actor === "owner" || actor === "admin";
     };
-    expect(canInvite("staff", "staff")).toBe(false);
+    expect(canInvite("staff")).toBe(false);
   });
 });
 

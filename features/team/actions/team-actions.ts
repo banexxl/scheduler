@@ -97,10 +97,9 @@ export async function inviteTenantMemberAction(
 
     // Enqueue invitation email (best effort)
     const appUrl = process.env.PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const inviteUrl = `${appUrl}/invite/${rawToken}`;
+    const _inviteUrl = `${appUrl}/invite/${rawToken}`;
 
     // TODO: Enqueue via notification outbox with template 'tenant_member_invitation'
-    // For now log the URL (development convenience)
     logger.info("team.invitation.created", {
       tenantId: tenant.id,
       operation: "invite_member",
@@ -146,7 +145,7 @@ export async function changeTenantMemberRoleAction(
   newRole: TenantRole
 ): Promise<ActionResult> {
   try {
-    const { user, tenant, membership } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
+    const { tenant, membership } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
     const actorRole = membership.role as TenantRole;
 
     // Cannot promote to owner unless actor is owner

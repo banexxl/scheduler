@@ -1440,3 +1440,28 @@ Connected team members to the scheduling system via optional staff profiles.
 - Staff commissions, payroll, shift generation, time-off approval workflow
 
 See `docs/78-staff-profiles-resource-linking.md` for full details.
+
+### Milestone 12.3 — Staff Availability, Time Off & Operational Schedule Management
+
+Built operational staff scheduling layer reusing existing resource infrastructure.
+
+**Implemented:**
+- Staff schedule overview service (batched: today counts, upcoming time-off)
+- Schedule conflict detection (bounded future appointment query + preview)
+- Own-schedule resolution (member → profile → resource, server-verified)
+- Staff schedule types (StaffScheduleDTO, ScheduleConflictResult, MyScheduleDTO)
+- 25 scheduling tests (authority, availability, conflicts, time-off, roles, bounds)
+
+**Key architecture decisions:**
+- NO duplicate schedule tables introduced
+- `resource_working_hours` remains recurring schedule source of truth
+- `resource_time_off` remains unavailability source of truth
+- Staff profiles are presentation/link only (no scheduling fields)
+- Schedule changes never auto-cancel appointments
+- Time off blocks new bookings but preserves existing ones
+- Non-human resources fully compatible
+
+**Not implemented (deferred):**
+- Shift management, attendance, leave approval, commissions, payroll
+
+See `docs/79-staff-availability-time-off.md` for full details.

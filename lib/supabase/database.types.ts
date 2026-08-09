@@ -254,6 +254,7 @@ export type Database = {
           failure_code: string | null
           failure_message: string | null
           id: string
+          last_reconciled_at: string | null
           metadata: Json
           origin: string
           payment_intent_id: string | null
@@ -262,6 +263,7 @@ export type Database = {
           provider_refund_id: string | null
           reason_code: string | null
           reason_note: string | null
+          reconciliation_attempts: number
           requested_at: string
           requested_by: string | null
           status: string
@@ -278,6 +280,7 @@ export type Database = {
           failure_code?: string | null
           failure_message?: string | null
           id?: string
+          last_reconciled_at?: string | null
           metadata?: Json
           origin?: string
           payment_intent_id?: string | null
@@ -286,6 +289,7 @@ export type Database = {
           provider_refund_id?: string | null
           reason_code?: string | null
           reason_note?: string | null
+          reconciliation_attempts?: number
           requested_at?: string
           requested_by?: string | null
           status?: string
@@ -302,6 +306,7 @@ export type Database = {
           failure_code?: string | null
           failure_message?: string | null
           id?: string
+          last_reconciled_at?: string | null
           metadata?: Json
           origin?: string
           payment_intent_id?: string | null
@@ -310,6 +315,7 @@ export type Database = {
           provider_refund_id?: string | null
           reason_code?: string | null
           reason_note?: string | null
+          reconciliation_attempts?: number
           requested_at?: string
           requested_by?: string | null
           status?: string
@@ -359,6 +365,7 @@ export type Database = {
           discount_code_snapshot: string | null
           id: string
           invoice_available: boolean
+          last_reconciled_at: string | null
           latest_payment_intent_id: string | null
           original_amount: number | null
           paid_at: string | null
@@ -369,6 +376,8 @@ export type Database = {
           provider_tax_amount: number | null
           provider_total_amount: number | null
           receipt_available: boolean
+          reconciliation_attempts: number
+          reconciliation_status: string | null
           status: string
           tenant_id: string
           updated_at: string
@@ -384,6 +393,7 @@ export type Database = {
           discount_code_snapshot?: string | null
           id?: string
           invoice_available?: boolean
+          last_reconciled_at?: string | null
           latest_payment_intent_id?: string | null
           original_amount?: number | null
           paid_at?: string | null
@@ -394,6 +404,8 @@ export type Database = {
           provider_tax_amount?: number | null
           provider_total_amount?: number | null
           receipt_available?: boolean
+          reconciliation_attempts?: number
+          reconciliation_status?: string | null
           status?: string
           tenant_id: string
           updated_at?: string
@@ -409,6 +421,7 @@ export type Database = {
           discount_code_snapshot?: string | null
           id?: string
           invoice_available?: boolean
+          last_reconciled_at?: string | null
           latest_payment_intent_id?: string | null
           original_amount?: number | null
           paid_at?: string | null
@@ -419,6 +432,8 @@ export type Database = {
           provider_tax_amount?: number | null
           provider_total_amount?: number | null
           receipt_available?: boolean
+          reconciliation_attempts?: number
+          reconciliation_status?: string | null
           status?: string
           tenant_id?: string
           updated_at?: string
@@ -3115,6 +3130,7 @@ export type Database = {
           fulfilled_at: string | null
           id: string
           invoice_available: boolean
+          last_reconciled_at: string | null
           metadata: Json
           original_amount: number | null
           package_id: string
@@ -3128,6 +3144,8 @@ export type Database = {
           provider_tax_amount: number | null
           provider_total_amount: number | null
           receipt_available: boolean
+          reconciliation_attempts: number
+          reconciliation_status: string | null
           request_key: string
           status: string
           tenant_customer_id: string
@@ -3147,6 +3165,7 @@ export type Database = {
           fulfilled_at?: string | null
           id?: string
           invoice_available?: boolean
+          last_reconciled_at?: string | null
           metadata?: Json
           original_amount?: number | null
           package_id: string
@@ -3160,6 +3179,8 @@ export type Database = {
           provider_tax_amount?: number | null
           provider_total_amount?: number | null
           receipt_available?: boolean
+          reconciliation_attempts?: number
+          reconciliation_status?: string | null
           request_key: string
           status?: string
           tenant_customer_id: string
@@ -3179,6 +3200,7 @@ export type Database = {
           fulfilled_at?: string | null
           id?: string
           invoice_available?: boolean
+          last_reconciled_at?: string | null
           metadata?: Json
           original_amount?: number | null
           package_id?: string
@@ -3192,6 +3214,8 @@ export type Database = {
           provider_tax_amount?: number | null
           provider_total_amount?: number | null
           receipt_available?: boolean
+          reconciliation_attempts?: number
+          reconciliation_status?: string | null
           request_key?: string
           status?: string
           tenant_customer_id?: string
@@ -3320,6 +3344,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payment_provider_reconciliation_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          provider: string
+          records_checked: number
+          records_failed: number
+          records_flagged: number
+          records_repaired: number
+          request_id: string | null
+          started_at: string
+          status: string
+          trigger_type: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          provider?: string
+          records_checked?: number
+          records_failed?: number
+          records_flagged?: number
+          records_repaired?: number
+          request_id?: string | null
+          started_at?: string
+          status?: string
+          trigger_type?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          provider?: string
+          records_checked?: number
+          records_failed?: number
+          records_flagged?: number
+          records_repaired?: number
+          request_id?: string | null
+          started_at?: string
+          status?: string
+          trigger_type?: string
+        }
+        Relationships: []
       }
       payment_provider_resources: {
         Row: {

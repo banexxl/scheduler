@@ -1353,3 +1353,33 @@ Created tenant/customer financial history experience.
 - CSV export, tenant payout reporting, custom fiscal documents
 
 See `docs/75-payment-history-receipts-financial-dashboard.md` for full details.
+
+### Milestone 11.9 — Polar Reconciliation, Recovery & Production Hardening
+
+Hardened Polar integration with reconciliation, crash recovery, and provider client improvements.
+
+**Implemented:**
+- Reconciliation run audit table
+- Stale payment intent detection + auto-fail (>10min, no provider ID)
+- Paid-but-unfulfilled package recovery (idempotent fulfillment retry)
+- Hardened Polar client (12s timeout, rate-limit handling, normalized errors)
+- Provider error types (6 classes: RateLimit, Auth, NotFound, Validation, Unavailable, Timeout)
+- Retryable vs non-retryable classification
+- Internal reconciliation route (`/api/internal/payments/reconcile`)
+- Financial invariant definitions
+- Manual review reason taxonomy
+- 25 reconciliation tests
+
+**Key guarantees:**
+- Local paid state never automatically downgraded
+- Package credits never granted twice (idempotent RPC)
+- Refunds never applied twice (idempotent RPC)
+- Provider resource recovery never deletes local tenant entity
+- Reconciliation starts from tenant-scoped mappings, not org-wide listing
+- Provider API outages don't corrupt financial state
+
+**Not implemented (deferred):**
+- Full provider-query reconciliation (webhook retry handles most cases)
+- Automated invariant repair (manual_review preferred)
+
+See `docs/76-polar-reconciliation-production-hardening.md` for full details.

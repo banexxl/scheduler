@@ -1563,3 +1563,29 @@ Unified status language, date/time formatting, and UX consistency across the app
 - No new state machine, mutation path, or schema changes
 
 See `docs/83-final-booking-operations-ux-polish.md` for full details.
+
+### Milestone 13.1 — Release Candidate Seed Data, E2E Testing & Defect Hardening
+
+Moved application into release-candidate hardening phase.
+
+**Implemented:**
+- E2E seed fixture definitions (4 tenants, 6 accounts, 3 services)
+- Expanded Playwright E2E specs (business navigation, appointment lifecycle, My Day, notifications, health)
+- RC verification script (`npm run verify:rc`)
+- E2E smoke command (`npm run test:e2e:smoke`)
+- Fixture documentation and testing strategy documentation
+- Environment safety guards preserved
+
+**E2E Coverage:**
+- 7 spec files, 25+ test scenarios
+- Business navigation: all 16 routes
+- Mobile: My Day, public booking overflow checks
+- Security: auth boundaries, token enumeration safety
+- Operational: notifications, health center, health API
+
+**RC Exit Criteria:**
+- 0 Blocker, 0 High defects
+- All verification gates pass
+- Medium/Low documented
+
+See `docs/85-e2e-fixtures.md` and `docs/86-release-candidate-testing.md` for full details.

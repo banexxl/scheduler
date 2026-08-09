@@ -1519,3 +1519,28 @@ Built internal operational inbox for business users.
 - WebSocket realtime, push notifications, AI prioritization, chat
 
 See `docs/81-business-notification-center.md` for full details.
+
+### Milestone 12.6 — Business Setup & Configuration Health Center
+
+Built configuration readiness diagnostic for tenant businesses.
+
+**Implemented:**
+- Pure health evaluator (no side effects, no mutations, testable)
+- 15+ health checks across: business, locations, services, scheduling, booking, communications, payments, operations
+- Overall status: ready / needs_attention / blocked (optional checks don't affect readiness)
+- Health page route (`/{tenantSlug}/health`) with actionable fix links
+- 20 health evaluation tests
+
+**Key guarantees:**
+- Health evaluation is read-only (no mutations on open/recheck)
+- Disabled optional features don't create false failures
+- Public booking disabled is not unhealthy
+- Payment checks only when online payments enabled
+- Tenant isolation on all queries
+- No secrets/provider internals exposed
+- Bounded queries (no N+1)
+
+**Not implemented (deferred):**
+- Auto-remediation, health history, cron heartbeat monitoring
+
+See `docs/82-business-configuration-health-center.md` for full details.

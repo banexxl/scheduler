@@ -5098,6 +5098,33 @@ export type Database = {
         Args: { p_tenant_id: string }
         Returns: string
       }
+      get_customers_with_upcoming_flag: {
+        Args: { p_customer_ids: string[]; p_tenant_id: string }
+        Returns: {
+          customer_id: string
+          has_upcoming: boolean
+        }[]
+      }
+      get_dashboard_analytics_summary: {
+        Args: {
+          p_comp_end?: string
+          p_comp_start?: string
+          p_location_id?: string
+          p_range_end: string
+          p_range_start: string
+          p_resource_id?: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
+      get_today_appointment_counts: {
+        Args: {
+          p_tenant_id: string
+          p_today_end: string
+          p_today_start: string
+        }
+        Returns: Json
+      }
       insert_appointment_atomic: {
         Args: {
           p_buffer_after_minutes?: number

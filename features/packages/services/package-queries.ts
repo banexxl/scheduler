@@ -223,7 +223,7 @@ export async function getEligiblePackagesForBooking(
 
 // ─── Usage History ───────────────────────────────────────────────────────────
 
-export async function getPackageUsageHistory(tenantId: string, customerPackageId: string): Promise<PackageUsageItem[]> {
+export async function getPackageUsageHistory(tenantId: string, customerPackageId: string, limit = 50): Promise<PackageUsageItem[]> {
   const admin = createAdminClient();
 
   const { data } = await (admin as never as ReturnType<typeof createAdminClient>)
@@ -231,7 +231,8 @@ export async function getPackageUsageHistory(tenantId: string, customerPackageId
     .select("id, appointment_id, service_id, credits_used, status, reserved_at, consumed_at, released_at" as never)
     .eq("tenant_id" as never, tenantId)
     .eq("customer_package_id" as never, customerPackageId)
-    .order("created_at" as never, { ascending: false });
+    .order("created_at" as never, { ascending: false })
+    .limit(Math.min(limit, 100));
 
   if (!data) return [];
 
@@ -259,7 +260,7 @@ export async function getPackageUsageHistory(tenantId: string, customerPackageId
 
 // ─── Adjustments ─────────────────────────────────────────────────────────────
 
-export async function getPackageAdjustments(tenantId: string, customerPackageId: string): Promise<PackageAdjustment[]> {
+export async function getPackageAdjustments(tenantId: string, customerPackageId: string, limit = 50): Promise<PackageAdjustment[]> {
   const admin = createAdminClient();
 
   const { data } = await (admin as never as ReturnType<typeof createAdminClient>)
@@ -267,7 +268,8 @@ export async function getPackageAdjustments(tenantId: string, customerPackageId:
     .select("id, delta, reason, created_at" as never)
     .eq("tenant_id" as never, tenantId)
     .eq("customer_package_id" as never, customerPackageId)
-    .order("created_at" as never, { ascending: false });
+    .order("created_at" as never, { ascending: false })
+    .limit(Math.min(limit, 100));
 
   if (!data) return [];
 

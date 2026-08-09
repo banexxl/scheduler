@@ -1,17 +1,16 @@
 import "server-only";
 
 /**
- * Dashboard Analytics Orchestrator — Milestone 8.4.
+ * Dashboard Analytics Orchestrator — Milestone 8.4 / Performance 10.2.
  *
- * Composes all analytics queries into the full DashboardAnalyticsDTO.
- * Single entry point called from the dashboard page.tsx.
+ * Uses server-side SQL aggregation via RPC to avoid loading thousands
+ * of appointment rows into Node. Returns compact aggregate DTOs.
  */
 
 import { createClient } from "@/lib/supabase/server";
 import {
   resolveAnalyticsDateRange,
   resolveComparisonRange,
-  getDateSeriesInRange,
 } from "./analytics-date-ranges";
 import { getTodaySummary } from "@/features/appointments/services/get-today-summary";
 import type {
@@ -27,6 +26,26 @@ import type {
   CustomerTrendPoint,
 } from "../types/analytics";
 
+// ─── Source Labels ───────────────────────────────────────────────────────────
+
+const SOURCE_LABELS: Record<string, string> = {
+  internal: "Internal",
+  online: "Online",
+  walk_in: "Walk-in",
+  phone: "Phone",
+  public_booking: "Public Booking",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  confirmed: "Confirmed",
+  checked_in: "Checked In",
+  in_progress: "In Progress",
+  completed: "Completed",
+  cancelled: "Cancelled",
+  no_show: "No Show",
+};
+
 // ─── Main Entry Point ────────────────────────────────────────────────────────
 
 export async function getDashboardAnalytics(
@@ -41,59 +60,39 @@ export async function getDashboardAnalytics(
 
   const supabase = await createClient();
 
-  // Load appointments for the selected period
-  let query = supabase
-    .from("appointments")
-    .select("id, status, source, starts_at, ends_at, price, currency, " +
-      "service_id, service_name_snapshot, resource_id, resource_name_snapshot, " +
-      "location_id, location_name_snapshot, customer_id, customer_email, " +
-      "duration_minutes, created_at, service_started_at, completed_at")
-    .eq("tenant_id", tenantId)
-    .gte("starts_at", dateRange.start)
-    .lt("starts_at", dateRange.end);
+  // Call aggregation RPC — single DB round-trip for all analytics
+  const { data: rpcResult } = await (supabase as never as Awaited<ReturnType<typeof createClient>>).rpc(
+    "get_dashboard_analytics_summary" as never,
+    {
+      p_tenant_id: tenantId,
+      p_range_start: dateRange.start,
+      p_range_end: dateRange.end,
+      p_comp_start: compRange?.start ?? null,
+      p_comp_end: compRange?.end ?? null,
+      p_location_id: filters.locationId ?? null,
+      p_resource_id: filters.resourceId ?? null,
+    } as never
+  );
 
-  if (filters.locationId) query = query.eq("location_id", filters.locationId);
-  if (filters.resourceId) query = query.eq("resource_id", filters.resourceId);
-
-  const { data: periodRows } = await query.order("starts_at").limit(5000);
-  const appointments = (periodRows ?? []) as unknown as Array<Record<string, unknown>>;
-
-  // Load comparison period
-  let compAppointments: Array<Record<string, unknown>> = [];
-  if (compRange) {
-    let compQuery = supabase
-      .from("appointments")
-      .select("id, status, price")
-      .eq("tenant_id", tenantId)
-      .gte("starts_at", compRange.start)
-      .lt("starts_at", compRange.end);
-    if (filters.locationId) compQuery = compQuery.eq("location_id", filters.locationId);
-    if (filters.resourceId) compQuery = compQuery.eq("resource_id", filters.resourceId);
-    const { data: compRows } = await compQuery.limit(5000);
-    compAppointments = (compRows ?? []) as Array<Record<string, unknown>>;
-  }
-
-  // Today summary
+  // Today summary (lightweight count query)
   const todaySummary = await getTodaySummary(tenantId, timeZone);
 
-  // ─── Compute Metrics ────────────────────────────────────────────────────
-  const periodTotal = appointments.length;
-  const periodCompleted = appointments.filter(a => a.status === "completed").length;
-  const periodCancelled = appointments.filter(a => a.status === "cancelled").length;
-  const periodNoShow = appointments.filter(a => a.status === "no_show").length;
+  // Parse RPC result
+  const agg = (rpcResult as unknown as Record<string, unknown>) ?? {};
+  const period = (agg.period as Record<string, unknown>) ?? {};
+  const comp = (agg.comparison as Record<string, unknown>) ?? null;
 
-  const periodBookedValue = appointments
-    .filter(a => a.status !== "cancelled")
-    .reduce((sum, a) => sum + Number(a.price ?? 0), 0);
-  const periodCompletedValue = appointments
-    .filter(a => a.status === "completed")
-    .reduce((sum, a) => sum + Number(a.price ?? 0), 0);
+  const periodTotal = Number(period.total ?? 0);
+  const periodCompleted = Number(period.completed ?? 0);
+  const periodCancelled = Number(period.cancelled ?? 0);
+  const periodNoShow = Number(period.no_show ?? 0);
+  const periodBookedValue = Number(period.booked_value ?? 0);
+  const periodCompletedValue = Number(period.completed_value ?? 0);
+  const periodNewCustomers = Number(agg.new_customers ?? 0);
+  const periodReturningCustomers = Number(agg.returning_customers ?? 0);
 
   // Rates
-  const pastAppointments = appointments.filter(a =>
-    ["completed", "cancelled", "no_show"].includes(a.status as string)
-  );
-  const pastTotal = pastAppointments.length;
+  const pastTotal = periodCompleted + periodCancelled + periodNoShow;
   const cancellationRate = pastTotal > 0 ? periodCancelled / pastTotal : null;
   const completedAndNoShow = periodCompleted + periodNoShow;
   const noShowRate = completedAndNoShow > 0 ? periodNoShow / completedAndNoShow : null;
@@ -101,219 +100,109 @@ export async function getDashboardAnalytics(
   const averageAppointmentValue = periodCompleted > 0
     ? periodCompletedValue / periodCompleted : null;
 
-  // Customer metrics
-  const customerEmails = new Set(
-    appointments
-      .filter(a => a.customer_email && a.status !== "cancelled")
-      .map(a => (a.customer_email as string).toLowerCase())
-  );
-
-  // New vs returning: check if customer had appointments before this period
-  let periodNewCustomers = 0;
-  let periodReturningCustomers = 0;
-  if (customerEmails.size > 0) {
-    const emailArray = [...customerEmails];
-    const { data: priorRows } = await supabase
-      .from("appointments")
-      .select("customer_email")
-      .eq("tenant_id", tenantId)
-      .lt("starts_at", dateRange.start)
-      .neq("status", "cancelled")
-      .in("customer_email", emailArray)
-      .limit(5000);
-    const priorEmails = new Set(
-      ((priorRows ?? []) as Array<Record<string, unknown>>)
-        .map(r => ((r.customer_email as string) ?? "").toLowerCase())
-    );
-    for (const email of customerEmails) {
-      if (priorEmails.has(email)) periodReturningCustomers++;
-      else periodNewCustomers++;
-    }
-  }
-
   // Comparison
-  const compTotal = compAppointments.length;
-  const compCompleted = compAppointments.filter(a => a.status === "completed").length;
-  const compCancelled = compAppointments.filter(a => a.status === "cancelled").length;
-  const compNoShow = compAppointments.filter(a => a.status === "no_show").length;
-  const compValue = compAppointments
-    .filter(a => a.status === "completed")
-    .reduce((sum, a) => sum + Number(a.price ?? 0), 0);
-  const compNoShowRate = (compCompleted + compNoShow) > 0
-    ? compNoShow / (compCompleted + compNoShow) : null;
-
-  const comparison = {
-    totalChange: compTotal > 0 ? ((periodTotal - compTotal) / compTotal) * 100 : null,
-    completedChange: compCompleted > 0 ? ((periodCompleted - compCompleted) / compCompleted) * 100 : null,
-    cancelledChange: compCancelled > 0 ? ((periodCancelled - compCancelled) / compCancelled) * 100 : null,
-    noShowRateChange: (noShowRate !== null && compNoShowRate !== null)
-      ? (noShowRate - compNoShowRate) * 100 : null,
-    valueChange: compValue > 0 ? ((periodCompletedValue - compValue) / compValue) * 100 : null,
+  let comparison = {
+    totalChange: null as number | null,
+    completedChange: null as number | null,
+    cancelledChange: null as number | null,
+    noShowRateChange: null as number | null,
+    valueChange: null as number | null,
   };
 
-  // ─── Appointment Trend ──────────────────────────────────────────────────
-  const dateSeries = getDateSeriesInRange(dateRange.start, dateRange.end, timeZone);
-  const trendMap = new Map<string, AppointmentTrendPoint>();
-  for (const d of dateSeries) {
-    trendMap.set(d, { date: d, total: 0, completed: 0, cancelled: 0, noShow: 0 });
-  }
-  for (const a of appointments) {
-    const d = (a.starts_at as string).slice(0, 10);
-    const point = trendMap.get(d);
-    if (point) {
-      point.total++;
-      if (a.status === "completed") point.completed++;
-      if (a.status === "cancelled") point.cancelled++;
-      if (a.status === "no_show") point.noShow++;
-    }
-  }
-  const appointmentTrend = [...trendMap.values()];
+  if (comp) {
+    const compTotal = Number(comp.total ?? 0);
+    const compCompleted = Number(comp.completed ?? 0);
+    const compCancelled = Number(comp.cancelled ?? 0);
+    const compNoShow = Number(comp.no_show ?? 0);
+    const compValue = Number(comp.completed_value ?? 0);
+    const compNoShowRate = (compCompleted + compNoShow) > 0
+      ? compNoShow / (compCompleted + compNoShow) : null;
 
-  // ─── Customer Trend ─────────────────────────────────────────────────────
-  const customerTrend: CustomerTrendPoint[] = [];
-  // Simplified: group new/returning by date
-  for (const d of dateSeries) {
-    customerTrend.push({ date: d, newCustomers: 0, returningCustomers: 0 });
+    comparison = {
+      totalChange: compTotal > 0 ? ((periodTotal - compTotal) / compTotal) * 100 : null,
+      completedChange: compCompleted > 0 ? ((periodCompleted - compCompleted) / compCompleted) * 100 : null,
+      cancelledChange: compCancelled > 0 ? ((periodCancelled - compCancelled) / compCancelled) * 100 : null,
+      noShowRateChange: (noShowRate !== null && compNoShowRate !== null)
+        ? (noShowRate - compNoShowRate) * 100 : null,
+      valueChange: compValue > 0 ? ((periodCompletedValue - compValue) / compValue) * 100 : null,
+    };
   }
 
-  // ─── Top Services ──────────────────────────────────────────────────────
-  const serviceMap = new Map<string, TopServiceItem>();
-  for (const a of appointments) {
-    const sid = a.service_id as string;
-    const existing = serviceMap.get(sid);
-    if (!existing) {
-      serviceMap.set(sid, {
-        serviceId: sid,
-        serviceName: a.service_name_snapshot as string,
-        appointmentCount: 1,
-        completedCount: a.status === "completed" ? 1 : 0,
-        cancelledCount: a.status === "cancelled" ? 1 : 0,
-        completedValue: a.status === "completed" ? Number(a.price ?? 0) : 0,
-        currency,
-      });
-    } else {
-      existing.appointmentCount++;
-      if (a.status === "completed") {
-        existing.completedCount++;
-        existing.completedValue += Number(a.price ?? 0);
-      }
-      if (a.status === "cancelled") existing.cancelledCount++;
-    }
-  }
-  const topServices = [...serviceMap.values()]
-    .sort((a, b) => b.appointmentCount - a.appointmentCount)
-    .slice(0, 10);
+  // Trend
+  const trendRaw = (agg.trend as Array<Record<string, unknown>>) ?? [];
+  const appointmentTrend: AppointmentTrendPoint[] = trendRaw.map((t) => ({
+    date: String(t.date ?? ""),
+    total: Number(t.total ?? 0),
+    completed: Number(t.completed ?? 0),
+    cancelled: Number(t.cancelled ?? 0),
+    noShow: Number(t.no_show ?? 0),
+  }));
 
-  // ─── Resource Analytics ────────────────────────────────────────────────
-  const resourceMap = new Map<string, ResourceAnalyticsItem>();
-  for (const a of appointments) {
-    const rid = a.resource_id as string;
-    const existing = resourceMap.get(rid);
-    const dur = Number(a.duration_minutes ?? 0);
-    const actualDur = (a.completed_at && a.service_started_at)
-      ? Math.round((new Date(a.completed_at as string).getTime() -
-        new Date(a.service_started_at as string).getTime()) / 60000)
-      : null;
+  // Customer trend (simplified placeholder)
+  const customerTrend: CustomerTrendPoint[] = appointmentTrend.map((t) => ({
+    date: t.date,
+    newCustomers: 0,
+    returningCustomers: 0,
+  }));
 
-    if (!existing) {
-      resourceMap.set(rid, {
-        resourceId: rid,
-        resourceName: a.resource_name_snapshot as string,
-        appointmentCount: 1,
-        completedCount: a.status === "completed" ? 1 : 0,
-        cancelledCount: a.status === "cancelled" ? 1 : 0,
-        noShowCount: a.status === "no_show" ? 1 : 0,
-        scheduledMinutes: dur,
-        actualMinutes: actualDur,
-        utilization: null,
-      });
-    } else {
-      existing.appointmentCount++;
-      existing.scheduledMinutes += dur;
-      if (a.status === "completed") existing.completedCount++;
-      if (a.status === "cancelled") existing.cancelledCount++;
-      if (a.status === "no_show") existing.noShowCount++;
-      if (actualDur !== null) {
-        existing.actualMinutes = (existing.actualMinutes ?? 0) + actualDur;
-      }
-    }
-  }
-  const resourceAnalytics = [...resourceMap.values()]
-    .sort((a, b) => b.appointmentCount - a.appointmentCount)
-    .slice(0, 10);
+  // Top services
+  const servicesRaw = (agg.top_services as Array<Record<string, unknown>>) ?? [];
+  const topServices: TopServiceItem[] = servicesRaw.map((s) => ({
+    serviceId: String(s.service_id ?? ""),
+    serviceName: String(s.service_name ?? ""),
+    appointmentCount: Number(s.appointment_count ?? 0),
+    completedCount: Number(s.completed_count ?? 0),
+    cancelledCount: Number(s.cancelled_count ?? 0),
+    completedValue: Number(s.completed_value ?? 0),
+    currency,
+  }));
 
-  // ─── Location Analytics ────────────────────────────────────────────────
-  const locationMap = new Map<string, LocationAnalyticsItem>();
-  for (const a of appointments) {
-    const lid = a.location_id as string;
-    const existing = locationMap.get(lid);
-    if (!existing) {
-      locationMap.set(lid, {
-        locationId: lid,
-        locationName: a.location_name_snapshot as string,
-        appointmentCount: 1,
-        completedCount: a.status === "completed" ? 1 : 0,
-        cancelledCount: a.status === "cancelled" ? 1 : 0,
-        noShowCount: a.status === "no_show" ? 1 : 0,
-        completedValue: a.status === "completed" ? Number(a.price ?? 0) : 0,
-        currency,
-      });
-    } else {
-      existing.appointmentCount++;
-      if (a.status === "completed") {
-        existing.completedCount++;
-        existing.completedValue += Number(a.price ?? 0);
-      }
-      if (a.status === "cancelled") existing.cancelledCount++;
-      if (a.status === "no_show") existing.noShowCount++;
-    }
-  }
-  const locationAnalytics = [...locationMap.values()]
-    .sort((a, b) => b.appointmentCount - a.appointmentCount);
+  // Resource analytics
+  const resourcesRaw = (agg.resource_analytics as Array<Record<string, unknown>>) ?? [];
+  const resourceAnalytics: ResourceAnalyticsItem[] = resourcesRaw.map((r) => ({
+    resourceId: String(r.resource_id ?? ""),
+    resourceName: String(r.resource_name ?? ""),
+    appointmentCount: Number(r.appointment_count ?? 0),
+    completedCount: Number(r.completed_count ?? 0),
+    cancelledCount: Number(r.cancelled_count ?? 0),
+    noShowCount: Number(r.no_show_count ?? 0),
+    scheduledMinutes: Number(r.scheduled_minutes ?? 0),
+    actualMinutes: null,
+    utilization: null,
+  }));
 
-  // ─── Booking Sources ───────────────────────────────────────────────────
-  const sourceCount = new Map<string, number>();
-  for (const a of appointments) {
-    const src = (a.source as string) ?? "unknown";
-    sourceCount.set(src, (sourceCount.get(src) ?? 0) + 1);
-  }
-  const sourceLabels: Record<string, string> = {
-    internal: "Internal",
-    online: "Online",
-    walk_in: "Walk-in",
-    phone: "Phone",
-    public_booking: "Public Booking",
-  };
-  const bookingSources: BookingSourceItem[] = [...sourceCount.entries()]
-    .map(([source, count]) => ({
-      source,
-      label: sourceLabels[source] ?? source,
-      count,
-      percentage: periodTotal > 0 ? count / periodTotal : 0,
-    }))
-    .sort((a, b) => b.count - a.count);
+  // Location analytics
+  const locationsRaw = (agg.location_analytics as Array<Record<string, unknown>>) ?? [];
+  const locationAnalytics: LocationAnalyticsItem[] = locationsRaw.map((l) => ({
+    locationId: String(l.location_id ?? ""),
+    locationName: String(l.location_name ?? ""),
+    appointmentCount: Number(l.appointment_count ?? 0),
+    completedCount: Number(l.completed_count ?? 0),
+    cancelledCount: Number(l.cancelled_count ?? 0),
+    noShowCount: Number(l.no_show_count ?? 0),
+    completedValue: Number(l.completed_value ?? 0),
+    currency,
+  }));
 
-  // ─── Status Breakdown ──────────────────────────────────────────────────
-  const statusCount = new Map<string, number>();
-  for (const a of appointments) {
-    const s = a.status as string;
-    statusCount.set(s, (statusCount.get(s) ?? 0) + 1);
-  }
-  const statusLabels: Record<string, string> = {
-    pending: "Pending", confirmed: "Confirmed", checked_in: "Checked In",
-    in_progress: "In Progress", completed: "Completed",
-    cancelled: "Cancelled", no_show: "No Show",
-  };
-  const statusBreakdown: StatusBreakdownItem[] = [...statusCount.entries()]
-    .map(([status, count]) => ({
-      status,
-      label: statusLabels[status] ?? status,
-      count,
-      percentage: periodTotal > 0 ? count / periodTotal : 0,
-    }))
-    .sort((a, b) => b.count - a.count);
+  // Booking sources
+  const sourcesRaw = (agg.booking_sources as Array<Record<string, unknown>>) ?? [];
+  const bookingSources: BookingSourceItem[] = sourcesRaw.map((s) => ({
+    source: String(s.source ?? "unknown"),
+    label: SOURCE_LABELS[String(s.source ?? "unknown")] ?? String(s.source ?? "unknown"),
+    count: Number(s.count ?? 0),
+    percentage: periodTotal > 0 ? Number(s.count ?? 0) / periodTotal : 0,
+  }));
 
-  // ─── Assemble DTO ──────────────────────────────────────────────────────
+  // Status breakdown
+  const statusesRaw = (agg.status_breakdown as Array<Record<string, unknown>>) ?? [];
+  const statusBreakdown: StatusBreakdownItem[] = statusesRaw.map((s) => ({
+    status: String(s.status ?? ""),
+    label: STATUS_LABELS[String(s.status ?? "")] ?? String(s.status ?? ""),
+    count: Number(s.count ?? 0),
+    percentage: periodTotal > 0 ? Number(s.count ?? 0) / periodTotal : 0,
+  }));
+
+  // Assemble DTO
   const summary: DashboardSummary = {
     todayTotal: todaySummary.total,
     todayUpcoming: todaySummary.upcoming,
@@ -322,16 +211,33 @@ export async function getDashboardAnalytics(
     todayNoShow: 0,
     todayCheckedIn: todaySummary.checkedIn,
     todayInProgress: todaySummary.inProgress,
-    periodTotal, periodCompleted, periodCancelled, periodNoShow,
-    periodBookedValue, periodCompletedValue,
-    periodNewCustomers, periodReturningCustomers,
-    cancellationRate, noShowRate, completionRate, averageAppointmentValue,
-    comparison, currency,
+    periodTotal,
+    periodCompleted,
+    periodCancelled,
+    periodNoShow,
+    periodBookedValue,
+    periodCompletedValue,
+    periodNewCustomers,
+    periodReturningCustomers,
+    cancellationRate,
+    noShowRate,
+    completionRate,
+    averageAppointmentValue,
+    comparison,
+    currency,
   };
 
   return {
-    summary, appointmentTrend, customerTrend, topServices,
-    resourceAnalytics, locationAnalytics, bookingSources, statusBreakdown,
-    period: filters.period, dateRange, filters,
+    summary,
+    appointmentTrend,
+    customerTrend,
+    topServices,
+    resourceAnalytics,
+    locationAnalytics,
+    bookingSources,
+    statusBreakdown,
+    period: filters.period,
+    dateRange,
+    filters,
   };
 }

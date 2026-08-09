@@ -1,10 +1,10 @@
 import "server-only";
 
 /**
- * Today Appointment Summary — Milestone 8.3.
+ * Today Appointment Summary — Milestone 8.3 / Performance 10.2.
  *
- * Lightweight query returning only today's appointment counts by status.
- * Used on the business dashboard card without loading full appointment data.
+ * Uses SQL aggregation via RPC to return today's counts without
+ * loading individual rows into Node.
  */
 
 import { createClient } from "@/lib/supabase/server";
@@ -25,24 +25,28 @@ export async function getTodaySummary(
   const supabase = await createClient();
   const today = getTenantToday(new Date(), timeZone);
 
-  const { data, error } = await supabase
-    .from("appointments")
-    .select("status")
-    .eq("tenant_id", tenantId)
-    .gte("starts_at", `${today}T00:00:00.000Z`)
-    .lt("starts_at", `${today}T23:59:59.999Z`)
-    .neq("status", "cancelled");
+  const todayStart = `${today}T00:00:00.000Z`;
+  const todayEnd = `${today}T23:59:59.999Z`;
 
-  if (error || !data) {
+  const { data } = await (supabase as never as Awaited<ReturnType<typeof createClient>>).rpc(
+    "get_today_appointment_counts" as never,
+    {
+      p_tenant_id: tenantId,
+      p_today_start: todayStart,
+      p_today_end: todayEnd,
+    } as never
+  );
+
+  if (!data) {
     return { total: 0, upcoming: 0, checkedIn: 0, inProgress: 0, completed: 0 };
   }
 
-  const rows = data as Array<{ status: string }>;
+  const result = data as unknown as Record<string, unknown>;
   return {
-    total: rows.length,
-    upcoming: rows.filter((r) => r.status === "pending" || r.status === "confirmed").length,
-    checkedIn: rows.filter((r) => r.status === "checked_in").length,
-    inProgress: rows.filter((r) => r.status === "in_progress").length,
-    completed: rows.filter((r) => r.status === "completed").length,
+    total: Number(result.total ?? 0),
+    upcoming: Number(result.upcoming ?? 0),
+    checkedIn: Number(result.checked_in ?? 0),
+    inProgress: Number(result.in_progress ?? 0),
+    completed: Number(result.completed ?? 0),
   };
 }

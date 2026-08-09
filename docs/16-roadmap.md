@@ -1022,3 +1022,27 @@ Enforced the server page.tsx + client-page.tsx convention across all routes.
 - Server → Client props must be serializable (no functions, no component refs)
 
 See `docs/61-server-client-page-architecture.md` for full details.
+
+### Milestone 10.2 — Performance, Query Efficiency & Data-Access Audit
+
+Performed project-wide performance audit focused on query efficiency and scaling.
+
+**Critical fixes:**
+- Dashboard analytics: replaced 15K-row Node aggregation with single SQL RPC (`get_dashboard_analytics_summary`)
+- Today summary: replaced row-loading count with SQL RPC (`get_today_appointment_counts`)
+- Customer CRM list: eliminated N+1 appointment join → batched `get_customers_with_upcoming_flag` RPC
+- Customer detail: bounded appointment sub-queries (10 upcoming + 10 recent)
+- Package usage/adjustments: added pagination bounds (max 100)
+
+**Performance indexes added (11):**
+- 6 appointment composite indexes for calendar/analytics/list hot paths
+- 3 partial worker indexes (notification, reminder, waitlist)
+- 1 customer-link index for cross-tenant queries
+- 1 appointment future-status index for has-upcoming checks
+
+**Tests:** 25 performance contract tests covering bounds, pagination, batch limits
+
+**Not implemented (deferred):**
+- Redis rate limiting, full-text search, materialized views, CDN
+
+See `docs/62-performance-query-audit.md` for full details.

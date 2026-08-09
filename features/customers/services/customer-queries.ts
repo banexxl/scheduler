@@ -1,5 +1,13 @@
 import "server-only";
 
+/**
+ * Customer Query Services — Performance 10.2.
+ *
+ * Optimized: customer list no longer joins ALL appointments.
+ * Uses batched RPC for has-upcoming flag after loading the page.
+ * Customer detail uses bounded appointment sub-queries.
+ */
+
 import { createClient } from "@/lib/supabase/server";
 
 export type CustomerListFilters = {
@@ -62,7 +70,8 @@ export function getCustomerStatusLabel(input: {
 }
 
 function mapCustomerRow(row: Record<string, unknown>): CustomerListItem {
-     const privateRow = (row.private as Record<string, unknown> | null) ?? null;
+     const privateRow = (row.private as Record<string, unknown> | null) ??
+          (row.tenant_customer_private as Record<string, unknown> | null) ?? null;
      const tags = parseCustomerTags((privateRow?.custom_data as Record<string, unknown> | null)?.tags as string | null | undefined);
 
      return {
@@ -84,6 +93,12 @@ function mapCustomerRow(row: Record<string, unknown>): CustomerListItem {
      };
 }
 
+/**
+ * List customers with pagination. Does NOT join all appointments.
+ * Instead uses a batched RPC to determine upcoming status for the page.
+ *
+ * Max page size enforced at 100.
+ */
 export async function getCustomersList(
      tenantId: string,
      filters: CustomerListFilters = {},
@@ -92,19 +107,21 @@ export async function getCustomersList(
 ): Promise<{ items: CustomerListItem[]; total: number }> {
      const supabase = await createClient();
 
+     // Enforce max page size
+     const safLimit = Math.min(Math.max(limit, 1), 100);
+
      let query = supabase
           .from("tenant_customers")
           .select(
                `id, tenant_id, name, email, phone_number, preferred_location_id, marketing_opt_in, created_at, updated_at,
-      tenant_customer_private!left(is_blocked, blocked_reason, loyalty_points, internal_notes, custom_data),
-      appointments!left(id, starts_at, status)`,
+      tenant_customer_private!left(is_blocked, blocked_reason, loyalty_points, internal_notes, custom_data)`,
                { count: "exact" }
           )
           .eq("tenant_id", tenantId);
 
      if (filters.search) {
           const search = filters.search.trim();
-          if (search) {
+          if (search.length >= 2) {
                query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,phone_number.ilike.%${search}%`);
           }
      }
@@ -113,24 +130,34 @@ export async function getCustomersList(
           query = query.eq("preferred_location_id", filters.locationId);
      }
 
-     const { data, error } = await query.order("updated_at", { ascending: false }).range(offset, offset + limit - 1);
+     const { data, error, count } = await query
+          .order("updated_at", { ascending: false })
+          .range(offset, offset + safLimit - 1);
 
      if (error || !data) return { items: [], total: 0 };
 
      const rows = data as Array<Record<string, unknown>>;
-     let items = rows.map((row) => {
-          const appointments = (row.appointments as Array<Record<string, unknown>> | null) ?? [];
-          const hasUpcomingAppointments = appointments.some((appointment) => {
-               const startsAt = appointment.starts_at as string | null;
-               const status = appointment.status as string | null;
-               if (!startsAt || !status) return false;
-               const startsAtDate = new Date(startsAt);
-               return status !== "cancelled" && status !== "completed" && startsAtDate.getTime() >= Date.now();
-          });
+     const customerIds = rows.map((r) => r.id as string);
 
-          return mapCustomerRow({ ...row, has_upcoming_appointments: hasUpcomingAppointments });
-     });
+     // Batch-determine upcoming appointments for this page of customers
+     const upcomingSet = new Set<string>();
+     if (customerIds.length > 0) {
+          const { data: upcomingRows } = await (supabase as never as Awaited<ReturnType<typeof createClient>>).rpc(
+               "get_customers_with_upcoming_flag" as never,
+               { p_tenant_id: tenantId, p_customer_ids: customerIds } as never
+          );
+          if (upcomingRows) {
+               for (const r of upcomingRows as unknown as Array<{ customer_id: string; has_upcoming: boolean }>) {
+                    if (r.has_upcoming) upcomingSet.add(r.customer_id);
+               }
+          }
+     }
 
+     let items = rows.map((row) =>
+          mapCustomerRow({ ...row, has_upcoming_appointments: upcomingSet.has(row.id as string) })
+     );
+
+     // Client-side status filter (post-query since it depends on computed flag)
      if (filters.status) {
           items = items.filter((customer) => {
                if (filters.status === "blocked") return customer.isBlocked;
@@ -139,21 +166,25 @@ export async function getCustomersList(
           });
      }
 
-     return { items, total: items.length };
+     return { items, total: count ?? items.length };
 }
 
+/**
+ * Get single customer detail with bounded appointment sub-queries.
+ * Loads only 10 upcoming + 10 recent appointments (not entire history).
+ */
 export async function getCustomerById(
      tenantId: string,
      customerId: string
 ): Promise<CustomerDetail | null> {
      const supabase = await createClient();
 
+     // Load customer data (without appointments)
      const { data, error } = await supabase
           .from("tenant_customers")
           .select(
                `id, tenant_id, name, email, phone_number, preferred_location_id, marketing_opt_in, created_at, updated_at,
-      tenant_customer_private!left(is_blocked, blocked_reason, loyalty_points, internal_notes, custom_data),
-      appointments!left(id, appointment_number, starts_at, service_name_snapshot, status)`
+      tenant_customer_private!left(is_blocked, blocked_reason, loyalty_points, internal_notes, custom_data)`
           )
           .eq("tenant_id", tenantId)
           .eq("id", customerId)
@@ -162,16 +193,29 @@ export async function getCustomerById(
      if (error || !data) return null;
 
      const row = data as Record<string, unknown>;
-     const appointments = (row.appointments as Array<Record<string, unknown>> | null) ?? [];
-     const upcomingAppointments = appointments
-          .filter((appointment) => {
-               const startsAt = appointment.starts_at as string | null;
-               const status = appointment.status as string | null;
-               if (!startsAt || !status) return false;
-               const startsAtDate = new Date(startsAt);
-               return status !== "cancelled" && status !== "completed" && startsAtDate.getTime() >= Date.now();
-          })
-          .slice(0, 5)
+     const now = new Date().toISOString();
+
+     // Load bounded upcoming appointments (max 10)
+     const { data: upcomingRows } = await supabase
+          .from("appointments")
+          .select("id, appointment_number, starts_at, service_name_snapshot, status")
+          .eq("tenant_id", tenantId)
+          .eq("customer_id", customerId)
+          .gte("starts_at", now)
+          .not("status", "in", "(cancelled,completed,no_show)")
+          .order("starts_at", { ascending: true })
+          .limit(10);
+
+     // Load bounded recent appointments (max 10)
+     const { data: recentRows } = await supabase
+          .from("appointments")
+          .select("id, appointment_number, starts_at, service_name_snapshot, status")
+          .eq("tenant_id", tenantId)
+          .eq("customer_id", customerId)
+          .order("starts_at", { ascending: false })
+          .limit(10);
+
+     const upcomingAppointments = ((upcomingRows ?? []) as Array<Record<string, unknown>>)
           .map((appointment) => ({
                id: appointment.id as string,
                appointmentNumber: appointment.appointment_number as string,
@@ -180,8 +224,7 @@ export async function getCustomerById(
                status: appointment.status as string,
           }));
 
-     const recentAppointments = appointments
-          .slice(0, 5)
+     const recentAppointments = ((recentRows ?? []) as Array<Record<string, unknown>>)
           .map((appointment) => ({
                id: appointment.id as string,
                appointmentNumber: appointment.appointment_number as string,
@@ -192,9 +235,8 @@ export async function getCustomerById(
 
      return {
           ...mapCustomerRow({ ...row, has_upcoming_appointments: upcomingAppointments.length > 0 }),
-          customData: ((row.private as Record<string, unknown> | null)?.custom_data as Record<string, unknown> | undefined) ?? {},
+          customData: ((row.tenant_customer_private as Record<string, unknown> | null)?.custom_data as Record<string, unknown> | undefined) ?? {},
           upcomingAppointments,
           recentAppointments,
      };
 }
-

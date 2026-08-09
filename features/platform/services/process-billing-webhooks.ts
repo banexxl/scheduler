@@ -29,6 +29,10 @@ import {
      isAppointmentPaymentEvent,
      processAppointmentPaymentWebhook,
 } from "@/features/payments/services/process-appointment-payment-webhook";
+import {
+     isPackagePurchaseEvent,
+     processPackagePurchaseOrderPaid,
+} from "@/features/payments/services/process-package-purchase-webhook";
 
 const DEFAULT_BATCH_SIZE = 10;
 const MAX_BATCH_SIZE = 50;
@@ -93,6 +97,22 @@ async function dispatchWebhookEvent(
                eventId
           );
           if (result.status !== "not_appointment_event") {
+               return "processed" as const;
+          }
+     }
+
+     // Route package purchase events
+     if (isPackagePurchaseEvent(payload as Record<string, unknown>)) {
+          if (eventType === "order.paid") {
+               const result = await processPackagePurchaseOrderPaid(
+                    payload as Record<string, unknown>,
+                    eventId
+               );
+               if (result.status !== "not_package_event") {
+                    return "processed" as const;
+               }
+          } else {
+               // Non-paid package events: log and continue
                return "processed" as const;
           }
      }

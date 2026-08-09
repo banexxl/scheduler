@@ -3075,6 +3075,107 @@ export type Database = {
           },
         ]
       }
+      package_purchases: {
+        Row: {
+          amount_total: number
+          checkout_url: string | null
+          created_at: string
+          credits_snapshot: number
+          currency: string
+          customer_package_id: string | null
+          fulfilled_at: string | null
+          id: string
+          metadata: Json
+          package_id: string
+          package_name_snapshot: string
+          paid_at: string | null
+          provider: string | null
+          provider_checkout_id: string | null
+          provider_order_id: string | null
+          request_key: string
+          status: string
+          tenant_customer_id: string
+          tenant_id: string
+          updated_at: string
+          validity_days_snapshot: number | null
+        }
+        Insert: {
+          amount_total: number
+          checkout_url?: string | null
+          created_at?: string
+          credits_snapshot: number
+          currency: string
+          customer_package_id?: string | null
+          fulfilled_at?: string | null
+          id?: string
+          metadata?: Json
+          package_id: string
+          package_name_snapshot: string
+          paid_at?: string | null
+          provider?: string | null
+          provider_checkout_id?: string | null
+          provider_order_id?: string | null
+          request_key: string
+          status?: string
+          tenant_customer_id: string
+          tenant_id: string
+          updated_at?: string
+          validity_days_snapshot?: number | null
+        }
+        Update: {
+          amount_total?: number
+          checkout_url?: string | null
+          created_at?: string
+          credits_snapshot?: number
+          currency?: string
+          customer_package_id?: string | null
+          fulfilled_at?: string | null
+          id?: string
+          metadata?: Json
+          package_id?: string
+          package_name_snapshot?: string
+          paid_at?: string | null
+          provider?: string | null
+          provider_checkout_id?: string | null
+          provider_order_id?: string | null
+          request_key?: string
+          status?: string
+          tenant_customer_id?: string
+          tenant_id?: string
+          updated_at?: string
+          validity_days_snapshot?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_purchases_customer_package_id_fkey"
+            columns: ["customer_package_id"]
+            isOneToOne: false
+            referencedRelation: "customer_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_purchases_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "service_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_purchases_tenant_customer_id_fkey"
+            columns: ["tenant_customer_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "package_purchases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_intents: {
         Row: {
           amount: number
@@ -3768,6 +3869,8 @@ export type Database = {
           is_active: boolean
           is_public: boolean
           name: string
+          price_amount: number | null
+          price_currency: string | null
           sort_order: number
           tenant_id: string
           total_credits: number
@@ -3781,6 +3884,8 @@ export type Database = {
           is_active?: boolean
           is_public?: boolean
           name: string
+          price_amount?: number | null
+          price_currency?: string | null
           sort_order?: number
           tenant_id: string
           total_credits: number
@@ -3794,6 +3899,8 @@ export type Database = {
           is_active?: boolean
           is_public?: boolean
           name?: string
+          price_amount?: number | null
+          price_currency?: string | null
           sort_order?: number
           tenant_id?: string
           total_credits?: number
@@ -5376,6 +5483,15 @@ export type Database = {
       }
       expire_appointment_payment_intent: {
         Args: { p_payment_intent_id: string }
+        Returns: Json
+      }
+      fulfill_package_purchase: {
+        Args: {
+          p_paid_amount?: number
+          p_paid_currency?: string
+          p_provider_order_id?: string
+          p_purchase_id: string
+        }
         Returns: Json
       }
       generate_appointment_number: {

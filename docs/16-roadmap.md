@@ -1276,3 +1276,28 @@ Implemented full and partial refund workflows via Polar API.
 - Deposits, automatic refund policy, package purchasing, refund receipt emails
 
 See `docs/72-polar-appointment-refunds.md` for full details.
+
+### Milestone 11.6 — Package Purchases through Polar
+
+Connected service packages to Polar for customer online purchase.
+
+**Implemented:**
+- `package_purchases` table (9 statuses, snapshot, provider IDs, fulfillment tracking)
+- Package pricing columns on `service_packages` (price_amount, price_currency)
+- `fulfill_package_purchase` RPC (idempotent, locked, amount/currency verified)
+- Purchase creation service (validates active/public/priced, snapshots, calls Polar)
+- Package purchase webhook processor (domain routing, order.paid → fulfillment)
+- Extended billing webhook router for package_purchase domain
+- 30 package purchase tests
+
+**Key guarantees:**
+- Package NOT granted from checkout return or order.created
+- Package granted ONLY after trusted order.paid webhook
+- Duplicate webhooks cannot create duplicate credits (idempotent RPC)
+- Price from server (service_packages.price_amount), never client
+- Existing manually assigned packages unaffected
+
+**Not implemented (deferred):**
+- Package refunds, discounts/coupons, recurring subscriptions, tenant product management
+
+See `docs/73-polar-package-purchases.md` for full details.

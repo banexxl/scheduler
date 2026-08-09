@@ -17,6 +17,15 @@ export default async function BusinessHealthPage({
 
   const supabase = createServiceRoleClient();
 
+  // Load tenant timezone
+  const { data: tenantDetails } = await supabase
+    .from("tenants")
+    .select("default_timezone")
+    .eq("id", tenant.id)
+    .single();
+
+  const tenantTimezone = tenantDetails?.default_timezone ?? null;
+
   // Batch load health inputs
   const [
     locationsResult, servicesResult, resourcesResult,
@@ -49,7 +58,7 @@ export default async function BusinessHealthPage({
   const paymentProvider = isAppointmentPaymentProviderAvailable();
 
   const inputs: BusinessHealthInputs = {
-    tenantTimezone: tenant.defaultTimezone ?? null,
+    tenantTimezone: tenantTimezone ?? null,
     activeLocationCount: locationsResult.count ?? 0,
     locationsWithHoursCount: locationsWithHours.size,
     activeServiceCount: servicesResult.count ?? 0,

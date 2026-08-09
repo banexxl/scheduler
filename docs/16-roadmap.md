@@ -1071,3 +1071,55 @@ Created consistent operational diagnostics layer for production issue identifica
 - Distributed tracing, alerting, metrics
 
 See `docs/63-observability-error-handling.md` for full details.
+
+### Milestone 10.4 — Mobile, Accessibility & UX Consistency Audit
+
+Performed project-wide UX hardening for mobile, accessibility, and consistency.
+
+**Major fix:**
+- Business backoffice had no navigation on mobile — created responsive AppBar + hamburger drawer with all section links
+
+**Components created:**
+- `BusinessShell` — responsive navigation (desktop inline / mobile drawer)
+- `LoadingState` — skeleton or spinner with role="status"
+- `EmptyState` — consistent empty list messaging + CTA
+- `StatusChip` — color-mapped chip that always shows text (never color-only)
+- `ConfirmDialog` — destructive confirmation, fullScreen on mobile, focus trap
+
+**Accessibility:**
+- Semantic landmarks (header, nav, main)
+- ARIA labels on all icon buttons
+- Focus trap in drawers and dialogs
+- Keyboard navigation verified
+- Status never relies on color alone
+
+**Not implemented (deferred):**
+- Per-table card view for narrow mobile, bottom sticky CTA, full screen-reader testing
+
+See `docs/64-mobile-accessibility-ux-audit.md` for full details.
+
+### Milestone 10.5 — End-to-End & Integration Test Hardening
+
+Created production-oriented integration and E2E test layer.
+
+**Implemented:**
+- Test infrastructure: fixtures, helpers, environment guards, production URL detection
+- Integration tests (Vitest + HTTP): health endpoints, authorization boundaries, internal API security (23 tests)
+- E2E tests (Playwright): auth boundaries, public booking, self-service, mobile viewport (10 specs)
+- Package scripts: test:unit, test:integration, test:integration:required, test:all
+- Strict mode (INTEGRATION_REQUIRED=1) for CI enforcement
+- Playwright config with chromium + mobile projects
+
+**Coverage:**
+- Internal API authentication: missing/wrong/correct secret (9 tests across 3 routes)
+- Authorization: anonymous vs protected, public vs private
+- Public booking: loads, no data leak, mobile usable
+- Self-service: generic error messages, noindex
+- Health: accessible, no secrets exposed
+
+**Not implemented (deferred):**
+- Full authenticated user E2E (requires test auth setup)
+- Package concurrency browser E2E (covered by RPC design)
+- Firefox/WebKit matrix
+
+See `docs/65-e2e-integration-testing.md` for full details.

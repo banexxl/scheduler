@@ -59,7 +59,7 @@ export function validateConfiguration(): ConfigValidationResult {
   }
 
   // Check feature-dependent (warn only)
-  for (const [_, config] of Object.entries(FEATURE_CONFIGS)) {
+  for (const [, config] of Object.entries(FEATURE_CONFIGS)) {
     const featureMissing = config.envs.filter((e) => !process.env[e]?.trim());
     if (featureMissing.length > 0 && featureMissing.length < config.envs.length) {
       // Partially configured — warn

@@ -41,4 +41,20 @@ export type CreateCheckoutResult = {
 
 export interface AppointmentPaymentProvider {
   createCheckout(input: CreateCheckoutInput): Promise<CreateCheckoutResult>;
+  createRefund(input: CreateRefundProviderInput): Promise<CreateRefundProviderResult>;
 }
+
+// ─── Refund Types ────────────────────────────────────────────────────────────
+
+export type CreateRefundProviderInput = {
+  providerOrderId: string;
+  amount: number;
+  currency: string;
+  reason: string;
+  metadata: Record<string, string>;
+};
+
+export type CreateRefundProviderResult = {
+  providerRefundId: string;
+  status: string | null;
+};

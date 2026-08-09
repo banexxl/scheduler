@@ -1248,3 +1248,31 @@ Implemented payment policy configuration and deadline-based slot reservation.
 - Deposits (11.5 scope change), refunds, package purchasing
 
 See `docs/71-appointment-payment-requirements.md` for full details.
+
+### Milestone 11.5 — Polar Refunds & Financial Reconciliation
+
+Implemented full and partial refund workflows via Polar API.
+
+**Implemented:**
+- `appointment_payment_refunds` table (5 statuses, 2 origins, amount constraints, relationship trigger)
+- Refundable amount calculation (accounts for pending refund reservation)
+- `apply_appointment_refund_succeeded` RPC (idempotent, locked, prevents over-refund)
+- `mark_appointment_refund_failed` RPC
+- Polar refund API integration via provider adapter
+- Refund creation service (validates amount, calls provider, handles failure)
+- Server action (owner/admin only, server-side amount authority)
+- Provider-initiated refund support (Polar dashboard → webhook → local projection)
+- Late payment refund resolution path
+- 30 refund-specific tests
+
+**Key guarantees:**
+- Refund not confirmed until trusted webhook confirmation
+- Concurrent refunds cannot exceed refundable amount (DB locking)
+- Duplicate webhooks cannot double amount_refunded
+- Provider-initiated refunds sync back from Polar
+- Refunds never change appointment operational status
+
+**Not implemented (deferred):**
+- Deposits, automatic refund policy, package purchasing, refund receipt emails
+
+See `docs/72-polar-appointment-refunds.md` for full details.

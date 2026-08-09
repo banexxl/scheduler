@@ -22,7 +22,7 @@ export async function updateTenantPaymentSettingsAction(
   }
 ): Promise<ActionResult> {
   try {
-    const { tenant, membership } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
+    const { tenant } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
 
     // Validate deadline bounds
     if (input.paymentDeadlineMinutes < 5 || input.paymentDeadlineMinutes > 60) {

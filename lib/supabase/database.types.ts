@@ -243,6 +243,110 @@ export type Database = {
           },
         ]
       }
+      appointment_payment_refunds: {
+        Row: {
+          amount: number
+          appointment_id: string
+          appointment_payment_id: string
+          completed_at: string | null
+          created_at: string
+          currency: string
+          failure_code: string | null
+          failure_message: string | null
+          id: string
+          metadata: Json
+          origin: string
+          payment_intent_id: string | null
+          provider: string
+          provider_order_id: string | null
+          provider_refund_id: string | null
+          reason_code: string | null
+          reason_note: string | null
+          requested_at: string
+          requested_by: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          appointment_id: string
+          appointment_payment_id: string
+          completed_at?: string | null
+          created_at?: string
+          currency: string
+          failure_code?: string | null
+          failure_message?: string | null
+          id?: string
+          metadata?: Json
+          origin?: string
+          payment_intent_id?: string | null
+          provider: string
+          provider_order_id?: string | null
+          provider_refund_id?: string | null
+          reason_code?: string | null
+          reason_note?: string | null
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          appointment_id?: string
+          appointment_payment_id?: string
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          failure_code?: string | null
+          failure_message?: string | null
+          id?: string
+          metadata?: Json
+          origin?: string
+          payment_intent_id?: string | null
+          provider?: string
+          provider_order_id?: string | null
+          provider_refund_id?: string | null
+          reason_code?: string | null
+          reason_note?: string | null
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_payment_refunds_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_payment_refunds_appointment_payment_id_fkey"
+            columns: ["appointment_payment_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_payment_refunds_payment_intent_id_fkey"
+            columns: ["payment_intent_id"]
+            isOneToOne: false
+            referencedRelation: "payment_intents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_payment_refunds_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointment_payments: {
         Row: {
           amount_paid: number
@@ -4905,6 +5009,14 @@ export type Database = {
         }
         Returns: Json
       }
+      apply_appointment_refund_succeeded: {
+        Args: {
+          p_completed_at?: string
+          p_provider_refund_id?: string
+          p_refund_id: string
+        }
+        Returns: Json
+      }
       award_customer_loyalty_points: {
         Args: {
           p_appointment_id: string
@@ -5379,6 +5491,14 @@ export type Database = {
       is_tenant_slug_available: {
         Args: { candidate_slug: string }
         Returns: boolean
+      }
+      mark_appointment_refund_failed: {
+        Args: {
+          p_failure_code?: string
+          p_failure_message?: string
+          p_refund_id: string
+        }
+        Returns: Json
       }
       mark_notification_failed: {
         Args: {

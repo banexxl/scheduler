@@ -19,7 +19,8 @@
     "test:self-service:integration": "vitest run features/appointments/self-service/appointment-self-service.integration.test.ts",
     "test:self-service:integration:required": "node scripts/check-self-service-integration-env.mjs && cross-env SELF_SERVICE_INTEGRATION_REQUIRED=1 vitest run features/appointments/self-service/appointment-self-service.integration.test.ts",
     "test:all": "npm run test && npm run test:integration",
-    "run:all": "npm run db:types && npm run lint && npm run type-check && npm run test && npm run build"
+    "build:all": "npm run lint && npm run type-check && npm run test && npm run build",
+    "build:run": "npm run db:types && npm run lint && npm run type-check && npm run test && npm run build && npm run start"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",

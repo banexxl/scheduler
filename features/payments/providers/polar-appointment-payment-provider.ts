@@ -16,6 +16,8 @@ import type {
   AppointmentPaymentProvider,
   CreateCheckoutInput,
   CreateCheckoutResult,
+  CreateRefundProviderInput,
+  CreateRefundProviderResult,
 } from "./appointment-payment-provider";
 
 // ─── Polar Fetch (reused from existing client pattern) ───────────────────────
@@ -123,5 +125,34 @@ export class PolarAppointmentPaymentProvider implements AppointmentPaymentProvid
     });
 
     return { checkoutId, checkoutUrl, status, expiresAt };
+  }
+
+  async createRefund(input: CreateRefundProviderInput): Promise<CreateRefundProviderResult> {
+    const payload: Record<string, unknown> = {
+      order_id: input.providerOrderId,
+      amount: input.amount,
+      currency: input.currency.toLowerCase(),
+      reason: input.reason,
+      metadata: input.metadata,
+    };
+
+    logger.info("polar_appointment_refund_creating", {
+      operation: "create_refund",
+    });
+
+    const response = await polarFetch<Record<string, unknown>>("/v1/refunds", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const providerRefundId = String(response.id ?? "").trim();
+    if (!providerRefundId) {
+      throw new Error("Polar refund response missing ID.");
+    }
+
+    const status = typeof response.status === "string" ? response.status : null;
+
+    return { providerRefundId, status };
   }
 }

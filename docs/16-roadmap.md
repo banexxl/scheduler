@@ -1328,3 +1328,28 @@ Implemented provider resource synchronization and tenant-managed discounts.
 - 100% discounts (zero-amount checkout), recurring subscriptions, tenant product management UI (foundation ready)
 
 See `docs/74-polar-tenant-resource-sync.md` for full details.
+
+### Milestone 11.8 — Payment History, Receipts & Financial Dashboard
+
+Created tenant/customer financial history experience.
+
+**Implemented:**
+- Migration: provider financial snapshot columns, indexes, `get_tenant_payment_summary` RPC
+- Normalized financial history query service (appointment payments + package purchases)
+- Tenant payments route (`/{tenantSlug}/payments`) with server/client-page
+- Summary cards (per-currency: payments received, refunded, net)
+- Financial history table (type, customer, description, amounts, status)
+- 14 financial history tests
+
+**Key guarantees:**
+- RSD and EUR never summed together
+- Refunds reflected in net customer payment
+- Terminology: "Payments received" not "Revenue"
+- Aggregation via DB RPC (no row-loading)
+- SaaS billing completely separate
+- Receipt resolved server-side from authorized local transaction
+
+**Not implemented (deferred):**
+- CSV export, tenant payout reporting, custom fiscal documents
+
+See `docs/75-payment-history-receipts-financial-dashboard.md` for full details.

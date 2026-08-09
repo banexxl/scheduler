@@ -355,11 +355,20 @@ export type Database = {
           appointment_id: string
           created_at: string
           currency: string
+          discount_amount_snapshot: number | null
+          discount_code_snapshot: string | null
           id: string
+          invoice_available: boolean
           latest_payment_intent_id: string | null
+          original_amount: number | null
           paid_at: string | null
           payment_requirement: string
           provider: string | null
+          provider_discount_amount: number | null
+          provider_subtotal_amount: number | null
+          provider_tax_amount: number | null
+          provider_total_amount: number | null
+          receipt_available: boolean
           status: string
           tenant_id: string
           updated_at: string
@@ -371,11 +380,20 @@ export type Database = {
           appointment_id: string
           created_at?: string
           currency: string
+          discount_amount_snapshot?: number | null
+          discount_code_snapshot?: string | null
           id?: string
+          invoice_available?: boolean
           latest_payment_intent_id?: string | null
+          original_amount?: number | null
           paid_at?: string | null
           payment_requirement?: string
           provider?: string | null
+          provider_discount_amount?: number | null
+          provider_subtotal_amount?: number | null
+          provider_tax_amount?: number | null
+          provider_total_amount?: number | null
+          receipt_available?: boolean
           status?: string
           tenant_id: string
           updated_at?: string
@@ -387,11 +405,20 @@ export type Database = {
           appointment_id?: string
           created_at?: string
           currency?: string
+          discount_amount_snapshot?: number | null
+          discount_code_snapshot?: string | null
           id?: string
+          invoice_available?: boolean
           latest_payment_intent_id?: string | null
+          original_amount?: number | null
           paid_at?: string | null
           payment_requirement?: string
           provider?: string | null
+          provider_discount_amount?: number | null
+          provider_subtotal_amount?: number | null
+          provider_tax_amount?: number | null
+          provider_total_amount?: number | null
+          receipt_available?: boolean
           status?: string
           tenant_id?: string
           updated_at?: string
@@ -3083,15 +3110,24 @@ export type Database = {
           credits_snapshot: number
           currency: string
           customer_package_id: string | null
+          discount_amount_snapshot: number | null
+          discount_code_snapshot: string | null
           fulfilled_at: string | null
           id: string
+          invoice_available: boolean
           metadata: Json
+          original_amount: number | null
           package_id: string
           package_name_snapshot: string
           paid_at: string | null
           provider: string | null
           provider_checkout_id: string | null
+          provider_discount_amount: number | null
           provider_order_id: string | null
+          provider_subtotal_amount: number | null
+          provider_tax_amount: number | null
+          provider_total_amount: number | null
+          receipt_available: boolean
           request_key: string
           status: string
           tenant_customer_id: string
@@ -3106,15 +3142,24 @@ export type Database = {
           credits_snapshot: number
           currency: string
           customer_package_id?: string | null
+          discount_amount_snapshot?: number | null
+          discount_code_snapshot?: string | null
           fulfilled_at?: string | null
           id?: string
+          invoice_available?: boolean
           metadata?: Json
+          original_amount?: number | null
           package_id: string
           package_name_snapshot: string
           paid_at?: string | null
           provider?: string | null
           provider_checkout_id?: string | null
+          provider_discount_amount?: number | null
           provider_order_id?: string | null
+          provider_subtotal_amount?: number | null
+          provider_tax_amount?: number | null
+          provider_total_amount?: number | null
+          receipt_available?: boolean
           request_key: string
           status?: string
           tenant_customer_id: string
@@ -3129,15 +3174,24 @@ export type Database = {
           credits_snapshot?: number
           currency?: string
           customer_package_id?: string | null
+          discount_amount_snapshot?: number | null
+          discount_code_snapshot?: string | null
           fulfilled_at?: string | null
           id?: string
+          invoice_available?: boolean
           metadata?: Json
+          original_amount?: number | null
           package_id?: string
           package_name_snapshot?: string
           paid_at?: string | null
           provider?: string | null
           provider_checkout_id?: string | null
+          provider_discount_amount?: number | null
           provider_order_id?: string | null
+          provider_subtotal_amount?: number | null
+          provider_tax_amount?: number | null
+          provider_total_amount?: number | null
+          receipt_available?: boolean
           request_key?: string
           status?: string
           tenant_customer_id?: string
@@ -5752,6 +5806,10 @@ export type Database = {
           p_resource_id?: string
           p_tenant_id: string
         }
+        Returns: Json
+      }
+      get_tenant_payment_summary: {
+        Args: { p_from: string; p_tenant_id: string; p_to: string }
         Returns: Json
       }
       get_today_appointment_counts: {

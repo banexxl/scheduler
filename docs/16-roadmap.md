@@ -1383,3 +1383,32 @@ Hardened Polar integration with reconciliation, crash recovery, and provider cli
 - Automated invariant repair (manual_review preferred)
 
 See `docs/76-polar-reconciliation-production-hardening.md` for full details.
+
+### Milestone 12.1 — Team Management & Staff Invitations
+
+Implemented complete team management with secure invitations.
+
+**Implemented:**
+- `tenant_member_invitations` table (SHA-256 hashed token, expiry, status lifecycle)
+- `accept_tenant_member_invitation` RPC (atomic, concurrency-safe, email-verified)
+- `safe_remove_tenant_member` RPC (last-owner protection, role authorization)
+- Team management route with full CRUD (invite, revoke, change role, remove)
+- Invitation landing page (`/invite/{token}`) with auth continuation
+- Invitation authorization matrix (owner/admin can invite, role-filtered options)
+- Last-owner invariant protection (DB-level transactional enforcement)
+- Member deactivation (preserves history, immediately revokes access)
+- 22 team management tests
+
+**Key guarantees:**
+- Tokens stored as SHA-256 only (never raw)
+- Expired/revoked invitations cannot create membership
+- Acceptance requires matching authenticated email
+- Concurrent acceptance creates exactly one membership
+- Admin cannot promote self to owner
+- Tenant always has >= 1 active owner
+- Removed member immediately loses authorization
+
+**Not implemented (deferred):**
+- Staff/resource profile linking (12.2), ownership transfer UI, resend with new token
+
+See `docs/77-team-management-staff-invitations.md` for full details.

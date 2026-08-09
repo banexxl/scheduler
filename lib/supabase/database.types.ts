@@ -4894,6 +4894,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_appointment_payment_order_paid: {
+        Args: {
+          p_paid_amount?: number
+          p_paid_currency?: string
+          p_payment_intent_id: string
+          p_provider_event_id?: string
+          p_provider_order_id: string
+          p_provider_payment_id?: string
+        }
+        Returns: Json
+      }
       award_customer_loyalty_points: {
         Args: {
           p_appointment_id: string
@@ -5249,6 +5260,10 @@ export type Database = {
           p_sender_name?: string
           p_tenant_id: string
         }
+        Returns: Json
+      }
+      expire_appointment_payment_intent: {
+        Args: { p_payment_intent_id: string }
         Returns: Json
       }
       generate_appointment_number: {

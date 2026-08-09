@@ -25,6 +25,10 @@ import { handleSubscriptionRevoked } from "./handle-subscription-revoked";
 import { handleOrderWebhook } from "./handle-order-webhook";
 import { handleRefundWebhook } from "./handle-refund-webhook";
 import type { ProcessWebhookResult } from "../types/billing";
+import {
+     isAppointmentPaymentEvent,
+     processAppointmentPaymentWebhook,
+} from "@/features/payments/services/process-appointment-payment-webhook";
 
 const DEFAULT_BATCH_SIZE = 10;
 const MAX_BATCH_SIZE = 50;
@@ -80,6 +84,18 @@ async function dispatchWebhookEvent(
      eventId: string
 ) {
      const eventTimestamp = extractWebhookEventTimestamp(payload);
+
+     // Route appointment payment events first (metadata-based detection)
+     if (isAppointmentPaymentEvent(payload as Record<string, unknown>)) {
+          const result = await processAppointmentPaymentWebhook(
+               eventType,
+               payload as Record<string, unknown>,
+               eventId
+          );
+          if (result.status !== "not_appointment_event") {
+               return "processed" as const;
+          }
+     }
 
      switch (eventType) {
           case "product.created":

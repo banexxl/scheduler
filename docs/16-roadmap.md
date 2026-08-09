@@ -1190,3 +1190,32 @@ Connected appointment payment model to Polar via real checkout creation.
 - Deposits, refunds, tenant product management
 
 See `docs/69-polar-appointment-checkout.md` for full details.
+
+### Milestone 11.3 — Polar Webhook Sync & Appointment Payment Confirmation
+
+Implemented webhook-authoritative payment confirmation via Polar events.
+
+**Implemented:**
+- Appointment payment webhook processor with metadata-based event routing
+- `order.paid` as sole authoritative payment-success signal
+- Transactional RPC `apply_appointment_payment_order_paid` (locked, idempotent, amount/currency verified)
+- Transactional RPC `expire_appointment_payment_intent` (monotonic state transitions)
+- Event routing in existing billing webhook processor (appointment vs SaaS separation)
+- Checkout expiry handling (intent → expired, payment → unpaid)
+- Order projection (provider_order_id persistence without marking paid)
+- Out-of-order event safety (succeeded cannot be reverted)
+- 38 webhook-specific tests
+
+**Key guarantees:**
+- `order.paid` is the ONLY event that marks payment as paid
+- Duplicate events cannot double amount_paid (idempotent RPC)
+- Out-of-order events cannot revert succeeded state
+- Return URL cannot mark payment as paid
+- Appointment events cannot mutate SaaS billing tables
+
+**Not implemented (deferred):**
+- Customer refund workflow (11.5)
+- Deposits (11.4)
+- Payment receipt emails
+
+See `docs/70-polar-appointment-payment-webhooks.md` for full details.

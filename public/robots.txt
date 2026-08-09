@@ -1,0 +1,22 @@
+# Robots.txt — Production
+# Public booking pages may be crawled.
+# All authenticated/token/internal routes are excluded.
+
+User-agent: *
+Allow: /book/
+Disallow: /customer/
+Disallow: /api/
+Disallow: /manage-appointment/
+Disallow: /platform/
+Disallow: /platform-admin/
+Disallow: /auth/
+Disallow: /login
+Disallow: /register
+Disallow: /create-business
+
+# Token routes (noindex via headers, but also excluded here)
+Disallow: /book/*/review/
+Disallow: /book/*/waitlist/
+Disallow: /book/*/portal/
+
+Sitemap: https://get-slot.app/sitemap.xml

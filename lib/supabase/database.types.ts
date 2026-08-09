@@ -243,6 +243,72 @@ export type Database = {
           },
         ]
       }
+      appointment_payments: {
+        Row: {
+          amount_paid: number
+          amount_refunded: number
+          amount_total: number
+          appointment_id: string
+          created_at: string
+          currency: string
+          id: string
+          latest_payment_intent_id: string | null
+          paid_at: string | null
+          payment_requirement: string
+          provider: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_paid?: number
+          amount_refunded?: number
+          amount_total: number
+          appointment_id: string
+          created_at?: string
+          currency: string
+          id?: string
+          latest_payment_intent_id?: string | null
+          paid_at?: string | null
+          payment_requirement?: string
+          provider?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_paid?: number
+          amount_refunded?: number
+          amount_total?: number
+          appointment_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          latest_payment_intent_id?: string | null
+          paid_at?: string | null
+          payment_requirement?: string
+          provider?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_payments_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointment_reminders: {
         Row: {
           appointment_id: string
@@ -2898,6 +2964,97 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "notification_templates_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_intents: {
+        Row: {
+          amount: number
+          appointment_id: string
+          appointment_payment_id: string
+          checkout_url: string | null
+          completed_at: string | null
+          created_at: string
+          currency: string
+          expires_at: string | null
+          failure_code: string | null
+          failure_message: string | null
+          id: string
+          metadata: Json
+          provider: string
+          provider_checkout_id: string | null
+          provider_order_id: string | null
+          provider_payment_id: string | null
+          request_key: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          appointment_id: string
+          appointment_payment_id: string
+          checkout_url?: string | null
+          completed_at?: string | null
+          created_at?: string
+          currency: string
+          expires_at?: string | null
+          failure_code?: string | null
+          failure_message?: string | null
+          id?: string
+          metadata?: Json
+          provider: string
+          provider_checkout_id?: string | null
+          provider_order_id?: string | null
+          provider_payment_id?: string | null
+          request_key: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          appointment_id?: string
+          appointment_payment_id?: string
+          checkout_url?: string | null
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          expires_at?: string | null
+          failure_code?: string | null
+          failure_message?: string | null
+          id?: string
+          metadata?: Json
+          provider?: string
+          provider_checkout_id?: string | null
+          provider_order_id?: string | null
+          provider_payment_id?: string | null
+          request_key?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_intents_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_intents_appointment_payment_id_fkey"
+            columns: ["appointment_payment_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_intents_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"

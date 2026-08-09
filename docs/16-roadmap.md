@@ -1123,3 +1123,46 @@ Created production-oriented integration and E2E test layer.
 - Firefox/WebKit matrix
 
 See `docs/65-e2e-integration-testing.md` for full details.
+
+### Milestone 10.6 — Production Launch Readiness
+
+Prepared the application for production deployment.
+
+**Implemented:**
+- Complete environment variable inventory with classification (public/secret/optional/test)
+- Updated `.env.example` with all supported variables organized by category
+- Production security headers: X-Content-Type-Options, Referrer-Policy, X-Frame-Options, Permissions-Policy
+- Cache control: private/no-store for token routes, portal, customer, internal APIs
+- robots.txt excluding authenticated/token/internal routes
+- Production runbook (docs/66-production-runbook.md): deployment, migrations, cron, incidents, secrets, recovery
+- Launch checklist (docs/67-production-launch-checklist.md): executable checkbox list
+
+**Status: IMPLEMENTED + DOCUMENTED**
+- Actual production deployment requires manual action (DNS, env setup, Supabase config, cron)
+- Launch checklist provides step-by-step verification procedure
+
+See `docs/66-production-runbook.md` and `docs/67-production-launch-checklist.md` for details.
+
+### Milestone 11.1 — Appointment Payment Model & Payment Intent Foundation
+
+Introduced provider-agnostic appointment payment domain model.
+
+**Implemented:**
+- `appointment_payments` table (9 statuses, monetary constraints, tenant isolation)
+- `payment_intents` table (7 statuses, idempotent request_key, provider-neutral)
+- Relationship verification trigger (tenant consistency)
+- RLS (member SELECT, no direct client writes)
+- Currency minor-unit utility (20+ currencies, exponent-aware conversion)
+- Payment status resolution (pure function, tested precedence rules)
+- Query services (payment lookup, latest intent, reusable intent, bounded history)
+- Payment intent creation service (eligibility, snapshot, idempotency, reuse)
+- Price-change detection helper
+- Customer DTO (privacy-safe) and Business DTO
+- 42 tests (status resolution, currency, formatting, constants)
+
+**Not implemented (deferred):**
+- Polar API calls, checkout sessions, payment capture
+- Deposits, refunds, package purchases, invoices
+- UI payment buttons (foundation only)
+
+See `docs/68-appointment-payment-foundation.md` for full details.

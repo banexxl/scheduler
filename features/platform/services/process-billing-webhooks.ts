@@ -105,8 +105,7 @@ async function dispatchWebhookEvent(
      if (isPackagePurchaseEvent(payload as Record<string, unknown>)) {
           if (eventType === "order.paid") {
                const result = await processPackagePurchaseOrderPaid(
-                    payload as Record<string, unknown>,
-                    eventId
+                    payload as Record<string, unknown>
                );
                if (result.status !== "not_package_event") {
                     return "processed" as const;

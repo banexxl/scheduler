@@ -1465,3 +1465,29 @@ Built operational staff scheduling layer reusing existing resource infrastructur
 - Shift management, attendance, leave approval, commissions, payroll
 
 See `docs/79-staff-availability-time-off.md` for full details.
+
+### Milestone 12.4 — Staff Operational Dashboard & My Day
+
+Built focused daily operational experience for linked staff members.
+
+**Implemented:**
+- `/my-day` route with server identity resolution (member → profile → resource)
+- My Day DTO (today's appointments, working hours, time off, gaps, summary, next appointment)
+- Gap calculator utility (split-shift aware, time-off subtraction, min 10-min threshold)
+- Mobile-first client page (appointment cards, quick actions, working hours, free time)
+- Safe unlinked-user state
+- 25 tests (gap calculation, identity resolution, authorization, privacy)
+
+**Key guarantees:**
+- Identity resolved server-side (browser resourceId never trusted)
+- Staff A cannot see/mutate Staff B appointments
+- Existing status actions reused (no duplicate state machine)
+- Completion triggers existing review/package/loyalty side effects
+- Gaps are informational (not claimed as bookable slots)
+- Customer privacy limited to operational needs
+- No N+1 queries
+
+**Not implemented (deferred):**
+- Auto-login redirect to My Day, push notifications, clock in/out, payroll
+
+See `docs/80-staff-my-day-operational-dashboard.md` for full details.

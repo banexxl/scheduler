@@ -34,10 +34,9 @@ describe("sync status model", () => {
 
 describe("sync version race protection", () => {
   it("v1 response must not mark v2 local state as synced", () => {
-    const localVersion = 2;
-    const responseVersion = 1;
-    const shouldApply = localVersion === responseVersion;
-    expect(shouldApply).toBe(false);
+    const localVersion: number = 2;
+    const responseVersion: number = 1;
+    expect(localVersion).not.toBe(responseVersion);
   });
 
   it("matching version allows sync completion", () => {

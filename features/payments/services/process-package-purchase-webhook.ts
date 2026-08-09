@@ -32,7 +32,7 @@ export function isPackagePurchaseEvent(payload: Record<string, unknown>): boolea
  */
 export async function processPackagePurchaseOrderPaid(
   payload: Record<string, unknown>,
-  providerEventId: string
+  _providerEventId: string
 ): Promise<PackagePurchaseWebhookResult> {
   const data = (payload.data && typeof payload.data === "object" && !Array.isArray(payload.data))
     ? payload.data as Record<string, unknown> : payload;

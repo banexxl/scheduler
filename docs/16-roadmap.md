@@ -1301,3 +1301,30 @@ Connected service packages to Polar for customer online purchase.
 - Package refunds, discounts/coupons, recurring subscriptions, tenant product management
 
 See `docs/73-polar-package-purchases.md` for full details.
+
+### Milestone 11.7 — Tenant Polar Products, Discounts & Provider Resource Sync
+
+Implemented provider resource synchronization and tenant-managed discounts.
+
+**Implemented:**
+- `payment_provider_resources` table (local-first sync mapping, optimistic versioning)
+- `tenant_discounts` table (percentage 1-99% / fixed, code uniqueness, validity)
+- `tenant_discount_targets` table (all_appointments, all_packages, service, package)
+- `tenant_discount_redemptions` table (reserved/confirmed/released)
+- Provider resource sync service (create mapping → call Polar → persist ID)
+- Discount validation service (code → tenant lookup → eligibility → provider ID)
+- Discount-to-Polar code namespacing strategy (prevents cross-tenant collision)
+- 35 tests
+
+**Key guarantees:**
+- Local record exists before provider sync (pending with null ID is valid)
+- Tenants never see organization-wide Polar catalog
+- Cross-tenant discount usage impossible (tenant-scoped validation)
+- Browser cannot submit arbitrary provider discount IDs
+- Sync version prevents stale response from overwriting newer edits
+- Dynamic appointment/package checkout unchanged (discounts optional)
+
+**Not implemented (deferred):**
+- 100% discounts (zero-amount checkout), recurring subscriptions, tenant product management UI (foundation ready)
+
+See `docs/74-polar-tenant-resource-sync.md` for full details.

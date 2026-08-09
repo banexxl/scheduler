@@ -3267,6 +3267,68 @@ export type Database = {
           },
         ]
       }
+      payment_provider_resources: {
+        Row: {
+          created_at: string
+          id: string
+          last_sync_attempt_at: string | null
+          last_synced_at: string | null
+          local_resource_id: string
+          provider: string
+          provider_resource_id: string | null
+          provider_version: string | null
+          resource_type: string
+          sync_error_code: string | null
+          sync_error_message: string | null
+          sync_status: string
+          sync_version: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_sync_attempt_at?: string | null
+          last_synced_at?: string | null
+          local_resource_id: string
+          provider: string
+          provider_resource_id?: string | null
+          provider_version?: string | null
+          resource_type: string
+          sync_error_code?: string | null
+          sync_error_message?: string | null
+          sync_status?: string
+          sync_version?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_sync_attempt_at?: string | null
+          last_synced_at?: string | null
+          local_resource_id?: string
+          provider?: string
+          provider_resource_id?: string | null
+          provider_version?: string | null
+          resource_type?: string
+          sync_error_code?: string | null
+          sync_error_message?: string | null
+          sync_status?: string
+          sync_version?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_provider_resources_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_admins: {
         Row: {
           created_at: string
@@ -4383,6 +4445,181 @@ export type Database = {
           },
           {
             foreignKeyName: "tenant_customers_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_discount_redemptions: {
+        Row: {
+          amount_discounted: number
+          appointment_payment_id: string | null
+          confirmed_at: string | null
+          created_at: string
+          currency: string
+          customer_id: string | null
+          discount_id: string
+          id: string
+          package_purchase_id: string | null
+          provider_order_id: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          amount_discounted: number
+          appointment_payment_id?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          currency: string
+          customer_id?: string | null
+          discount_id: string
+          id?: string
+          package_purchase_id?: string | null
+          provider_order_id?: string | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          amount_discounted?: number
+          appointment_payment_id?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          discount_id?: string
+          id?: string
+          package_purchase_id?: string | null
+          provider_order_id?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_discount_redemptions_appointment_payment_id_fkey"
+            columns: ["appointment_payment_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_discount_redemptions_discount_id_fkey"
+            columns: ["discount_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_discounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_discount_redemptions_package_purchase_id_fkey"
+            columns: ["package_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "package_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_discount_redemptions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_discount_targets: {
+        Row: {
+          created_at: string
+          discount_id: string
+          id: string
+          target_id: string | null
+          target_type: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          discount_id: string
+          id?: string
+          target_id?: string | null
+          target_type: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          discount_id?: string
+          id?: string
+          target_id?: string | null
+          target_type?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_discount_targets_discount_id_fkey"
+            columns: ["discount_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_discounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_discount_targets_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_discounts: {
+        Row: {
+          code: string | null
+          created_at: string
+          currency: string | null
+          discount_type: string
+          ends_at: string | null
+          fixed_amount: number | null
+          id: string
+          is_active: boolean
+          maximum_redemptions: number | null
+          name: string
+          percentage: number | null
+          starts_at: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          currency?: string | null
+          discount_type: string
+          ends_at?: string | null
+          fixed_amount?: number | null
+          id?: string
+          is_active?: boolean
+          maximum_redemptions?: number | null
+          name: string
+          percentage?: number | null
+          starts_at?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          currency?: string | null
+          discount_type?: string
+          ends_at?: string | null
+          fixed_amount?: number | null
+          id?: string
+          is_active?: boolean
+          maximum_redemptions?: number | null
+          name?: string
+          percentage?: number | null
+          starts_at?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_discounts_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"

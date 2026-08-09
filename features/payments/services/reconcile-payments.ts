@@ -19,7 +19,6 @@ export type ReconciliationResult = {
 };
 
 const STALE_CREATING_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
-const STALE_PENDING_THRESHOLD_MS = 10 * 60 * 1000;
 const MAX_BATCH = 50;
 
 /**

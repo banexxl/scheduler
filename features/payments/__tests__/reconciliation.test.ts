@@ -93,10 +93,9 @@ describe("webhook replay safety", () => {
 
 describe("cross-tenant metadata validation", () => {
   it("metadata tenant mismatch = manual review", () => {
-    const metadataTenant = "tenant-a";
-    const localIntentTenant = "tenant-b";
-    const matches = metadataTenant === localIntentTenant;
-    expect(matches).toBe(false);
+    const metadataTenant: string = "tenant-a";
+    const localIntentTenant: string = "tenant-b";
+    expect(metadataTenant).not.toBe(localIntentTenant);
     // Result: manual_review, no mutation
   });
 });

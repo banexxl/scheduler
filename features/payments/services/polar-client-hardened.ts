@@ -7,8 +7,6 @@ import "server-only";
  * and normalized error types. All Polar calls should flow through here.
  */
 
-import { logger } from "@/lib/logging";
-
 // ─── Provider Error Types ────────────────────────────────────────────────────
 
 export class ProviderRateLimitError extends Error {

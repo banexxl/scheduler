@@ -1544,3 +1544,22 @@ Built configuration readiness diagnostic for tenant businesses.
 - Auto-remediation, health history, cron heartbeat monitoring
 
 See `docs/82-business-configuration-health-center.md` for full details.
+
+### Milestone 12.7 — Final Booking & Operations UX Polish
+
+Unified status language, date/time formatting, and UX consistency across the application.
+
+**Implemented:**
+- Centralized status display labels (appointment, payment, operational, notification, health)
+- Centralized date/time formatters (date, time, relative, duration)
+- UX consistency audit: all existing patterns verified correct
+- 20 consistency tests
+
+**Key guarantees:**
+- No raw enums displayed to users (all human-friendly labels)
+- Payment wording remains webhook-authoritative ("Paid" only after confirmation)
+- Terminology: "Pay at business" not "Free", no "Revenue"/"Profit" misuse
+- Existing canonical actions remain authoritative
+- No new state machine, mutation path, or schema changes
+
+See `docs/83-final-booking-operations-ux-polish.md` for full details.

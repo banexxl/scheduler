@@ -1219,3 +1219,32 @@ Implemented webhook-authoritative payment confirmation via Polar events.
 - Payment receipt emails
 
 See `docs/70-polar-appointment-payment-webhooks.md` for full details.
+
+### Milestone 11.4 — Appointment Payment Requirements, Deadlines & Booking Integration
+
+Implemented payment policy configuration and deadline-based slot reservation.
+
+**Implemented:**
+- `tenant_appointment_payment_settings` table (enable/disable, requirement, deadline 5-60min)
+- `service_payment_rules` table (per-service override, NULL=inherit)
+- Payment requirement resolver (service → tenant → app default, zero-price/provider checks)
+- Payment deadline columns on `appointment_payments` (payment_due_at, expired_at, requires_review)
+- Expiry processor with `claim_expired_appointment_payments` RPC (FOR UPDATE SKIP LOCKED)
+- `cancel_expired_appointment_payment` RPC (race-safe: re-checks paid under lock)
+- `handle_late_appointment_payment` RPC (flags for review, never reactivates)
+- Internal API route (`/api/internal/appointment-payments/process-expired`)
+- Settings UI (`/{tenantSlug}/settings/payments`) with client-page
+- Server actions for tenant + service payment settings (owner/admin only)
+- Waitlist matching + reminder cancellation on payment timeout
+- 20 resolver/contract tests
+
+**Key guarantees:**
+- Existing tenants default to no online payment (safe migration)
+- Retry does not extend payment deadline
+- Webhook/timeout race protected by transactional locks
+- Late payments flagged for review, never auto-reactivate
+
+**Not implemented (deferred):**
+- Deposits (11.5 scope change), refunds, package purchasing
+
+See `docs/71-appointment-payment-requirements.md` for full details.

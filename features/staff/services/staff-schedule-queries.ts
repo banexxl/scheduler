@@ -98,8 +98,7 @@ export async function getStaffScheduleOverview(
  */
 export async function getScheduleChangeConflicts(
   tenantId: string,
-  resourceId: string,
-  _proposedUnavailableRanges: Array<{ dayOfWeek: number; startTime: string; endTime: string }>
+  resourceId: string
 ): Promise<ScheduleConflictResult> {
   const supabase = createServiceRoleClient();
   const now = new Date().toISOString();

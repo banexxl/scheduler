@@ -1,16 +1,24 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logging";
 
+/**
+ * GET /api/health/supabase
+ *
+ * Readiness check — verifies core DB dependency is reachable.
+ * Uses a lightweight single-row query with limit 1.
+ * Does not expose connection details or secrets.
+ */
 export async function GET() {
   try {
     const supabase = await createClient();
 
     const { error } = await supabase
-      .from("subscription_plans")
+      .from("tenants")
       .select("id")
       .limit(1);
 
     if (error) {
-      console.error("Supabase health check failed:", error.code);
+      logger.warn("health_supabase_failed", { errorCategory: "DATABASE" });
       return Response.json(
         { status: "error", supabase: "unavailable" },
         { status: 503 }
@@ -19,7 +27,7 @@ export async function GET() {
 
     return Response.json({ status: "ok", supabase: "connected" });
   } catch {
-    console.error("Supabase health check: unexpected error");
+    logger.warn("health_supabase_unexpected_error", { errorCategory: "DATABASE" });
     return Response.json(
       { status: "error", supabase: "unavailable" },
       { status: 503 }

@@ -1046,3 +1046,28 @@ Performed project-wide performance audit focused on query efficiency and scaling
 - Redis rate limiting, full-text search, materialized views, CDN
 
 See `docs/62-performance-query-audit.md` for full details.
+
+### Milestone 10.3 — Observability, Error Handling & Operational Diagnostics
+
+Created consistent operational diagnostics layer for production issue identification.
+
+**Implemented:**
+- Centralized structured logger (`lib/logging/logger.ts`) with JSON/human-readable output, 4 levels, auto-redaction
+- Typed application error system (`lib/errors/app-error.ts`) with 10 categories, 9 error classes
+- Public error mapping (toPublicError) — never exposes internals
+- PostgreSQL error code mapping (23505, 23P01, 23503, 23514, 42501)
+- Request correlation IDs with validation and generation
+- Operation timing with slow-operation warnings (>1s)
+- Health endpoint (liveness) and Supabase readiness probe
+- Configuration validation (required vs feature-dependent)
+- Global error boundaries (error.tsx, global-error.tsx, not-found.tsx)
+- Internal API routes migrated to structured logger
+- Console audit: all existing logs verified PII/secret-safe
+
+**Tests:** 46 tests (redaction, error mapping, request IDs, DB error mapping)
+
+**Not implemented (deferred):**
+- External observability vendor (Sentry, Datadog, OpenTelemetry)
+- Distributed tracing, alerting, metrics
+
+See `docs/63-observability-error-handling.md` for full details.

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processNotificationBatch } from "@/features/notifications/services/process-notifications";
 import { isAuthorizedBearerSecret } from "@/lib/security/internal-route-auth";
+import { logger, resolveRequestId } from "@/lib/logging";
 
 /**
  * POST /api/internal/notifications/process
@@ -73,12 +74,14 @@ export async function POST(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error("[notifications/process] Route error:", {
-      error: error instanceof Error ? error.message : "unknown",
-    });
+    const requestId = resolveRequestId(request.headers.get("x-request-id"));
+    logger.error("notification_process_route_failed", {
+      requestId,
+      worker: "notifications",
+    }, error);
 
     return NextResponse.json(
-      { error: "Processing failed" },
+      { error: "Processing failed", requestId },
       { status: 500 }
     );
   }

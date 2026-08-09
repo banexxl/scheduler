@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processReminderBatch } from "@/features/notifications/services/process-reminders";
 import { isAuthorizedBearerSecret } from "@/lib/security/internal-route-auth";
+import { logger, resolveRequestId } from "@/lib/logging";
 
 /**
  * POST /api/internal/reminders/process
@@ -66,12 +67,14 @@ export async function POST(request: NextRequest) {
       })),
     });
   } catch (error) {
-    console.error("[reminders/process] Route error:", {
-      error: error instanceof Error ? error.message : "unknown",
-    });
+    const requestId = resolveRequestId(request.headers.get("x-request-id"));
+    logger.error("reminder_process_route_failed", {
+      requestId,
+      worker: "reminders",
+    }, error);
 
     return NextResponse.json(
-      { error: "Processing failed" },
+      { error: "Processing failed", requestId },
       { status: 500 }
     );
   }

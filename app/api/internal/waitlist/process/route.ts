@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { expireWaitlistItems } from "@/features/waitlist/services/waitlist-expiration";
 import { isAuthorizedBearerSecret } from "@/lib/security/internal-route-auth";
+import { logger, resolveRequestId } from "@/lib/logging";
 
 /**
  * POST /api/internal/waitlist/process
@@ -27,7 +28,9 @@ export async function POST(request: NextRequest) {
   try {
     const result = await expireWaitlistItems();
     return NextResponse.json(result);
-  } catch {
-    return NextResponse.json({ error: "Processing failed" }, { status: 500 });
+  } catch (error) {
+    const requestId = resolveRequestId(request.headers.get("x-request-id"));
+    logger.error("waitlist_process_route_failed", { requestId, worker: "waitlist" }, error);
+    return NextResponse.json({ error: "Processing failed", requestId }, { status: 500 });
   }
 }

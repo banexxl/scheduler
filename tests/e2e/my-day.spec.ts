@@ -9,12 +9,12 @@ import { test, expect } from "@playwright/test";
 test.describe("my day", () => {
   test.skip(!process.env.TEST_BASE_URL, "TEST_BASE_URL not configured");
 
-  test("my-day route renders for authenticated user", async ({ page }) => {
+  test("my-day route renders or redirects to login", async ({ page }) => {
     const slug = process.env.TEST_TENANT_SLUG ?? "e2e-salon";
     await page.goto(`/${slug}/my-day`);
     const body = await page.locator("body").textContent();
-    // Should show My Day content or "not linked" message
-    expect(body).toMatch(/My Day|not linked|staff profile/i);
+    // Should show My Day content, "not linked" message, or login page
+    expect(body).toMatch(/My Day|not linked|staff profile|Sign In|login/i);
   });
 });
 

@@ -1,4 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
+import { config } from "dotenv";
+
+// Load .env file so TEST_BASE_URL etc. are available
+config();
 
 /**
  * Playwright Configuration — Milestone 10.5.

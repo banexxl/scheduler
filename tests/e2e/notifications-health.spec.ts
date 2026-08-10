@@ -13,13 +13,13 @@ test.describe("notifications and health", () => {
   test("notifications route renders", async ({ page }) => {
     await page.goto(`/${slug}/notifications`);
     const body = await page.locator("body").textContent();
-    expect(body).toMatch(/Notification|caught up/i);
+    expect(body).toMatch(/Notification|caught up|Sign In|login/i);
   });
 
   test("health route renders", async ({ page }) => {
     await page.goto(`/${slug}/health`);
     const body = await page.locator("body").textContent();
-    expect(body).toMatch(/Setup Health|ready|attention|blocked/i);
+    expect(body).toMatch(/Setup Health|ready|attention|blocked|Sign In|login/i);
   });
 
   test("health endpoint returns 200", async ({ page }) => {

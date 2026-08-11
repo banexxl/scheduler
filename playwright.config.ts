@@ -1,8 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
 import { config } from "dotenv";
+import path from "path";
 
 // Load .env file so TEST_BASE_URL etc. are available
 config();
+
+const authFile = path.join(__dirname, ".playwright-auth/user.json");
 
 /**
  * Playwright Configuration — Milestone 10.5.
@@ -25,13 +28,26 @@ export default defineConfig({
   },
 
   projects: [
+    // Auth setup — runs first, stores session
+    {
+      name: "setup",
+      testMatch: /auth\.setup\.ts/,
+    },
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: authFile,
+      },
+      dependencies: ["setup"],
     },
     {
       name: "mobile",
-      use: { ...devices["iPhone 14"] },
+      use: {
+        ...devices["iPhone 14"],
+        storageState: authFile,
+      },
+      dependencies: ["setup"],
     },
   ],
 

@@ -5,14 +5,12 @@ import { test, expect } from "@playwright/test";
  * @smoke
  *
  * Verifies all primary BusinessShell destinations render without error.
+ * Requires TEST_TENANT_SLUG, TEST_USER_NAME, TEST_USER_PASSWORD in .env.
  */
 
 const tenantSlug = process.env.TEST_TENANT_SLUG ?? "e2e-salon";
-const hasEnv = Boolean(process.env.TEST_BASE_URL);
 
 test.describe("business navigation smoke", () => {
-  test.skip(!hasEnv, "TEST_BASE_URL not configured");
-
   const routes = [
     "dashboard",
     "my-day",

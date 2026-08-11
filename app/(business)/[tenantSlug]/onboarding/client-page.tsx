@@ -48,8 +48,7 @@ export default function OnboardingClientPage({ data, tenantSlug }: Props) {
      const handleFinish = async () => {
           const result = await completeOnboardingAction(tenantSlug);
           if (result.success) {
-               setCurrentStep("complete");
-               router.refresh();
+               router.push(`/${tenantSlug}/dashboard`);
           } else {
                setMessage(result.message ?? "Unable to complete onboarding.");
           }
@@ -72,6 +71,13 @@ export default function OnboardingClientPage({ data, tenantSlug }: Props) {
      };
 
      const handleLocationSubmit = async () => {
+          // Location may already exist from create_tenant RPC
+          if (data.summary.locationCount > 0) {
+               setMessage("Location already exists.");
+               await updateOnboardingStepAction(tenantSlug, "resource");
+               setCurrentStep("resource");
+               return;
+          }
           const result = await createLocationAction(tenantSlug, {
                name: "Primary location",
                slug: `${tenantSlug}-location`,
@@ -89,21 +95,12 @@ export default function OnboardingClientPage({ data, tenantSlug }: Props) {
      };
 
      const handleResourceSubmit = async () => {
-          const result = await createResourceAction(tenantSlug, {
-               name: "Primary resource",
-               slug: `${tenantSlug}-resource`,
-               resourceTypeId: "00000000-0000-0000-0000-000000000000",
-               locationIds: [data.tenant.slug],
-               primaryLocationId: data.tenant.slug,
-               isActive: true,
-          }, { shouldRedirect: false });
-          if (result.success) {
-               setMessage("Resource saved.");
-               await updateOnboardingStepAction(tenantSlug, "service");
-               setCurrentStep("service");
-          } else {
-               setMessage(result.message ?? "Unable to save resource.");
-          }
+          // Skip resource creation during lightweight onboarding
+          // Resources require a valid resource type + location which aren't
+          // available in this simplified wizard. User creates them from /resources.
+          setMessage("Resource step skipped — create resources from the Resources page.");
+          await updateOnboardingStepAction(tenantSlug, "service");
+          setCurrentStep("service");
      };
 
      const handleServiceSubmit = async () => {

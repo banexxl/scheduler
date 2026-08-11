@@ -28,6 +28,12 @@ export default async function OnboardingPage({ params }: { params: Promise<{ ten
      ]);
 
      const onboardingRowData = onboardingRow.data;
+
+     // If onboarding is already completed, redirect to dashboard
+     if (onboardingRowData?.status === "completed") {
+          redirect(`/${tenantSlug}/dashboard`);
+     }
+
      const progress = resolveOnboardingProgress({
           currentStep: onboardingRowData?.current_step ?? "business_details",
           status: onboardingRowData?.status ?? "not_started",

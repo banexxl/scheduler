@@ -2,12 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { getTenantBySlug } from "@/lib/tenants/get-tenant-by-slug";
 import { serviceSchema } from "../schemas/service-schema";
 import type { ServiceActionResult } from "./create-service";
 import type { ServiceResourceAssignmentInput } from "../types/service-resource";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Atomically creates a service with location and resource assignments
@@ -27,10 +27,11 @@ export async function createServiceWithAssignmentsAction(
   if (!user) return { success: false, message: "Authentication required." };
 
   const tenant = await getTenantBySlug(tenantSlug);
-  if (!tenant || tenant.status !== "active") return { success: false, message: "Business not found." };
+  if (!tenant || !["active", "trialing"].includes(tenant.status)) return { success: false, message: "Business not found." };
 
+  // Authenticated client — RLS policies fixed in migration 20260807000014
   const supabase = await createClient();
-  const { data: membership } = await supabase
+  const { data: membership, error: membershipError } = await supabase
     .from("tenant_members")
     .select("id, role")
     .eq("user_id", user.id)
@@ -77,7 +78,7 @@ export async function createServiceWithAssignmentsAction(
     sort_order: a.sortOrder ?? idx,
   }));
 
-  // Call the atomic RPC
+  // Call the atomic RPC (authenticated client provides auth.uid() needed inside)
   const { error: rpcError } = (await (supabase as unknown as { rpc: (fn: string, params: Record<string, unknown>) => PromiseLike<{ data: string | null; error: { message?: string; code?: string } | null }> }).rpc("create_service_with_assignments", {
     p_tenant_id: tenant.id,
     p_service_category_id: validated.serviceCategoryId ?? null,

@@ -1,5 +1,5 @@
 import "server-only";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 
 export type BusinessSettings = {
   id: string;
@@ -17,12 +17,13 @@ export type BusinessSettings = {
 
 /**
  * Loads business settings for an already-authorized tenant.
- * Uses the normal authenticated server client — never admin.
+ * Uses service-role client because authorization is already verified
+ * by requireTenantMember() in the calling page.
  */
 export async function getBusinessSettings(
   tenantId: string
 ): Promise<BusinessSettings> {
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
 
   const { data, error } = await supabase
     .from("tenants")
@@ -31,6 +32,7 @@ export async function getBusinessSettings(
     )
     .eq("id", tenantId)
     .single();
+  console.log('error', error);
 
   if (error || !data) {
     throw new Error("Unable to load business settings");

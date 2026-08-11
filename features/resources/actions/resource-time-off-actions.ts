@@ -18,7 +18,7 @@ export async function createResourceTimeOffAction(
   if (!user) return { success: false, message: "Authentication required." };
 
   const tenant = await getTenantBySlug(tenantSlug);
-  if (!tenant || tenant.status !== "active")
+  if (!tenant || !["active","trialing"].includes(tenant.status))
     return { success: false, message: "Business not found." };
 
   const supabase = await createClient();
@@ -133,7 +133,7 @@ export async function updateResourceTimeOffAction(
   if (!user) return { success: false, message: "Authentication required." };
 
   const tenant = await getTenantBySlug(tenantSlug);
-  if (!tenant || tenant.status !== "active")
+  if (!tenant || !["active","trialing"].includes(tenant.status))
     return { success: false, message: "Business not found." };
 
   const supabase = await createClient();
@@ -233,7 +233,7 @@ export async function deleteResourceTimeOffAction(
   if (!user) return { success: false, message: "Authentication required." };
 
   const tenant = await getTenantBySlug(tenantSlug);
-  if (!tenant || tenant.status !== "active")
+  if (!tenant || !["active","trialing"].includes(tenant.status))
     return { success: false, message: "Business not found." };
 
   const supabase = await createClient();

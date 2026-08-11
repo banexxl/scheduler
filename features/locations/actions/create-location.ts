@@ -30,14 +30,14 @@ export async function createLocationAction(
   }
 
   const tenant = await getTenantBySlug(tenantSlug);
-  if (!tenant || tenant.status !== "active") {
+  if (!tenant || !["active", "trialing"].includes(tenant.status)) {
     return { success: false, message: "Business not found." };
   }
 
   const supabase = await createClient();
 
   // Verify owner/admin role
-  const { data: membership } = await supabase
+  const { data: membership, error: memberError } = await supabase
     .from("tenant_members")
     .select("id, role")
     .eq("user_id", user.id)
@@ -137,6 +137,7 @@ export async function createLocationAction(
   });
 
   if (insertError) {
+    console.error("[create-location] Insert error:", insertError.code, insertError.message, insertError.details);
     if (insertError.code === "23505") {
       return {
         success: false,

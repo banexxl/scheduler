@@ -21,7 +21,7 @@ export async function toggleLocationStatusAction(
   }
 
   const tenant = await getTenantBySlug(tenantSlug);
-  if (!tenant || tenant.status !== "active") {
+  if (!tenant || !["active","trialing"].includes(tenant.status)) {
     return { success: false, message: "Business not found." };
   }
 

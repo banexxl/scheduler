@@ -21,7 +21,7 @@ export async function createServiceWithLocationsAction(
   if (!user) return { success: false, message: "Authentication required." };
 
   const tenant = await getTenantBySlug(tenantSlug);
-  if (!tenant || tenant.status !== "active") return { success: false, message: "Business not found." };
+  if (!tenant || !["active","trialing"].includes(tenant.status)) return { success: false, message: "Business not found." };
 
   const supabase = await createClient();
   const { data: membership } = await supabase

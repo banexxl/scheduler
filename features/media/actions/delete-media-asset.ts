@@ -19,7 +19,7 @@ export async function deleteMediaAssetAction(
   if (!user) return { success: false, message: "Authentication required." };
 
   const tenant = await getTenantBySlug(tenantSlug);
-  if (!tenant || tenant.status !== "active") return { success: false, message: "Business not found." };
+  if (!tenant || !["active","trialing"].includes(tenant.status)) return { success: false, message: "Business not found." };
 
   const supabase = await createClient();
 

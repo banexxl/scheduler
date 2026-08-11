@@ -31,7 +31,7 @@ export async function createServiceWithAssignmentsAction(
 
   // Authenticated client — RLS policies fixed in migration 20260807000014
   const supabase = await createClient();
-  const { data: membership, error: membershipError } = await supabase
+  const { data: membership } = await supabase
     .from("tenant_members")
     .select("id, role")
     .eq("user_id", user.id)

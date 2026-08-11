@@ -14,7 +14,6 @@ import Link from "@mui/material/Link";
 import { updateOnboardingStepAction, completeOnboardingAction } from "@/features/onboarding/services/onboarding-state";
 import { updateBusinessSettingsAction } from "@/features/business/actions/update-business-settings";
 import { createLocationAction } from "@/features/locations/actions/create-location";
-import { createResourceAction } from "@/features/resources/actions/create-resource";
 import { createServiceWithAssignmentsAction } from "@/features/services/actions/create-service-with-assignments";
 import { saveTenantBookingRulesAction } from "@/features/booking-rules/actions/save-tenant-booking-rules";
 import { updatePublicBookingSettingsAction } from "@/features/public-booking/actions/update-public-booking-settings-action";

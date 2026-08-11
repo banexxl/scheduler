@@ -37,7 +37,7 @@ export async function createLocationAction(
   const supabase = await createClient();
 
   // Verify owner/admin role
-  const { data: membership, error: memberError } = await supabase
+  const { data: membership } = await supabase
     .from("tenant_members")
     .select("id, role")
     .eq("user_id", user.id)

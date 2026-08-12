@@ -2592,6 +2592,339 @@ export type Database = {
           },
         ]
       }
+      gift_card_ledger_entries: {
+        Row: {
+          amount: number
+          appointment_payment_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string | null
+          entry_type: string
+          gift_card_id: string
+          gift_card_purchase_id: string | null
+          id: string
+          package_purchase_id: string | null
+          reference_key: string | null
+          tenant_id: string
+        }
+        Insert: {
+          amount: number
+          appointment_payment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency: string
+          description?: string | null
+          entry_type: string
+          gift_card_id: string
+          gift_card_purchase_id?: string | null
+          id?: string
+          package_purchase_id?: string | null
+          reference_key?: string | null
+          tenant_id: string
+        }
+        Update: {
+          amount?: number
+          appointment_payment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string | null
+          entry_type?: string
+          gift_card_id?: string
+          gift_card_purchase_id?: string | null
+          id?: string
+          package_purchase_id?: string | null
+          reference_key?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_card_ledger_entries_gift_card_id_fkey"
+            columns: ["gift_card_id"]
+            isOneToOne: false
+            referencedRelation: "gift_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_card_ledger_entries_gift_card_purchase_id_fkey"
+            columns: ["gift_card_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "gift_card_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_card_ledger_entries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gift_card_products: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_public: boolean
+          name: string
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          name: string
+          sort_order?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_public?: boolean
+          name?: string
+          sort_order?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_card_products_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gift_card_purchases: {
+        Row: {
+          amount: number
+          buyer_email: string | null
+          buyer_name: string | null
+          created_at: string
+          currency: string
+          fulfilled_at: string | null
+          gift_card_product_id: string | null
+          id: string
+          is_gift: boolean
+          polar_checkout_id: string | null
+          polar_order_id: string | null
+          provider_event_id: string | null
+          recipient_email: string | null
+          recipient_message: string | null
+          recipient_name: string | null
+          request_key: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          buyer_email?: string | null
+          buyer_name?: string | null
+          created_at?: string
+          currency: string
+          fulfilled_at?: string | null
+          gift_card_product_id?: string | null
+          id?: string
+          is_gift?: boolean
+          polar_checkout_id?: string | null
+          polar_order_id?: string | null
+          provider_event_id?: string | null
+          recipient_email?: string | null
+          recipient_message?: string | null
+          recipient_name?: string | null
+          request_key: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          buyer_email?: string | null
+          buyer_name?: string | null
+          created_at?: string
+          currency?: string
+          fulfilled_at?: string | null
+          gift_card_product_id?: string | null
+          id?: string
+          is_gift?: boolean
+          polar_checkout_id?: string | null
+          polar_order_id?: string | null
+          provider_event_id?: string | null
+          recipient_email?: string | null
+          recipient_message?: string | null
+          recipient_name?: string | null
+          request_key?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_card_purchases_gift_card_product_id_fkey"
+            columns: ["gift_card_product_id"]
+            isOneToOne: false
+            referencedRelation: "gift_card_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_card_purchases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gift_card_reservations: {
+        Row: {
+          amount: number
+          appointment_payment_id: string | null
+          confirmed_at: string | null
+          created_at: string
+          currency: string
+          expires_at: string | null
+          gift_card_id: string
+          id: string
+          package_purchase_id: string | null
+          released_at: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          appointment_payment_id?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          currency: string
+          expires_at?: string | null
+          gift_card_id: string
+          id?: string
+          package_purchase_id?: string | null
+          released_at?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          appointment_payment_id?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          currency?: string
+          expires_at?: string | null
+          gift_card_id?: string
+          id?: string
+          package_purchase_id?: string | null
+          released_at?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_card_reservations_gift_card_id_fkey"
+            columns: ["gift_card_id"]
+            isOneToOne: false
+            referencedRelation: "gift_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_card_reservations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gift_cards: {
+        Row: {
+          claimed_by_customer_account_id: string | null
+          code_hash: string
+          code_prefix: string
+          created_at: string
+          currency: string
+          current_balance: number
+          expires_at: string | null
+          id: string
+          initial_amount: number
+          issued_at: string
+          purchase_id: string | null
+          recipient_name: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          claimed_by_customer_account_id?: string | null
+          code_hash: string
+          code_prefix: string
+          created_at?: string
+          currency: string
+          current_balance?: number
+          expires_at?: string | null
+          id?: string
+          initial_amount: number
+          issued_at?: string
+          purchase_id?: string | null
+          recipient_name?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          claimed_by_customer_account_id?: string | null
+          code_hash?: string
+          code_prefix?: string
+          created_at?: string
+          currency?: string
+          current_balance?: number
+          expires_at?: string | null
+          id?: string
+          initial_amount?: number
+          issued_at?: string
+          purchase_id?: string | null
+          recipient_name?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_cards_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "gift_card_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gift_cards_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       location_business_hours: {
         Row: {
           created_at: string
@@ -5095,6 +5428,56 @@ export type Database = {
           },
         ]
       }
+      tenant_gift_card_settings: {
+        Row: {
+          allow_appointment_redemption: boolean
+          allow_custom_amount: boolean
+          allow_package_redemption: boolean
+          created_at: string
+          enabled: boolean
+          expires_after_days: number | null
+          id: string
+          maximum_custom_amount: number | null
+          minimum_custom_amount: number | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          allow_appointment_redemption?: boolean
+          allow_custom_amount?: boolean
+          allow_package_redemption?: boolean
+          created_at?: string
+          enabled?: boolean
+          expires_after_days?: number | null
+          id?: string
+          maximum_custom_amount?: number | null
+          minimum_custom_amount?: number | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          allow_appointment_redemption?: boolean
+          allow_custom_amount?: boolean
+          allow_package_redemption?: boolean
+          created_at?: string
+          enabled?: boolean
+          expires_after_days?: number | null
+          id?: string
+          maximum_custom_amount?: number | null
+          minimum_custom_amount?: number | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_gift_card_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_loyalty_settings: {
         Row: {
           allow_manual_adjustments: boolean
@@ -6370,6 +6753,19 @@ export type Database = {
       }
       expire_appointment_payment_intent: {
         Args: { p_payment_intent_id: string }
+        Returns: Json
+      }
+      fulfill_gift_card_purchase: {
+        Args: {
+          p_code_hash: string
+          p_code_prefix: string
+          p_expires_at?: string
+          p_paid_amount: number
+          p_paid_currency: string
+          p_provider_event_id: string
+          p_provider_order_id: string
+          p_purchase_id: string
+        }
         Returns: Json
       }
       fulfill_package_purchase: {

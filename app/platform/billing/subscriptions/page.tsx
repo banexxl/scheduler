@@ -1,6 +1,5 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -9,12 +8,19 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
+import Chip from "@mui/material/Chip";
+import Grid from "@mui/material/Grid";
 import { requirePlatformAdmin } from "@/lib/platform/require-platform-admin";
 import {
      getPlatformSubscriptionStatusCounts,
      listPlatformSubscriptions,
 } from "@/features/platform/services/platform-billing-admin-queries";
 import { reconcileSubscriptionAdminAction } from "@/features/platform/actions/subscription-admin-actions";
+import PageHeader from "@/features/platform/components/page-header";
+import SectionCard from "@/features/platform/components/section-card";
+import MetricCard from "@/features/platform/components/metric-card";
+import PlatformEmptyState from "@/features/platform/components/platform-empty-state";
+import StatusChip from "@/components/ui/status-chip";
 
 function getFriendlyState(row: Record<string, unknown>) {
      const accessState = String(row.accessState ?? "");
@@ -67,124 +73,153 @@ export default async function PlatformBillingSubscriptionsPage({
 
      return (
           <Stack spacing={3}>
-               <Box>
-                    <Typography variant="h4" component="h1" gutterBottom>
-                         Billing Subscriptions
-                    </Typography>
-                    <Typography color="text.secondary">
-                         Inspect synchronized tenant subscription projections and reconciliation status.
-                    </Typography>
-               </Box>
-
-               <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Stack spacing={1.5} direction={{ xs: "column", md: "row" }}>
-                         <Button component="a" href="/platform/billing/subscriptions?accessState=trial" variant="outlined">
-                              Trial
-                         </Button>
-                         <Button component="a" href="/platform/billing/subscriptions?accessState=active" variant="outlined">
-                              Active
-                         </Button>
-                         <Button component="a" href="/platform/billing/subscriptions?polarStatus=past_due" variant="outlined">
-                              Past due
-                         </Button>
-                         <Button component="a" href="/platform/billing/subscriptions?mappingIssueOnly=1" variant="outlined">
-                              Mapping issues
-                         </Button>
-                         <Button component="a" href="/platform/billing/subscriptions?staleOnly=1" variant="outlined">
-                              Stale sync
-                         </Button>
-                         <Button component="a" href="/platform/billing/subscriptions" variant="text">
-                              Clear
-                         </Button>
-                    </Stack>
-               </Paper>
-
-               <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Stack direction={{ xs: "column", md: "row" }} spacing={1} alignItems={{ xs: "flex-start", md: "center" }}>
-                         <Typography variant="body2">Trial: {counts.trial}</Typography>
-                         <Typography variant="body2">Active: {counts.active}</Typography>
-                         <Typography variant="body2">Past due: {counts.pastDue}</Typography>
-                         <Typography variant="body2">Ending: {counts.ending}</Typography>
-                         <Typography variant="body2">Revoked: {counts.revoked}</Typography>
-                         <Typography variant="body2">Requires mapping: {counts.requiresMapping}</Typography>
-                         <Typography variant="body2">Stale sync: {counts.stale}</Typography>
-                    </Stack>
-               </Paper>
-
-               <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Stack direction="row" justifyContent="space-between" sx={{ mb: 2 }}>
-                         <Typography variant="h6">Subscription List</Typography>
+               <PageHeader
+                    title="Subscriptions"
+                    description="Synchronized tenant subscription projections and reconciliation."
+                    breadcrumbs={[
+                         { label: "Platform", href: "/platform" },
+                         { label: "Billing", href: "/platform/billing" },
+                         { label: "Subscriptions" },
+                    ]}
+                    action={
                          <form action={reconcileAllAction}>
                               <Button type="submit" variant="outlined" size="small">
-                                   Reconcile active subscriptions
+                                   Reconcile All
                               </Button>
                          </form>
-                    </Stack>
-                    <TableContainer>
-                         <Table size="small">
-                              <TableHead>
-                                   <TableRow>
-                                        <TableCell>Tenant</TableCell>
-                                        <TableCell>Plan</TableCell>
-                                        <TableCell>Polar IDs</TableCell>
-                                        <TableCell>Status</TableCell>
-                                        <TableCell>Access State</TableCell>
-                                        <TableCell>Period End</TableCell>
-                                        <TableCell>Sync</TableCell>
-                                        <TableCell>Actions</TableCell>
-                                   </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                   {subscriptions.length === 0 ? (
+                    }
+               />
+
+               {/* Status counts */}
+               <Grid container spacing={2}>
+                    <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+                         <MetricCard label="Trial" value={counts.trial} variant="info" />
+                    </Grid>
+                    <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+                         <MetricCard label="Active" value={counts.active} variant="success" />
+                    </Grid>
+                    <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+                         <MetricCard label="Past Due" value={counts.pastDue} variant={counts.pastDue > 0 ? "warning" : "default"} />
+                    </Grid>
+                    <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+                         <MetricCard label="Ending" value={counts.ending} />
+                    </Grid>
+                    <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+                         <MetricCard label="Revoked" value={counts.revoked} variant={counts.revoked > 0 ? "error" : "default"} />
+                    </Grid>
+                    <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+                         <MetricCard label="Needs Mapping" value={counts.requiresMapping} variant={counts.requiresMapping > 0 ? "warning" : "default"} />
+                    </Grid>
+               </Grid>
+
+               {/* Filters */}
+               <SectionCard noPadding>
+                    <Box sx={{ p: 2, display: "flex", gap: 1, flexWrap: "wrap" }}>
+                         {[
+                              { label: "Trial", href: "?accessState=trial" },
+                              { label: "Active", href: "?accessState=active" },
+                              { label: "Past Due", href: "?polarStatus=past_due" },
+                              { label: "Mapping Issues", href: "?mappingIssueOnly=1" },
+                              { label: "Stale Sync", href: "?staleOnly=1" },
+                         ].map((filter) => (
+                              <Chip
+                                   key={filter.label}
+                                   label={filter.label}
+                                   component="a"
+                                   href={`/platform/billing/subscriptions${filter.href}`}
+                                   clickable
+                                   size="small"
+                                   variant="outlined"
+                              />
+                         ))}
+                         {(filters.polarStatus || filters.accessState || filters.mappingIssueOnly || filters.staleOnly) && (
+                              <Chip
+                                   label="Clear"
+                                   component="a"
+                                   href="/platform/billing/subscriptions"
+                                   clickable
+                                   size="small"
+                                   variant="outlined"
+                                   color="default"
+                              />
+                         )}
+                    </Box>
+               </SectionCard>
+
+               <SectionCard title="Subscription List" noPadding>
+                    {subscriptions.length === 0 ? (
+                         <Box sx={{ p: 3 }}>
+                              <PlatformEmptyState title="No subscriptions found" description="Adjust your filters or check back later." />
+                         </Box>
+                    ) : (
+                         <TableContainer>
+                              <Table size="small">
+                                   <TableHead>
                                         <TableRow>
-                                             <TableCell colSpan={8}>No subscription rows found.</TableCell>
+                                             <TableCell>Tenant</TableCell>
+                                             <TableCell>Plan</TableCell>
+                                             <TableCell>Polar IDs</TableCell>
+                                             <TableCell>Status</TableCell>
+                                             <TableCell>Access State</TableCell>
+                                             <TableCell>Period End</TableCell>
+                                             <TableCell>Sync</TableCell>
+                                             <TableCell>Actions</TableCell>
                                         </TableRow>
-                                   ) : (
-                                        subscriptions.map((row) => (
-                                             <TableRow key={row.id}>
-                                                  <TableCell>
-                                                       {row.tenantName ?? "-"}
-                                                       <br />
-                                                       {row.tenantSlug ?? "-"}
-                                                  </TableCell>
-                                                  <TableCell>{row.planName ?? "Unmapped"}</TableCell>
-                                                  <TableCell>
-                                                       <Typography variant="caption" component="div">
-                                                            Sub: {row.polarSubscriptionId}
-                                                       </Typography>
-                                                       <Typography variant="caption" component="div">
-                                                            Customer: {row.polarCustomerId}
-                                                       </Typography>
-                                                  </TableCell>
-                                                  <TableCell>{row.status}</TableCell>
-                                                  <TableCell>{getFriendlyState(row as unknown as Record<string, unknown>)}</TableCell>
-                                                  <TableCell>{row.currentPeriodEnd ?? "-"}</TableCell>
-                                                  <TableCell>{row.syncStatus}</TableCell>
-                                                  <TableCell>
-                                                       <Stack direction="row" spacing={1}>
-                                                            <Button
-                                                                 component="a"
-                                                                 href={`/platform/billing/subscriptions/${row.id}`}
-                                                                 size="small"
-                                                                 variant="outlined"
-                                                            >
-                                                                 View
-                                                            </Button>
-                                                            <form action={reconcileSingleAction}>
-                                                                 <input type="hidden" name="subscriptionId" value={row.polarSubscriptionId} />
-                                                                 <Button type="submit" size="small" variant="outlined">
-                                                                      Reconcile
-                                                                 </Button>
-                                                            </form>
-                                                       </Stack>
-                                                  </TableCell>
+                                   </TableHead>
+                                   <TableBody>
+                                        {subscriptions.length === 0 ? (
+                                             <TableRow>
+                                                  <TableCell colSpan={8}>No subscription rows found.</TableCell>
                                              </TableRow>
-                                        ))
-                                   )}
-                              </TableBody>
-                         </Table>
-                    </TableContainer>
-               </Paper>
+                                        ) : (
+                                             subscriptions.map((row) => (
+                                                  <TableRow key={row.id}>
+                                                       <TableCell>
+                                                            {row.tenantName ?? "-"}
+                                                            <br />
+                                                            {row.tenantSlug ?? "-"}
+                                                       </TableCell>
+                                                       <TableCell>{row.planName ?? "Unmapped"}</TableCell>
+                                                       <TableCell>
+                                                            <Typography variant="caption" component="div">
+                                                                 Sub: {row.polarSubscriptionId}
+                                                            </Typography>
+                                                            <Typography variant="caption" component="div">
+                                                                 Customer: {row.polarCustomerId}
+                                                            </Typography>
+                                                       </TableCell>
+                                                       <TableCell>{row.status}</TableCell>
+                                                       <TableCell>
+                                                            <StatusChip label={getFriendlyState(row as unknown as Record<string, unknown>)} size="small" />
+                                                       </TableCell>
+                                                       <TableCell>{row.currentPeriodEnd ?? "-"}</TableCell>
+                                                       <TableCell>{row.syncStatus}</TableCell>
+                                                       <TableCell>
+                                                            <Stack direction="row" spacing={1}>
+                                                                 <Button
+                                                                      component="a"
+                                                                      href={`/platform/billing/subscriptions/${row.id}`}
+                                                                      size="small"
+                                                                      variant="outlined"
+                                                                 >
+                                                                      View
+                                                                 </Button>
+                                                                 <form action={reconcileSingleAction}>
+                                                                      <input type="hidden" name="subscriptionId" value={row.polarSubscriptionId} />
+                                                                      <Button type="submit" size="small" variant="outlined">
+                                                                           Reconcile
+                                                                      </Button>
+                                                                 </form>
+                                                            </Stack>
+                                                       </TableCell>
+                                                  </TableRow>
+                                             ))
+                                        )}
+                                   </TableBody>
+                              </Table>
+                         </TableContainer>
+                    )}
+               </SectionCard>
           </Stack>
      );
 }

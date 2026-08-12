@@ -1,137 +1,178 @@
-import Link from "next/link";
-import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import Link from "next/link";
+import PageHeader from "@/features/platform/components/page-header";
+import MetricCard from "@/features/platform/components/metric-card";
+import SectionCard from "@/features/platform/components/section-card";
 import { getPlatformBillingDashboardMetrics } from "@/features/platform/services/platform-billing-admin-queries";
-
-const platformSections = [
-  {
-    title: "Dashboard",
-    description: "Overview of platform operations and key health signals.",
-    href: "/platform/dashboard",
-  },
-  {
-    title: "Billing Products",
-    description:
-      "Map Polar products to local plans and inspect webhook/sync diagnostics.",
-    href: "/platform/billing/products",
-  },
-  {
-    title: "Subscriptions",
-    description: "Subscription management workflows and lifecycle controls.",
-    href: "/platform/subscriptions",
-  },
-  {
-    title: "Tenants",
-    description: "Inspect tenant records, states, and operational details.",
-    href: "/platform/tenants",
-  },
-  {
-    title: "Users",
-    description: "User management and account-level operations.",
-    href: "/platform/users",
-  },
-  {
-    title: "Audit Logs",
-    description: "Security and operational audit trail.",
-    href: "/platform/audit-logs",
-  },
-];
-
-const METRIC_LABELS: Array<{ key: keyof Awaited<ReturnType<typeof getPlatformBillingDashboardMetrics>>; label: string }> = [
-  { key: "activeTenants", label: "Active tenants" },
-  { key: "activeBillingPlans", label: "Active billing plans" },
-  { key: "mappedPolarProducts", label: "Mapped Polar products" },
-  { key: "unmappedPolarProducts", label: "Unmapped Polar products" },
-  { key: "activeSynchronizedPrices", label: "Active synchronized prices" },
-  { key: "archivedPrices", label: "Archived prices" },
-  { key: "pendingWebhookEvents", label: "Pending webhook events" },
-  { key: "failedWebhookEvents", label: "Failed webhook events" },
-  { key: "trialSubscriptions", label: "Trial subscriptions" },
-  { key: "activeSubscriptions", label: "Active subscriptions" },
-  { key: "pastDueSubscriptions", label: "Past-due subscriptions" },
-  { key: "endingSubscriptions", label: "Ending subscriptions" },
-  { key: "revokedSubscriptions", label: "Revoked subscriptions" },
-  { key: "subscriptionsRequiringMapping", label: "Subscriptions requiring mapping" },
-  { key: "staleSubscriptionSyncs", label: "Stale subscription syncs" },
-];
 
 export default async function PlatformHomePage() {
   const metrics = await getPlatformBillingDashboardMetrics();
-  const financialMetrics = await import("@/features/platform/services/platform-billing-order-queries").then((mod) => mod.getPlatformFinancialCounters());
+  const financialMetrics = await import(
+    "@/features/platform/services/platform-billing-order-queries"
+  ).then((mod) => mod.getPlatformFinancialCounters());
+
+  const hasAttentionItems =
+    metrics.failedWebhookEvents > 0 ||
+    metrics.unmappedPolarProducts > 0 ||
+    metrics.subscriptionsRequiringMapping > 0 ||
+    metrics.staleSubscriptionSyncs > 0;
 
   return (
     <Stack spacing={3}>
-      <Box>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Platform Administration
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Select an operational area.
-        </Typography>
-      </Box>
+      <PageHeader
+        title="Dashboard"
+        description="Platform operations overview and health signals."
+      />
 
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Stack spacing={2}>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="h6">Billing Health Snapshot</Typography>
-            <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ mt: 1 }}>
-              <Paper variant="outlined" sx={{ p: 2, minWidth: 180 }}>
-                <Typography variant="body2" color="text.secondary">Paid orders</Typography>
-                <Typography variant="h6">{financialMetrics.paidOrders}</Typography>
-              </Paper>
-              <Paper variant="outlined" sx={{ p: 2, minWidth: 180 }}>
-                <Typography variant="body2" color="text.secondary">Refunded orders</Typography>
-                <Typography variant="h6">{financialMetrics.refundedOrders}</Typography>
-              </Paper>
-              <Paper variant="outlined" sx={{ p: 2, minWidth: 180 }}>
-                <Typography variant="body2" color="text.secondary">Failed order syncs</Typography>
-                <Typography variant="h6">{financialMetrics.failedOrderSyncs}</Typography>
-              </Paper>
-            </Stack>
-            <Chip label="No subscription activation in this milestone" size="small" />
-          </Stack>
+      {/* Attention section */}
+      {hasAttentionItems && (
+        <SectionCard title="Requires Attention">
           <Grid container spacing={2}>
-            {METRIC_LABELS.map((metric) => (
-              <Grid key={metric.key} size={{ xs: 12, sm: 6, md: 3 }}>
-                <Paper variant="outlined" sx={{ p: 2 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    {metric.label}
-                  </Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                    {String(metrics[metric.key])}
-                  </Typography>
-                </Paper>
+            {metrics.failedWebhookEvents > 0 && (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <MetricCard
+                  label="Failed Webhooks"
+                  value={metrics.failedWebhookEvents}
+                  variant="error"
+                />
               </Grid>
-            ))}
+            )}
+            {metrics.unmappedPolarProducts > 0 && (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <MetricCard
+                  label="Unmapped Products"
+                  value={metrics.unmappedPolarProducts}
+                  variant="warning"
+                />
+              </Grid>
+            )}
+            {metrics.subscriptionsRequiringMapping > 0 && (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <MetricCard
+                  label="Subscriptions Need Mapping"
+                  value={metrics.subscriptionsRequiringMapping}
+                  variant="warning"
+                />
+              </Grid>
+            )}
+            {metrics.staleSubscriptionSyncs > 0 && (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <MetricCard
+                  label="Stale Syncs"
+                  value={metrics.staleSubscriptionSyncs}
+                  variant="warning"
+                />
+              </Grid>
+            )}
           </Grid>
-          <Typography variant="body2" color="text.secondary">
-            Last product reconciliation: {metrics.lastProductReconciliation ?? "Not available"}
-          </Typography>
-        </Stack>
-      </Paper>
+        </SectionCard>
+      )}
 
-      <Grid container spacing={2}>
-        {platformSections.map((section) => (
-          <Grid key={section.href} size={{ xs: 12, md: 6, lg: 4 }}>
-            <Paper variant="outlined" sx={{ p: 2, height: "100%" }}>
-              <Stack spacing={2}>
-                <Typography variant="h6">{section.title}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {section.description}
-                </Typography>
-                <Link href={section.href} style={{ textDecoration: "none" }}>
-                  <Button variant="outlined">Open</Button>
-                </Link>
-              </Stack>
-            </Paper>
+      {/* Platform metrics */}
+      <SectionCard title="Platform Metrics">
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+            <MetricCard label="Active Tenants" value={metrics.activeTenants} />
           </Grid>
-        ))}
-      </Grid>
+          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+            <MetricCard label="Trialing" value={metrics.trialSubscriptions} variant="info" />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+            <MetricCard label="Active Subscriptions" value={metrics.activeSubscriptions} variant="success" />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+            <MetricCard label="Past Due" value={metrics.pastDueSubscriptions} variant={metrics.pastDueSubscriptions > 0 ? "warning" : "default"} />
+          </Grid>
+        </Grid>
+      </SectionCard>
+
+      {/* Billing overview */}
+      <SectionCard
+        title="Billing"
+        action={
+          <Button component={Link} href="/platform/billing" size="small" variant="text">
+            View all
+          </Button>
+        }
+      >
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+            <MetricCard label="Billing Plans" value={metrics.activeBillingPlans} />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+            <MetricCard label="Mapped Products" value={metrics.mappedPolarProducts} />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+            <MetricCard label="Paid Orders" value={financialMetrics.paidOrders} variant="success" />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+            <MetricCard label="Refunded Orders" value={financialMetrics.refundedOrders} variant={financialMetrics.refundedOrders > 0 ? "info" : "default"} />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+            <MetricCard label="Pending Webhooks" value={metrics.pendingWebhookEvents} />
+          </Grid>
+          <Grid size={{ xs: 6, sm: 4, md: 3 }}>
+            <MetricCard label="Active Prices" value={metrics.activeSynchronizedPrices} />
+          </Grid>
+        </Grid>
+        {metrics.lastProductReconciliation && (
+          <Typography
+            sx={{ mt: 2, fontSize: "0.75rem", color: "#9ca3af" }}
+          >
+            Last reconciliation: {metrics.lastProductReconciliation}
+          </Typography>
+        )}
+      </SectionCard>
+
+      {/* Quick links */}
+      <SectionCard title="Quick Links">
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <Chip
+            label="Tenants"
+            component={Link}
+            href="/platform/tenants"
+            clickable
+            variant="outlined"
+            size="small"
+          />
+          <Chip
+            label="Subscriptions"
+            component={Link}
+            href="/platform/billing/subscriptions"
+            clickable
+            variant="outlined"
+            size="small"
+          />
+          <Chip
+            label="Webhooks"
+            component={Link}
+            href="/platform/billing/webhooks"
+            clickable
+            variant="outlined"
+            size="small"
+          />
+          <Chip
+            label="Orders"
+            component={Link}
+            href="/platform/billing/orders"
+            clickable
+            variant="outlined"
+            size="small"
+          />
+          <Chip
+            label="Audit Logs"
+            component={Link}
+            href="/platform/audit-logs"
+            clickable
+            variant="outlined"
+            size="small"
+          />
+        </Stack>
+      </SectionCard>
     </Stack>
   );
 }

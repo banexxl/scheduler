@@ -1,11 +1,5 @@
-import PlaceholderPage from "@/components/common/PlaceholderPage";
+import { redirect } from "next/navigation";
 
-export default function SubscriptionsPage() {
-  return (
-    <PlaceholderPage
-      title="Subscriptions"
-      area="Platform Admin"
-      route="/platform/subscriptions"
-    />
-  );
+export default function SubscriptionsRedirectPage() {
+  redirect("/platform/billing/subscriptions");
 }

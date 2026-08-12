@@ -1,10 +1,7 @@
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
 import type { ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import type { PlatformAdminRow } from "@/lib/platform/get-platform-admin";
-import PlatformAdminHeader from "./platform-admin-header";
-import PlatformAdminNavigation from "./platform-admin-navigation";
+import PlatformShellClient from "./platform-shell-client";
 
 type Props = {
      user: User;
@@ -12,18 +9,25 @@ type Props = {
      children: ReactNode;
 };
 
+/**
+ * Platform Admin Shell — Milestone 14.1.
+ *
+ * Server Component wrapper. Extracts serializable props from
+ * auth objects and delegates to the interactive client shell.
+ *
+ * Never passes functions or non-serializable objects to client.
+ */
 export default function PlatformAdminShell({
      user,
      platformAdmin,
      children,
 }: Props) {
      return (
-          <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-               <PlatformAdminHeader user={user} platformAdmin={platformAdmin} />
-               <Container maxWidth="xl" sx={{ py: 4 }}>
-                    <PlatformAdminNavigation />
-                    {children}
-               </Container>
-          </Box>
+          <PlatformShellClient
+               email={user.email ?? ""}
+               role={platformAdmin.role}
+          >
+               {children}
+          </PlatformShellClient>
      );
 }

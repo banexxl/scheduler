@@ -1,4 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+// Mock server-only so the import doesn't throw in test environment
+vi.mock("server-only", () => ({}));
+vi.mock("@/lib/supabase/server", () => ({
+  createServiceRoleClient: () => ({ from: () => ({ insert: () => Promise.resolve({}) }) }),
+}));
+
 import { toSafeData } from "../server-action-logger";
 
 /**

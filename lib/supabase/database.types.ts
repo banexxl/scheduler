@@ -3826,6 +3826,57 @@ export type Database = {
           },
         ]
       }
+      server_logs: {
+        Row: {
+          action: string
+          created_at: string
+          duration_ms: number | null
+          error_code: string | null
+          error_message: string | null
+          id: string
+          level: string
+          message: string | null
+          request_id: string | null
+          safe_data: Json
+          source: string
+          status: string
+          tenant_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          level?: string
+          message?: string | null
+          request_id?: string | null
+          safe_data?: Json
+          source?: string
+          status?: string
+          tenant_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: string
+          level?: string
+          message?: string | null
+          request_id?: string | null
+          safe_data?: Json
+          source?: string
+          status?: string
+          tenant_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       service_booking_rules: {
         Row: {
           allow_customer_cancellation: boolean | null
@@ -4641,6 +4692,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tenant_deletion_events: {
+        Row: {
+          actor_user_id: string
+          deleted_at: string
+          id: string
+          reason: string | null
+          summary: Json
+          tenant_id: string
+          tenant_name: string
+          tenant_slug: string
+        }
+        Insert: {
+          actor_user_id: string
+          deleted_at?: string
+          id?: string
+          reason?: string | null
+          summary?: Json
+          tenant_id: string
+          tenant_name: string
+          tenant_slug: string
+        }
+        Update: {
+          actor_user_id?: string
+          deleted_at?: string
+          id?: string
+          reason?: string | null
+          summary?: Json
+          tenant_id?: string
+          tenant_name?: string
+          tenant_slug?: string
+        }
+        Relationships: []
       }
       tenant_discount_redemptions: {
         Row: {
@@ -6062,6 +6146,15 @@ export type Database = {
         Args: { p_resource_type_id: string; p_tenant_id: string }
         Returns: boolean
       }
+      delete_tenant_for_test: { Args: { p_tenant_id: string }; Returns: Json }
+      delete_tenant_permanently: {
+        Args: {
+          p_actor_user_id: string
+          p_confirmation_slug?: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
       enqueue_appointment_notification: {
         Args: {
           p_appointment_id: string
@@ -6112,6 +6205,10 @@ export type Database = {
           p_resource_id?: string
           p_tenant_id: string
         }
+        Returns: Json
+      }
+      get_tenant_deletion_preview: {
+        Args: { p_actor_user_id: string; p_tenant_id: string }
         Returns: Json
       }
       get_tenant_payment_summary: {

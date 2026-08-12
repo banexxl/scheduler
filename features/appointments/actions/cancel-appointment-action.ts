@@ -11,6 +11,7 @@ import { cancelAppointment } from "../services/update-appointment";
 import { enqueueAppointmentCancelledNotification } from "@/features/notifications/services/enqueue-notification";
 import { cancelRemindersAfterCancellation } from "@/features/notifications/services/reminder-sync-service";
 import { loadTenantTimezone } from "@/features/availability/services/availability-queries";
+import { createServerActionLogger } from "@/lib/logging/server-action-logger";
 import type { Appointment } from "../types/appointment";
 
 type ActionSuccess = { success: true; data: Appointment };
@@ -24,8 +25,14 @@ export async function cancelAppointmentAction(
 ): Promise<CancelAppointmentActionResult> {
   try {
     const { user, tenant, membership } = await requireTenantMember(tenantSlug);
+    const log = createServerActionLogger({
+      action: "appointments.cancel",
+      tenantId: tenant.id,
+      userId: user.id,
+    });
 
     if (!["owner", "admin"].includes(membership.role)) {
+      await log.unauthorized();
       return { success: false, error: "Insufficient permissions", code: "FORBIDDEN" };
     }
 
@@ -84,6 +91,7 @@ export async function cancelAppointmentAction(
       // Waitlist matching failure must never block cancellation
     }
 
+    await log.success({ appointmentId });
     return { success: true, data: result.appointment };
   } catch (error) {
     if (error instanceof Error && error.name === "ValidationError") {
@@ -94,7 +102,6 @@ export async function cancelAppointmentAction(
         code: "VALIDATION_ERROR",
       };
     }
-    console.error("[cancel-appointment-action] Error:", { tenantSlug, appointmentId });
     return { success: false, error: "Failed to cancel appointment" };
   }
 }

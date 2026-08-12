@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getBusinessSettings } from "@/features/business/services/get-business-settings";
 import BusinessSettingsForm from "@/features/business/components/business-settings-form";
+import DeleteTenantSection from "@/features/business/components/delete-tenant-section";
 
 const EDITABLE_ROLES = ["owner", "admin"];
 
@@ -63,6 +64,10 @@ export default async function SettingsPage({
           </Button>
         </Stack>
       </Paper>
+
+      {membership.role === "owner" && (
+        <DeleteTenantSection tenantSlug={tenantSlug} tenantName={settings.name} />
+      )}
     </Box>
   );
 }

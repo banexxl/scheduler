@@ -8,6 +8,7 @@ import { createHash, randomBytes } from "crypto";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { logger } from "@/lib/logging";
+import { createServerActionLogger } from "@/lib/logging/server-action-logger";
 import type { TenantRole } from "../types/team";
 
 type ActionResult = { success: true } | { success: false; error: string };
@@ -38,8 +39,14 @@ export async function inviteTenantMemberAction(
   try {
     const { user, tenant, membership } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
     const actorRole = membership.role as TenantRole;
+    const log = createServerActionLogger({
+      action: "team.invite",
+      tenantId: tenant.id,
+      userId: user.id,
+    });
 
     if (!canInviteRole(actorRole, input.role)) {
+      await log.unauthorized("Cannot assign this role");
       return { success: false, error: "You cannot assign this role." };
     }
 

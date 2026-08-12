@@ -8,6 +8,7 @@
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { createAppointmentRefund, getRefundableAmount } from "../services/create-appointment-refund";
 import { getAppointmentPayment } from "../services/appointment-payment-queries";
+import { createServerActionLogger } from "@/lib/logging/server-action-logger";
 import type { CreateRefundResult, RefundReasonCode } from "../types/payment-refund";
 
 export async function createRefundAction(
@@ -17,8 +18,13 @@ export async function createRefundAction(
 ): Promise<CreateRefundResult> {
   try {
     const { user, tenant } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
+    const log = createServerActionLogger({
+      action: "payments.refund",
+      tenantId: tenant.id,
+      userId: user.id,
+    });
 
-    return await createAppointmentRefund({
+    const result = await createAppointmentRefund({
       tenantId: tenant.id,
       appointmentId,
       amount: input.amount,
@@ -26,6 +32,14 @@ export async function createRefundAction(
       reasonNote: input.reasonNote ?? null,
       requestedBy: user.id,
     });
+
+    if (result.success) {
+      await log.success({ appointmentId, amount: input.amount, reasonCode: input.reasonCode });
+    } else {
+      await log.failure(new Error(result.error ?? "refund failed"), { appointmentId });
+    }
+
+    return result;
   } catch {
     return { success: false, error: "Failed to create refund.", code: "INTERNAL" };
   }

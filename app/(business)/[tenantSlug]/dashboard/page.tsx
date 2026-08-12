@@ -1,20 +1,23 @@
-import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { getBusinessDashboard } from "@/features/business/services/get-business-dashboard";
 import { getSubscriptionStatusLabel } from "@/features/business/utils/status-labels";
-import BusinessDashboardHeader from "@/features/business/components/business-dashboard-header";
-import DashboardStatCard from "@/features/business/components/dashboard-stat-card";
-import SubscriptionSummaryCard from "@/features/business/components/subscription-summary-card";
-import DashboardSetupChecklist from "@/features/onboarding/components/dashboard-setup-checklist";
 import { resolveOnboardingProgress } from "@/features/onboarding/services/get-onboarding-progress";
 import { getDashboardAnalytics } from "@/features/analytics/services/get-dashboard-analytics";
 import { ANALYTICS_PERIODS } from "@/features/analytics/types/analytics";
 import type { AnalyticsPeriod } from "@/features/analytics/types/analytics";
+import PageHeader from "@/features/platform/components/page-header";
+import MetricCard from "@/features/platform/components/metric-card";
+import SectionCard from "@/features/platform/components/section-card";
+import DashboardSetupChecklist from "@/features/onboarding/components/dashboard-setup-checklist";
 import DashboardClientPage from "./client-page";
+import StatusChip from "@/components/ui/status-chip";
 
 export default async function DashboardPage({
   params,
@@ -25,7 +28,7 @@ export default async function DashboardPage({
 }) {
   const { tenantSlug } = await params;
   const query = await searchParams;
-  const { tenant, membership } = await requireTenantMember(tenantSlug);
+  const { tenant } = await requireTenantMember(tenantSlug);
 
   let dashboard;
   try {
@@ -33,19 +36,16 @@ export default async function DashboardPage({
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return (
-      <Box>
-        <Alert severity="error">Unable to load dashboard: {message}</Alert>
-      </Box>
+      <Alert severity="error">Unable to load dashboard: {message}</Alert>
     );
   }
 
-  // Resolve analytics period from URL
+  // Resolve analytics period
   const periodParam = query.period;
   const period: AnalyticsPeriod = (
     periodParam && ANALYTICS_PERIODS.includes(periodParam as AnalyticsPeriod)
   ) ? periodParam as AnalyticsPeriod : "7days";
 
-  // Load analytics
   let analytics;
   try {
     analytics = await getDashboardAnalytics(
@@ -106,72 +106,91 @@ export default async function DashboardPage({
     plan: { canUsePublicBooking: true },
   });
 
+  const showOnboarding = onboardingProgress.status !== "completed" &&
+    onboardingProgress.completedSteps.length < onboardingProgress.remainingSteps.length + onboardingProgress.completedSteps.length;
+
   return (
-    <Box>
-      <BusinessDashboardHeader
-        businessName={dashboard.business.name}
-        businessSlug={dashboard.business.slug}
-        businessStatus={dashboard.business.status}
-        memberRole={membership.role}
+    <Stack spacing={3}>
+      {/* Header */}
+      <PageHeader
+        title="Dashboard"
+        description={`${dashboard.business.name} — ${dashboard.business.defaultTimezone}`}
+        status={<StatusChip label={dashboard.business.status} size="small" />}
+        action={
+          <Stack direction="row" spacing={1}>
+            <Button
+              href={`/${tenantSlug}/appointments/today`}
+              variant="outlined"
+              size="small"
+            >
+              Today
+            </Button>
+            <Button
+              href={`/${tenantSlug}/calendar`}
+              variant="contained"
+              size="small"
+            >
+              Calendar
+            </Button>
+          </Stack>
+        }
       />
 
-      {/* Business stat cards */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
+      {/* Onboarding checklist (only when incomplete) */}
+      {showOnboarding && (
+        <DashboardSetupChecklist
+          tenantSlug={dashboard.business.slug}
+          progress={onboardingProgress}
+        />
+      )}
+
+      {/* Quick stats */}
+      <Grid container spacing={2}>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <DashboardStatCard label="Locations" value={dashboard.counts.locations} />
+          <MetricCard label="Locations" value={dashboard.counts.locations} />
         </Grid>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <DashboardStatCard label="Team Members" value={dashboard.counts.activeTeamMembers} />
+          <MetricCard label="Team Members" value={dashboard.counts.activeTeamMembers} />
         </Grid>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <DashboardStatCard label="Customers" value={dashboard.counts.customers} />
+          <MetricCard label="Customers" value={dashboard.counts.customers} />
         </Grid>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <DashboardStatCard
+          <MetricCard
             label="Subscription"
             value={dashboard.subscription
               ? getSubscriptionStatusLabel(dashboard.subscription.status)
-              : "—"}
+              : "Free"}
+            variant={dashboard.subscription?.status === "active" ? "success" : "default"}
           />
         </Grid>
       </Grid>
 
       {/* Analytics */}
       {analytics ? (
-        <DashboardClientPage
-          tenantSlug={tenantSlug}
-          analytics={analytics}
-          currency={dashboard.business.defaultCurrency}
-        />
+        <SectionCard title="Analytics">
+          <DashboardClientPage
+            tenantSlug={tenantSlug}
+            analytics={analytics}
+            currency={dashboard.business.defaultCurrency}
+          />
+        </SectionCard>
       ) : (
-        <Alert severity="info" sx={{ mb: 3 }}>
-          Analytics data is not available yet.
-        </Alert>
+        <SectionCard title="Analytics">
+          <Typography sx={{ fontSize: "0.8125rem", color: "#6b7280" }}>
+            Analytics data is not available yet. Create appointments to see trends.
+          </Typography>
+        </SectionCard>
       )}
 
-      {/* Subscription */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <SubscriptionSummaryCard
-            subscription={dashboard.subscription}
-            tenantSlug={dashboard.business.slug}
-          />
-        </Grid>
-      </Grid>
-
-      {/* Onboarding checklist */}
-      <DashboardSetupChecklist
-        tenantSlug={dashboard.business.slug}
-        progress={onboardingProgress}
-      />
-
-      {/* Footer */}
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="caption" color="text.secondary">
-          Timezone: {dashboard.business.defaultTimezone} | Currency:{" "}
-          {dashboard.business.defaultCurrency}
-        </Typography>
-      </Box>
-    </Box>
+      {/* Quick links */}
+      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+        <Chip label="My Day" component="a" href={`/${tenantSlug}/my-day`} clickable size="small" variant="outlined" />
+        <Chip label="Services" component="a" href={`/${tenantSlug}/services`} clickable size="small" variant="outlined" />
+        <Chip label="Team" component="a" href={`/${tenantSlug}/team`} clickable size="small" variant="outlined" />
+        <Chip label="Settings" component="a" href={`/${tenantSlug}/settings`} clickable size="small" variant="outlined" />
+        <Chip label="Health" component="a" href={`/${tenantSlug}/health`} clickable size="small" variant="outlined" />
+      </Stack>
+    </Stack>
   );
 }

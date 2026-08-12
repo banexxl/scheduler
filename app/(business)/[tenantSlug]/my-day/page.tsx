@@ -1,8 +1,8 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
 import Alert from "@mui/material/Alert";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getMyDayData } from "@/features/staff/services/get-my-day";
+import PageHeader from "@/features/platform/components/page-header";
 import MyDayClientPage from "./client-page";
 
 export default async function MyDayPage({
@@ -17,15 +17,16 @@ export default async function MyDayPage({
 
   if (!data) {
     return (
-      <Box sx={{ maxWidth: 600, mx: "auto", py: 4, px: 2 }}>
-        <Typography variant="h5" fontWeight={600} gutterBottom>
-          My Day
-        </Typography>
-        <Alert severity="info">
+      <Stack spacing={3}>
+        <PageHeader
+          title="My Day"
+          description="Your personal daily schedule."
+        />
+        <Alert severity="info" sx={{ maxWidth: 500 }}>
           Your account is not linked to a staff profile.
-          Ask an owner or administrator to link your account.
+          Ask an owner or administrator to link your account to view your schedule.
         </Alert>
-      </Box>
+      </Stack>
     );
   }
 

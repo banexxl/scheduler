@@ -1,10 +1,10 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getBusinessLocations } from "@/features/locations/services/get-business-locations";
 import LocationList from "@/features/locations/components/location-list";
+import PageHeader from "@/features/platform/components/page-header";
 
 const EDITABLE_ROLES = ["owner", "admin"];
 
@@ -21,31 +21,32 @@ export default async function LocationsPage({
   try {
     locations = await getBusinessLocations(tenant.id);
   } catch {
-    return (
-      <Box>
-        <Alert severity="error">Unable to load locations. Please try again later.</Alert>
-      </Box>
-    );
+    return <Alert severity="error">Unable to load locations.</Alert>;
   }
 
   return (
-    <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
-          Locations
-        </Typography>
-        {canEdit && (
-          <Button
-            component="a"
-            href={`/${tenantSlug}/locations/new`}
-            variant="contained"
-          >
-            Add Location
-          </Button>
-        )}
-      </Box>
+    <Stack spacing={2}>
+      <PageHeader
+        title="Locations"
+        description={`${locations.length} location${locations.length !== 1 ? "s" : ""}`}
+        breadcrumbs={[
+          { label: "Dashboard", href: `/${tenantSlug}/dashboard` },
+          { label: "Locations" },
+        ]}
+        action={
+          canEdit ? (
+            <Button
+              href={`/${tenantSlug}/locations/new`}
+              variant="contained"
+              size="small"
+            >
+              Add Location
+            </Button>
+          ) : undefined
+        }
+      />
 
       <LocationList locations={locations} tenantSlug={tenantSlug} canEdit={canEdit} />
-    </Box>
+    </Stack>
   );
 }

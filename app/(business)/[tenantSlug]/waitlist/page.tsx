@@ -1,7 +1,7 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getWaitlistEntries } from "@/features/waitlist/services/waitlist-queries";
+import PageHeader from "@/features/platform/components/page-header";
 import WaitlistClientPage from "./client-page";
 
 export default async function WaitlistPage({
@@ -15,15 +15,21 @@ export default async function WaitlistPage({
   const entries = await getWaitlistEntries(tenant.id);
 
   return (
-    <Box>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>
-        Waitlist
-      </Typography>
+    <Stack spacing={2}>
+      <PageHeader
+        title="Waitlist"
+        description={`${entries.length} entr${entries.length !== 1 ? "ies" : "y"} — customers waiting for available slots`}
+        breadcrumbs={[
+          { label: "Dashboard", href: `/${tenantSlug}/dashboard` },
+          { label: "Waitlist" },
+        ]}
+      />
+
       <WaitlistClientPage
         tenantSlug={tenantSlug}
         entries={entries}
         canManage={["owner", "admin", "manager"].includes(membership.role)}
       />
-    </Box>
+    </Stack>
   );
 }

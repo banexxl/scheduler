@@ -1,13 +1,12 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
-import Link from "@mui/material/Link";
 import Alert from "@mui/material/Alert";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getServices } from "@/features/services/services/get-services";
 import { getServiceLocationCounts } from "@/features/services/services/get-service-locations";
 import { getServiceResourceCounts } from "@/features/services/services/get-service-resources";
 import ServiceList from "@/features/services/components/service-list";
+import PageHeader from "@/features/platform/components/page-header";
 
 const EDITABLE_ROLES = ["owner", "admin"];
 
@@ -26,19 +25,47 @@ export default async function ServicesPage({ params }: { params: Promise<{ tenan
       getServiceResourceCounts(tenant.id),
     ]);
   } catch {
-    return <Box><Alert severity="error">Unable to load services.</Alert></Box>;
+    return <Alert severity="error">Unable to load services.</Alert>;
   }
 
   return (
-    <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexWrap: "wrap", gap: 1 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>Services</Typography>
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-          <Link component="a" href={`/${tenantSlug}/services/categories`} variant="body2">Categories</Link>
-          {canEdit && <Button component="a" href={`/${tenantSlug}/services/new`} variant="contained">Add Service</Button>}
-        </Box>
-      </Box>
-      <ServiceList services={services} tenantSlug={tenantSlug} canEdit={canEdit} locationMap={locationMap} resourceMap={resourceMap} />
-    </Box>
+    <Stack spacing={2}>
+      <PageHeader
+        title="Services"
+        description={`${services.length} service${services.length !== 1 ? "s" : ""} configured`}
+        breadcrumbs={[
+          { label: "Dashboard", href: `/${tenantSlug}/dashboard` },
+          { label: "Services" },
+        ]}
+        action={
+          <Stack direction="row" spacing={1}>
+            <Button
+              href={`/${tenantSlug}/services/categories`}
+              variant="text"
+              size="small"
+            >
+              Categories
+            </Button>
+            {canEdit && (
+              <Button
+                href={`/${tenantSlug}/services/new`}
+                variant="contained"
+                size="small"
+              >
+                Add Service
+              </Button>
+            )}
+          </Stack>
+        }
+      />
+
+      <ServiceList
+        services={services}
+        tenantSlug={tenantSlug}
+        canEdit={canEdit}
+        locationMap={locationMap}
+        resourceMap={resourceMap}
+      />
+    </Stack>
   );
 }

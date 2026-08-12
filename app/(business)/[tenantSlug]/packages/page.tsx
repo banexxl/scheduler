@@ -1,7 +1,7 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getPackages } from "@/features/packages/services/package-queries";
+import PageHeader from "@/features/platform/components/page-header";
 import PackagesClientPage from "./client-page";
 
 export default async function PackagesPage({
@@ -15,15 +15,21 @@ export default async function PackagesPage({
   const packages = await getPackages(tenant.id);
 
   return (
-    <Box>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>
-        Packages
-      </Typography>
+    <Stack spacing={2}>
+      <PageHeader
+        title="Packages"
+        description={`${packages.length} package${packages.length !== 1 ? "s" : ""} — credit bundles for customers`}
+        breadcrumbs={[
+          { label: "Dashboard", href: `/${tenantSlug}/dashboard` },
+          { label: "Packages" },
+        ]}
+      />
+
       <PackagesClientPage
         tenantSlug={tenantSlug}
         packages={packages}
         canManage={["owner", "admin"].includes(membership.role)}
       />
-    </Box>
+    </Stack>
   );
 }

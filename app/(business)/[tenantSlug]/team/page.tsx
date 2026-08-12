@@ -1,8 +1,10 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Grid from "@mui/material/Grid";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getTeamMembers, getTeamInvitations } from "@/features/team/services/team-queries";
 import type { TenantRole, TeamPageData } from "@/features/team/types/team";
+import PageHeader from "@/features/platform/components/page-header";
+import MetricCard from "@/features/platform/components/metric-card";
 import TeamClientPage from "./client-page";
 
 export default async function TeamPage({
@@ -25,12 +27,31 @@ export default async function TeamPage({
     currentMemberId: membership.id,
   };
 
+  const activeMembers = members.filter(m => m.status === "active").length;
+  const pendingInvitations = invitations.filter(i => i.status === "pending").length;
+
   return (
-    <Box>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>
-        Team
-      </Typography>
+    <Stack spacing={2}>
+      <PageHeader
+        title="Team"
+        description="Manage team members and invitations."
+        breadcrumbs={[
+          { label: "Dashboard", href: `/${tenantSlug}/dashboard` },
+          { label: "Team" },
+        ]}
+      />
+
+      {/* Team summary */}
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 6, sm: 4 }}>
+          <MetricCard label="Active Members" value={activeMembers} />
+        </Grid>
+        <Grid size={{ xs: 6, sm: 4 }}>
+          <MetricCard label="Pending Invitations" value={pendingInvitations} variant={pendingInvitations > 0 ? "info" : "default"} />
+        </Grid>
+      </Grid>
+
       <TeamClientPage tenantSlug={tenantSlug} data={pageData} />
-    </Box>
+    </Stack>
   );
 }

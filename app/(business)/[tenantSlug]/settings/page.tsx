@@ -1,13 +1,12 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Alert from "@mui/material/Alert";
-import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
+import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getBusinessSettings } from "@/features/business/services/get-business-settings";
 import BusinessSettingsForm from "@/features/business/components/business-settings-form";
 import DeleteTenantSection from "@/features/business/components/delete-tenant-section";
+import PageHeader from "@/features/platform/components/page-header";
+import SectionCard from "@/features/platform/components/section-card";
 
 const EDITABLE_ROLES = ["owner", "admin"];
 
@@ -25,49 +24,79 @@ export default async function SettingsPage({
   try {
     settings = await getBusinessSettings(tenant.id);
   } catch {
-    return (
-      <Box>
-        <Alert severity="error">
-          Unable to load business settings. Please try again later.
-        </Alert>
-      </Box>
-    );
+    return <Alert severity="error">Unable to load business settings.</Alert>;
   }
 
   return (
-    <Box>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>
-        Business Settings
-      </Typography>
+    <Stack spacing={3}>
+      <PageHeader
+        title="Settings"
+        description="Business configuration, billing, and account management."
+        breadcrumbs={[
+          { label: "Dashboard", href: `/${tenantSlug}/dashboard` },
+          { label: "Settings" },
+        ]}
+      />
 
-      <Paper elevation={1} sx={{ p: { xs: 2, sm: 4 } }}>
+      {/* Business details */}
+      <SectionCard title="Business Details" description="Name, timezone, currency, and contact information.">
         <BusinessSettingsForm
           settings={settings}
           tenantSlug={tenantSlug}
           canEdit={canEdit}
         />
-      </Paper>
+      </SectionCard>
 
-      <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 }, mt: 3 }}>
+      {/* Settings navigation */}
+      <SectionCard title="More Settings">
         <Stack spacing={1.5}>
-          <Typography variant="h6">Billing</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Open billing plans, checkout status, and customer portal controls.
-          </Typography>
           <Button
-            component="a"
             href={`/${tenantSlug}/settings/billing`}
             variant="outlined"
+            size="small"
             sx={{ width: "fit-content" }}
           >
-            Open Billing Settings
+            Billing & Subscription
+          </Button>
+          <Button
+            href={`/${tenantSlug}/settings/booking`}
+            variant="outlined"
+            size="small"
+            sx={{ width: "fit-content" }}
+          >
+            Booking Rules
+          </Button>
+          <Button
+            href={`/${tenantSlug}/settings/public-booking`}
+            variant="outlined"
+            size="small"
+            sx={{ width: "fit-content" }}
+          >
+            Public Booking
+          </Button>
+          <Button
+            href={`/${tenantSlug}/settings/notifications`}
+            variant="outlined"
+            size="small"
+            sx={{ width: "fit-content" }}
+          >
+            Notification Settings
+          </Button>
+          <Button
+            href={`/${tenantSlug}/settings/payments`}
+            variant="outlined"
+            size="small"
+            sx={{ width: "fit-content" }}
+          >
+            Payment Settings
           </Button>
         </Stack>
-      </Paper>
+      </SectionCard>
 
+      {/* Danger zone */}
       {membership.role === "owner" && (
         <DeleteTenantSection tenantSlug={tenantSlug} tenantName={settings.name} />
       )}
-    </Box>
+    </Stack>
   );
 }

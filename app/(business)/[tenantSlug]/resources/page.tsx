@@ -1,11 +1,10 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import Link from "@mui/material/Link";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getBusinessResources } from "@/features/resources/services/get-business-resources";
 import ResourceList from "@/features/resources/components/resource-list";
+import PageHeader from "@/features/platform/components/page-header";
 
 const EDITABLE_ROLES = ["owner", "admin"];
 
@@ -15,19 +14,44 @@ export default async function ResourcesPage({ params }: { params: Promise<{ tena
   const canEdit = EDITABLE_ROLES.includes(membership.role);
 
   let resources;
-  try { resources = await getBusinessResources(tenant.id); }
-  catch { return <Box><Alert severity="error">Unable to load resources.</Alert></Box>; }
+  try {
+    resources = await getBusinessResources(tenant.id);
+  } catch {
+    return <Alert severity="error">Unable to load resources.</Alert>;
+  }
 
   return (
-    <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3, flexWrap: "wrap", gap: 1 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>Resources</Typography>
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Link component="a" href={`/${tenantSlug}/resources/types`} variant="body2" sx={{ alignSelf: "center" }}>Manage Types</Link>
-          {canEdit && <Button component="a" href={`/${tenantSlug}/resources/new`} variant="contained">Add Resource</Button>}
-        </Box>
-      </Box>
+    <Stack spacing={2}>
+      <PageHeader
+        title="Resources"
+        description={`${resources.length} resource${resources.length !== 1 ? "s" : ""} — staff, rooms, and equipment`}
+        breadcrumbs={[
+          { label: "Dashboard", href: `/${tenantSlug}/dashboard` },
+          { label: "Resources" },
+        ]}
+        action={
+          <Stack direction="row" spacing={1}>
+            <Button
+              href={`/${tenantSlug}/resources/types`}
+              variant="text"
+              size="small"
+            >
+              Manage Types
+            </Button>
+            {canEdit && (
+              <Button
+                href={`/${tenantSlug}/resources/new`}
+                variant="contained"
+                size="small"
+              >
+                Add Resource
+              </Button>
+            )}
+          </Stack>
+        }
+      />
+
       <ResourceList resources={resources} tenantSlug={tenantSlug} canEdit={canEdit} />
-    </Box>
+    </Stack>
   );
 }

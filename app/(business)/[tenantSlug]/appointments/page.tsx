@@ -1,10 +1,10 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getAppointmentsList } from "@/features/appointments/services/appointment-queries";
 import AppointmentListTable from "@/features/appointments/components/appointment-list-table";
+import PageHeader from "@/features/platform/components/page-header";
 
 const EDITABLE_ROLES = ["owner", "admin"];
 
@@ -20,7 +20,6 @@ export default async function AppointmentsPage({
   const { tenant, membership } = await requireTenantMember(tenantSlug);
   const canEdit = EDITABLE_ROLES.includes(membership.role);
 
-  // Parse filter params
   const filters = {
     status: query.status || undefined,
     dateFrom: query.dateFrom || undefined,
@@ -40,47 +39,39 @@ export default async function AppointmentsPage({
       0
     );
   } catch {
-    return (
-      <Box>
-        <Alert severity="error">Unable to load appointments.</Alert>
-      </Box>
-    );
+    return <Alert severity="error">Unable to load appointments.</Alert>;
   }
 
   return (
-    <Box>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-          flexWrap: "wrap",
-          gap: 1,
-        }}
-      >
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
-          Appointments
-        </Typography>
-        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-          <Button
-            component="a"
-            href={`/${tenantSlug}/appointments/today`}
-            variant="outlined"
-          >
-            Today
-          </Button>
-          {canEdit && (
+    <Stack spacing={2}>
+      <PageHeader
+        title="Appointments"
+        description={`${result.total} appointment${result.total !== 1 ? "s" : ""}`}
+        breadcrumbs={[
+          { label: "Dashboard", href: `/${tenantSlug}/dashboard` },
+          { label: "Appointments" },
+        ]}
+        action={
+          <Stack direction="row" spacing={1}>
             <Button
-              component="a"
-              href={`/${tenantSlug}/appointments/new`}
-              variant="contained"
+              href={`/${tenantSlug}/appointments/today`}
+              variant="outlined"
+              size="small"
             >
-              New Appointment
+              Today
             </Button>
-          )}
-        </Box>
-      </Box>
+            {canEdit && (
+              <Button
+                href={`/${tenantSlug}/appointments/new`}
+                variant="contained"
+                size="small"
+              >
+                New Appointment
+              </Button>
+            )}
+          </Stack>
+        }
+      />
 
       <AppointmentListTable
         appointments={result.items}
@@ -89,6 +80,6 @@ export default async function AppointmentsPage({
         canEdit={canEdit}
         filters={filters}
       />
-    </Box>
+    </Stack>
   );
 }

@@ -1,5 +1,4 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
 import Alert from "@mui/material/Alert";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getBusinessLocations } from "@/features/locations/services/get-business-locations";
@@ -13,6 +12,7 @@ import {
   getTenantWeekRange,
 } from "@/lib/scheduling/calendar-utils";
 import AppointmentCalendar from "@/features/calendar/components/appointment-calendar";
+import PageHeader from "@/features/platform/components/page-header";
 import type { AppointmentStatus } from "@/features/appointments/types/appointment";
 
 export default async function CalendarPage({
@@ -30,16 +30,12 @@ export default async function CalendarPage({
   // Load tenant timezone
   const tenantData = await loadTenantTimezone(tenant.id);
   if (!tenantData) {
-    return (
-      <Box>
-        <Alert severity="error">Unable to load tenant configuration.</Alert>
-      </Box>
-    );
+    return <Alert severity="error">Unable to load tenant configuration.</Alert>;
   }
   const timeZone = tenantData.defaultTimezone;
   const today = getTenantToday(new Date(), timeZone);
 
-  // Parse and validate calendar filters from URL
+  // Parse calendar filters from URL
   const filters = parseCalendarFilters(query, today);
 
   // Load locations and resources
@@ -51,17 +47,13 @@ export default async function CalendarPage({
       getBusinessResources(tenant.id),
     ]);
   } catch {
-    return (
-      <Box>
-        <Alert severity="error">Unable to load calendar data.</Alert>
-      </Box>
-    );
+    return <Alert severity="error">Unable to load calendar data.</Alert>;
   }
 
   const activeLocations = locations.filter((l) => l.isActive);
   const activeResources = resources.filter((r) => r.isActive);
 
-  // Filter resources by selected location if applicable
+  // Filter resources by selected location
   const filteredResources = filters.locationId
     ? activeResources.filter((r) =>
       r.locations.some(
@@ -70,7 +62,7 @@ export default async function CalendarPage({
     )
     : activeResources;
 
-  // Determine date range for query
+  // Determine date range
   let rangeStart: string;
   let rangeEnd: string;
 
@@ -84,7 +76,6 @@ export default async function CalendarPage({
     rangeEnd = dayRange.end;
   }
 
-  // Build statuses filter
   const statuses: AppointmentStatus[] | undefined = filters.status
     ? [filters.status]
     : undefined;
@@ -105,15 +96,15 @@ export default async function CalendarPage({
   }
 
   return (
-    <Box>
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
-          Calendar
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Times shown in {timeZone}
-        </Typography>
-      </Box>
+    <Stack spacing={2}>
+      <PageHeader
+        title="Calendar"
+        description={`Times in ${timeZone}`}
+        breadcrumbs={[
+          { label: "Dashboard", href: `/${tenantSlug}/dashboard` },
+          { label: "Calendar" },
+        ]}
+      />
 
       <AppointmentCalendar
         tenantSlug={tenantSlug}
@@ -125,6 +116,6 @@ export default async function CalendarPage({
         filters={filters}
         canEdit={canEdit}
       />
-    </Box>
+    </Stack>
   );
 }

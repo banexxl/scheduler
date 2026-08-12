@@ -1,7 +1,9 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Grid from "@mui/material/Grid";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getTenantFinancialHistory, getTenantPaymentSummary } from "@/features/payments/services/financial-history-queries";
+import PageHeader from "@/features/platform/components/page-header";
+import MetricCard from "@/features/platform/components/metric-card";
 import PaymentsClientPage from "./client-page";
 
 export default async function TenantPaymentsPage({
@@ -29,13 +31,35 @@ export default async function TenantPaymentsPage({
   ]);
 
   return (
-    <Box>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 1 }}>
-        Payments
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Customer payment history for appointments and packages.
-      </Typography>
+    <Stack spacing={2}>
+      <PageHeader
+        title="Payments"
+        description="Customer payment history for appointments and packages."
+        breadcrumbs={[
+          { label: "Dashboard", href: `/${tenantSlug}/dashboard` },
+          { label: "Payments" },
+        ]}
+      />
+
+      {/* Summary per currency */}
+      <Grid container spacing={2}>
+        {summary.currencies.map((curr) => (
+          <Grid key={curr.currency} size={{ xs: 6, sm: 4, md: 3 }}>
+            <MetricCard
+              label={`Collected (${curr.currency})`}
+              value={curr.paymentsReceived.toLocaleString()}
+              secondary={curr.refunded > 0 ? `Refunded: ${curr.refunded.toLocaleString()}` : undefined}
+              variant="success"
+            />
+          </Grid>
+        ))}
+        {summary.currencies.length === 0 && (
+          <Grid size={{ xs: 12 }}>
+            <MetricCard label="Payments" value="No payments yet" />
+          </Grid>
+        )}
+      </Grid>
+
       <PaymentsClientPage
         tenantSlug={tenantSlug}
         history={history.items}
@@ -44,6 +68,6 @@ export default async function TenantPaymentsPage({
         dateTo={dateTo}
         typeFilter={type ?? null}
       />
-    </Box>
+    </Stack>
   );
 }

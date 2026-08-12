@@ -139,13 +139,17 @@ describeIntegration("tenant deletion (live DB)", () => {
 
   describe("successful deletion", () => {
     it("owner can delete with correct confirmation", async () => {
-      const { data } = await admin().rpc("delete_tenant_permanently", {
+      const { data, error } = await admin().rpc("delete_tenant_permanently", {
         p_tenant_id: tenantToDeleteId,
         p_actor_user_id: ownerUserId,
         p_confirmation_slug: tenantToDeleteSlug,
       });
 
-      const result = data as unknown as Record<string, unknown>;
+      if (error) {
+        console.log("[tenant-deletion] RPC error:", error.code, error.message);
+        throw new Error(`delete_tenant_permanently failed: ${error.message}`);
+      }
+      const result = typeof data === "string" ? JSON.parse(data) : data;
       expect(result?.status).toBe("deleted");
     });
 
@@ -230,11 +234,15 @@ describeIntegration("tenant deletion (live DB)", () => {
       const disposable = await createTestTenant("disposable");
       await createTestMembership(disposable.tenantId, ownerUserId, "owner");
 
-      const { data } = await admin().rpc("delete_tenant_for_test", {
+      const { data, error } = await admin().rpc("delete_tenant_for_test", {
         p_tenant_id: disposable.tenantId,
       });
 
-      const result = data as unknown as Record<string, unknown>;
+      if (error) {
+        console.log("[tenant-deletion] delete_tenant_for_test error:", error.code, error.message);
+        throw new Error(`delete_tenant_for_test failed: ${error.message}`);
+      }
+      const result = typeof data === "string" ? JSON.parse(data) : data;
       expect(result?.status).toBe("deleted");
     });
   });

@@ -1,9 +1,9 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { getOperationalNotifications } from "@/features/notifications/services/get-operational-notifications";
 import { getMyStaffResourceId } from "@/features/staff/services/staff-queries";
 import type { NotificationCategory } from "@/features/notifications/types/operational-notification";
+import PageHeader from "@/features/platform/components/page-header";
 import NotificationsClientPage from "./client-page";
 
 export default async function NotificationsPage({
@@ -37,16 +37,22 @@ export default async function NotificationsPage({
   );
 
   return (
-    <Box>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>
-        Notifications
-      </Typography>
+    <Stack spacing={2}>
+      <PageHeader
+        title="Notifications"
+        description={`${data.unreadCount} unread`}
+        breadcrumbs={[
+          { label: "Dashboard", href: `/${tenantSlug}/dashboard` },
+          { label: "Notifications" },
+        ]}
+      />
+
       <NotificationsClientPage
         tenantSlug={tenantSlug}
         data={data}
         activeFilter={filter ?? "all"}
         activeCategory={category ?? null}
       />
-    </Box>
+    </Stack>
   );
 }

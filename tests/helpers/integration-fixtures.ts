@@ -27,7 +27,9 @@ export async function createTestTenant(
 ): Promise<TestTenantFixture> {
   const admin = createTestAdminClient();
   const runId = getTestRunId();
-  const slug = `test-${label}-${runId}`.slice(0, 60).toLowerCase();
+  // Slug must be lowercase alphanumeric + hyphens only (no underscores)
+  const rawSlug = `test-${label}-${runId}`.slice(0, 60).toLowerCase();
+  const slug = rawSlug.replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
   const name = `Test ${label} ${runId.slice(0, 8)}`;
 
   const { data, error } = await admin
@@ -92,7 +94,7 @@ export async function createTestLocation(
 ): Promise<TestLocationFixture> {
   const admin = createTestAdminClient();
   const runId = getTestRunId();
-  const slug = `loc-${label}-${runId}`.slice(0, 60).toLowerCase();
+  const slug = `loc-${label}-${runId}`.slice(0, 60).toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
   const name = `Location ${label}`;
 
   const { data, error } = await admin
@@ -127,7 +129,7 @@ export async function createTestService(
 ): Promise<TestServiceFixture> {
   const admin = createTestAdminClient();
   const runId = getTestRunId();
-  const slug = `svc-${label}-${runId}`.slice(0, 60).toLowerCase();
+  const slug = `svc-${label}-${runId}`.slice(0, 60).toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
   const name = `Service ${label}`;
 
   const { data, error } = await admin
@@ -165,7 +167,7 @@ export async function createTestResource(
 ): Promise<TestResourceFixture> {
   const admin = createTestAdminClient();
   const runId = getTestRunId();
-  const slug = `res-${label}-${runId}`.slice(0, 60).toLowerCase();
+  const slug = `res-${label}-${runId}`.slice(0, 60).toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
   const name = `Resource ${label}`;
 
   const { data, error } = await admin
@@ -194,7 +196,7 @@ export async function createTestResourceType(
 ): Promise<string> {
   const admin = createTestAdminClient();
   const runId = getTestRunId();
-  const slug = `rtype-${label}-${runId}`.slice(0, 60).toLowerCase();
+  const slug = `rtype-${label}-${runId}`.slice(0, 60).toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
 
   const { data, error } = await admin
     .from("resource_types")
@@ -203,6 +205,9 @@ export async function createTestResourceType(
       name: `Type ${label}`,
       slug,
       sort_order: 0,
+      resource_kind: "person",
+      display_name_singular: `${label}`,
+      display_name_plural: `${label}s`,
     })
     .select("id")
     .single();
@@ -248,6 +253,8 @@ export async function createTestAppointment(
       location_id: options.locationId,
       starts_at: options.startsAt,
       ends_at: options.endsAt,
+      occupied_starts_at: options.startsAt,
+      occupied_ends_at: options.endsAt,
       customer_name: options.customerName ?? "Test Customer",
       customer_email: options.customerEmail ?? "test@example.test",
       customer_id: options.customerId ?? null,
@@ -256,6 +263,13 @@ export async function createTestAppointment(
       resource_name_snapshot: res?.name ?? "Test Resource",
       location_name_snapshot: loc?.name ?? "Test Location",
       duration_minutes: 30,
+      appointment_number: `TEST-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6)}`,
+      currency: "EUR",
+      price: 0,
+      buffer_before_minutes: 0,
+      buffer_after_minutes: 0,
+      ...(options.status === "cancelled" ? { cancelled_at: new Date().toISOString() } : {}),
+      ...(options.status === "completed" ? { completed_at: new Date().toISOString() } : {}),
     })
     .select("id, status")
     .single();
@@ -330,6 +344,37 @@ export async function setupFullTestEnvironment(): Promise<FullTestEnvironment> {
     price: 1500,
     currency: "EUR",
   });
+
+  // Link service to location (required for appointments)
+  const adminForLink = createTestAdminClient();
+  await adminForLink
+    .from("service_locations")
+    .insert({
+      service_id: serviceA.serviceId,
+      location_id: locationA.locationId,
+      tenant_id: tenantA.tenantId,
+    });
+
+  // Link resource to service (required for appointments)
+  await adminForLink
+    .from("service_resources")
+    .insert({
+      service_id: serviceA.serviceId,
+      resource_id: resourceA.resourceId,
+      tenant_id: tenantA.tenantId,
+      is_active: true,
+      sort_order: 0,
+    });
+
+  // Link resource to location (required for appointments)
+  await adminForLink
+    .from("resource_locations")
+    .insert({
+      resource_id: resourceA.resourceId,
+      location_id: locationA.locationId,
+      tenant_id: tenantA.tenantId,
+      is_active: true,
+    });
 
   return {
     tenantA,

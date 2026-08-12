@@ -1,10 +1,12 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Grid from "@mui/material/Grid";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { evaluateBusinessHealth, type BusinessHealthInputs } from "@/features/business-health/services/evaluate-business-health";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { isAppointmentPaymentProviderAvailable } from "@/features/payments/services/resolve-payment-requirement";
 import { isEmailProviderConfigured } from "@/features/notifications/services/providers";
+import PageHeader from "@/features/platform/components/page-header";
+import MetricCard from "@/features/platform/components/metric-card";
 import HealthClientPage from "./client-page";
 
 export default async function BusinessHealthPage({
@@ -17,7 +19,6 @@ export default async function BusinessHealthPage({
 
   const supabase = createServiceRoleClient();
 
-  // Load tenant timezone
   const { data: tenantDetails } = await supabase
     .from("tenants")
     .select("default_timezone")
@@ -26,7 +27,6 @@ export default async function BusinessHealthPage({
 
   const tenantTimezone = tenantDetails?.default_timezone ?? null;
 
-  // Batch load health inputs
   const [
     locationsResult, servicesResult, resourcesResult,
     locationHoursResult, serviceLocResult, serviceResResult,
@@ -67,7 +67,7 @@ export default async function BusinessHealthPage({
     activeResourceCount: resourcesResult.count ?? 0,
     resourcesWithHoursCount: resourcesWithHours.size,
     publicBookingEnabled: Boolean((publicBookingResult.data as unknown as { is_enabled?: boolean })?.is_enabled),
-    hasFutureAvailability: true, // Simplified: assume true if services/resources exist
+    hasFutureAvailability: true,
     emailProviderConfigured: isEmailProviderConfigured(),
     emailFeaturesEnabled: process.env.EMAIL_PROVIDER !== "console" || Boolean(process.env.NOTIFICATION_FROM_EMAIL),
     recentEmailFailureCount: emailFailResult.count ?? 0,
@@ -82,12 +82,36 @@ export default async function BusinessHealthPage({
 
   const health = evaluateBusinessHealth(inputs);
 
+  // Count issues by severity
+  const blocked = health.blockedCount;
+  const attention = health.attentionCount;
+  const ready = health.readyCount;
+
   return (
-    <Box>
-      <Typography variant="h4" component="h1" sx={{ fontWeight: 600, mb: 3 }}>
-        Setup Health
-      </Typography>
+    <Stack spacing={2}>
+      <PageHeader
+        title="Setup Health"
+        description="Configuration readiness and operational issues."
+        breadcrumbs={[
+          { label: "Dashboard", href: `/${tenantSlug}/dashboard` },
+          { label: "Health" },
+        ]}
+      />
+
+      {/* Health summary */}
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 4 }}>
+          <MetricCard label="Blocked" value={blocked} variant={blocked > 0 ? "error" : "default"} />
+        </Grid>
+        <Grid size={{ xs: 4 }}>
+          <MetricCard label="Needs Attention" value={attention} variant={attention > 0 ? "warning" : "default"} />
+        </Grid>
+        <Grid size={{ xs: 4 }}>
+          <MetricCard label="Ready" value={ready} variant="success" />
+        </Grid>
+      </Grid>
+
       <HealthClientPage tenantSlug={tenantSlug} health={health} />
-    </Box>
+    </Stack>
   );
 }

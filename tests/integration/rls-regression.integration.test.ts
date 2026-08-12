@@ -66,7 +66,7 @@ describeIntegration("RLS regression & tenant isolation (live DB)", () => {
         .select("id, role")
         .eq("tenant_id", env.tenantA.tenantId);
 
-      expect(error?.message).not.toContain("infinite recursion");
+      expect(error?.message ?? "").not.toContain("infinite recursion");
       expect(data).not.toBeNull();
       expect(data!.length).toBeGreaterThan(0);
     });
@@ -81,7 +81,7 @@ describeIntegration("RLS regression & tenant isolation (live DB)", () => {
         .select("id, name, status")
         .eq("id", env.tenantA.tenantId);
 
-      expect(error?.message).not.toContain("infinite recursion");
+      expect(error?.message ?? "").not.toContain("infinite recursion");
       expect(data).not.toBeNull();
       expect(data![0]?.id).toBe(env.tenantA.tenantId);
     });
@@ -96,7 +96,7 @@ describeIntegration("RLS regression & tenant isolation (live DB)", () => {
         .select("id, name")
         .eq("tenant_id", env.tenantA.tenantId);
 
-      expect(error?.message).not.toContain("infinite recursion");
+      expect(error?.message ?? "").not.toContain("infinite recursion");
       expect(data).not.toBeNull();
     });
 
@@ -110,7 +110,7 @@ describeIntegration("RLS regression & tenant isolation (live DB)", () => {
         .select("id, name")
         .eq("tenant_id", env.tenantA.tenantId);
 
-      expect(error?.message).not.toContain("infinite recursion");
+      expect(error?.message ?? "").not.toContain("infinite recursion");
       expect(data).not.toBeNull();
     });
 
@@ -124,7 +124,7 @@ describeIntegration("RLS regression & tenant isolation (live DB)", () => {
         .select("id, status")
         .eq("tenant_id", env.tenantA.tenantId);
 
-      expect(error?.message).not.toContain("infinite recursion");
+      expect(error?.message ?? "").not.toContain("infinite recursion");
       expect(data).not.toBeNull();
     });
 
@@ -138,7 +138,7 @@ describeIntegration("RLS regression & tenant isolation (live DB)", () => {
         .select("id, name")
         .eq("tenant_id", env.tenantA.tenantId);
 
-      expect(error?.message).not.toContain("infinite recursion");
+      expect(error?.message ?? "").not.toContain("infinite recursion");
       expect(data).not.toBeNull();
     });
 
@@ -152,7 +152,7 @@ describeIntegration("RLS regression & tenant isolation (live DB)", () => {
         .select("*")
         .eq("tenant_id", env.tenantA.tenantId);
 
-      expect(error?.message).not.toContain("infinite recursion");
+      expect(error?.message ?? "").not.toContain("infinite recursion");
       // May be empty (no rules set) — that's fine
       expect(error).toBeNull();
     });
@@ -338,7 +338,7 @@ describeIntegration("RLS regression & tenant isolation (live DB)", () => {
         .select("id")
         .eq("id", env.tenantA.tenantId);
 
-      expect(data).toEqual([]);
+      expect(data ?? []).toEqual([]);
     });
 
     it("anon client cannot read tenant_members", async () => {
@@ -353,7 +353,7 @@ describeIntegration("RLS regression & tenant isolation (live DB)", () => {
         .from("tenant_members")
         .select("id");
 
-      expect(data).toEqual([]);
+      expect(data ?? []).toEqual([]);
     });
 
     it("anon client cannot read appointments", async () => {
@@ -368,7 +368,7 @@ describeIntegration("RLS regression & tenant isolation (live DB)", () => {
         .from("appointments")
         .select("id");
 
-      expect(data).toEqual([]);
+      expect(data ?? []).toEqual([]);
     });
   });
 });

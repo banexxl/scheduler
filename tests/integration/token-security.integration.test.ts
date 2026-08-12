@@ -49,7 +49,7 @@ describeIntegration("token security (live DB)", () => {
   describe("review tokens", () => {
     let reviewTokenId: string;
     let appointmentId: string;
-    const tokenHash = "test_hash_" + Date.now();
+    const tokenHash = "a".repeat(64); // 64-char hex format (SHA-256)
 
     beforeAll(async () => {
       const tomorrow = futureLocalDate(1);
@@ -64,7 +64,7 @@ describeIntegration("token security (live DB)", () => {
       appointmentId = appt.appointmentId;
 
       // Create review token
-      const { data } = await admin()
+      const { data, error: tokenError } = await admin()
         .from("appointment_review_tokens")
         .insert({
           tenant_id: env.tenantA.tenantId,
@@ -76,7 +76,8 @@ describeIntegration("token security (live DB)", () => {
         .select("id")
         .single();
 
-      reviewTokenId = data!.id;
+      if (tokenError) throw new Error(`Review token creation failed: ${tokenError.message}`);
+      reviewTokenId = data.id;
     });
 
     it("valid token can be resolved", async () => {
@@ -121,7 +122,7 @@ describeIntegration("token security (live DB)", () => {
 
     it("expired token is rejected", async () => {
       // Create an already-expired token
-      const expiredHash = "expired_hash_" + Date.now();
+      const expiredHash = "b".repeat(64);
       await admin()
         .from("appointment_review_tokens")
         .insert({
@@ -145,7 +146,7 @@ describeIntegration("token security (live DB)", () => {
     });
 
     it("revoked token is rejected", async () => {
-      const revokedHash = "revoked_hash_" + Date.now();
+      const revokedHash = "c".repeat(64);
       await admin()
         .from("appointment_review_tokens")
         .insert({
@@ -173,7 +174,7 @@ describeIntegration("token security (live DB)", () => {
   describe("appointment self-service tokens", () => {
     it("non-existent token hash returns no rows", async () => {
       const { data } = await admin()
-        .from("appointment_tokens")
+        .from("appointment_access_tokens")
         .select("id")
         .eq("token_hash", "completely_nonexistent_hash_xyz_12345")
         .single();
@@ -184,7 +185,7 @@ describeIntegration("token security (live DB)", () => {
     it("tokens are scoped to tenant", async () => {
       // Any token lookup includes tenant_id validation in the service layer
       const { data, error } = await admin()
-        .from("appointment_tokens")
+        .from("appointment_access_tokens")
         .select("id, tenant_id")
         .limit(1);
 

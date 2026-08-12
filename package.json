@@ -24,8 +24,8 @@
     "seed:e2e": "npx tsx tests/fixtures/e2e-seed.ts",
     "reset:test-tenant": "npx tsx scripts/reset-test-tenant.ts",
     "verify:rc": "npm run lint && npm run type-check && npm run build && npm run start && npm run test && npm run test:integration:required",
-    "check:build:start": "npm run lint && npm run type-check && npm run build && npm run start",
     "db_types:check:build:start": "npm run db:types && npm run lint && npm run type-check && npm run build && npm run start",
+    "check:build:start": "npm run lint && npm run type-check && npm run build && npm run start",
     "test:int:e2e": "npm run test && npx playwright test"
   },
   "dependencies": {

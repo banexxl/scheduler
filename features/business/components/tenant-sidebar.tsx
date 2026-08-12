@@ -90,12 +90,14 @@ function getNavGroups(slug: string): NavGroup[] {
         { label: "Reviews", href: `/${slug}/reviews`, icon: <StarIcon fontSize="small" />, matchPrefix: `/${slug}/reviews` },
         { label: "Waitlist", href: `/${slug}/waitlist`, icon: <ListAltIcon fontSize="small" />, matchPrefix: `/${slug}/waitlist` },
         { label: "Packages", href: `/${slug}/packages`, icon: <CardGiftcardIcon fontSize="small" />, matchPrefix: `/${slug}/packages` },
+        { label: "Referrals", href: `/${slug}/referrals`, icon: <StarIcon fontSize="small" />, matchPrefix: `/${slug}/referrals` },
       ],
     },
     {
       label: "Finance",
       items: [
         { label: "Payments", href: `/${slug}/payments`, icon: <PaymentIcon fontSize="small" />, matchPrefix: `/${slug}/payments` },
+        { label: "Gift Cards", href: `/${slug}/gift-cards`, icon: <CardGiftcardIcon fontSize="small" />, matchPrefix: `/${slug}/gift-cards` },
       ],
     },
     {

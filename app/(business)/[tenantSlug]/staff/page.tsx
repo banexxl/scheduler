@@ -27,11 +27,11 @@ export default async function StaffPage({
 
   const { data: profiles } = await supabase
     .from("staff_profiles")
-    .select("id, display_name, job_title, is_bookable, resource_id, user_id, created_at")
+    .select("id, display_name, job_title, resource_id, user_id, created_at")
     .eq("tenant_id", tenant.id)
     .order("display_name", { ascending: true });
 
-  const rows = ((profiles ?? []) as unknown as Array<Record<string, unknown>>);
+  const rows = (profiles ?? []) as Array<Record<string, unknown>>;
 
   return (
     <Stack spacing={2}>
@@ -85,8 +85,8 @@ export default async function StaffPage({
                   ) : null}
                 </Box>
                 <StatusChip
-                  label={profile.is_bookable ? "Bookable" : "Not bookable"}
-                  color={profile.is_bookable ? "success" : "default"}
+                  label={profile.resource_id ? "Linked" : "Not linked"}
+                  color={profile.resource_id ? "success" : "default"}
                   size="small"
                 />
               </Box>

@@ -21,23 +21,23 @@ export default async function ReferralDashboardPage({
 
   const supabase = createServiceRoleClient();
 
-  // Metrics (tables may not exist in generated types yet — cast as never)
-  const { count: attributed } = await (supabase as never as ReturnType<typeof createServiceRoleClient>)
-    .from("customer_referrals" as never)
-    .select("id" as never, { count: "exact", head: true })
-    .eq("tenant_id" as never, tenant.id);
+  // Metrics
+  const { count: attributed } = await supabase
+    .from("customer_referrals")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tenant.id);
 
-  const { count: qualified } = await (supabase as never as ReturnType<typeof createServiceRoleClient>)
-    .from("customer_referrals" as never)
-    .select("id" as never, { count: "exact", head: true })
-    .eq("tenant_id" as never, tenant.id)
-    .in("status" as never, ["qualified", "rewarded"] as never);
+  const { count: qualified } = await supabase
+    .from("customer_referrals")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tenant.id)
+    .in("status", ["qualified", "rewarded"]);
 
-  const { count: rewarded } = await (supabase as never as ReturnType<typeof createServiceRoleClient>)
-    .from("customer_referrals" as never)
-    .select("id" as never, { count: "exact", head: true })
-    .eq("tenant_id" as never, tenant.id)
-    .eq("status" as never, "rewarded");
+  const { count: rewarded } = await supabase
+    .from("customer_referrals")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tenant.id)
+    .eq("status", "rewarded");
 
   const total = attributed ?? 0;
   const qual = qualified ?? 0;
@@ -45,14 +45,14 @@ export default async function ReferralDashboardPage({
   const rate = total > 0 ? Math.round((qual / total) * 100) : 0;
 
   // Recent referrals
-  const { data: recent } = await (supabase as never as ReturnType<typeof createServiceRoleClient>)
-    .from("customer_referrals" as never)
-    .select("id, status, attributed_at, referred_customer_email" as never)
-    .eq("tenant_id" as never, tenant.id)
-    .order("attributed_at" as never, { ascending: false })
+  const { data: recent } = await supabase
+    .from("customer_referrals")
+    .select("id, status, attributed_at, referred_customer_email")
+    .eq("tenant_id", tenant.id)
+    .order("attributed_at", { ascending: false })
     .limit(10);
 
-  const rows = ((recent ?? []) as unknown as Array<Record<string, unknown>>);
+  const rows = (recent ?? []) as Array<Record<string, unknown>>;
 
   return (
     <Stack spacing={2}>

@@ -17,10 +17,10 @@ export default async function ReferralSettingsPage({
   const { tenant } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
 
   const supabase = createServiceRoleClient();
-  const { data: program } = await (supabase as never as ReturnType<typeof createServiceRoleClient>)
-    .from("tenant_referral_programs" as never)
-    .select("*" as never)
-    .eq("tenant_id" as never, tenant.id)
+  const { data: program } = await supabase
+    .from("tenant_referral_programs")
+    .select("*")
+    .eq("tenant_id", tenant.id)
     .maybeSingle();
 
   const p = (program ?? {}) as Record<string, unknown>;

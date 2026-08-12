@@ -32,7 +32,6 @@ export async function getBusinessSettings(
     )
     .eq("id", tenantId)
     .single();
-  console.log('error', error);
 
   if (error || !data) {
     throw new Error("Unable to load business settings");

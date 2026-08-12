@@ -1,7 +1,6 @@
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
-import Link from "next/link";
 import PageHeader from "@/features/platform/components/page-header";
 import MetricCard from "@/features/platform/components/metric-card";
 import SectionCard from "@/features/platform/components/section-card";
@@ -54,7 +53,7 @@ export default async function PlatformBillingHomePage() {
                                    title={area.title}
                                    description={area.description}
                                    action={
-                                        <Button component={Link} href={area.href} size="small" variant="text">
+                                        <Button href={area.href} size="small" variant="text">
                                              Open
                                         </Button>
                                    }

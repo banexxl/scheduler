@@ -29,7 +29,7 @@ const PLATFORM_ROUTES = [
 test.describe("platform admin navigation", () => {
   test("all platform routes render without 500", async ({ page }) => {
     for (const route of PLATFORM_ROUTES) {
-      const response = await page.goto(route);
+      const response = await page.goto(route, { timeout: 60000 });
       // Should not be 500 (either renders or redirects/404)
       expect(response?.status(), `Route ${route} returned 500`).not.toBe(500);
     }

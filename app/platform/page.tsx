@@ -3,7 +3,6 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
-import Link from "next/link";
 import PageHeader from "@/features/platform/components/page-header";
 import MetricCard from "@/features/platform/components/metric-card";
 import SectionCard from "@/features/platform/components/section-card";
@@ -94,7 +93,7 @@ export default async function PlatformHomePage() {
       <SectionCard
         title="Billing"
         action={
-          <Button component={Link} href="/platform/billing" size="small" variant="text">
+          <Button href="/platform/billing" size="small" variant="text">
             View all
           </Button>
         }
@@ -131,46 +130,11 @@ export default async function PlatformHomePage() {
       {/* Quick links */}
       <SectionCard title="Quick Links">
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          <Chip
-            label="Tenants"
-            component={Link}
-            href="/platform/tenants"
-            clickable
-            variant="outlined"
-            size="small"
-          />
-          <Chip
-            label="Subscriptions"
-            component={Link}
-            href="/platform/billing/subscriptions"
-            clickable
-            variant="outlined"
-            size="small"
-          />
-          <Chip
-            label="Webhooks"
-            component={Link}
-            href="/platform/billing/webhooks"
-            clickable
-            variant="outlined"
-            size="small"
-          />
-          <Chip
-            label="Orders"
-            component={Link}
-            href="/platform/billing/orders"
-            clickable
-            variant="outlined"
-            size="small"
-          />
-          <Chip
-            label="Audit Logs"
-            component={Link}
-            href="/platform/audit-logs"
-            clickable
-            variant="outlined"
-            size="small"
-          />
+          <Chip label="Tenants" component="a" href="/platform/tenants" clickable variant="outlined" size="small" />
+          <Chip label="Subscriptions" component="a" href="/platform/billing/subscriptions" clickable variant="outlined" size="small" />
+          <Chip label="Webhooks" component="a" href="/platform/billing/webhooks" clickable variant="outlined" size="small" />
+          <Chip label="Orders" component="a" href="/platform/billing/orders" clickable variant="outlined" size="small" />
+          <Chip label="Audit Logs" component="a" href="/platform/audit-logs" clickable variant="outlined" size="small" />
         </Stack>
       </SectionCard>
     </Stack>

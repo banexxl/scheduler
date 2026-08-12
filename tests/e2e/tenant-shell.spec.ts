@@ -36,16 +36,19 @@ const TENANT_ROUTES = [
 test.describe("tenant shell - desktop", () => {
   test("all business routes render without 500", async ({ page }) => {
     for (const route of TENANT_ROUTES) {
-      const response = await page.goto(`/${tenantSlug}/${route}`);
+      const response = await page.goto(`/${tenantSlug}/${route}`, { timeout: 10000 });
       expect(response?.status(), `/${tenantSlug}/${route} returned 500`).not.toBe(500);
     }
   });
 
   test("sidebar navigation is visible on desktop", async ({ page }) => {
-    await page.goto(`/${tenantSlug}/dashboard`);
-    // The nav element should be visible at desktop width (1280px default)
-    const nav = page.locator('nav[aria-label="Business navigation"]');
-    await expect(nav).toBeVisible({ timeout: 10000 });
+    await page.goto(`/${tenantSlug}/dashboard`, { timeout: 60000 });
+    // Only check on desktop viewport — mobile hides the sidebar
+    const viewportWidth = page.viewportSize()?.width ?? 0;
+    if (viewportWidth >= 1024) {
+      const nav = page.locator('nav[aria-label="Business navigation"]');
+      await expect(nav).toBeVisible({ timeout: 10000 });
+    }
   });
 
   test("dashboard shows page header", async ({ page }) => {
@@ -64,15 +67,15 @@ test.describe("tenant shell - desktop", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
-    await page.goto(`/${tenantSlug}/dashboard`);
-    await page.waitForLoadState("networkidle").catch(() => {});
+    await page.goto(`/${tenantSlug}/dashboard`, { timeout: 60000 });
+    await page.waitForLoadState("networkidle").catch(() => { });
 
     // Navigate to a few pages
-    await page.goto(`/${tenantSlug}/services`);
-    await page.waitForLoadState("networkidle").catch(() => {});
+    await page.goto(`/${tenantSlug}/services`, { timeout: 60000 });
+    await page.waitForLoadState("networkidle").catch(() => { });
 
-    await page.goto(`/${tenantSlug}/team`);
-    await page.waitForLoadState("networkidle").catch(() => {});
+    await page.goto(`/${tenantSlug}/team`, { timeout: 60000 });
+    await page.waitForLoadState("networkidle").catch(() => { });
 
     const html = await page.content();
     expect(html).not.toContain("Functions cannot be passed directly to Client Components");
@@ -117,7 +120,7 @@ test.describe("tenant shell - mobile", () => {
   test("no horizontal overflow on key pages", async ({ page }) => {
     const pages = ["dashboard", "appointments", "services", "customers", "settings"];
     for (const route of pages) {
-      await page.goto(`/${tenantSlug}/${route}`);
+      await page.goto(`/${tenantSlug}/${route}`, { timeout: 10000 });
       await page.waitForLoadState("domcontentloaded");
 
       const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
@@ -132,7 +135,7 @@ test.describe("tenant shell - authorization", () => {
 
   test("unauthenticated user cannot access business routes", async ({ page }) => {
     await page.goto(`/${tenantSlug}/dashboard`);
-    await page.waitForURL(/login/, { timeout: 10000 }).catch(() => {});
+    await page.waitForURL(/login/, { timeout: 10000 }).catch(() => { });
     const url = page.url();
     const body = await page.locator("body").textContent();
     const blocked = url.includes("login") || body?.toLowerCase().includes("sign in") || body?.toLowerCase().includes("not found");

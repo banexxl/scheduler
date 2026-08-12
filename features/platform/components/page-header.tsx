@@ -3,7 +3,6 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
-import NextLink from "next/link";
 import { platformTypography } from "@/styles/theme/platform-admin-tokens";
 
 /**
@@ -40,7 +39,7 @@ export default function PageHeader({
             crumb.href && idx < breadcrumbs.length - 1 ? (
               <Link
                 key={crumb.label}
-                component={NextLink}
+                component="a"
                 href={crumb.href}
                 underline="hover"
                 sx={{ fontSize: "0.8125rem", color: "#6b7280" }}

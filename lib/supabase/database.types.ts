@@ -4582,6 +4582,50 @@ export type Database = {
           },
         ]
       }
+      tenant_branding_settings: {
+        Row: {
+          created_at: string
+          draft_config: Json
+          draft_version: number
+          id: string
+          published_at: string | null
+          published_config: Json
+          published_version: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          draft_config?: Json
+          draft_version?: number
+          id?: string
+          published_at?: string | null
+          published_config?: Json
+          published_version?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          draft_config?: Json
+          draft_version?: number
+          id?: string
+          published_at?: string | null
+          published_config?: Json
+          published_version?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_branding_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_customer_private: {
         Row: {
           blocked_reason: string | null
@@ -6207,6 +6251,10 @@ export type Database = {
         }
         Returns: Json
       }
+      get_published_tenant_branding: {
+        Args: { p_tenant_slug: string }
+        Returns: Json
+      }
       get_tenant_deletion_preview: {
         Args: { p_actor_user_id: string; p_tenant_id: string }
         Returns: Json
@@ -6333,6 +6381,14 @@ export type Database = {
           p_worker_id: string
         }
         Returns: undefined
+      }
+      publish_tenant_branding: {
+        Args: {
+          p_actor_user_id: string
+          p_expected_draft_version: number
+          p_tenant_id: string
+        }
+        Returns: Json
       }
       register_as_tenant_customer: {
         Args: {

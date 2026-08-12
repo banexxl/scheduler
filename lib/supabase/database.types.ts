@@ -627,6 +627,140 @@ export type Database = {
           },
         ]
       }
+      appointment_series: {
+        Row: {
+          buffer_after_minutes: number
+          buffer_before_minutes: number
+          cancelled_at: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customer_email: string | null
+          customer_id: string | null
+          customer_name: string
+          customer_phone: string | null
+          day_of_month: number | null
+          days_of_week: number[] | null
+          duration_minutes: number
+          ends_on: string | null
+          id: string
+          location_id: string
+          location_name_snapshot: string
+          max_occurrences: number
+          occurrence_count: number | null
+          price: number
+          recurrence_interval: number
+          recurrence_type: string
+          resource_id: string | null
+          resource_name_snapshot: string | null
+          service_id: string
+          service_name_snapshot: string
+          starts_at_local_time: string
+          starts_on: string
+          status: string
+          tenant_id: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          buffer_after_minutes?: number
+          buffer_before_minutes?: number
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          day_of_month?: number | null
+          days_of_week?: number[] | null
+          duration_minutes: number
+          ends_on?: string | null
+          id?: string
+          location_id: string
+          location_name_snapshot: string
+          max_occurrences?: number
+          occurrence_count?: number | null
+          price?: number
+          recurrence_interval?: number
+          recurrence_type: string
+          resource_id?: string | null
+          resource_name_snapshot?: string | null
+          service_id: string
+          service_name_snapshot: string
+          starts_at_local_time: string
+          starts_on: string
+          status?: string
+          tenant_id: string
+          timezone: string
+          updated_at?: string
+        }
+        Update: {
+          buffer_after_minutes?: number
+          buffer_before_minutes?: number
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customer_email?: string | null
+          customer_id?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          day_of_month?: number | null
+          days_of_week?: number[] | null
+          duration_minutes?: number
+          ends_on?: string | null
+          id?: string
+          location_id?: string
+          location_name_snapshot?: string
+          max_occurrences?: number
+          occurrence_count?: number | null
+          price?: number
+          recurrence_interval?: number
+          recurrence_type?: string
+          resource_id?: string | null
+          resource_name_snapshot?: string | null
+          service_id?: string
+          service_name_snapshot?: string
+          starts_at_local_time?: string
+          starts_on?: string
+          status?: string
+          tenant_id?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_series_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_series_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_series_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_series_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointment_status_history: {
         Row: {
           appointment_id: string
@@ -699,6 +833,7 @@ export type Database = {
           ends_at: string
           id: string
           internal_notes: string | null
+          is_series_exception: boolean
           location_id: string
           location_name_snapshot: string
           no_show_at: string | null
@@ -710,6 +845,8 @@ export type Database = {
           resource_id: string
           resource_name_snapshot: string
           schedule_version: number
+          series_id: string | null
+          series_occurrence_index: number | null
           service_id: string
           service_name_snapshot: string
           service_started_at: string | null
@@ -743,6 +880,7 @@ export type Database = {
           ends_at: string
           id?: string
           internal_notes?: string | null
+          is_series_exception?: boolean
           location_id: string
           location_name_snapshot: string
           no_show_at?: string | null
@@ -754,6 +892,8 @@ export type Database = {
           resource_id: string
           resource_name_snapshot: string
           schedule_version?: number
+          series_id?: string | null
+          series_occurrence_index?: number | null
           service_id: string
           service_name_snapshot: string
           service_started_at?: string | null
@@ -787,6 +927,7 @@ export type Database = {
           ends_at?: string
           id?: string
           internal_notes?: string | null
+          is_series_exception?: boolean
           location_id?: string
           location_name_snapshot?: string
           no_show_at?: string | null
@@ -798,6 +939,8 @@ export type Database = {
           resource_id?: string
           resource_name_snapshot?: string
           schedule_version?: number
+          series_id?: string | null
+          series_occurrence_index?: number | null
           service_id?: string
           service_name_snapshot?: string
           service_started_at?: string | null
@@ -821,6 +964,13 @@ export type Database = {
             columns: ["resource_id"]
             isOneToOne: false
             referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_series"
             referencedColumns: ["id"]
           },
           {
@@ -5915,6 +6065,7 @@ export type Database = {
           ends_at: string
           id: string
           internal_notes: string | null
+          is_series_exception: boolean
           location_id: string
           location_name_snapshot: string
           no_show_at: string | null
@@ -5926,6 +6077,8 @@ export type Database = {
           resource_id: string
           resource_name_snapshot: string
           schedule_version: number
+          series_id: string | null
+          series_occurrence_index: number | null
           service_id: string
           service_name_snapshot: string
           service_started_at: string | null
@@ -6322,6 +6475,7 @@ export type Database = {
           ends_at: string
           id: string
           internal_notes: string | null
+          is_series_exception: boolean
           location_id: string
           location_name_snapshot: string
           no_show_at: string | null
@@ -6333,6 +6487,8 @@ export type Database = {
           resource_id: string
           resource_name_snapshot: string
           schedule_version: number
+          series_id: string | null
+          series_occurrence_index: number | null
           service_id: string
           service_name_snapshot: string
           service_started_at: string | null
@@ -6623,6 +6779,7 @@ export type Database = {
           ends_at: string
           id: string
           internal_notes: string | null
+          is_series_exception: boolean
           location_id: string
           location_name_snapshot: string
           no_show_at: string | null
@@ -6634,6 +6791,8 @@ export type Database = {
           resource_id: string
           resource_name_snapshot: string
           schedule_version: number
+          series_id: string | null
+          series_occurrence_index: number | null
           service_id: string
           service_name_snapshot: string
           service_started_at: string | null

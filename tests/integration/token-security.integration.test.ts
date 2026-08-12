@@ -49,7 +49,7 @@ describeIntegration("token security (live DB)", () => {
   describe("review tokens", () => {
     let reviewTokenId: string;
     let appointmentId: string;
-    const tokenHash = "a".repeat(64); // 64-char hex format (SHA-256)
+    const tokenHash = `a${Date.now().toString(16)}`.padEnd(64, "0").slice(0, 64);
 
     beforeAll(async () => {
       const tomorrow = futureLocalDate(1);
@@ -122,7 +122,7 @@ describeIntegration("token security (live DB)", () => {
 
     it("expired token is rejected", async () => {
       // Create an already-expired token
-      const expiredHash = "b".repeat(64);
+      const expiredHash = `b${Date.now().toString(16)}`.padEnd(64, "0").slice(0, 64);
       await admin()
         .from("appointment_review_tokens")
         .insert({
@@ -146,7 +146,7 @@ describeIntegration("token security (live DB)", () => {
     });
 
     it("revoked token is rejected", async () => {
-      const revokedHash = "c".repeat(64);
+      const revokedHash = `c${Date.now().toString(16)}`.padEnd(64, "0").slice(0, 64);
       await admin()
         .from("appointment_review_tokens")
         .insert({

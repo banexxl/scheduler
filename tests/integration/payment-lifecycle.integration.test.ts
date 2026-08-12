@@ -4,10 +4,8 @@ import {
   createTestAdminClient,
   setupFullTestEnvironment,
   teardownFullTestEnvironment,
-  createTestAppointment,
   type FullTestEnvironment,
 } from "../helpers";
-import { futureLocalDate } from "../helpers/test-fixtures";
 
 /**
  * Payment Lifecycle Integration — Milestone 13.1, Sections 10-14.

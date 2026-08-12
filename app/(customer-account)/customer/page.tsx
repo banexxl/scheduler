@@ -5,9 +5,10 @@ import { getCustomerDashboardSummary } from "@/features/customer-account/service
 import CustomerDashboardClient from "./client-page";
 
 /**
- * Customer Dashboard — Milestone 9.2.
+ * Customer Dashboard — Milestone 14.3.
  *
  * Shows unified view across all linked businesses.
+ * Shell is provided by layout.tsx.
  */
 export default async function CustomerDashboardPage() {
   let user;

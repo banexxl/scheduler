@@ -14,6 +14,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { getTenantBySlug } from "@/lib/tenants/get-tenant-by-slug";
 import { createServerActionLogger } from "@/lib/logging/server-action-logger";
@@ -155,7 +156,8 @@ export async function deleteTenantPermanentlyAction(
 
   log.info("deletion requested", { slug: tenant.slug });
 
-  const supabase = await createClient();
+  // Use service-role client because delete_tenant_permanently is restricted from authenticated
+  const supabase = createServiceRoleClient();
 
   const { data, error } = await supabase.rpc("delete_tenant_permanently", {
     p_tenant_id: tenant.id,

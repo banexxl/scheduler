@@ -2420,6 +2420,78 @@ export type Database = {
           },
         ]
       }
+      customer_referrals: {
+        Row: {
+          attributed_at: string
+          created_at: string
+          disqualification_reason: string | null
+          disqualified_at: string | null
+          id: string
+          qualified_at: string | null
+          qualifying_appointment_id: string | null
+          referral_code_id: string
+          referred_customer_email: string | null
+          referred_customer_id: string | null
+          referrer_customer_id: string
+          reward_reference_key: string | null
+          rewarded_at: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          attributed_at?: string
+          created_at?: string
+          disqualification_reason?: string | null
+          disqualified_at?: string | null
+          id?: string
+          qualified_at?: string | null
+          qualifying_appointment_id?: string | null
+          referral_code_id: string
+          referred_customer_email?: string | null
+          referred_customer_id?: string | null
+          referrer_customer_id: string
+          reward_reference_key?: string | null
+          rewarded_at?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          attributed_at?: string
+          created_at?: string
+          disqualification_reason?: string | null
+          disqualified_at?: string | null
+          id?: string
+          qualified_at?: string | null
+          qualifying_appointment_id?: string | null
+          referral_code_id?: string
+          referred_customer_email?: string | null
+          referred_customer_id?: string | null
+          referrer_customer_id?: string
+          reward_reference_key?: string | null
+          rewarded_at?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_referrals_referral_code_id_fkey"
+            columns: ["referral_code_id"]
+            isOneToOne: false
+            referencedRelation: "referral_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_referrals_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_reviews: {
         Row: {
           appointment_id: string
@@ -4003,6 +4075,41 @@ export type Database = {
           },
           {
             foreignKeyName: "public_booking_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          customer_id: string
+          id: string
+          is_active: boolean
+          tenant_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          is_active?: boolean
+          tenant_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          is_active?: boolean
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -5893,6 +6000,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tenant_public_booking_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_referral_programs: {
+        Row: {
+          attribution_window_days: number
+          created_at: string
+          currency: string | null
+          enabled: boolean
+          id: string
+          qualification_rule: string
+          referred_incentive_type: string | null
+          referred_incentive_value: number | null
+          referrer_reward_type: string
+          referrer_reward_value: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          attribution_window_days?: number
+          created_at?: string
+          currency?: string | null
+          enabled?: boolean
+          id?: string
+          qualification_rule?: string
+          referred_incentive_type?: string | null
+          referred_incentive_value?: number | null
+          referrer_reward_type?: string
+          referrer_reward_value?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          attribution_window_days?: number
+          created_at?: string
+          currency?: string | null
+          enabled?: boolean
+          id?: string
+          qualification_rule?: string
+          referred_incentive_type?: string | null
+          referred_incentive_value?: number | null
+          referrer_reward_type?: string
+          referrer_reward_value?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_referral_programs_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: true
             referencedRelation: "tenants"

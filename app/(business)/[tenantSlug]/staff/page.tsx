@@ -27,7 +27,7 @@ export default async function StaffPage({
 
   const { data: profiles } = await supabase
     .from("staff_profiles")
-    .select("id, display_name, job_title, resource_id, user_id, created_at")
+    .select("id, display_name, job_title, resource_id, is_active, created_at")
     .eq("tenant_id", tenant.id)
     .order("display_name", { ascending: true });
 
@@ -85,8 +85,8 @@ export default async function StaffPage({
                   ) : null}
                 </Box>
                 <StatusChip
-                  label={profile.resource_id ? "Linked" : "Not linked"}
-                  color={profile.resource_id ? "success" : "default"}
+                  label={profile.is_active ? "Active" : "Inactive"}
+                  color={profile.is_active ? "success" : "default"}
                   size="small"
                 />
               </Box>

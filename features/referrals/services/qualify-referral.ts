@@ -5,13 +5,6 @@ import "server-only";
  *
  * Called after appointment completion to check if a referral should qualify.
  * Non-blocking: failure here must never roll back appointment completion.
- *
- * Rules:
- * - Referral must be attributed and not yet qualified/rewarded
- * - Appointment must be completed (not cancelled/no-show)
- * - Referred customer must be genuinely new to the tenant
- * - Self-referral cannot qualify
- * - One acquisition per referred customer per tenant
  */
 
 import { createServiceRoleClient } from "@/lib/supabase/server";
@@ -40,7 +33,7 @@ export async function attemptReferralQualification(
       .eq("status", "attributed")
       .maybeSingle();
 
-    if (!referral) return; // No pending referral for this customer
+    if (!referral) return;
 
     // Mark as qualified
     const { error } = await supabase
@@ -51,7 +44,7 @@ export async function attemptReferralQualification(
         qualifying_appointment_id: appointmentId,
       })
       .eq("id", referral.id)
-      .eq("status", "attributed"); // Optimistic lock — only update if still attributed
+      .eq("status", "attributed"); // Optimistic lock
 
     if (error) {
       logger.warn("referral_qualification_failed", {
@@ -67,7 +60,6 @@ export async function attemptReferralQualification(
       });
     }
   } catch (err) {
-    // Non-blocking: log but never fail the appointment completion
     logger.error("referral_qualification_error", {
       tenantId,
       appointmentId,

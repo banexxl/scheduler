@@ -21,7 +21,6 @@ export default async function ReferralDashboardPage({
 
   const supabase = createServiceRoleClient();
 
-  // Metrics
   const { count: attributed } = await supabase
     .from("customer_referrals")
     .select("id", { count: "exact", head: true })
@@ -44,7 +43,6 @@ export default async function ReferralDashboardPage({
   const rew = rewarded ?? 0;
   const rate = total > 0 ? Math.round((qual / total) * 100) : 0;
 
-  // Recent referrals
   const { data: recent } = await supabase
     .from("customer_referrals")
     .select("id, status, attributed_at, referred_customer_email")
@@ -52,7 +50,7 @@ export default async function ReferralDashboardPage({
     .order("attributed_at", { ascending: false })
     .limit(10);
 
-  const rows = (recent ?? []) as Array<Record<string, unknown>>;
+  const rows = (recent ?? []) as Array<{ id: string; status: string; attributed_at: string; referred_customer_email: string | null }>;
 
   return (
     <Stack spacing={2}>
@@ -86,12 +84,12 @@ export default async function ReferralDashboardPage({
         ) : (
           <Stack spacing={1}>
             {rows.map((r) => (
-              <Stack key={String(r.id)} direction="row" justifyContent="space-between" sx={{ fontSize: "0.8125rem" }}>
+              <Stack key={r.id} direction="row" justifyContent="space-between" sx={{ fontSize: "0.8125rem" }}>
                 <Typography sx={{ fontSize: "0.8125rem" }}>
-                  {String(r.referred_customer_email ?? "Guest")}
+                  {r.referred_customer_email ?? "Guest"}
                 </Typography>
                 <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>
-                  {String(r.status)} — {new Date(String(r.attributed_at)).toLocaleDateString()}
+                  {r.status} — {new Date(r.attributed_at).toLocaleDateString()}
                 </Typography>
               </Stack>
             ))}

@@ -29,7 +29,6 @@ import type {
   PublicStaffItem,
   PublicReviewData,
   PublicGalleryItem,
-  PublicFeatureState,
 } from "../services/public-site-resolver";
 
 // ─── Hero Section ────────────────────────────────────────────────────────────
@@ -221,7 +220,7 @@ type StaffProps = {
   theme: ResolvedTenantTheme;
 };
 
-export function StaffSection({ staff, tenantSlug, theme }: StaffProps) {
+export function StaffSection({ staff, theme }: StaffProps) {
   if (staff.length === 0) return null;
 
   return (
@@ -479,7 +478,7 @@ type ContactProps = {
   socialLinks: SocialLink[];
 };
 
-export function ContactSection({ tenant, locations, socialLinks }: ContactProps) {
+export function ContactSection({ locations, socialLinks }: ContactProps) {
   const primaryLocation = locations.find(l => l.isPrimary) ?? locations[0];
 
   return (

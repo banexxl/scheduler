@@ -102,7 +102,6 @@ export default function PublicBookingFlow({
 
   useEffect(() => {
     if (!selectedService) {
-      setDynamicPackageOptions([]);
       return;
     }
 
@@ -189,6 +188,7 @@ export default function PublicBookingFlow({
     setPaymentMethod("pay_at_business");
     setGiftCardReservation(null);
     setSelectedPackageOption(null);
+    setDynamicPackageOptions([]);
     setStep(1);
   }, []);
 

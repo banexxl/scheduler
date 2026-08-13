@@ -89,8 +89,25 @@ export async function processGiftCardPurchaseOrderPaid(
       logger.info("gift_card_fulfilled", {
         operation: "gift_card.fulfill",
       });
-      // TODO: Trigger delivery notification with rawCode (minimum boundary)
-      // rawCode must NOT be logged or persisted beyond this point
+      // Marketing automation enrollment (non-blocking)
+      try {
+        const customerId = String(metadata.customer_id ?? "");
+        const tenantId = String(metadata.tenant_id ?? "");
+        if (customerId && tenantId) {
+          const { enrollCustomerForTrigger } = await import(
+            "@/features/automations/services/enrollment-service"
+          );
+          await enrollCustomerForTrigger({
+            tenantId,
+            customerId,
+            triggerType: "gift_card_purchased",
+            triggerReferenceType: "gift_card_purchase",
+            triggerReferenceId: purchaseId,
+          });
+        }
+      } catch {
+        // Automation failure must never block gift card fulfillment
+      }
       return { status: "fulfilled" };
 
     case "already_fulfilled":

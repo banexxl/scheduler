@@ -58,6 +58,22 @@ export async function attemptReferralQualification(
         appointmentId,
         operation: "referral.qualify",
       });
+
+      // Marketing automation enrollment (non-blocking)
+      try {
+        const { enrollCustomerForTrigger } = await import(
+          "@/features/automations/services/enrollment-service"
+        );
+        await enrollCustomerForTrigger({
+          tenantId,
+          customerId: referral.referrer_customer_id,
+          triggerType: "referral_rewarded",
+          triggerReferenceType: "referral",
+          triggerReferenceId: referral.id,
+        });
+      } catch {
+        // Automation failure must never block referral qualification
+      }
     }
   } catch (err) {
     logger.error("referral_qualification_error", {

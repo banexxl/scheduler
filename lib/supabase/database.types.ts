@@ -3615,6 +3615,359 @@ export type Database = {
           },
         ]
       }
+      marketing_automation_enrollments: {
+        Row: {
+          automation_id: string
+          cancelled_at: string | null
+          completed_at: string | null
+          created_at: string
+          current_step_position: number
+          customer_id: string
+          id: string
+          next_run_at: string | null
+          status: string
+          tenant_id: string
+          trigger_reference_id: string | null
+          trigger_reference_type: string | null
+          triggered_at: string
+          updated_at: string
+          version_id: string
+        }
+        Insert: {
+          automation_id: string
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_step_position?: number
+          customer_id: string
+          id?: string
+          next_run_at?: string | null
+          status?: string
+          tenant_id: string
+          trigger_reference_id?: string | null
+          trigger_reference_type?: string | null
+          triggered_at?: string
+          updated_at?: string
+          version_id: string
+        }
+        Update: {
+          automation_id?: string
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_step_position?: number
+          customer_id?: string
+          id?: string
+          next_run_at?: string | null
+          status?: string
+          tenant_id?: string
+          trigger_reference_id?: string | null
+          trigger_reference_type?: string | null
+          triggered_at?: string
+          updated_at?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_automation_enrollments_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_automations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_automation_enrollments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_automation_enrollments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_automation_enrollments_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_automation_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_automation_step_executions: {
+        Row: {
+          automation_id: string
+          completed_at: string | null
+          created_at: string
+          delivery_reference: string | null
+          enrollment_id: string
+          error_code: string | null
+          execution_key: string
+          failed_at: string | null
+          id: string
+          skip_reason: string | null
+          started_at: string | null
+          status: string
+          step_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          automation_id: string
+          completed_at?: string | null
+          created_at?: string
+          delivery_reference?: string | null
+          enrollment_id: string
+          error_code?: string | null
+          execution_key: string
+          failed_at?: string | null
+          id?: string
+          skip_reason?: string | null
+          started_at?: string | null
+          status?: string
+          step_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          automation_id?: string
+          completed_at?: string | null
+          created_at?: string
+          delivery_reference?: string | null
+          enrollment_id?: string
+          error_code?: string | null
+          execution_key?: string
+          failed_at?: string | null
+          id?: string
+          skip_reason?: string | null
+          started_at?: string | null
+          status?: string
+          step_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_automation_step_executions_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_automations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_automation_step_executions_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_automation_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_automation_step_executions_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_automation_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_automation_step_executions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_automation_steps: {
+        Row: {
+          automation_id: string
+          config: Json
+          created_at: string
+          id: string
+          position: number
+          step_type: string
+          tenant_id: string
+          updated_at: string
+          version_id: string
+        }
+        Insert: {
+          automation_id: string
+          config?: Json
+          created_at?: string
+          id?: string
+          position: number
+          step_type: string
+          tenant_id: string
+          updated_at?: string
+          version_id: string
+        }
+        Update: {
+          automation_id?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          position?: number
+          step_type?: string
+          tenant_id?: string
+          updated_at?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_automation_steps_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_automations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_automation_steps_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_automation_steps_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_automation_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_automation_versions: {
+        Row: {
+          automation_id: string
+          created_at: string
+          entry_conditions: Json | null
+          id: string
+          published_at: string
+          re_enrollment_policy: string
+          tenant_id: string
+          timezone: string
+          trigger_config: Json
+          trigger_type: string
+          version_number: number
+        }
+        Insert: {
+          automation_id: string
+          created_at?: string
+          entry_conditions?: Json | null
+          id?: string
+          published_at?: string
+          re_enrollment_policy: string
+          tenant_id: string
+          timezone: string
+          trigger_config: Json
+          trigger_type: string
+          version_number?: number
+        }
+        Update: {
+          automation_id?: string
+          created_at?: string
+          entry_conditions?: Json | null
+          id?: string
+          published_at?: string
+          re_enrollment_policy?: string
+          tenant_id?: string
+          timezone?: string
+          trigger_config?: Json
+          trigger_type?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_automation_versions_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_automations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_automation_versions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_automations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          current_version_id: string | null
+          description: string | null
+          entry_conditions: Json | null
+          id: string
+          name: string
+          paused_at: string | null
+          published_at: string | null
+          re_enrollment_policy: string
+          status: string
+          tenant_id: string
+          timezone: string
+          trigger_config: Json
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          current_version_id?: string | null
+          description?: string | null
+          entry_conditions?: Json | null
+          id?: string
+          name: string
+          paused_at?: string | null
+          published_at?: string | null
+          re_enrollment_policy?: string
+          status?: string
+          tenant_id: string
+          timezone?: string
+          trigger_config?: Json
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          current_version_id?: string | null
+          description?: string | null
+          entry_conditions?: Json | null
+          id?: string
+          name?: string
+          paused_at?: string | null
+          published_at?: string | null
+          re_enrollment_policy?: string
+          status?: string
+          tenant_id?: string
+          timezone?: string
+          trigger_config?: Json
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_current_version_fk"
+            columns: ["current_version_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_automation_versions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_automations_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketing_unsubscribe_tokens: {
         Row: {
           created_at: string
@@ -6808,6 +7161,14 @@ export type Database = {
         Args: { p_token_hash: string; p_user_email: string; p_user_id: string }
         Returns: Json
       }
+      advance_automation_enrollment: {
+        Args: {
+          p_enrollment_id: string
+          p_next_run_at?: string
+          p_next_step_position: number
+        }
+        Returns: undefined
+      }
       apply_appointment_payment_order_paid: {
         Args: {
           p_paid_amount?: number
@@ -6990,6 +7351,17 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      claim_due_automation_enrollments: {
+        Args: { p_batch_size?: number; p_worker_id?: string }
+        Returns: {
+          automation_id: string
+          current_step_position: number
+          customer_id: string
+          enrollment_id: string
+          tenant_id: string
+          version_id: string
+        }[]
+      }
       claim_notification_outbox_batch: {
         Args: { p_batch_size?: number; p_worker_id: string }
         Returns: {
@@ -7051,6 +7423,10 @@ export type Database = {
       claim_scheduled_campaign: {
         Args: { p_campaign_id: string; p_worker_id?: string }
         Returns: boolean
+      }
+      complete_automation_enrollment: {
+        Args: { p_enrollment_id: string }
+        Returns: undefined
       }
       complete_campaign: {
         Args: {
@@ -7229,6 +7605,10 @@ export type Database = {
       expire_appointment_payment_intent: {
         Args: { p_payment_intent_id: string }
         Returns: Json
+      }
+      fail_automation_enrollment: {
+        Args: { p_enrollment_id: string; p_error_code?: string }
+        Returns: undefined
       }
       fail_campaign: {
         Args: {

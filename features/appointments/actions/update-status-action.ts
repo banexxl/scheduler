@@ -62,6 +62,24 @@ export async function updateAppointmentStatusAction(
       } catch {
         // Referral failure must never block appointment completion
       }
+
+      // Marketing automation enrollment (non-blocking)
+      try {
+        const { enrollCustomerForTrigger } = await import(
+          "@/features/automations/services/enrollment-service"
+        );
+        if (result.appointment.customerId) {
+          await enrollCustomerForTrigger({
+            tenantId: tenant.id,
+            customerId: result.appointment.customerId,
+            triggerType: "appointment_completed",
+            triggerReferenceType: "appointment",
+            triggerReferenceId: result.appointment.id,
+          });
+        }
+      } catch {
+        // Automation enrollment failure must never block appointment completion
+      }
     }
 
     return { success: true, data: result.appointment };

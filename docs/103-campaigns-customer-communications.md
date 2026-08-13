@@ -299,11 +299,14 @@ If segment matches 0 customers or all are ineligible:
 | `/{slug}/campaigns/{id}` | Detail — metrics, info, recipients |
 | `/{slug}/campaigns/{id}/edit` | Edit draft campaign |
 
-## Deferred to 15.8
+## Deferred to 15.8 (Now Complete)
 
-- Marketing automations / customer journeys
-- Birthday campaigns
-- Behavior-triggered sends
-- Multi-step drip campaigns
+The following were implemented in Milestone 15.8:
+- Marketing automations / customer journeys → See docs/104
+- Behavior-triggered sends (appointment_completed, referral_rewarded, gift_card_purchased)
+- Multi-step drip campaigns (delay → condition → email sequences)
+
+Still deferred:
+- Birthday campaigns (no date_of_birth field)
 - Recurring campaign schedules
 - SMS channel

@@ -89,6 +89,7 @@ function getNavGroups(slug: string): NavGroup[] {
       label: "Engagement",
       items: [
         { label: "Campaigns", href: `/${slug}/campaigns`, icon: <CampaignIcon fontSize="small" />, matchPrefix: `/${slug}/campaigns` },
+        { label: "Automations", href: `/${slug}/automations`, icon: <CampaignIcon fontSize="small" />, matchPrefix: `/${slug}/automations` },
         { label: "Reviews", href: `/${slug}/reviews`, icon: <StarIcon fontSize="small" />, matchPrefix: `/${slug}/reviews` },
         { label: "Waitlist", href: `/${slug}/waitlist`, icon: <ListAltIcon fontSize="small" />, matchPrefix: `/${slug}/waitlist` },
         { label: "Packages", href: `/${slug}/packages`, icon: <CardGiftcardIcon fontSize="small" />, matchPrefix: `/${slug}/packages` },

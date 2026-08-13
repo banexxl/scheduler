@@ -2895,6 +2895,149 @@ export type Database = {
           },
         ]
       }
+      data_import_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          created_rows: number
+          failed_at: string | null
+          failed_rows: number
+          file_size_bytes: number
+          id: string
+          import_type: string
+          invalid_rows: number
+          mapping: Json
+          options: Json
+          original_filename: string
+          skipped_rows: number
+          started_at: string | null
+          status: string
+          tenant_id: string
+          total_rows: number
+          updated_at: string
+          updated_rows: number
+          valid_rows: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          created_rows?: number
+          failed_at?: string | null
+          failed_rows?: number
+          file_size_bytes?: number
+          id?: string
+          import_type: string
+          invalid_rows?: number
+          mapping?: Json
+          options?: Json
+          original_filename: string
+          skipped_rows?: number
+          started_at?: string | null
+          status?: string
+          tenant_id: string
+          total_rows?: number
+          updated_at?: string
+          updated_rows?: number
+          valid_rows?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          created_rows?: number
+          failed_at?: string | null
+          failed_rows?: number
+          file_size_bytes?: number
+          id?: string
+          import_type?: string
+          invalid_rows?: number
+          mapping?: Json
+          options?: Json
+          original_filename?: string
+          skipped_rows?: number
+          started_at?: string | null
+          status?: string
+          tenant_id?: string
+          total_rows?: number
+          updated_at?: string
+          updated_rows?: number
+          valid_rows?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_import_jobs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      data_import_rows: {
+        Row: {
+          created_at: string
+          error_codes: Json | null
+          error_details: Json | null
+          id: string
+          import_job_id: string
+          matched_entity_id: string | null
+          normalized_data: Json | null
+          raw_data: Json
+          result_entity_id: string | null
+          row_number: number
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error_codes?: Json | null
+          error_details?: Json | null
+          id?: string
+          import_job_id: string
+          matched_entity_id?: string | null
+          normalized_data?: Json | null
+          raw_data?: Json
+          result_entity_id?: string | null
+          row_number: number
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error_codes?: Json | null
+          error_details?: Json | null
+          id?: string
+          import_job_id?: string
+          matched_entity_id?: string | null
+          normalized_data?: Json | null
+          raw_data?: Json
+          result_entity_id?: string | null
+          row_number?: number
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_import_rows_import_job_id_fkey"
+            columns: ["import_job_id"]
+            isOneToOne: false
+            referencedRelation: "data_import_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_import_rows_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gift_card_ledger_entries: {
         Row: {
           amount: number
@@ -7403,6 +7546,15 @@ export type Database = {
           version_id: string
         }[]
       }
+      claim_import_rows_batch: {
+        Args: { p_batch_size?: number; p_job_id: string }
+        Returns: {
+          matched_entity_id: string
+          normalized_data: Json
+          row_id: string
+          row_number: number
+        }[]
+      }
       claim_notification_outbox_batch: {
         Args: { p_batch_size?: number; p_worker_id: string }
         Returns: {
@@ -7660,6 +7812,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      finalize_import_job: { Args: { p_job_id: string }; Returns: undefined }
       fulfill_gift_card_purchase: {
         Args: {
           p_code_hash: string

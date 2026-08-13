@@ -36,6 +36,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import GroupIcon from "@mui/icons-material/Group";
 import SettingsIcon from "@mui/icons-material/Settings";
+import CampaignIcon from "@mui/icons-material/Campaign";
 import {
   TENANT_SIDEBAR_WIDTH,
   tenantPalette,
@@ -87,6 +88,7 @@ function getNavGroups(slug: string): NavGroup[] {
     {
       label: "Engagement",
       items: [
+        { label: "Campaigns", href: `/${slug}/campaigns`, icon: <CampaignIcon fontSize="small" />, matchPrefix: `/${slug}/campaigns` },
         { label: "Reviews", href: `/${slug}/reviews`, icon: <StarIcon fontSize="small" />, matchPrefix: `/${slug}/reviews` },
         { label: "Waitlist", href: `/${slug}/waitlist`, icon: <ListAltIcon fontSize="small" />, matchPrefix: `/${slug}/waitlist` },
         { label: "Packages", href: `/${slug}/packages`, icon: <CardGiftcardIcon fontSize="small" />, matchPrefix: `/${slug}/packages` },

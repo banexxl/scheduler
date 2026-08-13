@@ -48,6 +48,7 @@ export type SegmentField =
   | "average_rating"
   // Payments
   | "lifetime_paid"
+  | "net_paid_amount"
   // Marketing
   | "marketing_opt_in";
 

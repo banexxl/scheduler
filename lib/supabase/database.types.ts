@@ -1864,6 +1864,190 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_campaign_recipients: {
+        Row: {
+          campaign_id: string
+          channel: string
+          created_at: string
+          customer_id: string | null
+          delivered_at: string | null
+          error_code: string | null
+          failed_at: string | null
+          id: string
+          provider_message_id: string | null
+          queued_at: string | null
+          recipient_email: string | null
+          sent_at: string | null
+          skip_reason: string | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          channel?: string
+          created_at?: string
+          customer_id?: string | null
+          delivered_at?: string | null
+          error_code?: string | null
+          failed_at?: string | null
+          id?: string
+          provider_message_id?: string | null
+          queued_at?: string | null
+          recipient_email?: string | null
+          sent_at?: string | null
+          skip_reason?: string | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          channel?: string
+          created_at?: string
+          customer_id?: string | null
+          delivered_at?: string | null
+          error_code?: string | null
+          failed_at?: string | null
+          id?: string
+          provider_message_id?: string | null
+          queued_at?: string | null
+          recipient_email?: string | null
+          sent_at?: string | null
+          skip_reason?: string | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "customer_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_campaign_recipients_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_campaign_recipients_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_campaigns: {
+        Row: {
+          audience_name_snapshot: string | null
+          audience_rules_snapshot: Json | null
+          audience_source: string
+          branding_snapshot: Json | null
+          cancelled_at: string | null
+          channel: string
+          completed_at: string | null
+          content: string | null
+          created_at: string
+          created_by: string | null
+          cta_text: string | null
+          cta_url: string | null
+          delivered_count: number
+          eligible_count: number
+          failed_count: number
+          id: string
+          matched_count: number
+          name: string
+          scheduled_for: string | null
+          segment_id: string | null
+          sent_count: number
+          skipped_count: number
+          started_at: string | null
+          status: string
+          subject: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          audience_name_snapshot?: string | null
+          audience_rules_snapshot?: Json | null
+          audience_source?: string
+          branding_snapshot?: Json | null
+          cancelled_at?: string | null
+          channel?: string
+          completed_at?: string | null
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          cta_text?: string | null
+          cta_url?: string | null
+          delivered_count?: number
+          eligible_count?: number
+          failed_count?: number
+          id?: string
+          matched_count?: number
+          name: string
+          scheduled_for?: string | null
+          segment_id?: string | null
+          sent_count?: number
+          skipped_count?: number
+          started_at?: string | null
+          status?: string
+          subject?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          audience_name_snapshot?: string | null
+          audience_rules_snapshot?: Json | null
+          audience_source?: string
+          branding_snapshot?: Json | null
+          cancelled_at?: string | null
+          channel?: string
+          completed_at?: string | null
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          cta_text?: string | null
+          cta_url?: string | null
+          delivered_count?: number
+          eligible_count?: number
+          failed_count?: number
+          id?: string
+          matched_count?: number
+          name?: string
+          scheduled_for?: string | null
+          segment_id?: string | null
+          sent_count?: number
+          skipped_count?: number
+          started_at?: string | null
+          status?: string
+          subject?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_campaigns_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "customer_segments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_campaigns_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_favorite_resources: {
         Row: {
           created_at: string
@@ -3424,6 +3608,60 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "loyalty_rewards_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_unsubscribe_tokens: {
+        Row: {
+          created_at: string
+          customer_id: string
+          expires_at: string
+          id: string
+          is_used: boolean
+          purpose: string
+          tenant_id: string
+          token_hash: string
+          token_prefix: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          expires_at?: string
+          id?: string
+          is_used?: boolean
+          purpose?: string
+          tenant_id: string
+          token_hash: string
+          token_prefix: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          expires_at?: string
+          id?: string
+          is_used?: boolean
+          purpose?: string
+          tenant_id?: string
+          token_hash?: string
+          token_prefix?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_unsubscribe_tokens_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_unsubscribe_tokens_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -6810,6 +7048,19 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      claim_scheduled_campaign: {
+        Args: { p_campaign_id: string; p_worker_id?: string }
+        Returns: boolean
+      }
+      complete_campaign: {
+        Args: {
+          p_campaign_id: string
+          p_failed_count: number
+          p_sent_count: number
+          p_skipped_count: number
+        }
+        Returns: undefined
+      }
       complete_public_booking_request: {
         Args: {
           p_appointment_id: string
@@ -6958,9 +7209,35 @@ export type Database = {
         }
         Returns: Json
       }
+      evaluate_segment_count: {
+        Args: { p_tenant_id: string; p_where_clause: string }
+        Returns: number
+      }
+      evaluate_segment_customers: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_tenant_id: string
+          p_where_clause: string
+        }
+        Returns: {
+          email: string
+          id: string
+          name: string
+        }[]
+      }
       expire_appointment_payment_intent: {
         Args: { p_payment_intent_id: string }
         Returns: Json
+      }
+      fail_campaign: {
+        Args: {
+          p_campaign_id: string
+          p_failed_count?: number
+          p_sent_count?: number
+          p_skipped_count?: number
+        }
+        Returns: undefined
       }
       fulfill_gift_card_purchase: {
         Args: {
@@ -7347,6 +7624,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      start_campaign_now: {
+        Args: { p_campaign_id: string; p_tenant_id: string }
+        Returns: boolean
       }
       sync_appointment_reminders: {
         Args: { p_appointment_id: string; p_tenant_id: string }

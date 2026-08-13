@@ -54,6 +54,7 @@ const FIELD_OPTIONS: Array<{ value: SegmentField; label: string; type: "numeric"
   { value: "marketing_opt_in", label: "Marketing opt-in", type: "boolean" },
   { value: "has_booked_service", label: "Has booked service", type: "entity" },
   { value: "has_visited_location", label: "Has visited location", type: "entity" },
+  { value: "net_paid_amount", label: "Net paid amount (minor units)", type: "numeric" },
 ];
 
 const NUMERIC_OPERATORS: Array<{ value: ComparisonOperator; label: string }> = [

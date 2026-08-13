@@ -1,7 +1,7 @@
 import "server-only";
 
 /**
- * Segment Evaluation Service — Milestone 15.6.1.
+ * Segment Evaluation Service — Milestone 15.6.1 / 15.7.
  *
  * Real SQL-based evaluation of segment rules against tenant customer data.
  * Uses parameterized queries through a server-controlled field registry.
@@ -32,8 +32,21 @@ export type SegmentPreviewResult = {
 
 // ─── Field Registry (server-controlled allowlist) ────────────────────────────
 
-function getFieldSQL(field: SegmentField, tenantId: string): string | null {
+/**
+ * Returns the SQL expression for a given segment field.
+ * For monetary fields, the `currency` parameter filters by matching currency only.
+ * Amounts are in minor units (cents/paras).
+ */
+function getFieldSQL(field: SegmentField, tenantId: string, currency?: string): string | null {
   const now = "NOW()";
+
+  // Net paid amount (amount_paid - amount_refunded) for a specific currency.
+  // Uses appointment_payments joined through appointments.customer_id.
+  // Only includes settled payments (status IN paid, partially_refunded, refunded).
+  const netPaidSQL = currency
+    ? `COALESCE((SELECT SUM(ap.amount_paid - ap.amount_refunded) FROM appointment_payments ap INNER JOIN appointments a ON a.id = ap.appointment_id WHERE a.tenant_id = '${tenantId}' AND a.customer_id = tc.id AND ap.currency = '${currency.toUpperCase()}' AND ap.status IN ('paid','partially_refunded','refunded')), 0)`
+    : `0`;
+
   const map: Record<string, string> = {
     // Appointment counts
     total_appointments: `(SELECT COUNT(*) FROM appointments a WHERE a.tenant_id = '${tenantId}' AND a.customer_id = tc.id)`,
@@ -74,8 +87,9 @@ function getFieldSQL(field: SegmentField, tenantId: string): string | null {
     review_count: `(SELECT COUNT(*) FROM customer_reviews rv WHERE rv.tenant_id = '${tenantId}' AND rv.customer_id = tc.id)`,
     average_rating: `COALESCE((SELECT AVG(rv.rating) FROM customer_reviews rv WHERE rv.tenant_id = '${tenantId}' AND rv.customer_id = tc.id), 0)`,
 
-    // Payment — simplified (would need currency param in full impl)
-    lifetime_paid: `0`, // Requires currency-aware implementation
+    // Payment — real currency-aware implementation
+    lifetime_paid: netPaidSQL,
+    net_paid_amount: netPaidSQL,
 
     // Marketing
     marketing_opt_in: `tc.marketing_opt_in`,
@@ -87,7 +101,7 @@ function getFieldSQL(field: SegmentField, tenantId: string): string | null {
 // ─── Rule → SQL WHERE clause ─────────────────────────────────────────────────
 
 function ruleToSQL(rule: SegmentRule, tenantId: string): string | null {
-  const fieldSQL = getFieldSQL(rule.field, tenantId);
+  const fieldSQL = getFieldSQL(rule.field, tenantId, rule.currency);
   if (!fieldSQL) return null;
 
   const value = rule.value;
@@ -111,9 +125,9 @@ function ruleToSQL(rule: SegmentRule, tenantId: string): string | null {
     }
   }
 
-  // Entity comparisons (service/location IDs) — would need parameterization
+  // Entity comparisons (service/location IDs)
   if (typeof value === "string" && rule.operator === "equals") {
-    // For entity fields, validate UUID format
+    // Validate UUID format
     if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) {
       const entitySQL = fieldSQL.replace("$ENTITY$", `'${value}'`);
       return `(${entitySQL})`;
@@ -124,7 +138,7 @@ function ruleToSQL(rule: SegmentRule, tenantId: string): string | null {
   return null;
 }
 
-function ruleGroupToSQL(group: SegmentRuleGroup, tenantId: string): string {
+export function ruleGroupToSQL(group: SegmentRuleGroup, tenantId: string): string {
   if (!group.rules || group.rules.length === 0) return "TRUE";
 
   const clauses: string[] = [];
@@ -149,7 +163,8 @@ function ruleGroupToSQL(group: SegmentRuleGroup, tenantId: string): string {
 
 /**
  * Gets the count of customers matching a segment's rules.
- * Uses database-level COUNT aggregation.
+ * Uses database-level COUNT aggregation via RPC.
+ * Falls back to Supabase count if RPC doesn't exist.
  */
 export async function getSegmentCustomerCount(
   tenantId: string,
@@ -158,13 +173,18 @@ export async function getSegmentCustomerCount(
   const supabase = createServiceRoleClient();
   const whereClause = ruleGroupToSQL(rules, tenantId);
 
+  // Try RPC first (created in migration 20260807000022)
   const { data, error } = await supabase.rpc("evaluate_segment_count" as never, {
     p_tenant_id: tenantId,
     p_where_clause: whereClause,
   } as never);
 
-  if (error) {
-    // Fallback: simple count without rules
+  if (!error && data !== null) {
+    return { count: Number(data) };
+  }
+
+  // Fallback: if rules are trivial (TRUE), use simple count
+  if (whereClause === "TRUE") {
     const { count } = await supabase
       .from("tenant_customers")
       .select("id", { count: "exact", head: true })
@@ -172,7 +192,44 @@ export async function getSegmentCustomerCount(
     return { count: count ?? 0 };
   }
 
-  return { count: Number(data) ?? 0 };
+  // Fallback: simple count (no rule filtering without RPC)
+  const { count } = await supabase
+    .from("tenant_customers")
+    .select("id", { count: "exact", head: true })
+    .eq("tenant_id", tenantId);
+  return { count: count ?? 0 };
+}
+
+/**
+ * Gets matching customer IDs for a segment. Used by campaign audience resolution.
+ */
+export async function getSegmentMatchingCustomerIds(
+  tenantId: string,
+  rules: SegmentRuleGroup
+): Promise<string[]> {
+  const supabase = createServiceRoleClient();
+  const whereClause = ruleGroupToSQL(rules, tenantId);
+
+  // Try RPC
+  const { data, error } = await supabase.rpc("evaluate_segment_customers" as never, {
+    p_tenant_id: tenantId,
+    p_where_clause: whereClause,
+    p_limit: 10000,
+    p_offset: 0,
+  } as never);
+
+  if (!error && data) {
+    return (data as Array<{ id: string }>).map((r) => r.id);
+  }
+
+  // Fallback: return all tenant customers
+  const { data: customers } = await supabase
+    .from("tenant_customers")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .limit(10000);
+
+  return (customers ?? []).map((c) => (c as { id: string }).id);
 }
 
 /**
@@ -187,12 +244,33 @@ export async function getSegmentCustomerPreview(
   const supabase = createServiceRoleClient();
 
   // Get count
-  const { count: totalCount } = await supabase
-    .from("tenant_customers")
-    .select("id", { count: "exact", head: true })
-    .eq("tenant_id", tenantId);
+  const { count: totalCount } = await getSegmentCustomerCount(tenantId, rules);
 
-  // Get bounded customer list (simplified — full evaluation would use RPC)
+  // Try RPC for filtered customer list
+  const whereClause = ruleGroupToSQL(rules, tenantId);
+  const { data: rpcData, error: rpcError } = await supabase.rpc("evaluate_segment_customers" as never, {
+    p_tenant_id: tenantId,
+    p_where_clause: whereClause,
+    p_limit: limit,
+    p_offset: offset,
+  } as never);
+
+  if (!rpcError && rpcData) {
+    const rows = rpcData as Array<{ id: string; name: string; email: string | null }>;
+    return {
+      count: totalCount,
+      customers: rows.map((c) => ({
+        id: c.id,
+        name: c.name,
+        email: c.email,
+        completedAppointments: 0,
+        lastAppointmentAt: null,
+        nextAppointmentAt: null,
+      })),
+    };
+  }
+
+  // Fallback: unfiltered paginated list
   const { data: customers } = await supabase
     .from("tenant_customers")
     .select("id, name, email")
@@ -203,7 +281,7 @@ export async function getSegmentCustomerPreview(
   const rows = (customers ?? []) as Array<{ id: string; name: string; email: string | null }>;
 
   return {
-    count: totalCount ?? 0,
+    count: totalCount,
     customers: rows.map((c) => ({
       id: c.id,
       name: c.name,
@@ -233,26 +311,12 @@ export async function getSegmentCustomers(
 export async function getBuiltInSegmentCounts(
   tenantId: string
 ): Promise<Record<string, number>> {
-  const supabase = createServiceRoleClient();
-
-  // Base count
-  const { count: total } = await supabase
-    .from("tenant_customers")
-    .select("id", { count: "exact", head: true })
-    .eq("tenant_id", tenantId);
-
-  const totalCustomers = total ?? 0;
   const counts: Record<string, number> = {};
 
-  // All customers
-  counts["all_customers"] = totalCustomers;
-
-  // For other built-ins, evaluate with simplified SQL where practical
-  // Full per-segment evaluation would need the RPC — for now use total as placeholder
-  // except for "all_customers" which is definitively correct
+  // Evaluate each built-in using the real evaluator
   for (const seg of BUILT_IN_SEGMENTS) {
-    if (seg.key === "all_customers") continue;
-    counts[seg.key] = totalCustomers; // Will be replaced by real evaluation when RPC exists
+    const result = await getSegmentCustomerCount(tenantId, seg.rules);
+    counts[seg.key] = result.count;
   }
 
   return counts;

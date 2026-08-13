@@ -14,7 +14,7 @@ const NUMERIC_FIELDS: SegmentField[] = [
   "total_appointments", "completed_appointments", "cancelled_appointments",
   "no_show_count", "days_since_last_appointment", "package_count",
   "loyalty_balance", "gift_card_count", "successful_referral_count",
-  "review_count", "average_rating", "lifetime_paid",
+  "review_count", "average_rating", "lifetime_paid", "net_paid_amount",
 ];
 
 const BOOLEAN_FIELDS: SegmentField[] = [
@@ -43,7 +43,7 @@ const DATE_OPERATORS: ComparisonOperator[] = [
 
 const ENTITY_OPERATORS: ComparisonOperator[] = ["in", "not_in", "equals"];
 
-const MONETARY_FIELDS: SegmentField[] = ["lifetime_paid"];
+const MONETARY_FIELDS: SegmentField[] = ["lifetime_paid", "net_paid_amount"];
 
 // ─── Validation ──────────────────────────────────────────────────────────────
 

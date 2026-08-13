@@ -33,6 +33,10 @@ import {
      isPackagePurchaseEvent,
      processPackagePurchaseOrderPaid,
 } from "@/features/payments/services/process-package-purchase-webhook";
+import {
+     isGiftCardPurchaseEvent,
+     processGiftCardPurchaseOrderPaid,
+} from "@/features/gift-cards/services/process-gift-card-webhook";
 
 const DEFAULT_BATCH_SIZE = 10;
 const MAX_BATCH_SIZE = 50;
@@ -112,6 +116,20 @@ async function dispatchWebhookEvent(
                }
           } else {
                // Non-paid package events: log and continue
+               return "processed" as const;
+          }
+     }
+
+     // Route gift card purchase events (metadata domain = gift_card_purchase)
+     if (isGiftCardPurchaseEvent(payload as Record<string, unknown>)) {
+          if (eventType === "order.paid") {
+               const result = await processGiftCardPurchaseOrderPaid(
+                    payload as Record<string, unknown>
+               );
+               if (result.status !== "not_gift_card_event") {
+                    return "processed" as const;
+               }
+          } else {
                return "processed" as const;
           }
      }

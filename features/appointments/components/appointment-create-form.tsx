@@ -30,6 +30,10 @@ import StepLabel from "@mui/material/StepLabel";
 import { useRouter } from "next/navigation";
 import { getAvailabilityPreview } from "@/features/availability/actions/get-availability-preview";
 import { createAppointmentAction } from "../actions/create-appointment-action";
+import { createAppointmentSeriesAction } from "@/features/recurring-appointments/actions/create-series-action";
+import { formatRecurrenceSummary } from "@/features/recurring-appointments/services/generate-occurrences";
+import RecurrenceEditor from "@/features/recurring-appointments/components/recurrence-editor";
+import type { RecurrenceRule } from "@/features/recurring-appointments/types/recurrence";
 import type { AvailabilitySlot } from "@/features/availability/types/availability";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -70,6 +74,16 @@ export default function AppointmentCreateForm({
     const [customerPhone, setCustomerPhone] = useState("");
     const [internalNotes, setInternalNotes] = useState("");
     const [customerNotes, setCustomerNotes] = useState("");
+
+    // Recurrence state
+    const [recurrenceEnabled, setRecurrenceEnabled] = useState(false);
+    const [recurrenceRule, setRecurrenceRule] = useState<Partial<RecurrenceRule>>({
+        type: "weekly",
+        interval: 1,
+        daysOfWeek: [],
+        occurrenceCount: 6,
+    });
+    const [recurrenceConflicts, setRecurrenceConflicts] = useState<string[]>([]);
 
     // Availability state
     const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
@@ -122,30 +136,74 @@ export default function AppointmentCreateForm({
 
         setSubmitting(true);
         setError("");
+        setRecurrenceConflicts([]);
 
-        const result = await createAppointmentAction(tenantSlug, {
-            serviceId,
-            locationId,
-            resourceId: selectedSlot.resourceId,
-            customerName: customerName.trim(),
-            customerEmail: customerEmail.trim() || null,
-            customerPhone: customerPhone.trim() || null,
-            localDate,
-            localStartTime: selectedSlot.localStartTime,
-            internalNotes: internalNotes.trim() || null,
-            customerNotes: customerNotes.trim() || null,
-        });
+        if (recurrenceEnabled) {
+            // Recurring series creation
+            const fullRule: RecurrenceRule = {
+                type: recurrenceRule.type ?? "weekly",
+                interval: recurrenceRule.interval ?? 1,
+                daysOfWeek: recurrenceRule.daysOfWeek,
+                dayOfMonth: recurrenceRule.dayOfMonth,
+                startsOn: localDate,
+                occurrenceCount: recurrenceRule.occurrenceCount,
+                endsOn: recurrenceRule.endsOn,
+                startsAtLocalTime: selectedSlot.localStartTime,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Will be overridden server-side
+            };
 
-        setSubmitting(false);
+            const result = await createAppointmentSeriesAction(tenantSlug, {
+                customerName: customerName.trim(),
+                customerEmail: customerEmail.trim() || undefined,
+                customerPhone: customerPhone.trim() || undefined,
+                serviceId,
+                locationId,
+                resourceId: selectedSlot.resourceId || undefined,
+                recurrence: fullRule,
+                durationMinutes: selectedSlot.durationMinutes,
+                price: parseFloat(selectedSlot.price),
+                currency: selectedSlot.currency,
+            });
 
-        if (!result.success) {
-            setError(result.error);
-            return;
+            setSubmitting(false);
+
+            if (!result.success) {
+                if (result.conflicts && result.conflicts.length > 0) {
+                    setRecurrenceConflicts(result.conflicts);
+                }
+                setError(result.message);
+                return;
+            }
+
+            startTransition(() => {
+                router.push(`/${tenantSlug}/appointment-series/${result.seriesId}`);
+            });
+        } else {
+            // Single appointment creation
+            const result = await createAppointmentAction(tenantSlug, {
+                serviceId,
+                locationId,
+                resourceId: selectedSlot.resourceId,
+                customerName: customerName.trim(),
+                customerEmail: customerEmail.trim() || null,
+                customerPhone: customerPhone.trim() || null,
+                localDate,
+                localStartTime: selectedSlot.localStartTime,
+                internalNotes: internalNotes.trim() || null,
+                customerNotes: customerNotes.trim() || null,
+            });
+
+            setSubmitting(false);
+
+            if (!result.success) {
+                setError(result.error);
+                return;
+            }
+
+            startTransition(() => {
+                router.push(`/${tenantSlug}/appointments/${result.data.id}`);
+            });
         }
-
-        startTransition(() => {
-            router.push(`/${tenantSlug}/appointments/${result.data.id}`);
-        });
     }
 
     // ─── Step Navigation ───────────────────────────────────────────────────────
@@ -351,6 +409,49 @@ export default function AppointmentCreateForm({
             {activeStep === 3 && selectedSlot && (
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                     <Typography variant="h6">Confirm Appointment</Typography>
+
+                    {/* Recurrence Editor */}
+                    <RecurrenceEditor
+                        enabled={recurrenceEnabled}
+                        onEnabledChange={setRecurrenceEnabled}
+                        rule={recurrenceRule}
+                        onRuleChange={setRecurrenceRule}
+                        timezone=""
+                    />
+
+                    {/* Recurrence preview */}
+                    {recurrenceEnabled && localDate && selectedSlot && (
+                        <Box sx={{ mt: 1, p: 1.5, bgcolor: "#f0f9ff", borderRadius: 1 }}>
+                            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 500 }}>
+                                {formatRecurrenceSummary({
+                                    type: recurrenceRule.type ?? "weekly",
+                                    interval: recurrenceRule.interval ?? 1,
+                                    daysOfWeek: recurrenceRule.daysOfWeek,
+                                    dayOfMonth: recurrenceRule.dayOfMonth,
+                                    startsOn: localDate,
+                                    startsAtLocalTime: selectedSlot.localStartTime,
+                                    timezone: "UTC",
+                                    occurrenceCount: recurrenceRule.occurrenceCount,
+                                    endsOn: recurrenceRule.endsOn,
+                                })}
+                            </Typography>
+                            <Typography sx={{ fontSize: "0.75rem", color: "#6b7280", mt: 0.5 }}>
+                                {recurrenceRule.occurrenceCount ?? 6} appointments will be created
+                            </Typography>
+                        </Box>
+                    )}
+
+                    {/* Conflict display */}
+                    {recurrenceConflicts.length > 0 && (
+                        <Alert severity="error" sx={{ mt: 1 }}>
+                            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, mb: 0.5 }}>
+                                {recurrenceConflicts.length} date(s) have scheduling conflicts:
+                            </Typography>
+                            {recurrenceConflicts.map((date) => (
+                                <Typography key={date} sx={{ fontSize: "0.75rem" }}>{date}</Typography>
+                            ))}
+                        </Alert>
+                    )}
                     <Box component="dl" sx={{ "& dt": { fontWeight: 600, mt: 1 }, "& dd": { ml: 0 } }}>
                         <dt>Service</dt>
                         <dd>{services.find((s) => s.id === serviceId)?.name}</dd>

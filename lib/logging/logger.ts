@@ -178,11 +178,11 @@ function log(
   const output = formatEntry(entry);
 
   if (level === "error") {
-    console.error(output);
+    console.error('Error LOG: ', output);
   } else if (level === "warn") {
-    console.warn(output);
+    console.warn('Warning LOG: ', output);
   } else {
-    console.log(output);
+    console.log('LOG: ', output);
   }
 }
 

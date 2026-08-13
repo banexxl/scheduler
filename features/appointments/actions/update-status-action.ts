@@ -9,6 +9,7 @@ import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
 import { appointmentStatusUpdateSchema } from "../schemas/appointment-schemas";
 import { updateAppointmentStatus } from "../services/update-appointment";
 import { syncRemindersAfterStatusChange } from "@/features/notifications/services/reminder-sync-service";
+import { attemptReferralQualification } from "@/features/referrals/services/qualify-referral";
 import type { Appointment, AppointmentStatus } from "../types/appointment";
 
 type ActionSuccess = { success: true; data: Appointment };
@@ -48,6 +49,19 @@ export async function updateAppointmentStatusAction(
       await syncRemindersAfterStatusChange(tenant.id, result.appointment);
     } catch {
       // Reminder sync failure must never block status transitions
+    }
+
+    // Referral qualification on completion (non-blocking)
+    if (result.appointment.status === "completed") {
+      try {
+        await attemptReferralQualification(
+          tenant.id,
+          result.appointment.id,
+          result.appointment.customerEmail
+        );
+      } catch {
+        // Referral failure must never block appointment completion
+      }
     }
 
     return { success: true, data: result.appointment };

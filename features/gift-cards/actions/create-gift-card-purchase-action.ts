@@ -97,17 +97,23 @@ export async function createGiftCardPurchaseAction(
   }
 
   // TODO: Create Polar checkout here using existing Polar client infrastructure
-  // For now, mark as pending and return (Polar integration requires runtime config)
-  await supabase
+  // The PolarAppointmentPaymentProvider pattern should be adapted for gift cards.
+  // For now, mark as pending (Polar integration requires provider config at runtime)
+  const { error: updateError } = await supabase
     .from("gift_card_purchases")
     .update({ status: "pending" })
     .eq("id", purchase.id);
+
+  if (updateError) {
+    await log.failure(updateError);
+    return { success: false, message: "Unable to update purchase status." };
+  }
 
   await log.success({ purchaseId: purchase.id, amount: product.amount, currency: product.currency });
 
   return {
     success: true,
     purchaseId: purchase.id,
-    checkoutUrl: null, // Will be populated when Polar checkout is created
+    checkoutUrl: null, // Will be populated when Polar checkout is created at runtime
   };
 }

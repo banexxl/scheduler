@@ -1589,3 +1589,31 @@ Moved application into release-candidate hardening phase.
 - Medium/Low documented
 
 See `docs/85-e2e-fixtures.md` and `docs/86-release-candidate-testing.md` for full details.
+
+### Milestone 15.12 — Customer Booking Experience 2.0
+
+Integrated gift card redemption, package credits, recurring appointments, and ICS calendar export into the public booking checkout.
+
+**Implemented:**
+- Gift card code validation + reservation in checkout (SHA-256 hash, tenant-scoped, 15-min expiry)
+- Package credit selection for authenticated customers (portal session identity)
+- Customer-friendly recurring appointment creation (daily/weekly/monthly, conflict detection, atomic series)
+- Enhanced confirmation with ICS calendar export (RFC 5545)
+- Payment step with multiple options (pay at business, online, package, gift card)
+- Dynamic step configuration (steps skipped when unnecessary)
+- Platform feature override enforcement (gift_cards, online_payments)
+
+**Security:**
+- Raw gift card codes never stored/logged
+- Customer identity server-authoritative (portal session cookie)
+- Package/gift-card balances server-authoritative
+- Concurrent redemption safe (reservation model + row locking)
+- Cross-tenant gift card attempts return generic error
+
+**Tests:**
+- 26 new unit tests (ICS generation, payment resolution logic)
+- Comprehensive E2E coverage (mobile viewports, branding isolation, security)
+- All 1328+ unit tests passing
+- Production build passing
+
+See `docs/109-customer-booking-experience-2.md` for full details.

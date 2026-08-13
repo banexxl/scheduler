@@ -149,7 +149,34 @@ RLS enforces tenant isolation via `tenant_id = auth.jwt()->>'tenant_id'`.
 
 ## Future Enhancements
 
-- `evaluate_segment_count` RPC for full SQL-level evaluation
-- `lifetime_paid` field with currency-aware join implementation
-- Segment-based campaign targeting (Milestone 15.7+)
 - Scheduled segment count caching for dashboard performance
+
+## Milestone 15.7 Closures
+
+### Monetary Segmentation (closed)
+
+The `lifetime_paid` placeholder has been replaced with real implementation:
+
+- **New field:** `net_paid_amount` (alias: `lifetime_paid` for backward compat)
+- **Source:** `appointment_payments` table joined through `appointments.customer_id`
+- **Formula:** `SUM(amount_paid - amount_refunded)` WHERE `status IN ('paid', 'partially_refunded', 'refunded')`
+- **Currency isolation:** Rule requires explicit `currency` parameter; filters `WHERE ap.currency = $currency`
+- **RSD and EUR never aggregated** — a rule for RSD only evaluates RSD payments
+- **Refunds reduce net paid** — `amount_refunded` subtracted from `amount_paid`
+- **Pending/failed payments excluded** — only settled statuses considered
+- **Gift card purchases** not double-counted — only appointment payment records used
+
+### Count Evaluation (closed)
+
+- `evaluate_segment_count` RPC created in migration 20260807000022
+- SECURITY DEFINER, service_role only
+- Executes: `SELECT COUNT(*) FROM tenant_customers tc WHERE tc.tenant_id = $1 AND ($where_clause)`
+- Server generates WHERE clause from validated rules — no client SQL
+- `evaluate_segment_customers` RPC for paginated preview (id, name, email)
+- `getBuiltInSegmentCounts()` now evaluates each built-in via the real evaluator
+
+### Campaign Targeting (closed)
+
+- Campaigns use exact same segment definitions (saved + built-in)
+- `getSegmentMatchingCustomerIds()` provides audience for campaign execution
+- Rules snapshotted at campaign execution time for history preservation

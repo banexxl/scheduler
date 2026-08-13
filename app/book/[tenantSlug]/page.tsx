@@ -1,36 +1,56 @@
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
 import { resolvePublicBookingContext } from "@/features/public-booking/services/public-tenant-resolver";
 import { getPublicBookableServices } from "@/features/public-booking/services/public-service-discovery";
-import { resolvePublishedTenantTheme } from "@/features/branding/services/resolve-tenant-theme";
-import { isFeatureEnabled } from "@/features/platform/services/feature-override-service";
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { resolvePublicSite } from "@/features/public-site/services/public-site-resolver";
+import { clientEnvironment } from "@/lib/environment/client";
 import PublicBookingFlow from "@/features/public-booking/components/public-booking-flow";
+import JsonLdScript from "@/features/public-site/components/json-ld-script";
+import { buildLocalBusinessJsonLd, buildFaqJsonLd } from "@/features/public-site/utils/structured-data";
+import {
+  HeroSection,
+  ServicesSection,
+  AboutSection,
+  StaffSection,
+  GallerySection,
+  ReviewsSection,
+  LocationsSection,
+  FaqSection,
+  GiftCardsSection,
+  ContactSection,
+  PublicSiteNav,
+  PublicSiteFooter,
+} from "@/features/public-site/components/public-site-sections";
 
 export async function generateMetadata({ params }: { params: Promise<{ tenantSlug: string }> }) {
   const { tenantSlug } = await params;
-  const context = await resolvePublicBookingContext(tenantSlug);
-  if (!context) return { title: "Book an Appointment" };
+  const siteResult = await resolvePublicSite(tenantSlug);
+
+  if (siteResult.status !== "ok" || !siteResult.data) {
+    return { title: "Book an Appointment" };
+  }
+
+  const { tenant, config } = siteResult.data;
+  const title = config.seo.metaTitle || `${tenant.name} — Book Online`;
+  const description = config.seo.metaDescription || tenant.description || `Book an appointment with ${tenant.name}`;
+
   return {
-    title: context.settings.bookingPageTitle ?? `Book with ${context.tenant.name}`,
-    description: context.settings.bookingPageDescription ?? `Book an appointment with ${context.tenant.name}`,
+    title,
+    description,
     openGraph: {
-      title: context.settings.bookingPageTitle ?? `Book with ${context.tenant.name}`,
-      description: context.settings.bookingPageDescription ?? `Schedule your visit`,
+      title,
+      description,
       type: "website",
     },
   };
 }
 
 /**
- * Public Booking Storefront + Wizard — Milestone 15.12.
+ * Public Booking Storefront — Milestones 15.12, 15.13.
  *
- * Combines a polished business landing (hero, services, CTA)
- * with the existing multi-step booking wizard below.
- * Mobile-first, branded, accessible.
+ * Renders the tenant public website using published site config.
+ * Sections are driven by config ordering and enabled state.
+ * Falls back to sensible defaults when no site config is published.
  */
 export default async function PublicBookingPage({
   params,
@@ -39,8 +59,9 @@ export default async function PublicBookingPage({
 }) {
   const { tenantSlug } = await params;
 
-  const context = await resolvePublicBookingContext(tenantSlug);
-  if (!context) {
+  // Resolve booking context (for the wizard)
+  const bookingContext = await resolvePublicBookingContext(tenantSlug);
+  if (!bookingContext) {
     return (
       <Box sx={{ minHeight: "100vh", bgcolor: "#fafafa", display: "flex", alignItems: "center", justifyContent: "center", p: 3 }}>
         <Box sx={{ p: 4, maxWidth: 420, textAlign: "center", bgcolor: "#fff", borderRadius: 3, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
@@ -53,160 +74,108 @@ export default async function PublicBookingPage({
     );
   }
 
-  const { tenant, settings } = context;
-  const theme = await resolvePublishedTenantTheme(tenant.id);
+  const { tenant: bookingTenant, settings } = bookingContext;
 
-  // Load services
-  let services;
+  // Resolve public site data (config, services, staff, reviews, gallery, locations)
+  const siteResult = await resolvePublicSite(tenantSlug);
+
+  // Load bookable services for the wizard
+  let bookableServices: Awaited<ReturnType<typeof getPublicBookableServices>>;
   try {
-    services = await getPublicBookableServices(tenant.id);
+    bookableServices = await getPublicBookableServices(bookingTenant.id);
   } catch {
+    bookableServices = [];
+  }
+
+  // Use site data if available, otherwise render minimal fallback
+  const site = siteResult.data;
+  if (!site) {
+    // Minimal fallback (no site config published yet)
     return (
-      <Box sx={{ minHeight: "100vh", bgcolor: "#fafafa", display: "flex", alignItems: "center", justifyContent: "center", p: 3 }}>
-        <Box sx={{ p: 4, maxWidth: 420, textAlign: "center", bgcolor: "#fff", borderRadius: 3, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-          <Typography variant="h6" gutterBottom>Something went wrong</Typography>
-          <Typography sx={{ fontSize: "0.875rem", color: "#6b7280" }}>Unable to load booking information.</Typography>
+      <Box sx={{ minHeight: "100vh", bgcolor: "#fafafa" }}>
+        <Box sx={{ bgcolor: "#2563eb", color: "#fff", py: 5, px: 3, textAlign: "center" }}>
+          <Typography component="h1" sx={{ fontSize: "1.75rem", fontWeight: 700, mb: 1 }}>{bookingTenant.name}</Typography>
+          {bookingTenant.description && <Typography sx={{ opacity: 0.9 }}>{bookingTenant.description}</Typography>}
+        </Box>
+        <Box id="booking" sx={{ maxWidth: 600, mx: "auto", px: 2, py: 4 }}>
+          <PublicBookingFlow
+            tenantSlug={tenantSlug}
+            tenant={bookingTenant}
+            timeZone={bookingTenant.defaultTimeZone}
+            settings={settings}
+            services={bookableServices}
+            giftCardsEnabled={false}
+          />
         </Box>
       </Box>
     );
   }
 
-  if (services.length === 0) {
-    return (
-      <Box sx={{ minHeight: "100vh", bgcolor: "#fafafa", display: "flex", alignItems: "center", justifyContent: "center", p: 3 }}>
-        <Box sx={{ p: 4, maxWidth: 420, textAlign: "center", bgcolor: "#fff", borderRadius: 3, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-          <Typography variant="h6" gutterBottom>{tenant.name}</Typography>
-          <Typography sx={{ fontSize: "0.875rem", color: "#6b7280" }}>No services are currently available for booking.</Typography>
-        </Box>
-      </Box>
-    );
-  }
+  const { tenant, theme, config, services, locations, staff, reviews, gallery, features } = site;
+  const supabaseUrl = clientEnvironment.supabaseUrl;
 
-  // Check feature availability for gift cards
-  const giftCardsEnabled = await isFeatureEnabled(tenant.id, "gift_cards");
-
-  // Load review summary
-  const supabase = createServiceRoleClient();
-  const { count: reviewCount } = await supabase
-    .from("customer_reviews")
-    .select("id", { count: "exact", head: true })
-    .eq("tenant_id", tenant.id)
-    .eq("status", "published");
-
-  const { data: avgRatingRow } = await supabase
-    .from("customer_reviews")
-    .select("rating")
-    .eq("tenant_id", tenant.id)
-    .eq("status", "published")
-    .limit(100);
-
-  const avgRating = avgRatingRow && avgRatingRow.length > 0
-    ? Math.round((avgRatingRow.reduce((sum, r) => sum + (r as { rating: number }).rating, 0) / avgRatingRow.length) * 10) / 10
-    : null;
+  // Build section renderer map
+  const sectionRenderers: Record<string, () => React.ReactNode> = {
+    services: () => <ServicesSection config={config} services={services} tenantSlug={tenantSlug} theme={theme} />,
+    about: () => <AboutSection config={config} />,
+    staff: () => <StaffSection staff={staff} tenantSlug={tenantSlug} theme={theme} />,
+    gallery: () => <GallerySection gallery={gallery} supabaseUrl={supabaseUrl} />,
+    reviews: () => <ReviewsSection reviews={reviews} />,
+    locations: () => <LocationsSection locations={locations} tenantSlug={tenantSlug} theme={theme} />,
+    gift_cards: () => <GiftCardsSection tenantSlug={tenantSlug} theme={theme} enabled={features.giftCardsEnabled} />,
+    faq: () => <FaqSection faq={config.faq} />,
+    contact: () => <ContactSection tenant={tenant} locations={locations} socialLinks={tenant.socialLinks} />,
+  };
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#fafafa" }}>
-      {/* Hero Section */}
-      <Box
-        sx={{
-          bgcolor: theme.primaryColor,
-          color: "#fff",
-          py: { xs: 4, md: 6 },
-          px: 3,
-          textAlign: "center",
-        }}
-      >
-        <Typography
-          component="h1"
-          sx={{ fontSize: { xs: "1.5rem", md: "2rem" }, fontWeight: 700, mb: 1 }}
-        >
-          {tenant.name}
-        </Typography>
-        {tenant.description && (
-          <Typography sx={{ fontSize: { xs: "0.875rem", md: "1rem" }, opacity: 0.9, maxWidth: 600, mx: "auto", mb: 2 }}>
-            {tenant.description}
-          </Typography>
-        )}
-        {avgRating !== null && (
-          <Typography sx={{ fontSize: "0.8125rem", opacity: 0.85 }}>
-            ★ {avgRating} ({reviewCount} review{(reviewCount ?? 0) !== 1 ? "s" : ""})
-          </Typography>
-        )}
-        <Button
-          href="#booking"
-          variant="contained"
-          size="large"
-          sx={{
-            mt: 2,
-            bgcolor: "#fff",
-            color: theme.primaryColor,
-            fontWeight: 700,
-            "&:hover": { bgcolor: "#f0f0f0" },
-            borderRadius: `${theme.borderRadius}px`,
-          }}
-        >
-          Book Now
-        </Button>
-      </Box>
+    <Box sx={{ minHeight: "100vh", bgcolor: theme.backgroundColor }}>
+      {/* Navigation */}
+      <PublicSiteNav
+        tenant={tenant}
+        sections={config.sections}
+        theme={theme}
+        tenantSlug={tenantSlug}
+        bookingEnabled={features.publicBookingEnabled}
+      />
 
-      {/* Services Preview */}
-      <Box sx={{ maxWidth: 900, mx: "auto", px: 2, py: 4 }}>
-        <Typography component="h2" sx={{ fontSize: "1.125rem", fontWeight: 700, mb: 2, textAlign: "center" }}>
-          Our Services
-        </Typography>
-        <Grid container spacing={1.5}>
-          {services.slice(0, 6).map((service) => (
-            <Grid key={service.id} size={{ xs: 12, sm: 6 }}>
-              <Box sx={{ p: 2, bgcolor: "#fff", borderRadius: 2, border: "1px solid #e5e7eb" }}>
-                <Typography sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{service.name}</Typography>
-                <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-                  {settings.showServiceDuration && (
-                    <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>{service.durationMinutes} min</Typography>
-                  )}
-                  {settings.showServicePrices && Number(service.price) > 0 && (
-                    <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>
-                      {service.price} {service.currency}
-                    </Typography>
-                  )}
-                </Stack>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-        {services.length > 6 && (
-          <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af", textAlign: "center", mt: 1 }}>
-            +{services.length - 6} more services
-          </Typography>
-        )}
-      </Box>
+      {/* Hero */}
+      <HeroSection tenant={tenant} config={config} theme={theme} />
 
-      {/* Gift Cards CTA */}
-      {giftCardsEnabled && (
-        <Box sx={{ textAlign: "center", py: 2 }}>
-          <Button href={`/book/${tenantSlug}/gift-cards`} variant="outlined" size="small" sx={{ borderRadius: `${theme.borderRadius}px` }}>
-            🎁 Buy a Gift Card
-          </Button>
+      {/* Dynamic sections in config order */}
+      {config.sections
+        .filter(section => section.enabled)
+        .map(section => {
+          const renderer = sectionRenderers[section.type];
+          if (!renderer) return null;
+          return <Box key={section.type}>{renderer()}</Box>;
+        })}
+
+      {/* Booking Wizard */}
+      {features.publicBookingEnabled && bookableServices.length > 0 && (
+        <Box id="booking" sx={{ maxWidth: 600, mx: "auto", px: 2, py: 5 }}>
+          <Typography component="h2" sx={{ fontSize: "1.25rem", fontWeight: 700, mb: 3, textAlign: "center" }}>
+            Book an Appointment
+          </Typography>
+          <PublicBookingFlow
+            tenantSlug={tenantSlug}
+            tenant={bookingTenant}
+            timeZone={bookingTenant.defaultTimeZone}
+            settings={settings}
+            services={bookableServices}
+            giftCardsEnabled={features.giftCardsEnabled}
+          />
         </Box>
       )}
 
-      {/* Booking Wizard */}
-      <Box id="booking" sx={{ maxWidth: 600, mx: "auto", px: 2, py: 4 }}>
-        <PublicBookingFlow
-          tenantSlug={tenantSlug}
-          tenant={tenant}
-          timeZone={tenant.defaultTimeZone}
-          settings={settings}
-          services={services}
-          giftCardsEnabled={giftCardsEnabled}
-        />
-      </Box>
-
       {/* Footer */}
-      <Box sx={{ textAlign: "center", py: 3, borderTop: "1px solid #e5e7eb" }}>
-        <Typography sx={{ fontSize: "0.6875rem", color: "#9ca3af" }}>
-          Powered by get-slot.app
-        </Typography>
-      </Box>
+      <PublicSiteFooter tenant={tenant} />
+
+      {/* JSON-LD Structured Data */}
+      <JsonLdScript data={buildLocalBusinessJsonLd({ tenant, locations, reviews, tenantSlug })} />
+      {config.faq.length > 0 && (() => {
+        const faqLd = buildFaqJsonLd(config.faq);
+        return faqLd ? <JsonLdScript data={faqLd} /> : null;
+      })()}
     </Box>
   );
 }

@@ -4815,6 +4815,150 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_processor_runs: {
+        Row: {
+          claimed_count: number
+          completed_at: string | null
+          created_at: string
+          duration_ms: number | null
+          error_code: string | null
+          failed_count: number
+          id: string
+          metadata: Json
+          processed_count: number
+          processor_name: string
+          started_at: string
+          status: string
+          tenant_id: string | null
+        }
+        Insert: {
+          claimed_count?: number
+          completed_at?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          failed_count?: number
+          id?: string
+          metadata?: Json
+          processed_count?: number
+          processor_name: string
+          started_at?: string
+          status?: string
+          tenant_id?: string | null
+        }
+        Update: {
+          claimed_count?: number
+          completed_at?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          failed_count?: number
+          id?: string
+          metadata?: Json
+          processed_count?: number
+          processor_name?: string
+          started_at?: string
+          status?: string
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_processor_runs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_support_sessions: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          expires_at: string
+          id: string
+          platform_user_id: string
+          reason: string
+          started_at: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          expires_at?: string
+          id?: string
+          platform_user_id: string
+          reason: string
+          started_at?: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          expires_at?: string
+          id?: string
+          platform_user_id?: string
+          reason?: string
+          started_at?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_support_sessions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_tenant_feature_overrides: {
+        Row: {
+          created_at: string
+          created_by: string
+          enabled: boolean
+          expires_at: string | null
+          feature: string
+          id: string
+          reason: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          enabled?: boolean
+          expires_at?: string | null
+          feature: string
+          id?: string
+          reason: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          enabled?: boolean
+          expires_at?: string | null
+          feature?: string
+          id?: string
+          reason?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_tenant_feature_overrides_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_booking_requests: {
         Row: {
           appointment_id: string | null
@@ -6829,6 +6973,53 @@ export type Database = {
           },
         ]
       }
+      tenant_public_site_settings: {
+        Row: {
+          created_at: string
+          draft_config: Json
+          draft_version: number
+          id: string
+          published_at: string | null
+          published_by: string | null
+          published_config: Json
+          published_version: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          draft_config?: Json
+          draft_version?: number
+          id?: string
+          published_at?: string | null
+          published_by?: string | null
+          published_config?: Json
+          published_version?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          draft_config?: Json
+          draft_version?: number
+          id?: string
+          published_at?: string | null
+          published_by?: string | null
+          published_config?: Json
+          published_version?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_public_site_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_referral_programs: {
         Row: {
           attribution_window_days: number
@@ -7890,6 +8081,28 @@ export type Database = {
         }
         Returns: Json
       }
+      get_public_gallery: {
+        Args: { p_limit?: number; p_tenant_slug: string }
+        Returns: Json
+      }
+      get_public_location_hours: {
+        Args: { p_location_id: string; p_tenant_slug: string }
+        Returns: Json
+      }
+      get_public_locations: { Args: { p_tenant_slug: string }; Returns: Json }
+      get_public_reviews: {
+        Args: { p_limit?: number; p_tenant_slug: string }
+        Returns: Json
+      }
+      get_public_services: {
+        Args: { p_limit?: number; p_tenant_slug: string }
+        Returns: Json
+      }
+      get_public_staff: { Args: { p_tenant_slug: string }; Returns: Json }
+      get_published_site_config: {
+        Args: { p_tenant_slug: string }
+        Returns: Json
+      }
       get_published_tenant_branding: {
         Args: { p_tenant_slug: string }
         Returns: Json
@@ -8023,6 +8236,14 @@ export type Database = {
           p_worker_id: string
         }
         Returns: undefined
+      }
+      publish_site_config: {
+        Args: {
+          p_actor_user_id: string
+          p_expected_draft_version: number
+          p_tenant_id: string
+        }
+        Returns: Json
       }
       publish_tenant_branding: {
         Args: {

@@ -5054,6 +5054,47 @@ export type Database = {
           },
         ]
       }
+      saved_analytics_reports: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          filters: Json
+          id: string
+          name: string
+          report_type: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          filters?: Json
+          id?: string
+          name: string
+          report_type: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          filters?: Json
+          id?: string
+          name?: string
+          report_type?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_analytics_reports_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       server_logs: {
         Row: {
           action: string
@@ -7645,6 +7686,14 @@ export type Database = {
         Args: { p_tenant_id: string }
         Returns: string
       }
+      get_customer_retention_analytics: {
+        Args: {
+          p_range_end: string
+          p_range_start: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
       get_customers_with_upcoming_flag: {
         Args: { p_customer_ids: string[]; p_tenant_id: string }
         Returns: {
@@ -7660,6 +7709,30 @@ export type Database = {
           p_range_end: string
           p_range_start: string
           p_resource_id?: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
+      get_gift_card_analytics: {
+        Args: {
+          p_range_end: string
+          p_range_start: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
+      get_marketing_analytics_summary: {
+        Args: {
+          p_range_end: string
+          p_range_start: string
+          p_tenant_id: string
+        }
+        Returns: Json
+      }
+      get_package_analytics: {
+        Args: {
+          p_range_end: string
+          p_range_start: string
           p_tenant_id: string
         }
         Returns: Json

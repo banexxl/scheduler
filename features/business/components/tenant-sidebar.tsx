@@ -106,6 +106,7 @@ function getNavGroups(slug: string): NavGroup[] {
     {
       label: "Manage",
       items: [
+        { label: "Analytics", href: `/${slug}/analytics`, icon: <DashboardIcon fontSize="small" />, matchPrefix: `/${slug}/analytics` },
         { label: "Notifications", href: `/${slug}/notifications`, icon: <NotificationsIcon fontSize="small" />, matchPrefix: `/${slug}/notifications` },
         { label: "Health", href: `/${slug}/health`, icon: <HealthAndSafetyIcon fontSize="small" />, matchPrefix: `/${slug}/health` },
         { label: "Team", href: `/${slug}/team`, icon: <GroupIcon fontSize="small" />, matchPrefix: `/${slug}/team` },

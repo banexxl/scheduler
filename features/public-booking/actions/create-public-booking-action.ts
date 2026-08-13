@@ -61,6 +61,14 @@ type PublicBookingInput = {
     idempotencyKey: string;
     reviewedPrice?: string | null;
     reviewedDuration?: number | null;
+    /** Payment method selected by customer */
+    paymentMethod?: "pay_at_business" | "online" | "package_credit" | "gift_card";
+    /** Gift card reservation ID (from validateGiftCardAction) */
+    giftCardReservationId?: string | null;
+    /** Package credit: customerPackageId to use */
+    packageCustomerPackageId?: string | null;
+    /** Package credit: service ID for credit validation */
+    packageServiceId?: string | null;
 };
 
 // ─── Main Action ─────────────────────────────────────────────────────────────
@@ -219,6 +227,16 @@ export async function createPublicBookingAction(
                 p_status: isConflict ? "conflict" : "failed",
             });
 
+            // Release gift card reservation on failure
+            if (input.giftCardReservationId) {
+                try {
+                    const { releaseGiftCardReservation } = await import("@/features/gift-cards/services/gift-card-redemption-service");
+                    await releaseGiftCardReservation(tenantId, input.giftCardReservationId);
+                } catch {
+                    // Release failure — reservation will expire via expiry mechanism
+                }
+            }
+
             if (isConflict) {
                 return {
                     success: false,
@@ -272,6 +290,75 @@ export async function createPublicBookingAction(
         const zonedStart = toZonedTime(new Date(appt.startsAt), timeZone);
         const zonedEnd = toZonedTime(new Date(appt.endsAt), timeZone);
 
+        // 12a. Confirm gift card reservation (after appointment created successfully)
+        let giftCardAmountApplied: number | undefined;
+        let giftCardCodePrefix: string | undefined;
+        if (input.paymentMethod === "gift_card" && input.giftCardReservationId) {
+            try {
+                const { confirmGiftCardReservation } = await import("@/features/gift-cards/services/gift-card-redemption-service");
+                const gcResult = await confirmGiftCardReservation(tenantId, input.giftCardReservationId, null);
+                if (gcResult.success) {
+                    // Load reservation details for confirmation display
+                    const { data: resData } = await supabase
+                        .from("gift_card_reservations" as never)
+                        .select("amount, gift_card_id" as never)
+                        .eq("id" as never, input.giftCardReservationId)
+                        .single();
+                    if (resData) {
+                        const resRow = resData as unknown as { amount: number; gift_card_id: string };
+                        giftCardAmountApplied = resRow.amount;
+                        // Get code prefix
+                        const { data: cardData } = await supabase
+                            .from("gift_cards" as never)
+                            .select("code_prefix" as never)
+                            .eq("id" as never, resRow.gift_card_id)
+                            .single();
+                        if (cardData) {
+                            giftCardCodePrefix = (cardData as unknown as { code_prefix: string }).code_prefix;
+                        }
+                    }
+                }
+            } catch {
+                // Gift card confirmation failure should not block booking confirmation
+                // Reservation will expire and be handled by cleanup
+            }
+        }
+
+        // 12b. Reserve package credits (after appointment created successfully)
+        let packageNameUsed: string | undefined;
+        if (input.paymentMethod === "package_credit" && input.packageCustomerPackageId) {
+            try {
+                const { reservePackageCredits } = await import("@/features/packages/services/package-credit-service");
+                const pkgResult = await reservePackageCredits({
+                    tenantId,
+                    customerPackageId: input.packageCustomerPackageId,
+                    appointmentId: createResult.appointment.id,
+                    serviceId: validated.serviceId,
+                    creditsRequired: 1, // Default: 1 credit per appointment
+                });
+                if (pkgResult.success) {
+                    // Load package name for display
+                    const { data: cpData } = await supabase
+                        .from("customer_packages" as never)
+                        .select("package_id" as never)
+                        .eq("id" as never, input.packageCustomerPackageId)
+                        .single();
+                    if (cpData) {
+                        const { data: pkgData } = await supabase
+                            .from("service_packages" as never)
+                            .select("name" as never)
+                            .eq("id" as never, (cpData as unknown as { package_id: string }).package_id)
+                            .single();
+                        if (pkgData) {
+                            packageNameUsed = (pkgData as unknown as { name: string }).name;
+                        }
+                    }
+                }
+            } catch {
+                // Package credit failure should not block booking confirmation
+            }
+        }
+
         const confirmation: PublicBookingConfirmation = {
             appointmentNumber: appt.appointmentNumber,
             tenantName: tenant.name,
@@ -289,6 +376,13 @@ export async function createPublicBookingAction(
             confirmationMessage: settings.confirmationMessage,
             emailConfirmationEnqueued,
             remindersScheduled,
+            paymentMethod: (input.paymentMethod as PublicBookingConfirmation["paymentMethod"]) ?? "pay_at_business",
+            giftCardAmountApplied,
+            giftCardCodePrefix,
+            packageNameUsed,
+            startsAtUtc: appt.startsAt,
+            endsAtUtc: appt.endsAt,
+            locationAddress: appt.locationNameSnapshot,
         };
 
         return { success: true, data: confirmation };
@@ -372,6 +466,10 @@ async function buildConfirmationFromAppointment(
             confirmationMessage,
             emailConfirmationEnqueued: true, // Already completed — email was enqueued on first attempt
             remindersScheduled: true, // Already completed — reminders were synced on first attempt
+            paymentMethod: "pay_at_business",
+            startsAtUtc: row.starts_at as string,
+            endsAtUtc: row.ends_at as string,
+            locationAddress: row.location_name_snapshot as string,
         },
     };
 }

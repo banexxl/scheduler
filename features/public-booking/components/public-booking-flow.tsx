@@ -1,24 +1,31 @@
 "use client";
 
 /**
- * Public booking multi-step flow — Milestones 6.11, 8.5.
+ * Public booking multi-step flow — Milestones 6.11, 8.5, 15.12.
  *
  * Steps:
  * 1. Service selection
  * 2. Location selection
  * 3. Date & time selection
- * 4. Customer details
- * 5. Review
- * 6. Confirmation (after successful creation)
+ * 4. Recurrence (optional — skipped if not available)
+ * 5. Customer details
+ * 6. Payment / credits / gift card (conditional — skipped for free/recurring)
+ * 7. Review
+ * 8. Confirmation (after successful creation)
+ *
+ * Recurrence restriction (Milestone 15.1 policies):
+ * - Recurring series are pay-at-business ONLY
+ * - Online payment, package credits, and gift cards are disabled for series
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import type {
   PublicBookableService,
   PublicBookingSettings,
   PublicBookingTenant,
   PublicBookingConfirmation,
   PublicAvailabilityOption,
+  PublicPaymentMethod,
 } from "../types/public-booking";
 import PublicBookingShell from "./public-booking-shell";
 import PublicBookingConfirmationView from "./public-booking-confirmation";
@@ -27,6 +34,11 @@ import PublicDateTimeStep from "./public-date-time-step";
 import PublicLocationStep from "./public-location-step";
 import PublicCustomerStep from "./public-customer-step";
 import PublicBookingReview from "./public-booking-review";
+import PublicPaymentStep from "./public-payment-step";
+import PublicRecurrenceStep from "./public-recurrence-step";
+import type { GiftCardReservation, PackageOption, PaymentMethod } from "./public-payment-step";
+import type { PublicRecurrenceSelection } from "./public-recurrence-step";
+import { getEligiblePackagesAction } from "../actions/get-eligible-packages-action";
 
 type Props = {
   tenantSlug: string;
@@ -34,9 +46,17 @@ type Props = {
   timeZone: string;
   settings: PublicBookingSettings;
   services: PublicBookableService[];
+  /** Whether gift cards are enabled for this tenant (effective state) */
+  giftCardsEnabled?: boolean;
+  /** Whether online payment is enabled and required for selected service */
+  onlinePaymentEnabled?: boolean;
+  /** Whether payment is required for booking */
+  paymentRequired?: boolean;
+  /** Eligible package options for authenticated customer */
+  packageOptions?: PackageOption[];
+  /** Whether recurring appointments are available */
+  recurringEnabled?: boolean;
 };
-
-const STEP_LABELS = ["Service", "Location", "Date & Time", "Details", "Review"];
 
 export default function PublicBookingFlow({
   tenantSlug,
@@ -44,6 +64,11 @@ export default function PublicBookingFlow({
   timeZone,
   settings,
   services,
+  giftCardsEnabled = false,
+  onlinePaymentEnabled = false,
+  paymentRequired = false,
+  packageOptions = [],
+  recurringEnabled = true,
 }: Props) {
   const [step, setStep] = useState(0);
 
@@ -55,14 +80,101 @@ export default function PublicBookingFlow({
   const [selectedOption, setSelectedOption] = useState<PublicAvailabilityOption | null>(null);
   const [selectedResourceForSlot, setSelectedResourceForSlot] = useState<string | null>(null);
 
+  // Recurrence
+  const [recurrenceSelection, setRecurrenceSelection] = useState<PublicRecurrenceSelection | null>(null);
+
   // Customer
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
 
+  // Payment
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pay_at_business");
+  const [giftCardReservation, setGiftCardReservation] = useState<GiftCardReservation | null>(null);
+  const [selectedPackageOption, setSelectedPackageOption] = useState<PackageOption | null>(null);
+  const [dynamicPackageOptions, setDynamicPackageOptions] = useState<PackageOption[]>([]);
+
   // Result
   const [confirmation, setConfirmation] = useState<PublicBookingConfirmation | null>(null);
+
+  // ─── Dynamic Package Loading ─────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!selectedService) {
+      setDynamicPackageOptions([]);
+      return;
+    }
+
+    let cancelled = false;
+    getEligiblePackagesAction(tenantSlug, selectedService.id).then((result) => {
+      if (cancelled) return;
+      if (result.success) {
+        setDynamicPackageOptions(result.packages);
+      } else {
+        setDynamicPackageOptions([]);
+      }
+    }).catch(() => {
+      if (!cancelled) setDynamicPackageOptions([]);
+    });
+
+    return () => { cancelled = true; };
+  }, [tenantSlug, selectedService]);
+
+  const effectivePackageOptions = useMemo(
+    () => dynamicPackageOptions.length > 0 ? dynamicPackageOptions : packageOptions,
+    [dynamicPackageOptions, packageOptions]
+  );
+
+  // ─── Conditional Steps ───────────────────────────────────────────────────
+
+  const isRecurring = recurrenceSelection?.enabled === true;
+
+  // Payment step: shown if service has price AND payment options exist AND not recurring
+  const showPaymentStep = useMemo(() => {
+    if (isRecurring) return false; // Recurring = pay at business only
+    if (!selectedService) return false;
+    const price = parseFloat(selectedService.price);
+    if (price <= 0) return false;
+    return giftCardsEnabled || onlinePaymentEnabled || paymentRequired || effectivePackageOptions.length > 0;
+  }, [selectedService, giftCardsEnabled, onlinePaymentEnabled, paymentRequired, effectivePackageOptions, isRecurring]);
+
+  // ─── Step Configuration ──────────────────────────────────────────────────
+
+  // Build step sequence dynamically
+  const stepConfig = useMemo(() => {
+    const steps: Array<{ key: string; label: string }> = [
+      { key: "service", label: "Service" },
+      { key: "location", label: "Location" },
+      { key: "datetime", label: "Date & Time" },
+    ];
+
+    if (recurringEnabled) {
+      steps.push({ key: "recurrence", label: "Repeat" });
+    }
+
+    steps.push({ key: "customer", label: "Details" });
+
+    if (showPaymentStep) {
+      steps.push({ key: "payment", label: "Payment" });
+    }
+
+    steps.push({ key: "review", label: "Review" });
+
+    return steps;
+  }, [recurringEnabled, showPaymentStep]);
+
+  const stepLabels = useMemo(() => stepConfig.map((s) => s.label), [stepConfig]);
+
+  // Resolve step indices
+  const getStepIndex = useCallback((key: string) => {
+    return stepConfig.findIndex((s) => s.key === key);
+  }, [stepConfig]);
+
+  const recurrenceStepIndex = getStepIndex("recurrence");
+  const customerStepIndex = getStepIndex("customer");
+  const paymentStepIndex = getStepIndex("payment");
+  const reviewStepIndex = getStepIndex("review");
 
   // ─── State Reset Rules ───────────────────────────────────────────────────
 
@@ -73,6 +185,10 @@ export default function PublicBookingFlow({
     setSelectedDate(null);
     setSelectedOption(null);
     setSelectedResourceForSlot(null);
+    setRecurrenceSelection(null);
+    setPaymentMethod("pay_at_business");
+    setGiftCardReservation(null);
+    setSelectedPackageOption(null);
     setStep(1);
   }, []);
 
@@ -82,30 +198,59 @@ export default function PublicBookingFlow({
     setSelectedDate(null);
     setSelectedOption(null);
     setSelectedResourceForSlot(null);
-    setStep(2); // Skip resource step if not allowed, go to date/time
+    setRecurrenceSelection(null);
+    setStep(2);
   }, []);
 
   const handleDateTimeSelect = useCallback((option: PublicAvailabilityOption, resourceId: string) => {
     setSelectedOption(option);
     setSelectedResourceForSlot(resourceId);
-    setStep(3);
-  }, []);
+    // Next step: recurrence (if enabled) or customer details
+    if (recurringEnabled) {
+      setStep(getStepIndex("recurrence"));
+    } else {
+      setStep(getStepIndex("customer"));
+    }
+  }, [recurringEnabled, getStepIndex]);
+
+  const handleRecurrenceSelect = useCallback((selection: PublicRecurrenceSelection) => {
+    setRecurrenceSelection(selection);
+    // If recurring, force pay_at_business and clear gift card/package
+    if (selection.enabled) {
+      setPaymentMethod("pay_at_business");
+      setGiftCardReservation(null);
+      setSelectedPackageOption(null);
+    }
+    setStep(getStepIndex("customer"));
+  }, [getStepIndex]);
 
   const handleCustomerSubmit = useCallback(() => {
-    setStep(4);
-  }, []);
+    const nextKey = showPaymentStep ? "payment" : "review";
+    setStep(getStepIndex(nextKey));
+  }, [showPaymentStep, getStepIndex]);
+
+  const handlePaymentSelect = useCallback((
+    method: PaymentMethod,
+    giftCard?: GiftCardReservation,
+    packageOption?: PackageOption
+  ) => {
+    setPaymentMethod(method);
+    setGiftCardReservation(giftCard ?? null);
+    setSelectedPackageOption(packageOption ?? null);
+    setStep(getStepIndex("review"));
+  }, [getStepIndex]);
 
   const handleConfirmation = useCallback((conf: PublicBookingConfirmation) => {
     setConfirmation(conf);
-    setStep(5);
-  }, []);
+    setStep(stepConfig.length); // Beyond last step = confirmation
+  }, [stepConfig.length]);
 
   const handleBack = useCallback(() => {
     setStep((s) => Math.max(0, s - 1));
   }, []);
 
   // Progress
-  const totalSteps = STEP_LABELS.length;
+  const totalSteps = stepLabels.length;
 
   // ─── Render ──────────────────────────────────────────────────────────────
 
@@ -134,7 +279,7 @@ export default function PublicBookingFlow({
       totalSteps={totalSteps}
       isConfirmed={false}
     >
-      {/* Steps */}
+      {/* Service */}
       {step === 0 && (
         <PublicServiceStep
           services={services}
@@ -144,6 +289,7 @@ export default function PublicBookingFlow({
         />
       )}
 
+      {/* Location */}
       {step === 1 && selectedService && (
         <PublicLocationStep
           tenantSlug={tenantSlug}
@@ -154,6 +300,7 @@ export default function PublicBookingFlow({
         />
       )}
 
+      {/* Date & Time */}
       {step === 2 && selectedService && selectedLocationId && (
         <PublicDateTimeStep
           tenantSlug={tenantSlug}
@@ -168,7 +315,20 @@ export default function PublicBookingFlow({
         />
       )}
 
-      {step === 3 && (
+      {/* Recurrence */}
+      {step === recurrenceStepIndex && selectedOption && selectedService && (
+        <PublicRecurrenceStep
+          selectedDate={selectedOption.startsAt.slice(0, 10)}
+          selectedTime={selectedOption.localStartTime}
+          timeZone={timeZone}
+          durationMinutes={selectedService.durationMinutes}
+          onSelect={handleRecurrenceSelect}
+          onBack={handleBack}
+        />
+      )}
+
+      {/* Customer Details */}
+      {step === customerStepIndex && (
         <PublicCustomerStep
           customerName={customerName}
           customerEmail={customerEmail}
@@ -183,7 +343,23 @@ export default function PublicBookingFlow({
         />
       )}
 
-      {step === 4 && selectedService && selectedOption && selectedResourceForSlot && (
+      {/* Payment (conditional — not shown for recurring) */}
+      {step === paymentStepIndex && paymentStepIndex >= 0 && selectedService && (
+        <PublicPaymentStep
+          tenantSlug={tenantSlug}
+          servicePrice={Math.round(parseFloat(selectedService.price) * 100)}
+          serviceCurrency={selectedService.currency}
+          giftCardsEnabled={giftCardsEnabled}
+          onlinePaymentEnabled={onlinePaymentEnabled}
+          paymentRequired={paymentRequired}
+          packageOptions={effectivePackageOptions}
+          onSelect={handlePaymentSelect}
+          onBack={handleBack}
+        />
+      )}
+
+      {/* Review */}
+      {step === reviewStepIndex && selectedService && selectedOption && selectedResourceForSlot && (
         <PublicBookingReview
           tenantSlug={tenantSlug}
           tenantName={tenant.name}
@@ -197,6 +373,10 @@ export default function PublicBookingFlow({
           customerPhone={customerPhone}
           customerNotes={customerNotes}
           settings={settings}
+          paymentMethod={(isRecurring ? "pay_at_business" : paymentMethod) as PublicPaymentMethod}
+          giftCardReservation={isRecurring ? null : giftCardReservation}
+          packageOption={isRecurring ? null : selectedPackageOption}
+          recurrence={recurrenceSelection}
           onConfirm={handleConfirmation}
           onBack={handleBack}
         />

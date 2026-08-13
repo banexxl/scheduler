@@ -125,6 +125,10 @@ export type PublicBookingDraft = {
   customerNotes: string;
 };
 
+// ─── Payment Method ──────────────────────────────────────────────────────────
+
+export type PublicPaymentMethod = "pay_at_business" | "online" | "package_credit" | "gift_card";
+
 // ─── Public Error Codes ──────────────────────────────────────────────────────
 
 export type PublicBookingErrorCode =
@@ -136,6 +140,8 @@ export type PublicBookingErrorCode =
   | "RATE_LIMITED"
   | "CAPTCHA_FAILED"
   | "BOOKING_DISABLED"
+  | "GIFT_CARD_RESERVATION_EXPIRED"
+  | "PACKAGE_CREDIT_FAILED"
   | "UNKNOWN_ERROR";
 
 // ─── Public Confirmation ─────────────────────────────────────────────────────
@@ -159,4 +165,22 @@ export type PublicBookingConfirmation = {
   emailConfirmationEnqueued: boolean;
   /** Whether reminder schedules were created for this appointment */
   remindersScheduled: boolean;
+  /** Payment method used for this booking */
+  paymentMethod: PublicPaymentMethod;
+  /** Gift card amount applied (minor units) */
+  giftCardAmountApplied?: number;
+  /** Gift card code prefix (for display only) */
+  giftCardCodePrefix?: string;
+  /** Package name if package credit was used */
+  packageNameUsed?: string;
+  /** Recurrence summary if this is a recurring booking */
+  recurrenceSummary?: string;
+  /** Series occurrence count */
+  seriesOccurrenceCount?: number;
+  /** Appointment start time in ISO 8601 UTC for calendar export */
+  startsAtUtc?: string;
+  /** Appointment end time in ISO 8601 UTC for calendar export */
+  endsAtUtc?: string;
+  /** Location address for calendar export */
+  locationAddress?: string;
 };

@@ -61,6 +61,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/platform/tenants", label: "Tenants", icon: <BusinessIcon fontSize="small" />, matchPrefix: "/platform/tenants" },
       { href: "/platform/users", label: "Users", icon: <PeopleIcon fontSize="small" />, matchPrefix: "/platform/users" },
       { href: "/platform/audit-logs", label: "Audit Logs", icon: <HistoryIcon fontSize="small" />, matchPrefix: "/platform/audit-logs" },
+      { href: "/platform/operations", label: "Operations", icon: <DashboardIcon fontSize="small" />, matchPrefix: "/platform/operations" },
     ],
   },
   {

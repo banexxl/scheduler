@@ -61,7 +61,7 @@ function detectCurrency(): string {
  * Milestone 4.4: Calls the create_tenant RPC via server action.
  * On success, the server action redirects to /${tenantSlug}/onboarding.
  */
-export default function CreateBusinessForm() {
+export default function CreateBusinessForm({ selectedPlanId }: { selectedPlanId?: string | null }) {
   const [isPending, startTransition] = useTransition();
   const [actionResult, setActionResult] =
     useState<CreateBusinessActionResult | null>(null);
@@ -182,6 +182,7 @@ export default function CreateBusinessForm() {
         primaryLocationName: values.primaryLocationName.trim(),
         timezone: values.timezone,
         currency: values.currency,
+        selectedPlanId: selectedPlanId ?? undefined,
       });
       // If we reach here, the action did NOT redirect (i.e. there was an error)
       setActionResult(result);

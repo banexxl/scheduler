@@ -52,6 +52,7 @@ export async function createBusinessAction(
     primaryLocationName: string;
     timezone: string;
     currency: string;
+    selectedPlanId?: string;
   }
 ): Promise<CreateBusinessActionResult> {
   // 1. Require authenticated user
@@ -169,50 +170,50 @@ export async function createBusinessAction(
     };
   }
 
-  // 5. Resolve active subscription plan
-  const { data: plan, error: planError } = await supabase
-    .from("subscription_plans")
-    .select("id")
-    .eq("is_active", true)
-    .eq("billing_interval", "annual")
-    .limit(1)
-    .single();
+  // 5. Resolve subscription plan
+  let selectedPlan: { id: string } | null = null;
 
-  if (planError || !plan) {
-    // Try any active plan as fallback
-    const { data: fallbackPlan } = await supabase
+  // Use explicitly selected plan if provided
+  if (values.selectedPlanId) {
+    const { data: explicitPlan } = await supabase
       .from("subscription_plans")
       .select("id")
+      .eq("id", values.selectedPlanId)
       .eq("is_active", true)
-      .limit(1)
-      .single();
+      .maybeSingle();
 
-    if (!fallbackPlan) {
-      console.error(
-        "[create-business] No active subscription plan found:",
-        planError?.message
-      );
-      return {
-        success: false,
-        message:
-          "Business creation is temporarily unavailable. Please try again later.",
-      };
+    if (explicitPlan) {
+      selectedPlan = explicitPlan as { id: string };
     }
+  }
 
-    // Use fallback plan
-    return await executeCreateTenant(
-      supabase,
-      validated,
-      normalizedSlug,
-      fallbackPlan.id
-    );
+  // Fallback: auto-select cheapest/free plan
+  if (!selectedPlan) {
+    const { data: plans } = await supabase
+      .from("subscription_plans")
+      .select("id, code")
+      .eq("is_active", true)
+      .order("price_amount", { ascending: true })
+      .limit(10);
+
+    const allPlans = (plans ?? []) as Array<{ id: string; code: string }>;
+    const freePlan = allPlans.find(p => p.code === "free" || p.code.includes("free"));
+    selectedPlan = freePlan ?? allPlans[0] ?? null;
+  }
+
+  if (!selectedPlan) {
+    console.error("[create-business] No active subscription plan found");
+    return {
+      success: false,
+      message: "No subscription plans are available. Please contact support.",
+    };
   }
 
   return await executeCreateTenant(
     supabase,
     validated,
     normalizedSlug,
-    plan.id
+    selectedPlan.id
   );
 }
 

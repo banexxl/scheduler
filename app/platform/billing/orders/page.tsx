@@ -10,6 +10,7 @@ import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import { requirePlatformAdmin } from "@/lib/platform/require-platform-admin";
 import { listPlatformOrders } from "@/features/platform/services/platform-billing-order-queries";
+import PolarConfigAlert from "@/features/platform/components/polar-config-alert";
 
 export default async function PlatformBillingOrdersPage() {
      await requirePlatformAdmin();
@@ -30,6 +31,8 @@ export default async function PlatformBillingOrdersPage() {
                          Back to billing
                     </Button>
                </Stack>
+
+               <PolarConfigAlert />
 
                <Paper variant="outlined" sx={{ p: 2 }}>
                     <TableContainer>

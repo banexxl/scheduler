@@ -63,6 +63,13 @@ export async function createBillingPlanAction(input: {
      isActive: boolean;
      isPublic: boolean;
      sortOrder: number;
+     /** Pricing — required for paid plans */
+     priceAmount?: number; // minor units (cents)
+     priceCurrency?: string; // e.g. "usd"
+     isRecurring?: boolean;
+     recurringInterval?: "month" | "year";
+     recurringIntervalCount?: number;
+     trialDays?: number;
 }): Promise<AdminActionResult<{ planId: string }>> {
      await requirePlatformAdmin();
 
@@ -76,6 +83,41 @@ export async function createBillingPlanAction(input: {
           });
 
           const adminClient = createAdminClient();
+
+          // For paid plans, create Polar product first
+          let polarProductId: string | null = null;
+          let polarPriceId: string | null = null;
+          let polarCreatedAt: string | null = null;
+
+          if (!validated.isFree && input.priceAmount && input.priceCurrency) {
+               try {
+                    const { createPolarProduct } = await import("../services/polar-client");
+                    const polarResult = await createPolarProduct({
+                         name: validated.name,
+                         description: validated.description ?? undefined,
+                         isRecurring: input.isRecurring ?? true,
+                         recurringInterval: input.recurringInterval ?? "month",
+                         recurringIntervalCount: input.recurringIntervalCount ?? 1,
+                         priceAmount: input.priceAmount,
+                         priceCurrency: input.priceCurrency,
+                         trialDays: input.trialDays ?? undefined,
+                         metadata: {
+                              application: "scheduling-platform",
+                              plan_key: validated.planKey,
+                         },
+                    });
+                    polarProductId = polarResult.productId;
+                    polarPriceId = polarResult.priceId;
+                    polarCreatedAt = polarResult.createdAt;
+               } catch (polarError) {
+                    return {
+                         success: false,
+                         message: `Plan not created: Polar API error — ${polarError instanceof Error ? polarError.message : "unknown error"}`,
+                    };
+               }
+          }
+
+          // Insert local plan
           const { data, error } = await adminClient
                .from("billing_plans" as never)
                .insert(
@@ -87,6 +129,11 @@ export async function createBillingPlanAction(input: {
                          is_active: validated.isActive,
                          is_public: validated.isPublic,
                          sort_order: validated.sortOrder,
+                         polar_product_id: polarProductId,
+                         polar_product_name: validated.name,
+                         polar_product_description: validated.description ?? null,
+                         polar_created_at: polarCreatedAt,
+                         last_synced_at: polarProductId ? new Date().toISOString() : null,
                          product_metadata: {
                               application: "scheduling-platform",
                               plan_key: validated.planKey,
@@ -103,11 +150,35 @@ export async function createBillingPlanAction(input: {
                return { success: false, message: "Unable to create billing plan." };
           }
 
+          // If we have a price, insert into billing_plan_prices
+          if (polarPriceId && polarProductId && input.priceAmount && input.priceCurrency) {
+               await adminClient
+                    .from("billing_plan_prices" as never)
+                    .insert({
+                         billing_plan_id: (data as { id: string }).id,
+                         polar_product_id: polarProductId,
+                         polar_price_id: polarPriceId,
+                         price_type: input.isRecurring ? "recurring" : "one_time",
+                         amount: input.priceAmount,
+                         currency: input.priceCurrency,
+                         billing_interval: input.recurringInterval ?? null,
+                         billing_interval_count: input.recurringIntervalCount ?? null,
+                         is_recurring: input.isRecurring ?? true,
+                         is_active: true,
+                         is_archived: false,
+                         is_checkout_eligible: true,
+                         last_synced_at: new Date().toISOString(),
+                         polar_created_at: polarCreatedAt,
+                    } as never);
+          }
+
           revalidatePlatformBillingRoutes();
 
           return {
                success: true,
-               message: "Billing plan created.",
+               message: polarProductId
+                    ? "Billing plan created and synced to Polar."
+                    : "Billing plan created (free plan — no Polar product).",
                data: { planId: String((data as { id: string }).id) },
           };
      } catch {

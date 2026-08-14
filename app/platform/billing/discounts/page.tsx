@@ -14,6 +14,7 @@ import { requirePlatformAdmin } from "@/lib/platform/require-platform-admin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { listPolarDiscounts } from "@/features/platform/services/polar-client";
 import PageHeader from "@/features/platform/components/page-header";
+import PolarConfigAlert from "@/features/platform/components/polar-config-alert";
 
 /**
  * Platform Billing Discounts Page — Milestone 15.13.
@@ -58,6 +59,8 @@ export default async function PlatformBillingDiscountsPage() {
         title="Discounts"
         description="Polar discounts synced across tenants. Discounts created here apply to subscription plans."
       />
+
+      <PolarConfigAlert />
 
       {polarError && (
         <Paper variant="outlined" sx={{ p: 2, bgcolor: "#fff3f3" }}>

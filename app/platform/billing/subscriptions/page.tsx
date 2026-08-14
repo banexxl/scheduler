@@ -17,6 +17,7 @@ import {
 } from "@/features/platform/services/platform-billing-admin-queries";
 import { reconcileSubscriptionAdminAction } from "@/features/platform/actions/subscription-admin-actions";
 import PageHeader from "@/features/platform/components/page-header";
+import PolarConfigAlert from "@/features/platform/components/polar-config-alert";
 import SectionCard from "@/features/platform/components/section-card";
 import MetricCard from "@/features/platform/components/metric-card";
 import PlatformEmptyState from "@/features/platform/components/platform-empty-state";
@@ -89,6 +90,8 @@ export default async function PlatformBillingSubscriptionsPage({
                          </form>
                     }
                />
+
+               <PolarConfigAlert />
 
                {/* Status counts */}
                <Grid container spacing={2}>

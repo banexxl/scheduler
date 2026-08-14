@@ -28,6 +28,7 @@ import {
 } from "@/features/platform/actions/billing-plan-admin-actions";
 import { requirePlatformAdmin } from "@/lib/platform/require-platform-admin";
 import { getBillingDiagnosticsConfig } from "@/features/platform/services/polar-config";
+import PolarConfigAlert from "@/features/platform/components/polar-config-alert";
 import { formatMinorCurrency } from "@/lib/helpers/format-minor-currency";
 
 async function mapAction(formData: FormData) {
@@ -86,9 +87,7 @@ export default async function PlatformBillingProductsPage() {
                     </form>
                </Stack>
 
-               <Alert severity={diagnostics.hasAccessToken ? "success" : "warning"}>
-                    Polar API: {diagnostics.apiBaseUrl} | Access token: {diagnostics.hasAccessToken ? "configured" : "missing"} | Webhook secret: {diagnostics.hasWebhookSecret ? "configured" : "missing"}
-               </Alert>
+               <PolarConfigAlert />
 
                <Paper variant="outlined" sx={{ p: 2 }}>
                     <Stack spacing={1}>

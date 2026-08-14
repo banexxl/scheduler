@@ -13,6 +13,7 @@ import {
      listBillingWebhookDiagnostics,
 } from "@/features/platform/services/platform-billing-admin-queries";
 import { retryBillingWebhookEventAction } from "@/features/platform/actions/billing-plan-admin-actions";
+import PolarConfigAlert from "@/features/platform/components/polar-config-alert";
 
 async function retryWebhookFormAction(formData: FormData) {
      "use server";
@@ -28,6 +29,8 @@ export default async function PlatformBillingWebhooksPage() {
                <Typography variant="h4" component="h1">
                     Billing Webhooks
                </Typography>
+
+               <PolarConfigAlert />
                <Typography color="text.secondary">
                     Event payloads are not shown by default. Retry is available for failed events only.
                </Typography>

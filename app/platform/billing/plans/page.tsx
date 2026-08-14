@@ -22,18 +22,30 @@ import {
 } from "@/features/platform/actions/billing-plan-admin-actions";
 import { listPlatformBillingPlanSummaries } from "@/features/platform/services/platform-billing-admin-queries";
 import { requirePlatformAdmin } from "@/lib/platform/require-platform-admin";
+import PolarConfigAlert from "@/features/platform/components/polar-config-alert";
 
 async function createPlanFormAction(formData: FormData) {
      "use server";
+
+     const isFree = String(formData.get("isFree") ?? "") === "on";
 
      await createBillingPlanAction({
           planKey: String(formData.get("planKey") ?? ""),
           name: String(formData.get("name") ?? ""),
           description: String(formData.get("description") ?? "") || null,
-          isFree: String(formData.get("isFree") ?? "") === "on",
+          isFree,
           isActive: true,
           isPublic: true,
           sortOrder: Number(formData.get("sortOrder") ?? "0"),
+          // Pricing (only for paid plans)
+          ...(!isFree && {
+               priceAmount: Number(formData.get("priceAmount") ?? "0"),
+               priceCurrency: String(formData.get("priceCurrency") ?? "usd").toLowerCase(),
+               isRecurring: String(formData.get("billingType") ?? "recurring") === "recurring",
+               recurringInterval: (String(formData.get("recurringInterval") ?? "month") as "month" | "year"),
+               recurringIntervalCount: Number(formData.get("recurringIntervalCount") ?? "1"),
+               trialDays: Number(formData.get("trialDays") ?? "0") || undefined,
+          }),
      });
 }
 
@@ -105,21 +117,41 @@ export default async function PlatformBillingPlansPage() {
                     </Typography>
                </Box>
 
+               <PolarConfigAlert />
+
                <Paper variant="outlined" sx={{ p: 2 }}>
                     <Typography variant="h6" gutterBottom>
                          Create Plan
                     </Typography>
                     <form action={createPlanFormAction}>
-                         <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
-                              <TextField size="small" name="planKey" label="Plan key" required />
-                              <TextField size="small" name="name" label="Name" required fullWidth />
-                              <TextField size="small" name="description" label="Description" fullWidth />
-                              <TextField size="small" name="sortOrder" label="Sort order" defaultValue="100" />
-                              <label>
-                                   <input type="checkbox" name="isFree" /> Free
-                              </label>
-                              <Button type="submit" variant="contained">
-                                   Create
+                         <Stack spacing={1.5}>
+                              <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
+                                   <TextField size="small" name="planKey" label="Plan key" required />
+                                   <TextField size="small" name="name" label="Name" required fullWidth />
+                                   <TextField size="small" name="description" label="Description" fullWidth />
+                                   <TextField size="small" name="sortOrder" label="Sort order" defaultValue="100" />
+                                   <label>
+                                        <input type="checkbox" name="isFree" /> Free
+                                   </label>
+                              </Stack>
+                              <Divider />
+                              <Typography variant="subtitle2" color="text.secondary">Pricing (for paid plans)</Typography>
+                              <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
+                                   <TextField size="small" name="priceAmount" label="Price (cents)" type="number" defaultValue="0" placeholder="e.g. 2900 = $29" />
+                                   <TextField size="small" name="priceCurrency" label="Currency" defaultValue="usd" placeholder="usd" />
+                                   <select name="billingType" defaultValue="recurring" style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }}>
+                                        <option value="recurring">Recurring</option>
+                                        <option value="one_time">One-time</option>
+                                   </select>
+                                   <select name="recurringInterval" defaultValue="month" style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ccc" }}>
+                                        <option value="month">Monthly</option>
+                                        <option value="year">Yearly</option>
+                                   </select>
+                                   <TextField size="small" name="recurringIntervalCount" label="Interval count" type="number" defaultValue="1" />
+                                   <TextField size="small" name="trialDays" label="Trial days" type="number" defaultValue="0" />
+                              </Stack>
+                              <Button type="submit" variant="contained" sx={{ alignSelf: "flex-start" }}>
+                                   Create Plan
                               </Button>
                          </Stack>
                     </form>

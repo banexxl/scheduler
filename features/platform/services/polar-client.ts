@@ -126,6 +126,89 @@ export async function listPolarDiscounts(): Promise<Array<Record<string, unknown
      return extractList(payload) as Array<Record<string, unknown>>;
 }
 
+// ─── Polar Product CRUD ──────────────────────────────────────────────────────
+
+export type CreatePolarProductInput = {
+     name: string;
+     description?: string | null;
+     isRecurring: boolean;
+     recurringInterval?: "month" | "year" | null;
+     recurringIntervalCount?: number;
+     priceAmount: number; // minor units (cents)
+     priceCurrency: string; // e.g., "usd"
+     trialDays?: number | null;
+     metadata?: Record<string, unknown>;
+};
+
+export type PolarProductResult = {
+     productId: string;
+     priceId: string;
+     createdAt: string;
+};
+
+export async function createPolarProduct(input: CreatePolarProductInput): Promise<PolarProductResult> {
+     // Build price payload
+     const price: Record<string, unknown> = {
+          type: input.isRecurring ? "recurring" : "one_time",
+          amount_type: "fixed",
+          price_amount: input.priceAmount,
+          price_currency: input.priceCurrency,
+     };
+
+     if (input.isRecurring && input.recurringInterval) {
+          price.recurring_interval = input.recurringInterval;
+          price.recurring_interval_count = input.recurringIntervalCount ?? 1;
+     }
+
+     // Build product payload
+     const productPayload: Record<string, unknown> = {
+          name: input.name,
+          prices: [price],
+          metadata: input.metadata ?? {},
+     };
+
+     if (input.description) productPayload.description = input.description;
+
+     const response = await polarFetch<Record<string, unknown>>("/v1/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(productPayload),
+     });
+
+     const productId = String(response.id ?? "");
+     if (!productId) throw new Error("[polar-client] Product create response missing id");
+
+     // Extract price ID from response
+     const prices = (response.prices ?? []) as Array<Record<string, unknown>>;
+     const priceId = String(prices[0]?.id ?? "");
+
+     return {
+          productId,
+          priceId,
+          createdAt: String(response.created_at ?? new Date().toISOString()),
+     };
+}
+
+export async function updatePolarProduct(
+     polarProductId: string,
+     input: { name?: string; description?: string | null; isArchived?: boolean }
+): Promise<void> {
+     const payload: Record<string, unknown> = {};
+     if (input.name !== undefined) payload.name = input.name;
+     if (input.description !== undefined) payload.description = input.description;
+     if (input.isArchived !== undefined) payload.is_archived = input.isArchived;
+
+     await polarFetch<unknown>(`/v1/products/${polarProductId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+     });
+}
+
+export async function getPolarProduct(polarProductId: string): Promise<Record<string, unknown>> {
+     return await polarFetch<Record<string, unknown>>(`/v1/products/${polarProductId}`);
+}
+
 export async function createPolarCheckoutSession(input: {
      productId: string;
      priceId: string;

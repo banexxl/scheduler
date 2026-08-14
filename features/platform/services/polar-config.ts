@@ -10,29 +10,11 @@ type PolarEnvironment = {
 };
 
 /**
- * Resolves the correct env var based on POLAR_SERVER mode.
- *
- * When POLAR_SERVER=sandbox:
- *   Looks for SANDBOX_POLAR_ACCESS_TOKEN first, falls back to POLAR_ACCESS_TOKEN
- * When POLAR_SERVER=production (or unset):
- *   Uses POLAR_ACCESS_TOKEN directly
- *
- * This allows the same codebase to run against sandbox (localhost, preview)
- * and production (main branch) by prefixing sandbox vars with SANDBOX_.
+ * Determines if running against Polar sandbox.
+ * POLAR_SERVER=sandbox → sandbox; anything else → production.
  */
 function isSandbox(): boolean {
      return (process.env.POLAR_SERVER?.trim().toLowerCase() ?? "production") === "sandbox";
-}
-
-function getPolarEnv(name: string): string | null {
-     const sandbox = isSandbox();
-     if (sandbox) {
-          // Try SANDBOX_ prefixed first, fall back to unprefixed
-          const sandboxValue = process.env[`SANDBOX_${name}`]?.trim();
-          if (sandboxValue) return sandboxValue;
-     }
-     const value = process.env[name]?.trim();
-     return value || null;
 }
 
 function normalizeBaseUrl(value: string | undefined | null): string {
@@ -49,29 +31,28 @@ function normalizeBaseUrl(value: string | undefined | null): string {
      }
 }
 
+function getOptionalEnv(name: string): string | null {
+     const value = process.env[name]?.trim();
+     return value || null;
+}
+
 export function getPolarEnvironment(): PolarEnvironment {
-     const processorSecret = "";
-
-     const syncSecret = getPolarEnv("POLAR_RECONCILIATION_SECRET") ?? "";
-
      return {
-          apiBaseUrl: normalizeBaseUrl(getPolarEnv("POLAR_API_BASE_URL")),
-          accessToken: getPolarEnv("POLAR_ACCESS_TOKEN") ?? "",
-          organizationId: getPolarEnv("POLAR_ORGANIZATION_ID") ?? null,
-          webhookSecret: getPolarEnv("POLAR_WEBHOOK_SECRET") ?? "",
-          processorSecret,
-          syncSecret,
+          apiBaseUrl: normalizeBaseUrl(process.env.POLAR_API_BASE_URL),
+          accessToken: getOptionalEnv("POLAR_ACCESS_TOKEN") ?? "",
+          organizationId: getOptionalEnv("POLAR_ORGANIZATION_ID") ?? null,
+          webhookSecret: getOptionalEnv("POLAR_WEBHOOK_SECRET") ?? "",
+          processorSecret: "",
+          syncSecret: getOptionalEnv("POLAR_RECONCILIATION_SECRET") ?? "",
      };
 }
 
 /**
- * Resolves a per-webhook secret with sandbox prefix support.
- * Example: getPolarWebhookSecret("ORDER") checks:
- *   sandbox → SANDBOX_POLAR_ORDER_WEBHOOK_SECRET → POLAR_ORDER_WEBHOOK_SECRET → general webhook secret
- *   prod    → POLAR_ORDER_WEBHOOK_SECRET → general webhook secret
+ * Resolves a per-webhook secret.
+ * Example: getPolarWebhookSecret("ORDER") → POLAR_ORDER_WEBHOOK_SECRET → POLAR_WEBHOOK_SECRET
  */
 export function getPolarWebhookSecret(type: string): string {
-     return getPolarEnv(`POLAR_${type}_WEBHOOK_SECRET`) ?? getPolarEnv("POLAR_WEBHOOK_SECRET") ?? "";
+     return getOptionalEnv(`POLAR_${type}_WEBHOOK_SECRET`) ?? getOptionalEnv("POLAR_WEBHOOK_SECRET") ?? "";
 }
 
 export function getBillingProcessorSecret(): string {
@@ -85,12 +66,20 @@ export function getBillingSyncSecret(): string {
 export function getBillingDiagnosticsConfig() {
      const env = getPolarEnvironment();
 
+     // Check if any webhook secret is configured
+     const hasAnyWebhookSecret = Boolean(
+          env.webhookSecret ||
+          getOptionalEnv("POLAR_ORDER_WEBHOOK_SECRET") ||
+          getOptionalEnv("POLAR_CHECKOUT_WEBHOOK_SECRET") ||
+          getOptionalEnv("POLAR_SUBSCRIPTION_WEBHOOK_SECRET")
+     );
+
      return {
           apiBaseUrl: env.apiBaseUrl,
           server: isSandbox() ? "sandbox" : "production",
           hasAccessToken: Boolean(env.accessToken),
           hasOrganizationId: Boolean(env.organizationId),
-          hasWebhookSecret: Boolean(env.webhookSecret),
+          hasWebhookSecret: hasAnyWebhookSecret,
           hasProcessorSecret: Boolean(env.processorSecret),
           hasSyncSecret: Boolean(env.syncSecret),
      };

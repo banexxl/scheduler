@@ -8,6 +8,8 @@
  * "Go Home" uses /api/home to resolve user's appropriate dashboard.
  */
 
+import Link from "next/link";
+
 export default function RootError({
   reset,
 }: {
@@ -54,7 +56,7 @@ export default function RootError({
             >
               Try Again
             </button>
-            <a
+            <Link
               href="/api/home"
               style={{
                 padding: "0.5rem 1.5rem",
@@ -70,7 +72,7 @@ export default function RootError({
               }}
             >
               Go Home
-            </a>
+            </Link>
           </div>
         </div>
       </body>

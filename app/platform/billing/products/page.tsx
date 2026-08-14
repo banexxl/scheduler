@@ -1,5 +1,4 @@
 import Box from "@mui/material/Box";
-import Alert from "@mui/material/Alert";
 import Link from "next/link";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -27,7 +26,6 @@ import {
      refreshSinglePolarProductAction,
 } from "@/features/platform/actions/billing-plan-admin-actions";
 import { requirePlatformAdmin } from "@/lib/platform/require-platform-admin";
-import { getBillingDiagnosticsConfig } from "@/features/platform/services/polar-config";
 import PolarConfigAlert from "@/features/platform/components/polar-config-alert";
 import { formatMinorCurrency } from "@/lib/helpers/format-minor-currency";
 
@@ -61,8 +59,6 @@ export default async function PlatformBillingProductsPage() {
           discoverPolarProductsForMapping(),
           getPlatformBillingDashboardMetrics(),
      ]);
-
-     const diagnostics = getBillingDiagnosticsConfig();
 
      return (
           <Stack spacing={3}>

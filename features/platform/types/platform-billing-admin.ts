@@ -2,6 +2,7 @@ export type PlatformBillingPlanSummary = {
      id: string;
      planKey: string;
      name: string;
+     description: string | null;
      isFree: boolean;
      isActive: boolean;
      isPublic: boolean;

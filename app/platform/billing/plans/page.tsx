@@ -189,7 +189,7 @@ export default async function PlatformBillingPlansPage() {
                                         <input type="hidden" name="id" value={plan.id} />
                                         <Stack direction={{ xs: "column", md: "row" }} spacing={1} alignItems="center">
                                              <TextField size="small" name="name" label="Name" defaultValue={plan.name} required />
-                                             <TextField size="small" name="description" label="Description" />
+                                             <TextField size="small" name="description" label="Description" defaultValue={plan.description ?? ""} />
                                              <TextField size="small" name="sortOrder" label="Sort" defaultValue={String(plan.sortOrder)} />
                                              <label>
                                                   <input type="checkbox" name="isFree" defaultChecked={plan.isFree} /> Free

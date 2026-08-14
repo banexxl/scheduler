@@ -60,6 +60,7 @@ export async function listPlatformBillingPlanSummaries(): Promise<
                id: String(row.id),
                planKey: String(row.plan_key),
                name: String(row.name),
+               description: typeof row.description === "string" ? row.description : null,
                isFree: Boolean(row.is_free),
                isActive: Boolean(row.is_active),
                isPublic: Boolean(row.is_public),

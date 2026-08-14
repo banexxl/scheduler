@@ -58,7 +58,7 @@ const scaleIn = {
 
 // ─── Animated Section Wrapper ────────────────────────────────────────────────
 
-function AnimatedSection({ children, variants = fadeUp, className }: { children: React.ReactNode; variants?: typeof fadeUp; className?: string }) {
+function AnimatedSection({ children, variants = fadeUp, className }: { children: React.ReactNode; variants?: Record<string, unknown>; className?: string }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
 
@@ -67,7 +67,7 @@ function AnimatedSection({ children, variants = fadeUp, className }: { children:
       ref={ref}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
-      variants={variants}
+      variants={variants as never}
       className={className}
     >
       {children}

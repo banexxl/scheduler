@@ -50,11 +50,11 @@ export default function CreateBusinessWithPlanFlow({ plans, userEmail }: Props) 
         const { initiatePlanCheckoutAction } = await import("../actions/initiate-plan-checkout");
         const result = await initiatePlanCheckoutAction(polarProductId);
         if (result.success && result.checkoutUrl) {
-          // Redirect to Polar checkout — on success they'll return to /create-business?plan={planId}
           window.location.href = result.checkoutUrl;
         } else {
-          setError(result.message ?? "Unable to start checkout. Please try again.");
-          toast.error(result.message ?? "Checkout failed");
+          const msg = !result.success ? result.message : "Unable to start checkout. Please try again.";
+          setError(msg);
+          toast.error(msg);
         }
       } catch {
         setError("Unable to start checkout. Please try again.");

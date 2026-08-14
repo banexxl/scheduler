@@ -44,6 +44,7 @@ export default function CreatePlanForm({ action }: Props) {
   async function handleSubmit(formData: FormData) {
     setSubmitting(true);
     setError(null);
+    console.log("[create-plan-form] Submitting...", { isFree, currency: currency.code, billingType });
 
     const priceWhole = Number(formData.get("priceWhole") ?? "0");
     const currencyCode = currency.code;
@@ -59,13 +60,14 @@ export default function CreatePlanForm({ action }: Props) {
     submissionData.set("priceAmount", String(priceAmount));
     submissionData.set("priceCurrency", currencyCode.toLowerCase());
     submissionData.set("billingType", billingType);
-    submissionData.set("recurringInterval", formData.get("recurringInterval") as string ?? "month");
-    submissionData.set("recurringIntervalCount", formData.get("recurringIntervalCount") as string ?? "1");
-    submissionData.set("trialDays", formData.get("trialDays") as string ?? "0");
+    submissionData.set("recurringInterval", String(formData.get("recurringInterval") || "month"));
+    submissionData.set("recurringIntervalCount", String(formData.get("recurringIntervalCount") || "1"));
+    submissionData.set("trialDays", String(formData.get("trialDays") || "0"));
 
     try {
       await action(submissionData);
     } catch (err) {
+      console.error("[create-plan-form] Action error:", err);
       setError(err instanceof Error ? err.message : "Failed to create plan");
     } finally {
       setSubmitting(false);

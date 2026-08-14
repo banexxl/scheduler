@@ -25,6 +25,7 @@ import { listPlatformBillingPlanSummaries } from "@/features/platform/services/p
 import { requirePlatformAdmin } from "@/lib/platform/require-platform-admin";
 import PolarConfigAlert from "@/features/platform/components/polar-config-alert";
 import CreatePlanForm from "@/features/platform/components/create-plan-form";
+import PlanActionButtons from "@/features/platform/components/plan-action-buttons";
 
 async function createPlanFormAction(formData: FormData) {
      "use server";
@@ -65,24 +66,6 @@ async function updatePlanFormAction(formData: FormData) {
      });
 }
 
-async function togglePlanActiveFormAction(formData: FormData) {
-     "use server";
-
-     await toggleBillingPlanActiveAction(
-          String(formData.get("planId") ?? ""),
-          String(formData.get("nextState") ?? "") === "true"
-     );
-}
-
-async function togglePlanPublicFormAction(formData: FormData) {
-     "use server";
-
-     await toggleBillingPlanPublicAction(
-          String(formData.get("planId") ?? ""),
-          String(formData.get("nextState") ?? "") === "true"
-     );
-}
-
 async function reorderFormAction(formData: FormData) {
      "use server";
 
@@ -92,20 +75,6 @@ async function reorderFormAction(formData: FormData) {
           .filter(Boolean);
 
      await reorderBillingPlansAction({ orderedPlanIds: ids });
-}
-
-async function refreshPlanProductFormAction(formData: FormData) {
-     "use server";
-
-     await refreshSinglePolarProductAction(
-          String(formData.get("polarProductId") ?? "")
-     );
-}
-
-async function deletePlanFormAction(formData: FormData) {
-     "use server";
-
-     await deleteBillingPlanAction(String(formData.get("planId") ?? ""));
 }
 
 export default async function PlatformBillingPlansPage() {
@@ -181,48 +150,20 @@ export default async function PlatformBillingPlansPage() {
                                              </TableCell>
                                              <TableCell>{plan.sortOrder}</TableCell>
                                              <TableCell>
-                                                  <Stack spacing={1}>
-                                                       <form action={togglePlanActiveFormAction}>
-                                                            <input type="hidden" name="planId" value={plan.id} />
-                                                            <input type="hidden" name="nextState" value={String(!plan.isActive)} />
-                                                            <Button size="small" type="submit" variant="outlined">
-                                                                 {plan.isActive ? "Deactivate" : "Activate"}
-                                                            </Button>
-                                                       </form>
-                                                       <form action={togglePlanPublicFormAction}>
-                                                            <input type="hidden" name="planId" value={plan.id} />
-                                                            <input type="hidden" name="nextState" value={String(!plan.isPublic)} />
-                                                            <Button size="small" type="submit" variant="outlined">
-                                                                 {plan.isPublic ? "Hide" : "Show"}
-                                                            </Button>
-                                                       </form>
-                                                       <Button
-                                                            size="small"
-                                                            variant="outlined"
-                                                            component="a"
-                                                            href={`/platform/billing/products`}
-                                                       >
-                                                            Open Mapping
-                                                       </Button>
-                                                       {plan.polarProductId ? (
-                                                            <form action={refreshPlanProductFormAction}>
-                                                                 <input
-                                                                      type="hidden"
-                                                                      name="polarProductId"
-                                                                      value={plan.polarProductId}
-                                                                 />
-                                                                 <Button size="small" type="submit" variant="outlined">
-                                                                      Refresh Product
-                                                                 </Button>
-                                                            </form>
-                                                       ) : null}
-                                                       <form action={deletePlanFormAction}>
-                                                            <input type="hidden" name="planId" value={plan.id} />
-                                                            <Button size="small" type="submit" variant="outlined" color="error">
-                                                                 Delete
-                                                            </Button>
-                                                       </form>
-                                                  </Stack>
+                                                  <PlanActionButtons
+                                                       plan={{
+                                                            id: plan.id,
+                                                            name: plan.name,
+                                                            planKey: plan.planKey,
+                                                            isActive: plan.isActive,
+                                                            isPublic: plan.isPublic,
+                                                            polarProductId: plan.polarProductId ?? null,
+                                                       }}
+                                                       onToggleActive={async (planId, nextState) => { "use server"; await toggleBillingPlanActiveAction(planId, nextState); }}
+                                                       onTogglePublic={async (planId, nextState) => { "use server"; await toggleBillingPlanPublicAction(planId, nextState); }}
+                                                       onDelete={async (planId) => { "use server"; await deleteBillingPlanAction(planId); }}
+                                                       onRefresh={async (polarProductId) => { "use server"; await refreshSinglePolarProductAction(polarProductId); }}
+                                                  />
                                              </TableCell>
                                         </TableRow>
                                    ))}

@@ -150,7 +150,7 @@ export default async function PlatformBillingDiscountsPage() {
         <Button
           variant="outlined"
           size="small"
-          href="https://sandbox.polar.sh/dashboard/get-slot/discounts"
+          href="https://sandbox.polar.sh/dashboard/get-slot/products/discounts"
           target="_blank"
           rel="noopener noreferrer"
         >

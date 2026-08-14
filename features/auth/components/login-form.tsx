@@ -9,6 +9,7 @@ import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import { loginSchema, type LoginFormValues } from "../schemas/login-schema";
 import { loginAction } from "../actions/login";
+import { googleLoginAction } from "../actions/google-login";
 import AuthFormAlert from "./auth-form-alert";
 import type { AuthActionResult } from "../types/auth-action-result";
 
@@ -101,9 +102,24 @@ export default function LoginForm() {
             fullWidth
             size="large"
             disabled={isPending}
-            sx={{ mt: 2, mb: 2 }}
+            sx={{ mt: 2, mb: 1 }}
           >
             {isPending ? "Signing in..." : "Sign In"}
+          </Button>
+
+          <Button
+            variant="outlined"
+            fullWidth
+            size="large"
+            disabled={isPending}
+            onClick={() => {
+              startTransition(async () => {
+                await googleLoginAction();
+              });
+            }}
+            sx={{ mb: 2 }}
+          >
+            Continue with Google
           </Button>
 
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>

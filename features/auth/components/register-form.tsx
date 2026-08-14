@@ -132,9 +132,25 @@ export default function RegisterForm() {
             fullWidth
             size="large"
             disabled={isPending}
-            sx={{ mt: 2, mb: 2 }}
+            sx={{ mt: 2, mb: 1 }}
           >
             {isPending ? "Creating account..." : "Create Account"}
+          </Button>
+
+          <Button
+            variant="outlined"
+            fullWidth
+            size="large"
+            disabled={isPending}
+            onClick={() => {
+              startTransition(async () => {
+                const { googleLoginAction } = await import("../actions/google-login");
+                await googleLoginAction();
+              });
+            }}
+            sx={{ mb: 2 }}
+          >
+            Continue with Google
           </Button>
 
           <Box sx={{ textAlign: "center" }}>

@@ -1,0 +1,41 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { getAppUrl } from "@/lib/helpers/get-app-url";
+
+/**
+ * Google OAuth Login Action.
+ *
+ * Initiates Google OAuth flow via Supabase.
+ * After Google auth completes, Supabase redirects to /auth/callback
+ * which exchanges the code and resolves the user's home page
+ * (admin/tenant/customer) via resolveLoginDestination.
+ *
+ * Prerequisites:
+ * - Google OAuth provider enabled in Supabase Dashboard → Authentication → Providers
+ * - Google Cloud Console OAuth credentials configured
+ * - Redirect URL added to Supabase: {APP_URL}/auth/callback
+ */
+export async function googleLoginAction(): Promise<never> {
+  const supabase = await createClient();
+  const callbackUrl = new URL("/auth/callback", getAppUrl()).toString();
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: callbackUrl,
+      queryParams: {
+        access_type: "offline",
+        prompt: "consent",
+      },
+    },
+  });
+
+  if (error || !data.url) {
+    console.error("[google-login] OAuth initiation failed:", error?.message);
+    redirect("/auth-error?code=oauth_failed");
+  }
+
+  redirect(data.url);
+}

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { resolveLoginDestination } from "@/features/auth/services/resolve-login-destination";
 
@@ -11,22 +11,23 @@ import { resolveLoginDestination } from "@/features/auth/services/resolve-login-
  * - Customer → /account
  * - Unauthenticated → /login
  *
- * Used by the error page "Go Home" button since error.tsx is a client component
- * and cannot directly call server-side identity resolution.
+ * Uses the request origin for redirects (works correctly on both
+ * preview deployments and production).
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const origin = request.nextUrl.origin;
+
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"));
+      return NextResponse.redirect(new URL("/login", origin));
     }
 
     const destination = await resolveLoginDestination(user);
-    return NextResponse.redirect(new URL(destination, process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"));
+    return NextResponse.redirect(new URL(destination, origin));
   } catch {
-    // Fallback if identity resolution fails
-    return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"));
+    return NextResponse.redirect(new URL("/login", origin));
   }
 }

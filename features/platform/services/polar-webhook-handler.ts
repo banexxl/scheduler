@@ -27,6 +27,16 @@ export async function parsePolarWebhook(
   const secret = getPolarWebhookSecret(webhookType);
 
   if (!verifyPolarWebhookSignature({ rawBody, signatureHeader: sig, secret, svixId, svixTimestamp })) {
+    console.error("[polar-webhook] Signature verification failed", {
+      webhookType,
+      hasSig: Boolean(sig),
+      sigPrefix: sig?.slice(0, 20),
+      hasSvixId: Boolean(svixId),
+      hasSvixTimestamp: Boolean(svixTimestamp),
+      secretPrefix: secret ? `${secret.slice(0, 10)}...` : "EMPTY",
+      secretLength: secret?.length ?? 0,
+      bodyLength: rawBody.length,
+    });
     return { payload: null, error: NextResponse.json({ error: "Invalid signature" }, { status: 401 }) };
   }
 

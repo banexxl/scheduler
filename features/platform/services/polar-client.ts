@@ -164,7 +164,10 @@ export async function createPolarProduct(input: CreatePolarProductInput): Promis
      const productPayload: Record<string, unknown> = {
           name: input.name,
           prices: [price],
-          metadata: input.metadata ?? {},
+          metadata: {
+               ...(input.metadata ?? {}),
+               ...(input.description ? { description: input.description } : {}),
+          },
      };
 
      if (input.description) productPayload.description = input.description;

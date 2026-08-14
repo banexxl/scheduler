@@ -45,7 +45,6 @@ export default function CreatePlanForm({ action }: Props) {
   async function handleSubmit(formData: FormData) {
     setSubmitting(true);
     setError(null);
-    console.log("[create-plan-form] Submitting...", { isFree, currency: currency.code, billingType });
 
     const priceWhole = Number(formData.get("priceWhole") ?? "0");
     const currencyCode = currency.code;
@@ -74,7 +73,6 @@ export default function CreatePlanForm({ action }: Props) {
         toast.success("Plan created successfully!");
       }
     } catch (err) {
-      console.error("[create-plan-form] Action error:", err);
       const msg = err instanceof Error ? err.message : "Failed to create plan";
       setError(msg);
       toast.error(msg);

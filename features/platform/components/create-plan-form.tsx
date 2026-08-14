@@ -4,7 +4,7 @@
  * Create Plan Form — Milestone 15.13.
  *
  * Client component for creating billing plans with:
- * - Currency autocomplete with search (all ISO 4217 currencies)
+ * - Currency autocomplete with search (all Polar-supported currencies)
  * - Price entered in whole units (dollars/euros/dinars), converted to cents on submit
  * - Billing type selector (recurring/one-time)
  * - Interval selector (monthly/yearly)
@@ -24,6 +24,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 import Divider from "@mui/material/Divider";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -44,13 +45,11 @@ export default function CreatePlanForm({ action }: Props) {
     setSubmitting(true);
     setError(null);
 
-    // Convert whole units to cents (minor units)
     const priceWhole = Number(formData.get("priceWhole") ?? "0");
     const currencyCode = currency.code;
     const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(currencyCode.toUpperCase());
     const priceAmount = isZeroDecimal ? priceWhole : Math.round(priceWhole * 100);
 
-    // Build proper FormData with converted values
     const submissionData = new FormData();
     submissionData.set("planKey", formData.get("planKey") as string);
     submissionData.set("name", formData.get("name") as string);
@@ -60,9 +59,9 @@ export default function CreatePlanForm({ action }: Props) {
     submissionData.set("priceAmount", String(priceAmount));
     submissionData.set("priceCurrency", currencyCode.toLowerCase());
     submissionData.set("billingType", billingType);
-    submissionData.set("recurringInterval", formData.get("recurringInterval") as string);
-    submissionData.set("recurringIntervalCount", formData.get("recurringIntervalCount") as string);
-    submissionData.set("trialDays", formData.get("trialDays") as string);
+    submissionData.set("recurringInterval", formData.get("recurringInterval") as string ?? "month");
+    submissionData.set("recurringIntervalCount", formData.get("recurringIntervalCount") as string ?? "1");
+    submissionData.set("trialDays", formData.get("trialDays") as string ?? "0");
 
     try {
       await action(submissionData);
@@ -75,21 +74,64 @@ export default function CreatePlanForm({ action }: Props) {
 
   return (
     <form action={handleSubmit}>
-      <Stack spacing={2}>
+      <Stack spacing={2.5}>
         {error && <Alert severity="error">{error}</Alert>}
 
-        {/* Basic info */}
+        {/* Row 1: Plan key + Name */}
         <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
-          <TextField size="small" name="planKey" label="Plan key" required placeholder="e.g. pro" />
-          <TextField size="small" name="name" label="Name" required fullWidth placeholder="e.g. Pro Plan" />
-          <TextField size="small" name="description" label="Description" fullWidth />
-          <TextField size="small" name="sortOrder" label="Sort order" type="number" defaultValue="100" sx={{ width: 100 }} />
+          <Tooltip title="Unique identifier used in code (e.g. free, pro, business). Cannot be changed later." arrow>
+            <TextField
+              size="small"
+              name="planKey"
+              label="Plan Key"
+              required
+              placeholder="e.g. pro"
+              sx={{ minWidth: 180 }}
+            />
+          </Tooltip>
+          <Tooltip title="Display name shown to customers on the pricing page." arrow>
+            <TextField
+              size="small"
+              name="name"
+              label="Plan Name"
+              required
+              fullWidth
+              placeholder="e.g. Pro Plan"
+            />
+          </Tooltip>
         </Stack>
 
-        <FormControlLabel
-          control={<Switch checked={isFree} onChange={(e) => setIsFree(e.target.checked)} />}
-          label="Free plan (no Polar product)"
-        />
+        {/* Row 2: Description + Sort */}
+        <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
+          <Tooltip title="Short description of what the plan includes. Shown on the pricing page." arrow>
+            <TextField
+              size="small"
+              name="description"
+              label="Description"
+              fullWidth
+              placeholder="e.g. For growing businesses"
+            />
+          </Tooltip>
+          <Tooltip title="Display order on the pricing page. Lower numbers appear first." arrow>
+            <TextField
+              size="small"
+              name="sortOrder"
+              label="Sort Order"
+              type="number"
+              defaultValue="100"
+              sx={{ width: 120 }}
+            />
+          </Tooltip>
+        </Stack>
+
+        {/* Free toggle */}
+        <Tooltip title="Free plans have no price and are not synced to Polar. Tenants get them by default." arrow placement="right">
+          <FormControlLabel
+            control={<Switch checked={isFree} onChange={(e) => setIsFree(e.target.checked)} />}
+            label="Free plan (no payment required)"
+            sx={{ width: "fit-content" }}
+          />
+        </Tooltip>
 
         {/* Pricing — hidden when free */}
         {!isFree && (
@@ -97,81 +139,99 @@ export default function CreatePlanForm({ action }: Props) {
             <Divider />
             <Typography variant="subtitle2" color="text.secondary">Pricing</Typography>
 
+            {/* Row 3: Price + Currency + Billing type */}
             <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} alignItems="flex-start">
-              <TextField
-                size="small"
-                name="priceWhole"
-                label={`Price (${currency.code})`}
-                type="number"
-                required={!isFree}
-                placeholder="e.g. 29"
-                inputProps={{ min: 0, step: "0.01" }}
-                sx={{ width: 160 }}
-              />
+              <Tooltip title="Price in whole units (e.g. 29 for $29). Automatically converted to cents for Polar." arrow>
+                <TextField
+                  size="small"
+                  name="priceWhole"
+                  label={`Price (${currency.code})`}
+                  type="number"
+                  required={!isFree}
+                  placeholder="e.g. 29"
+                  inputProps={{ min: 0, step: "0.01" }}
+                  sx={{ width: 160 }}
+                />
+              </Tooltip>
 
-              <Autocomplete
-                size="small"
-                options={[...SUPPORTED_CURRENCIES]}
-                value={currency}
-                onChange={(_, val) => { if (val) setCurrency(val); }}
-                getOptionLabel={(opt) => `${opt.code} — ${opt.name}`}
-                renderInput={(params) => <TextField {...params} label="Currency" />}
-                isOptionEqualToValue={(opt, val) => opt.code === val.code}
-                disableClearable
-                sx={{ width: 280 }}
-              />
+              <Tooltip title="Currency for this plan. Must match what Polar supports." arrow>
+                <Autocomplete
+                  size="small"
+                  options={[...SUPPORTED_CURRENCIES]}
+                  value={currency}
+                  onChange={(_, val) => { if (val) setCurrency(val); }}
+                  getOptionLabel={(opt) => `${opt.code} — ${opt.name}`}
+                  renderInput={(params) => <TextField {...params} label="Currency" />}
+                  isOptionEqualToValue={(opt, val) => opt.code === val.code}
+                  disableClearable
+                  sx={{ width: 280 }}
+                />
+              </Tooltip>
 
-              <FormControl size="small" sx={{ minWidth: 140 }}>
-                <InputLabel>Billing type</InputLabel>
-                <Select
-                  value={billingType}
-                  label="Billing type"
-                  onChange={(e) => setBillingType(e.target.value as "recurring" | "one_time")}
-                >
-                  <MenuItem value="recurring">Recurring</MenuItem>
-                  <MenuItem value="one_time">One-time</MenuItem>
-                </Select>
-              </FormControl>
-            </Stack>
-
-            {billingType === "recurring" && (
-              <Stack direction="row" spacing={1.5}>
-                <FormControl size="small" sx={{ minWidth: 130 }}>
-                  <InputLabel>Interval</InputLabel>
-                  <Select name="recurringInterval" defaultValue="month" label="Interval">
-                    <MenuItem value="month">Monthly</MenuItem>
-                    <MenuItem value="year">Yearly</MenuItem>
+              <Tooltip title="Recurring charges the customer periodically. One-time charges once." arrow>
+                <FormControl size="small" sx={{ minWidth: 150 }}>
+                  <InputLabel>Billing Type</InputLabel>
+                  <Select
+                    value={billingType}
+                    label="Billing Type"
+                    onChange={(e) => setBillingType(e.target.value as "recurring" | "one_time")}
+                  >
+                    <MenuItem value="recurring">Recurring</MenuItem>
+                    <MenuItem value="one_time">One-time</MenuItem>
                   </Select>
                 </FormControl>
-                <TextField
-                  size="small"
-                  name="recurringIntervalCount"
-                  label="Every N"
-                  type="number"
-                  defaultValue="1"
-                  inputProps={{ min: 1, max: 12 }}
-                  sx={{ width: 90 }}
-                />
-                <TextField
-                  size="small"
-                  name="trialDays"
-                  label="Trial days"
-                  type="number"
-                  defaultValue="0"
-                  inputProps={{ min: 0 }}
-                  sx={{ width: 110 }}
-                />
+              </Tooltip>
+            </Stack>
+
+            {/* Row 4: Interval + Interval count (recurring only) */}
+            {billingType === "recurring" && (
+              <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
+                <Tooltip title="How often the customer is billed (monthly or yearly)." arrow>
+                  <FormControl size="small" sx={{ minWidth: 140 }}>
+                    <InputLabel>Interval</InputLabel>
+                    <Select name="recurringInterval" defaultValue="month" label="Interval">
+                      <MenuItem value="month">Monthly</MenuItem>
+                      <MenuItem value="year">Yearly</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Tooltip>
+                <Tooltip title="Bill every N intervals. E.g. 3 months = quarterly billing." arrow>
+                  <TextField
+                    size="small"
+                    name="recurringIntervalCount"
+                    label="Every N intervals"
+                    type="number"
+                    defaultValue="1"
+                    inputProps={{ min: 1, max: 12 }}
+                    sx={{ width: 150 }}
+                  />
+                </Tooltip>
               </Stack>
             )}
 
-            {billingType === "one_time" && (
-              <input type="hidden" name="recurringInterval" value="month" />
+            {/* Row 5: Trial days (separate row for clarity) */}
+            {billingType === "recurring" && (
+              <Tooltip title="Number of free trial days before the first charge. Set to 0 for no trial." arrow>
+                <TextField
+                  size="small"
+                  name="trialDays"
+                  label="Free Trial Days"
+                  type="number"
+                  defaultValue="0"
+                  inputProps={{ min: 0, max: 365 }}
+                  helperText="How many days before the first charge"
+                  sx={{ width: 200 }}
+                />
+              </Tooltip>
             )}
+
+            {/* Hidden fields for one-time billing */}
             {billingType === "one_time" && (
-              <input type="hidden" name="recurringIntervalCount" value="1" />
-            )}
-            {billingType === "one_time" && (
-              <input type="hidden" name="trialDays" value="0" />
+              <>
+                <input type="hidden" name="recurringInterval" value="month" />
+                <input type="hidden" name="recurringIntervalCount" value="1" />
+                <input type="hidden" name="trialDays" value="0" />
+              </>
             )}
           </>
         )}
@@ -180,7 +240,7 @@ export default function CreatePlanForm({ action }: Props) {
           type="submit"
           variant="contained"
           disabled={submitting}
-          sx={{ alignSelf: "flex-start" }}
+          sx={{ alignSelf: "flex-start", mt: 1 }}
         >
           {submitting ? <CircularProgress size={20} /> : "Create Plan"}
         </Button>

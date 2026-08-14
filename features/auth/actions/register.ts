@@ -30,6 +30,7 @@ export async function registerAction(
     });
 
     if (error) {
+      console.error("[register] Supabase signUp error:", { status: error.status, message: error.message, code: error.code });
       if (error.status === 429) {
         return {
           success: false,
@@ -47,6 +48,7 @@ export async function registerAction(
       message: "Check your email to confirm your account.",
     };
   } catch (error) {
+    console.error("[register] Unexpected error:", error);
     if (error && typeof error === "object" && "inner" in error) {
       const yupError = error as { inner: Array<{ path?: string; message: string }> };
       const fieldErrors: Record<string, string> = {};

@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
   const next = searchParams.get("next");
 
   if (!code) {
+    console.error("[auth/callback] No code parameter in callback URL");
     redirect("/auth-error?code=callback_failed");
   }
 
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
+    console.error("[auth/callback] exchangeCodeForSession failed:", { message: error.message, status: error.status, code: error.code });
     redirect("/auth-error?code=callback_failed");
   }
 
@@ -34,6 +36,7 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
+    console.error("[auth/callback] getUser returned null after successful code exchange");
     redirect("/auth-error?code=callback_failed");
   }
 

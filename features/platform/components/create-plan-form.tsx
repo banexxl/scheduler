@@ -31,7 +31,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { SUPPORTED_CURRENCIES, ZERO_DECIMAL_CURRENCIES } from "@/features/business/utils/supported-currencies";
 
 type Props = {
-  action: (formData: FormData) => Promise<void>;
+  action: (formData: FormData) => Promise<string | null>;
 };
 
 export default function CreatePlanForm({ action }: Props) {
@@ -65,7 +65,10 @@ export default function CreatePlanForm({ action }: Props) {
     submissionData.set("trialDays", String(formData.get("trialDays") || "0"));
 
     try {
-      await action(submissionData);
+      const errorMessage = await action(submissionData);
+      if (errorMessage) {
+        setError(errorMessage);
+      }
     } catch (err) {
       console.error("[create-plan-form] Action error:", err);
       setError(err instanceof Error ? err.message : "Failed to create plan");

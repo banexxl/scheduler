@@ -29,6 +29,7 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import HistoryIcon from "@mui/icons-material/History";
 import SubscriptionsIcon from "@mui/icons-material/Subscriptions";
 import StorefrontIcon from "@mui/icons-material/Storefront";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import {
   SIDEBAR_WIDTH,
   platformPalette,
@@ -72,6 +73,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/platform/billing/products", label: "Polar Products", icon: <StorefrontIcon fontSize="small" />, matchPrefix: "/platform/billing/products" },
       { href: "/platform/billing/subscriptions", label: "Subscriptions", icon: <SubscriptionsIcon fontSize="small" />, matchPrefix: "/platform/billing/subscriptions" },
       { href: "/platform/billing/orders", label: "Orders", icon: <ReceiptIcon fontSize="small" />, matchPrefix: "/platform/billing/orders" },
+      { href: "/platform/billing/discounts", label: "Discounts", icon: <LocalOfferIcon fontSize="small" />, matchPrefix: "/platform/billing/discounts" },
       { href: "/platform/billing/webhooks", label: "Webhooks", icon: <WebhookIcon fontSize="small" />, matchPrefix: "/platform/billing/webhooks" },
     ],
   },

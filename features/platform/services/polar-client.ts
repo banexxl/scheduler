@@ -119,6 +119,13 @@ export async function listPolarProductPrices(
      return rows.map((row) => normalizePolarPrice(row, productId));
 }
 
+export async function listPolarDiscounts(): Promise<Array<Record<string, unknown>>> {
+     const payload = await polarFetch<PolarListResponse<Record<string, unknown>>>(
+          "/v1/discounts"
+     );
+     return extractList(payload) as Array<Record<string, unknown>>;
+}
+
 export async function createPolarCheckoutSession(input: {
      productId: string;
      priceId: string;

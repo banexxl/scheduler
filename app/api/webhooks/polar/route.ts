@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPolarEnvironment } from "@/features/platform/services/polar-config";
+import { getPolarEnvironment, getPolarWebhookSecret } from "@/features/platform/services/polar-config";
 import { verifyPolarWebhookSignature } from "@/features/platform/services/polar-webhook-signature";
 import { persistBillingWebhookEvent } from "@/features/platform/services/billing-webhook-events";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Legacy unified Polar webhook route.
+ * Individual per-event routes at /api/polar/webhook/* are preferred.
+ * This route persists events for billing reconciliation as a catch-all.
+ */
 
 function getSignatureHeader(request: NextRequest): string | null {
      return (
@@ -27,10 +33,13 @@ export async function POST(request: NextRequest) {
      const rawBody = await request.text();
      const signatureHeader = getSignatureHeader(request);
 
+     // Try subscription secret as this route was primarily used for billing events
+     const secret = getPolarWebhookSecret("SUBSCRIPTION") || getPolarWebhookSecret("ORDER");
+
      const isValid = verifyPolarWebhookSignature({
           rawBody,
           signatureHeader,
-          secret: environment.webhookSecret,
+          secret,
      });
 
      if (!isValid) {

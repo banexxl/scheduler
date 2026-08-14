@@ -4,7 +4,6 @@ type PolarEnvironment = {
      apiBaseUrl: string;
      accessToken: string;
      organizationId: string | null;
-     webhookSecret: string;
      processorSecret: string;
      syncSecret: string;
 };
@@ -41,7 +40,6 @@ export function getPolarEnvironment(): PolarEnvironment {
           apiBaseUrl: normalizeBaseUrl(process.env.POLAR_API_BASE_URL),
           accessToken: getOptionalEnv("POLAR_ACCESS_TOKEN") ?? "",
           organizationId: getOptionalEnv("POLAR_ORGANIZATION_ID") ?? null,
-          webhookSecret: getOptionalEnv("POLAR_WEBHOOK_SECRET") ?? "",
           processorSecret: "",
           syncSecret: getOptionalEnv("POLAR_RECONCILIATION_SECRET") ?? "",
      };
@@ -49,10 +47,10 @@ export function getPolarEnvironment(): PolarEnvironment {
 
 /**
  * Resolves a per-webhook secret.
- * Example: getPolarWebhookSecret("ORDER") → POLAR_ORDER_WEBHOOK_SECRET → POLAR_WEBHOOK_SECRET
+ * Example: getPolarWebhookSecret("ORDER") → POLAR_ORDER_WEBHOOK_SECRET
  */
 export function getPolarWebhookSecret(type: string): string {
-     return getOptionalEnv(`POLAR_${type}_WEBHOOK_SECRET`) ?? getOptionalEnv("POLAR_WEBHOOK_SECRET") ?? "";
+     return getOptionalEnv(`POLAR_${type}_WEBHOOK_SECRET`) ?? "";
 }
 
 export function getBillingProcessorSecret(): string {
@@ -66,12 +64,13 @@ export function getBillingSyncSecret(): string {
 export function getBillingDiagnosticsConfig() {
      const env = getPolarEnvironment();
 
-     // Check if any webhook secret is configured
+     // Check if any per-endpoint webhook secret is configured
      const hasAnyWebhookSecret = Boolean(
-          env.webhookSecret ||
           getOptionalEnv("POLAR_ORDER_WEBHOOK_SECRET") ||
           getOptionalEnv("POLAR_CHECKOUT_WEBHOOK_SECRET") ||
-          getOptionalEnv("POLAR_SUBSCRIPTION_WEBHOOK_SECRET")
+          getOptionalEnv("POLAR_SUBSCRIPTION_WEBHOOK_SECRET") ||
+          getOptionalEnv("POLAR_REFUND_WEBHOOK_SECRET") ||
+          getOptionalEnv("POLAR_DISCOUNT_WEBHOOK_SECRET")
      );
 
      return {

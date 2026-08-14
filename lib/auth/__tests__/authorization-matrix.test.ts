@@ -302,7 +302,7 @@ describe("environment secret safety", () => {
   const serverSecrets = [
     "SUPABASE_SERVICE_ROLE_KEY",
     "NOTIFICATION_PROCESSOR_SECRET",
-    "POLAR_WEBHOOK_SECRET",
+    "POLAR_ORDER_WEBHOOK_SECRET",
     "POLAR_ACCESS_TOKEN",
     "APPOINTMENT_TOKEN_ENCRYPTION_KEY",
     "SMTP_PASS",

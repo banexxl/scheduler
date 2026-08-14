@@ -7,7 +7,6 @@ const serverEnvironmentSchema = yup.object({
   polarApiBaseUrl: yup.string().optional().default("https://api.polar.sh"),
   polarAccessToken: yup.string().optional().default(""),
   polarOrganizationId: yup.string().optional().default(""),
-  polarWebhookSecret: yup.string().optional().default(""),
   polarServer: yup.string().optional().default("sandbox"),
   polarReconciliationSecret: yup.string().optional().default(""),
 });
@@ -22,7 +21,6 @@ function validateServerEnvironment(): ServerEnvironment {
       polarApiBaseUrl: process.env.POLAR_API_BASE_URL,
       polarAccessToken: process.env.POLAR_ACCESS_TOKEN,
       polarOrganizationId: process.env.POLAR_ORGANIZATION_ID,
-      polarWebhookSecret: process.env.POLAR_WEBHOOK_SECRET,
       polarServer: process.env.POLAR_SERVER,
       polarReconciliationSecret: process.env.POLAR_RECONCILIATION_SECRET,
     });

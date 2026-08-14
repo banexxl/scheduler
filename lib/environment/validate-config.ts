@@ -34,7 +34,7 @@ const FEATURE_CONFIGS: Record<string, { envs: string[]; feature: string }> = {
     feature: "SMTP delivery (when EMAIL_PROVIDER=nodemailer)",
   },
   polar: {
-    envs: ["POLAR_ACCESS_TOKEN", "POLAR_WEBHOOK_SECRET"],
+    envs: ["POLAR_ACCESS_TOKEN", "POLAR_ORDER_WEBHOOK_SECRET"],
     feature: "Polar billing integration",
   },
   tokenEncryption: {
@@ -107,7 +107,7 @@ export function getFeatureAvailability(): Record<string, boolean> {
     supabase: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
     emailNotifications: Boolean(process.env.NOTIFICATION_PROCESSOR_SECRET),
     smtpDelivery: process.env.EMAIL_PROVIDER === "nodemailer" && Boolean(process.env.SMTP_HOST),
-    polarBilling: Boolean(process.env.POLAR_ACCESS_TOKEN && process.env.POLAR_WEBHOOK_SECRET),
+    polarBilling: Boolean(process.env.POLAR_ACCESS_TOKEN && process.env.POLAR_ORDER_WEBHOOK_SECRET),
     appointmentSelfService: Boolean(process.env.APPOINTMENT_TOKEN_ENCRYPTION_KEY),
   };
 }

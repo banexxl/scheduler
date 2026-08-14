@@ -12,7 +12,6 @@
  */
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
@@ -26,11 +25,9 @@ import type { PlanOption } from "./plan-selection-step";
 
 type Props = {
   plans: PlanOption[];
-  userEmail: string;
 };
 
-export default function CreateBusinessWithPlanFlow({ plans, userEmail }: Props) {
-  const router = useRouter();
+export default function CreateBusinessWithPlanFlow({ plans }: Props) {
   const [step, setStep] = useState<"plan" | "business">(plans.length > 0 ? "plan" : "business");
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

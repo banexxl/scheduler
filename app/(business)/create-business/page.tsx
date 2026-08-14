@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import Container from "@mui/material/Container";
-import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
@@ -78,7 +77,7 @@ export default async function CreateBusinessPage() {
 
   return (
     <Container maxWidth="sm" sx={{ py: { xs: 3, sm: 6 } }}>
-      <CreateBusinessWithPlanFlow plans={plans} userEmail={user.email ?? ""} />
+      <CreateBusinessWithPlanFlow plans={plans} />
 
       {/* Footer links */}
       <Box

@@ -69,7 +69,6 @@ export default function PlanSelectionStep({ plans, onSelectFree, onSelectPaid }:
 
       <Stack spacing={2}>
         {plans.map((plan) => {
-          const canTrial = plan.isFree || plan.trialDays > 0;
           const needsPayment = !plan.isFree && plan.trialDays === 0;
 
           return (

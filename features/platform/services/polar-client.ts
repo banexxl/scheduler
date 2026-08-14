@@ -160,10 +160,27 @@ export async function createPolarProduct(input: CreatePolarProductInput): Promis
           price.recurring_interval_count = input.recurringIntervalCount ?? 1;
      }
 
+     // Polar requires the org's default presentment currency (USD) to be present.
+     // If the selected currency isn't USD, add a USD price as well.
+     const prices: Array<Record<string, unknown>> = [price];
+     if (input.priceCurrency.toLowerCase() !== "usd") {
+          const usdPrice: Record<string, unknown> = {
+               type: input.isRecurring ? "recurring" : "one_time",
+               amount_type: "fixed",
+               price_amount: input.priceAmount, // Same amount in USD as fallback
+               price_currency: "usd",
+          };
+          if (input.isRecurring && input.recurringInterval) {
+               usdPrice.recurring_interval = input.recurringInterval;
+               usdPrice.recurring_interval_count = input.recurringIntervalCount ?? 1;
+          }
+          prices.push(usdPrice);
+     }
+
      // Build product payload
      const productPayload: Record<string, unknown> = {
           name: input.name,
-          prices: [price],
+          prices,
           metadata: {
                ...(input.metadata ?? {}),
                ...(input.description ? { description: input.description } : {}),
@@ -182,7 +199,6 @@ export async function createPolarProduct(input: CreatePolarProductInput): Promis
      if (!productId) throw new Error("[polar-client] Product create response missing id");
 
      // Extract price ID from response
-     const prices = (response.prices ?? []) as Array<Record<string, unknown>>;
      const priceId = String(prices[0]?.id ?? "");
 
      return {

@@ -205,7 +205,7 @@ export async function updateBillingPlanAction(input: {
      try {
           const { data: existingPlan } = await adminClient
                .from("billing_plans" as never)
-               .select("id, plan_key")
+               .select("id, plan_key, polar_product_id, is_active")
                .eq("id" as never, input.id)
                .single();
 
@@ -213,10 +213,12 @@ export async function updateBillingPlanAction(input: {
                return { success: false, message: "Billing plan was not found." };
           }
 
+          const plan = existingPlan as unknown as { id: string; plan_key: string; polar_product_id: string | null; is_active: boolean };
+
           const validated = await billingPlanUpsertSchema.validate(
                {
                     ...input,
-                    planKey: String((existingPlan as { plan_key: string }).plan_key),
+                    planKey: plan.plan_key,
                },
                {
                     abortEarly: false,
@@ -224,6 +226,7 @@ export async function updateBillingPlanAction(input: {
                }
           );
 
+          // Update local plan
           const { error } = await adminClient
                .from("billing_plans" as never)
                .update(
@@ -234,6 +237,9 @@ export async function updateBillingPlanAction(input: {
                          is_active: validated.isActive,
                          is_public: validated.isPublic,
                          sort_order: validated.sortOrder,
+                         polar_product_name: validated.name,
+                         polar_product_description: validated.description ?? null,
+                         last_synced_at: plan.polar_product_id ? new Date().toISOString() : null,
                     } as never
                )
                .eq("id" as never, input.id);
@@ -242,8 +248,29 @@ export async function updateBillingPlanAction(input: {
                return { success: false, message: "Unable to update billing plan." };
           }
 
+          // Sync to Polar if product is mapped
+          if (plan.polar_product_id) {
+               try {
+                    const { updatePolarProduct } = await import("../services/polar-client");
+                    await updatePolarProduct(plan.polar_product_id, {
+                         name: validated.name,
+                         description: validated.description ?? null,
+                         isArchived: !validated.isActive,
+                    });
+               } catch (polarError) {
+                    // Local update succeeded but Polar sync failed — not fatal
+                    // Next webhook or manual refresh will reconcile
+                    console.error("[billing-plan] Polar sync failed:", polarError instanceof Error ? polarError.message : "unknown");
+               }
+          }
+
           revalidatePlatformBillingRoutes();
-          return { success: true, message: "Billing plan updated." };
+          return {
+               success: true,
+               message: plan.polar_product_id
+                    ? "Billing plan updated and synced to Polar."
+                    : "Billing plan updated.",
+          };
      } catch {
           return { success: false, message: "Invalid billing plan data." };
      }
@@ -256,6 +283,14 @@ export async function toggleBillingPlanActiveAction(
      await requirePlatformAdmin();
 
      const adminClient = createAdminClient();
+
+     // Load plan to get polar_product_id
+     const { data: plan } = await adminClient
+          .from("billing_plans" as never)
+          .select("id, polar_product_id" as never)
+          .eq("id" as never, planId)
+          .single();
+
      const { error } = await adminClient
           .from("billing_plans" as never)
           .update({ is_active: isActive } as never)
@@ -263,6 +298,17 @@ export async function toggleBillingPlanActiveAction(
 
      if (error) {
           return { success: false, message: "Unable to update plan active state." };
+     }
+
+     // Sync archive state to Polar
+     const polarProductId = (plan as unknown as { polar_product_id: string | null } | null)?.polar_product_id;
+     if (polarProductId) {
+          try {
+               const { updatePolarProduct } = await import("../services/polar-client");
+               await updatePolarProduct(polarProductId, { isArchived: !isActive });
+          } catch {
+               // Non-fatal — webhook will reconcile
+          }
      }
 
      revalidatePlatformBillingRoutes();

@@ -8,6 +8,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -71,9 +72,11 @@ export default function CampaignBuilderClient({ tenantSlug, savedSegments, built
         audienceSource,
       });
       if (result.success && result.campaignId) {
+        toast.success("Campaign created!");
         router.push(`/${tenantSlug}/campaigns/${result.campaignId}`);
       } else if (!result.success) {
         setError(result.message);
+        toast.error(result.message);
       }
     });
   };

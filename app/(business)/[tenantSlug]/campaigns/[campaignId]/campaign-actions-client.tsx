@@ -10,6 +10,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
@@ -44,10 +45,13 @@ export default function CampaignActionsClient({ tenantSlug, campaignId, status }
     setMessage(null);
     startTransition(async () => {
       const result = await sendTestCampaignAction(tenantSlug, campaignId);
-      setMessage(result.success
-        ? { type: "success", text: "Test email sent to your account." }
-        : { type: "error", text: result.message }
-      );
+      if (result.success) {
+        setMessage({ type: "success", text: "Test email sent to your account." });
+        toast.success("Test email sent!");
+      } else {
+        setMessage({ type: "error", text: result.message });
+        toast.error(result.message);
+      }
     });
   };
 
@@ -57,9 +61,11 @@ export default function CampaignActionsClient({ tenantSlug, campaignId, status }
     startTransition(async () => {
       const result = await sendCampaignNowAction(tenantSlug, campaignId);
       if (result.success) {
+        toast.success("Campaign sent!");
         router.refresh();
       } else {
         setMessage({ type: "error", text: result.message });
+        toast.error(result.message);
       }
     });
   };
@@ -72,9 +78,11 @@ export default function CampaignActionsClient({ tenantSlug, campaignId, status }
       const result = await scheduleCampaignAction(tenantSlug, campaignId, utcDate);
       if (result.success) {
         setScheduleOpen(false);
+        toast.success("Campaign scheduled!");
         router.refresh();
       } else {
         setMessage({ type: "error", text: result.message });
+        toast.error(result.message);
       }
     });
   };
@@ -83,7 +91,12 @@ export default function CampaignActionsClient({ tenantSlug, campaignId, status }
     if (!confirm("Cancel this campaign?")) return;
     startTransition(async () => {
       const result = await cancelCampaignAction(tenantSlug, campaignId);
-      if (result.success) router.refresh();
+      if (result.success) {
+        toast.success("Campaign cancelled.");
+        router.refresh();
+      } else {
+        toast.error("Failed to cancel campaign.");
+      }
     });
   };
 
@@ -91,7 +104,12 @@ export default function CampaignActionsClient({ tenantSlug, campaignId, status }
     if (!confirm("Delete this campaign? This cannot be undone.")) return;
     startTransition(async () => {
       const result = await deleteCampaignAction(tenantSlug, campaignId);
-      if (result.success) router.push(`/${tenantSlug}/campaigns`);
+      if (result.success) {
+        toast.success("Campaign deleted.");
+        router.push(`/${tenantSlug}/campaigns`);
+      } else {
+        toast.error("Failed to delete campaign.");
+      }
     });
   };
 

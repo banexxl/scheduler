@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Formik, Form, Field } from "formik";
+import { showActionToast } from "@/lib/hooks/use-action-toast";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -100,6 +101,7 @@ export default function BusinessSettingsForm({
     startTransition(async () => {
       const result = await updateBusinessSettingsAction(tenantSlug, values);
       setActionResult(result);
+      showActionToast(result, "Settings saved!");
       if (result.success) {
         // Reset form with new values so dirty state clears
         resetForm({ values });

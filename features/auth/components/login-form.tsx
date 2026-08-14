@@ -2,6 +2,7 @@
 
 import { useTransition, useState } from "react";
 import { Formik, Form, Field } from "formik";
+import toast from "react-hot-toast";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -31,6 +32,7 @@ export default function LoginForm() {
       setActionResult(result);
       // Clear password on failure
       if (!result.success) {
+        toast.error(result.message ?? "Login failed.");
         setFieldValue("password", "");
       }
     });

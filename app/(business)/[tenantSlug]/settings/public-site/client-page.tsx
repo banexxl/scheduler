@@ -18,6 +18,7 @@
  */
 
 import { useState, useCallback } from "react";
+import toast from "react-hot-toast";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -115,8 +116,10 @@ export default function PublicSiteEditorClient({
       setDraftVersion(result.draftVersion);
       setHasChanges(true); // Still unpublished
       setMessage({ type: "success", text: "Draft saved." });
+      toast.success("Draft saved!");
     } else {
       setMessage({ type: "error", text: result.error });
+      toast.error(result.error);
     }
   }, [tenantSlug, config]);
 
@@ -143,8 +146,10 @@ export default function PublicSiteEditorClient({
     if (publishResult.success) {
       setHasChanges(false);
       setMessage({ type: "success", text: "Published! Your public website has been updated." });
+      toast.success("Published!");
     } else {
       setMessage({ type: "error", text: publishResult.error });
+      toast.error(publishResult.error);
     }
   }, [tenantSlug, config]);
 

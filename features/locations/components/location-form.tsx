@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useTransition } from "react";
 import { Formik, Form, Field } from "formik";
+import { showActionToast } from "@/lib/hooks/use-action-toast";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -90,6 +91,7 @@ export default function LocationForm({
     startTransition(async () => {
       const result = await onSubmit(values);
       setActionResult(result);
+      showActionToast(result, "Location saved!");
       if (result.success) {
         resetForm({ values });
       }

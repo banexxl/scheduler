@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useTransition } from "react";
+import toast from "react-hot-toast";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -74,6 +75,7 @@ export default function MediaUploader({
         );
         if (!prepare.success || !prepare.uploadPath) {
           setError(prepare.message ?? "Upload preparation failed.");
+          toast.error(prepare.message ?? "Upload preparation failed.");
           return;
         }
 
@@ -91,6 +93,7 @@ export default function MediaUploader({
 
         if (uploadError) {
           setError("Upload failed. Please try again.");
+          toast.error("Upload failed. Please try again.");
           return;
         }
 
@@ -110,10 +113,12 @@ export default function MediaUploader({
 
         if (!complete.success) {
           setError(complete.message ?? "Failed to save media metadata.");
+          toast.error(complete.message ?? "Failed to save media metadata.");
           return;
         }
 
         setSuccess(true);
+        toast.success("File uploaded!");
         setSelectedFile(null);
         setPreviewUrl(null);
         setAltText("");
@@ -121,6 +126,7 @@ export default function MediaUploader({
         onUploadComplete?.();
       } catch {
         setError("An unexpected error occurred.");
+        toast.error("An unexpected error occurred.");
       }
     });
   };

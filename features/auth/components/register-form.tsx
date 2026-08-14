@@ -2,6 +2,7 @@
 
 import { useTransition, useState } from "react";
 import { Formik, Form, Field } from "formik";
+import toast from "react-hot-toast";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -34,8 +35,11 @@ export default function RegisterForm() {
       const result = await registerAction(formData);
       setActionResult(result);
       if (!result.success) {
+        toast.error(result.message ?? "Registration failed.");
         setFieldValue("password", "");
         setFieldValue("confirmPassword", "");
+      } else {
+        toast.success("Account created!");
       }
     });
   };

@@ -28,6 +28,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Divider from "@mui/material/Divider";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
+import toast from "react-hot-toast";
 import { SUPPORTED_CURRENCIES, ZERO_DECIMAL_CURRENCIES } from "@/features/business/utils/supported-currencies";
 
 type Props = {
@@ -68,10 +69,15 @@ export default function CreatePlanForm({ action }: Props) {
       const errorMessage = await action(submissionData);
       if (errorMessage) {
         setError(errorMessage);
+        toast.error(errorMessage);
+      } else {
+        toast.success("Plan created successfully!");
       }
     } catch (err) {
       console.error("[create-plan-form] Action error:", err);
-      setError(err instanceof Error ? err.message : "Failed to create plan");
+      const msg = err instanceof Error ? err.message : "Failed to create plan";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }

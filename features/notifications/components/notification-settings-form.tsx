@@ -17,6 +17,7 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import { useFormik } from "formik";
+import { showActionToast } from "@/lib/hooks/use-action-toast";
 import { notificationSettingsSchema } from "../schemas/notification-schemas";
 import { updateNotificationSettingsAction } from "../actions/update-notification-settings-action";
 import type { ResolvedNotificationSettings } from "../types/notification";
@@ -61,8 +62,10 @@ export default function NotificationSettingsForm({
 
         if (result.success) {
           setFeedback({ type: "success", message: "Notification settings saved." });
+          showActionToast(result, "Notification settings saved!");
         } else {
           setFeedback({ type: "error", message: result.error });
+          showActionToast({ success: false, message: result.error }, "Notification settings saved!");
         }
       });
     },

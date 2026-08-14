@@ -9,6 +9,7 @@
 
 import { useState, useTransition } from "react";
 import { Formik, Form, Field } from "formik";
+import { showActionToast } from "@/lib/hooks/use-action-toast";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -58,6 +59,7 @@ export default function TenantBookingRulesForm({ tenantSlug, existingRules, canE
     startTransition(async () => {
       const result = await saveTenantBookingRulesAction(tenantSlug, values as unknown as Record<string, unknown>);
       setActionResult(result);
+      showActionToast(result, "Booking rules saved!");
       if (result.success) {
         resetForm({ values });
       }

@@ -7,6 +7,7 @@
  */
 
 import { useState, useTransition } from "react";
+import toast from "react-hot-toast";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
@@ -67,6 +68,7 @@ export default function AppointmentEditForm({
     }
 
     setSuccess(true);
+    toast.success("Appointment updated!");
     startTransition(() => router.refresh());
   }
 

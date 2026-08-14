@@ -16,6 +16,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
+import toast from "react-hot-toast";
 
 type PlanInfo = {
   id: string;
@@ -44,23 +45,31 @@ export default function PlanActionButtons({ plan, onToggleActive, onTogglePublic
       switch (dialog) {
         case "activate":
           await onToggleActive(plan.id, true);
+          toast.success(`"${plan.name}" activated.`);
           break;
         case "deactivate":
           await onToggleActive(plan.id, false);
+          toast.success(`"${plan.name}" deactivated.`);
           break;
         case "show":
           await onTogglePublic(plan.id, true);
+          toast.success(`"${plan.name}" is now public.`);
           break;
         case "hide":
           await onTogglePublic(plan.id, false);
+          toast.success(`"${plan.name}" hidden.`);
           break;
         case "delete":
           await onDelete(plan.id);
+          toast.success(`"${plan.name}" deleted.`);
           break;
         case "refresh":
           if (plan.polarProductId) await onRefresh(plan.polarProductId);
+          toast.success(`"${plan.name}" refreshed from Polar.`);
           break;
       }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Action failed");
     } finally {
       setLoading(false);
       setDialog(null);

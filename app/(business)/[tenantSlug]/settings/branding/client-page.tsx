@@ -7,6 +7,7 @@
  */
 
 import { useState, useTransition } from "react";
+import toast from "react-hot-toast";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -59,8 +60,13 @@ export default function BrandingEditorClient({
     setMessage(null);
     startTransition(async () => {
       const result = await saveTenantBrandingDraftAction(tenantSlug, config);
-      if (result.success) setMessage(result.message ?? "Saved!");
-      else setError(result.message);
+      if (result.success) {
+        setMessage(result.message ?? "Saved!");
+        toast.success("Draft saved!");
+      } else {
+        setError(result.message);
+        toast.error(result.message);
+      }
     });
   };
 
@@ -69,8 +75,13 @@ export default function BrandingEditorClient({
     setMessage(null);
     startTransition(async () => {
       const result = await publishTenantBrandingAction(tenantSlug, draftVersion);
-      if (result.success) setMessage(result.message ?? "Published!");
-      else setError(result.message);
+      if (result.success) {
+        setMessage(result.message ?? "Published!");
+        toast.success("Branding published!");
+      } else {
+        setError(result.message);
+        toast.error(result.message);
+      }
     });
   };
 

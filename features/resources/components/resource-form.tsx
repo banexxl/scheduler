@@ -2,6 +2,7 @@
 
 import { useState, useRef, useTransition } from "react";
 import { Formik, Form, Field } from "formik";
+import { showActionToast } from "@/lib/hooks/use-action-toast";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -39,7 +40,7 @@ export default function ResourceForm({ initialValues, onSubmit, submitLabel, can
   const handleSubmit = (values: ResourceFormValues, { resetForm }: { resetForm: (o: { values: ResourceFormValues }) => void }) => {
     if (!canEdit) return;
     setActionResult(null);
-    startTransition(async () => { const r = await onSubmit(values); setActionResult(r); if (r.success) resetForm({ values }); });
+    startTransition(async () => { const r = await onSubmit(values); setActionResult(r); showActionToast(r, "Resource saved!"); if (r.success) resetForm({ values }); });
   };
 
   const activeTypes = resourceTypes.filter((t) => t.isActive);

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useTransition } from "react";
 import { Formik, Form, Field } from "formik";
+import { showActionToast } from "@/lib/hooks/use-action-toast";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -57,6 +58,7 @@ export default function ServiceForm({ initialValues, onSubmit, submitLabel, canE
     setResourceError(null);
     startTransition(async () => {
       const r = await onSubmit(values);
+      showActionToast(r, "Service saved!");
       if (r.success && onLocationsSave) {
         const locResult = await onLocationsSave(selectedLocationIds);
         if (!locResult.success) {

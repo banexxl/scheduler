@@ -2,6 +2,7 @@
 
 import { useState, useRef, useTransition } from "react";
 import { Formik, Form, Field } from "formik";
+import { showActionToast } from "@/lib/hooks/use-action-toast";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -27,7 +28,7 @@ export default function ServiceCategoryForm({ initialValues, onSubmit, submitLab
   const handleSubmit = (values: ServiceCategoryFormValues, { resetForm }: { resetForm: (o: { values: ServiceCategoryFormValues }) => void }) => {
     if (!canEdit) return;
     setActionResult(null);
-    startTransition(async () => { const r = await onSubmit(values); setActionResult(r); if (r.success) resetForm({ values }); });
+    startTransition(async () => { const r = await onSubmit(values); setActionResult(r); showActionToast(r, "Category saved!"); if (r.success) resetForm({ values }); });
   };
 
   return (

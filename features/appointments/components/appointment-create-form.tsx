@@ -15,6 +15,7 @@
  */
 
 import { useState, useTransition } from "react";
+import toast from "react-hot-toast";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -172,9 +173,11 @@ export default function AppointmentCreateForm({
                     setRecurrenceConflicts(result.conflicts);
                 }
                 setError(result.message);
+                toast.error(result.message);
                 return;
             }
 
+            toast.success("Appointment created!");
             startTransition(() => {
                 router.push(`/${tenantSlug}/appointment-series/${result.seriesId}`);
             });
@@ -197,9 +200,11 @@ export default function AppointmentCreateForm({
 
             if (!result.success) {
                 setError(result.error);
+                toast.error(result.error);
                 return;
             }
 
+            toast.success("Appointment created!");
             startTransition(() => {
                 router.push(`/${tenantSlug}/appointments/${result.data.id}`);
             });

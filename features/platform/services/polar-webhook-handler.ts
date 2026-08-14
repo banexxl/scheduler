@@ -27,12 +27,8 @@ export async function parsePolarWebhook(
   const secret = getPolarWebhookSecret(webhookType);
 
   if (!verifyPolarWebhookSignature({ rawBody, signatureHeader: sig, secret, svixId, svixTimestamp })) {
-    // TODO: Re-enable signature verification once secret sync is confirmed
-    // For now, log the failure but allow the request through
-    console.warn("[polar-webhook] Signature mismatch — BYPASSED for debugging", {
-      webhookType,
-      secretPrefix: secret ? `${secret.slice(0, 10)}...` : "EMPTY",
-    });
+    console.error("[polar-webhook] Signature verification failed", { webhookType });
+    return { payload: null, error: NextResponse.json({ error: "Invalid signature" }, { status: 401 }) };
   }
 
   try {

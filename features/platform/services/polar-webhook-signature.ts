@@ -1,70 +1,127 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-function normalizeToken(value: string): string {
-     return value.trim().replace(/^sha256=/i, "").replace(/^v1=/i, "");
-}
+/**
+ * Polar Webhook Signature Verification.
+ *
+ * Polar uses Svix for webhook delivery. Svix signs with:
+ * - Headers: svix-id, svix-timestamp, svix-signature
+ * - Signature: HMAC-SHA256 over "{svix-id}.{svix-timestamp}.{body}"
+ * - Secret: base64-decoded (secrets start with "whsec_")
+ * - Signature header format: "v1,{base64-encoded-hmac}"
+ *
+ * Also supports legacy format where signature is plain HMAC of body.
+ */
 
-function decodeBase64ToHex(value: string): string | null {
-     try {
-          const bytes = Buffer.from(value, "base64");
-          if (bytes.length === 0) return null;
-          return bytes.toString("hex");
-     } catch {
-          return null;
+function decodeSecret(secret: string): Buffer {
+     // Svix secrets start with "whsec_" prefix — strip it and base64-decode
+     const cleaned = secret.trim();
+     if (cleaned.startsWith("whsec_")) {
+          return Buffer.from(cleaned.slice(6), "base64");
      }
+     // Fallback: use as-is (utf8 key)
+     return Buffer.from(cleaned, "utf8");
 }
 
-function isHex(value: string): boolean {
-     return /^[a-fA-F0-9]+$/.test(value) && value.length % 2 === 0;
-}
+function verifySvixSignature(params: {
+     rawBody: string;
+     svixId: string | null;
+     svixTimestamp: string | null;
+     signatureHeader: string;
+     secret: string;
+}): boolean {
+     const { rawBody, svixId, svixTimestamp, signatureHeader, secret } = params;
 
-function parseSignatureHeader(value: string): string[] {
-     return value
-          .split(",")
-          .map((part) => part.trim())
-          .filter(Boolean)
-          .flatMap((part) => {
-               const eqIndex = part.indexOf("=");
-               if (eqIndex > -1) {
-                    return [part.slice(eqIndex + 1).trim()];
+     if (!svixId || !svixTimestamp) return false;
+
+     const secretBytes = decodeSecret(secret);
+     const signedContent = `${svixId}.${svixTimestamp}.${rawBody}`;
+
+     const expectedSignature = createHmac("sha256", secretBytes)
+          .update(signedContent, "utf8")
+          .digest("base64");
+
+     // Parse "v1,{base64}" format — may have multiple signatures
+     const signatures = signatureHeader.split(" ").flatMap(part => {
+          const trimmed = part.trim();
+          if (trimmed.startsWith("v1,")) {
+               return [trimmed.slice(3)];
+          }
+          return [];
+     });
+
+     for (const sig of signatures) {
+          try {
+               const sigBuffer = Buffer.from(sig, "base64");
+               const expectedBuffer = Buffer.from(expectedSignature, "base64");
+               if (sigBuffer.length === expectedBuffer.length && timingSafeEqual(sigBuffer, expectedBuffer)) {
+                    return true;
                }
-               return [part];
-          })
-          .map(normalizeToken)
-          .flatMap((token) => {
-               if (!token) return [];
-               if (isHex(token)) return [token.toLowerCase()];
+          } catch {
+               continue;
+          }
+     }
 
-               const maybeHex = decodeBase64ToHex(token);
-               return maybeHex ? [maybeHex.toLowerCase()] : [];
-          });
+     return false;
 }
 
-function safeEqualHex(a: string, b: string): boolean {
-     if (a.length !== b.length) return false;
+function verifyLegacySignature(params: {
+     rawBody: string;
+     signatureHeader: string;
+     secret: string;
+}): boolean {
+     const { rawBody, signatureHeader, secret } = params;
 
-     const left = Buffer.from(a, "hex");
-     const right = Buffer.from(b, "hex");
+     // Legacy: plain HMAC-SHA256 of body
+     const expectedHex = createHmac("sha256", secret)
+          .update(rawBody, "utf8")
+          .digest("hex")
+          .toLowerCase();
 
-     if (left.length !== right.length) return false;
-     return timingSafeEqual(left, right);
+     // Try to match various formats
+     const candidates = signatureHeader
+          .split(",")
+          .map(p => p.trim())
+          .filter(Boolean)
+          .map(p => {
+               // Strip prefixes like "sha256=" or "v1="
+               const eq = p.indexOf("=");
+               return eq > -1 ? p.slice(eq + 1).trim() : p;
+          });
+
+     for (const candidate of candidates) {
+          // Try as hex
+          if (/^[a-fA-F0-9]+$/.test(candidate) && candidate.length === 64) {
+               if (candidate.toLowerCase() === expectedHex) return true;
+          }
+          // Try as base64 → hex
+          try {
+               const decoded = Buffer.from(candidate, "base64").toString("hex").toLowerCase();
+               if (decoded === expectedHex) return true;
+          } catch {
+               // skip
+          }
+     }
+
+     return false;
 }
 
 export function verifyPolarWebhookSignature(params: {
      rawBody: string;
      signatureHeader: string | null;
      secret: string;
+     svixId?: string | null;
+     svixTimestamp?: string | null;
 }): boolean {
-     const { rawBody, signatureHeader, secret } = params;
+     const { rawBody, signatureHeader, secret, svixId, svixTimestamp } = params;
      if (!signatureHeader || !secret.trim()) return false;
 
-     const candidates = parseSignatureHeader(signatureHeader);
-     if (candidates.length === 0) return false;
+     // Try Svix format first (Polar's current method)
+     if (svixId && svixTimestamp) {
+          if (verifySvixSignature({ rawBody, svixId, svixTimestamp, signatureHeader, secret })) {
+               return true;
+          }
+     }
 
-     const expectedHex = createHmac("sha256", secret)
-          .update(rawBody, "utf8")
-          .digest("hex")
-          .toLowerCase();
-
-     return candidates.some((candidate) => safeEqualHex(candidate, expectedHex));
+     // Fallback to legacy HMAC verification
+     return verifyLegacySignature({ rawBody, signatureHeader, secret });
 }

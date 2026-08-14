@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyPolarWebhookSignature } from "@/features/platform/services/polar-webhook-signature";
-import { getPolarEnvironment, getPolarWebhookSecret } from "@/features/platform/services/polar-config";
+import { parsePolarWebhook } from "@/features/platform/services/polar-webhook-handler";
 import { logger } from "@/lib/logging";
 import { isAppointmentPaymentEvent, processAppointmentPaymentWebhook } from "@/features/payments/services/process-appointment-payment-webhook";
 import { isGiftCardPurchaseEvent, processGiftCardPurchaseOrderPaid } from "@/features/gift-cards/services/process-gift-card-webhook";
@@ -16,7 +15,7 @@ export const dynamic = "force-dynamic";
  * - SaaS billing checkouts (handled by billing persistence)
  */
 export async function POST(request: NextRequest) {
-  const { payload, error } = await parseAndVerify(request);
+  const { payload, error } = await parsePolarWebhook(request, "CHECKOUT");
   if (error) return error;
 
   const event = payload as Record<string, unknown>;
@@ -44,25 +43,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function parseAndVerify(request: NextRequest) {
-  let environment;
-  try {
-    environment = getPolarEnvironment();
-  } catch {
-    return { payload: null, error: NextResponse.json({ error: "Not configured" }, { status: 503 }) };
-  }
-
-  const rawBody = await request.text();
-  const sig = request.headers.get("polar-signature") ?? request.headers.get("x-polar-signature") ?? request.headers.get("svix-signature");
-  const secret = getPolarWebhookSecret("CHECKOUT");
-
-  if (!verifyPolarWebhookSignature({ rawBody, signatureHeader: sig, secret })) {
-    return { payload: null, error: NextResponse.json({ error: "Invalid signature" }, { status: 401 }) };
-  }
-
-  try {
-    return { payload: JSON.parse(rawBody), error: null };
-  } catch {
-    return { payload: null, error: NextResponse.json({ error: "Invalid JSON" }, { status: 400 }) };
-  }
-}

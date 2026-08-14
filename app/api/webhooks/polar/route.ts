@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPolarEnvironment, getPolarWebhookSecret } from "@/features/platform/services/polar-config";
-import { verifyPolarWebhookSignature } from "@/features/platform/services/polar-webhook-signature";
+import { parsePolarWebhook } from "@/features/platform/services/polar-webhook-handler";
 import { persistBillingWebhookEvent } from "@/features/platform/services/billing-webhook-events";
 
 export const dynamic = "force-dynamic";
@@ -11,50 +10,12 @@ export const dynamic = "force-dynamic";
  * This route persists events for billing reconciliation as a catch-all.
  */
 
-function getSignatureHeader(request: NextRequest): string | null {
-     return (
-          request.headers.get("polar-signature") ??
-          request.headers.get("x-polar-signature") ??
-          request.headers.get("svix-signature")
-     );
-}
-
 export async function POST(request: NextRequest) {
-     let environment;
-     try {
-          environment = getPolarEnvironment();
-     } catch {
-          return NextResponse.json(
-               { error: "Billing webhook endpoint is not configured" },
-               { status: 503 }
-          );
-     }
-
-     const rawBody = await request.text();
-     const signatureHeader = getSignatureHeader(request);
-
-     // Try subscription secret as this route was primarily used for billing events
-     const secret = getPolarWebhookSecret("SUBSCRIPTION") || getPolarWebhookSecret("ORDER");
-
-     const isValid = verifyPolarWebhookSignature({
-          rawBody,
-          signatureHeader,
-          secret,
-     });
-
-     if (!isValid) {
-          return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-     }
-
-     let payload: unknown;
-     try {
-          payload = JSON.parse(rawBody);
-     } catch {
-          return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
-     }
+     const { payload, error } = await parsePolarWebhook(request, "SUBSCRIPTION");
+     if (error) return error;
 
      try {
-          const persisted = await persistBillingWebhookEvent({ payload, rawBody });
+          const persisted = await persistBillingWebhookEvent({ payload, rawBody: JSON.stringify(payload) });
 
           return NextResponse.json(
                {
@@ -64,9 +25,9 @@ export async function POST(request: NextRequest) {
                },
                { status: 200 }
           );
-     } catch (error) {
+     } catch (err) {
           console.error("[webhooks/polar] Persist failed", {
-               error: error instanceof Error ? error.message : "unknown",
+               error: err instanceof Error ? err.message : "unknown",
           });
 
           return NextResponse.json(

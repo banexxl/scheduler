@@ -51,6 +51,13 @@ function verifySvixSignature(params: {
 
      for (const sig of signatures) {
           try {
+               // Debug log
+               console.log("[polar-webhook-sig]", {
+                    expectedSignature,
+                    receivedSig: sig,
+                    match: expectedSignature === sig,
+                    secretBytesLen: secretBytes.length,
+               });
                const sigBuffer = Buffer.from(sig, "base64");
                const expectedBuffer = Buffer.from(expectedSignature, "base64");
                if (sigBuffer.length === expectedBuffer.length && timingSafeEqual(sigBuffer, expectedBuffer)) {

@@ -208,6 +208,14 @@ export async function updatePolarProduct(
      });
 }
 
+export async function archivePolarProduct(polarProductId: string): Promise<void> {
+     await polarFetch<unknown>(`/v1/products/${polarProductId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ is_archived: true }),
+     });
+}
+
 export async function getPolarProduct(polarProductId: string): Promise<Record<string, unknown>> {
      return await polarFetch<Record<string, unknown>>(`/v1/products/${polarProductId}`);
 }

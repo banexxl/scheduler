@@ -341,6 +341,59 @@ export async function toggleBillingPlanPublicAction(
      };
 }
 
+export async function deleteBillingPlanAction(
+     planId: string
+): Promise<AdminActionResult> {
+     await requirePlatformAdmin();
+
+     const adminClient = createAdminClient();
+
+     // Load plan to get polar_product_id
+     const { data: plan } = await adminClient
+          .from("billing_plans" as never)
+          .select("id, polar_product_id, plan_key" as never)
+          .eq("id" as never, planId)
+          .single();
+
+     if (!plan) {
+          return { success: false, message: "Billing plan not found." };
+     }
+
+     const planRow = plan as unknown as { id: string; polar_product_id: string | null; plan_key: string };
+
+     // Archive on Polar first (Polar has no hard delete — only archive)
+     if (planRow.polar_product_id) {
+          try {
+               const { archivePolarProduct } = await import("../services/polar-client");
+               await archivePolarProduct(planRow.polar_product_id);
+          } catch (err) {
+               return {
+                    success: false,
+                    message: `Unable to archive product on Polar: ${err instanceof Error ? err.message : "unknown error"}`,
+               };
+          }
+     }
+
+     // Delete associated prices
+     await adminClient
+          .from("billing_plan_prices" as never)
+          .delete()
+          .eq("billing_plan_id" as never, planId);
+
+     // Delete the local plan
+     const { error } = await adminClient
+          .from("billing_plans" as never)
+          .delete()
+          .eq("id" as never, planId);
+
+     if (error) {
+          return { success: false, message: "Unable to delete billing plan." };
+     }
+
+     revalidatePlatformBillingRoutes();
+     return { success: true, message: `Plan "${planRow.plan_key}" deleted and archived on Polar.` };
+}
+
 export async function reorderBillingPlansAction(input: {
      orderedPlanIds: string[];
 }): Promise<AdminActionResult> {

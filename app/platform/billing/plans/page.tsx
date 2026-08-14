@@ -14,6 +14,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import {
      createBillingPlanAction,
+     deleteBillingPlanAction,
      refreshSinglePolarProductAction,
      reorderBillingPlansAction,
      toggleBillingPlanActiveAction,
@@ -99,6 +100,12 @@ async function refreshPlanProductFormAction(formData: FormData) {
      await refreshSinglePolarProductAction(
           String(formData.get("polarProductId") ?? "")
      );
+}
+
+async function deletePlanFormAction(formData: FormData) {
+     "use server";
+
+     await deleteBillingPlanAction(String(formData.get("planId") ?? ""));
 }
 
 export default async function PlatformBillingPlansPage() {
@@ -209,6 +216,12 @@ export default async function PlatformBillingPlansPage() {
                                                                  </Button>
                                                             </form>
                                                        ) : null}
+                                                       <form action={deletePlanFormAction}>
+                                                            <input type="hidden" name="planId" value={plan.id} />
+                                                            <Button size="small" type="submit" variant="outlined" color="error">
+                                                                 Delete
+                                                            </Button>
+                                                       </form>
                                                   </Stack>
                                              </TableCell>
                                         </TableRow>

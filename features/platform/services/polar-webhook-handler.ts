@@ -21,9 +21,9 @@ export async function parsePolarWebhook(
   }
 
   const rawBody = await request.text();
-  const sig = request.headers.get("svix-signature") ?? request.headers.get("polar-signature") ?? request.headers.get("x-polar-signature");
-  const svixId = request.headers.get("svix-id");
-  const svixTimestamp = request.headers.get("svix-timestamp");
+  const sig = request.headers.get("webhook-signature") ?? request.headers.get("svix-signature") ?? request.headers.get("polar-signature");
+  const svixId = request.headers.get("webhook-id") ?? request.headers.get("svix-id");
+  const svixTimestamp = request.headers.get("webhook-timestamp") ?? request.headers.get("svix-timestamp");
   const secret = getPolarWebhookSecret(webhookType);
 
   if (!verifyPolarWebhookSignature({ rawBody, signatureHeader: sig, secret, svixId, svixTimestamp })) {

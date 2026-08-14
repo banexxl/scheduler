@@ -27,7 +27,7 @@ import PolarConfigAlert from "@/features/platform/components/polar-config-alert"
 import CreatePlanForm from "@/features/platform/components/create-plan-form";
 import PlanActionButtons from "@/features/platform/components/plan-action-buttons";
 
-async function createPlanFormAction(formData: FormData) {
+async function createPlanFormAction(formData: FormData): Promise<string | null> {
      "use server";
 
      const isFree = String(formData.get("isFree") ?? "") === "on";
@@ -52,8 +52,10 @@ async function createPlanFormAction(formData: FormData) {
      });
 
      if (!result.success) {
-          throw new Error(result.message);
+          return result.message;
      }
+
+     return null;
 }
 
 async function updatePlanFormAction(formData: FormData) {

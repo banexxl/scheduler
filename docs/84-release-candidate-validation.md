@@ -167,7 +167,7 @@ Status: PRE-EXISTING / NOT RESOLVED (deferred to 13.2)
 | `tests/integration/team-membership.integration.test.ts` | SUPABASE_URL + SERVICE_ROLE_KEY | Skipped |
 | `tests/integration/token-security.integration.test.ts` | SUPABASE_URL + SERVICE_ROLE_KEY | Skipped |
 | `tests/integration/internal-api-expanded.integration.test.ts` | TEST_BASE_URL + NOTIFICATION_PROCESSOR_SECRET | Skipped |
-| `tests/e2e/public-booking.spec.ts` | TEST_PUBLIC_TENANT_SLUG | Skipped |
+| `tests/e2e/public-booking.spec.ts` | TEST_TENANT_SLUG | Skipped |
 | All E2E tests | TEST_USER_NAME + TEST_USER_PASSWORD + TEST_TENANT_SLUG | Auth setup fails |
 
 ### Future Enhancements (NOT in scope for 13.1)

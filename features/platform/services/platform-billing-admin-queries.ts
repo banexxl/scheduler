@@ -271,7 +271,7 @@ export async function listPlatformSubscriptions(input?: {
      let query = adminClient
           .from("tenant_subscriptions" as never)
           .select(
-               "id,tenant_id,polar_subscription_id,polar_customer_id,polar_product_id,polar_price_id,status,billing_interval,billing_interval_count,current_period_ends_at,cancel_at_period_end,trial_ends_at,last_synced_at,status ,billing_plans(name,plan_key),tenants(name,slug)"
+               "id,tenant_id,polar_subscription_id,polar_customer_id,polar_product_id,polar_price_id,status,billing_interval,billing_interval_count,current_period_ends_at,cancel_at_period_end,trial_ends_at,last_synced_at,status,subscription_plans(name,code),tenants(name,slug)"
           )
           .order("last_synced_at" as never, { ascending: false })
           .limit(limit);

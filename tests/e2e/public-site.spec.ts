@@ -15,10 +15,10 @@ import { test, expect } from "@playwright/test";
  * - Robots/sitemap
  * - Draft isolation (anonymous cannot see draft)
  *
- * Environment: TEST_PUBLIC_TENANT_SLUG
+ * Environment: TEST_TENANT_SLUG
  */
 
-const tenantSlug = process.env.TEST_PUBLIC_TENANT_SLUG ?? "";
+const tenantSlug = process.env.TEST_TENANT_SLUG ?? "";
 const hasEnv = Boolean(tenantSlug);
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -26,7 +26,7 @@ const hasEnv = Boolean(tenantSlug);
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public site — homepage", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("homepage loads without error", async ({ page }) => {
     const response = await page.goto(`/book/${tenantSlug}`);
@@ -80,7 +80,7 @@ test.describe("public site — homepage", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public site — service detail", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("non-existent service returns 404", async ({ page }) => {
     const response = await page.goto(`/book/${tenantSlug}/services/nonexistent-service-xyz`);
@@ -108,7 +108,7 @@ test.describe("public site — service detail", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public site — staff privacy", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("staff section does not expose emails or phones", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}`);
@@ -127,7 +127,7 @@ test.describe("public site — staff privacy", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public site — XSS safety", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("page does not execute injected scripts", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}`);
@@ -160,7 +160,7 @@ test.describe("public site — XSS safety", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public site — SEO", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("has page title", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}`);
@@ -224,7 +224,7 @@ test.describe("public site — robots", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public site — mobile 375px", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
   test.use({ viewport: { width: 375, height: 812 } });
 
   test("no horizontal overflow", async ({ page }) => {
@@ -245,7 +245,7 @@ test.describe("public site — mobile 375px", () => {
 });
 
 test.describe("public site — mobile 320px", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
   test.use({ viewport: { width: 320, height: 568 } });
 
   test("no horizontal overflow at 320px", async ({ page }) => {
@@ -262,7 +262,7 @@ test.describe("public site — mobile 320px", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public site — tenant isolation", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("non-existent tenant returns safe response", async ({ page }) => {
     const response = await page.goto("/book/completely-fake-tenant-xyz-999");
@@ -282,7 +282,7 @@ test.describe("public site — tenant isolation", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public site — settings authorization", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
   test.use({ storageState: { cookies: [], origins: [] } });
 
   test("unauthenticated cannot access site settings", async ({ page }) => {

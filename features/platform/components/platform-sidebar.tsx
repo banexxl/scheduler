@@ -84,7 +84,11 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
   function isActive(item: NavItem): boolean {
     if (item.href === "/platform") return pathname === "/platform";
-    if (item.matchPrefix) return pathname.startsWith(item.matchPrefix);
+    if (item.matchPrefix) {
+      // Exact match for items where href equals matchPrefix (e.g., Overview pages)
+      if (item.href === item.matchPrefix) return pathname === item.href;
+      return pathname.startsWith(item.matchPrefix);
+    }
     return pathname === item.href;
   }
 

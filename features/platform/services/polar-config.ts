@@ -9,8 +9,35 @@ type PolarEnvironment = {
      syncSecret: string;
 };
 
-function normalizeBaseUrl(value: string | undefined): string {
-     const fallback = "https://api.polar.sh";
+/**
+ * Resolves the correct env var based on POLAR_SERVER mode.
+ *
+ * When POLAR_SERVER=sandbox:
+ *   Looks for SANDBOX_POLAR_ACCESS_TOKEN first, falls back to POLAR_ACCESS_TOKEN
+ * When POLAR_SERVER=production (or unset):
+ *   Uses POLAR_ACCESS_TOKEN directly
+ *
+ * This allows the same codebase to run against sandbox (localhost, preview)
+ * and production (main branch) by prefixing sandbox vars with SANDBOX_.
+ */
+function isSandbox(): boolean {
+     return (process.env.POLAR_SERVER?.trim().toLowerCase() ?? "production") === "sandbox";
+}
+
+function getPolarEnv(name: string): string | null {
+     const sandbox = isSandbox();
+     if (sandbox) {
+          // Try SANDBOX_ prefixed first, fall back to unprefixed
+          const sandboxValue = process.env[`SANDBOX_${name}`]?.trim();
+          if (sandboxValue) return sandboxValue;
+     }
+     const value = process.env[name]?.trim();
+     return value || null;
+}
+
+function normalizeBaseUrl(value: string | undefined | null): string {
+     const sandbox = isSandbox();
+     const fallback = sandbox ? "https://sandbox-api.polar.sh" : "https://api.polar.sh";
      const input = value?.trim();
      if (!input) return fallback;
 
@@ -22,34 +49,29 @@ function normalizeBaseUrl(value: string | undefined): string {
      }
 }
 
-function getOptionalEnv(name: string): string | null {
-     const value = process.env[name]?.trim();
-     return value ? value : null;
-}
-
-function getFirstNonEmptyEnv(names: string[]): string | null {
-     for (const name of names) {
-          const value = process.env[name]?.trim();
-          if (value) return value;
-     }
-     return null;
-}
-
 export function getPolarEnvironment(): PolarEnvironment {
      const processorSecret = "";
 
-     const syncSecret = getFirstNonEmptyEnv([
-          "POLAR_RECONCILIATION_SECRET",
-     ]) ?? "";
+     const syncSecret = getPolarEnv("POLAR_RECONCILIATION_SECRET") ?? "";
 
      return {
-          apiBaseUrl: normalizeBaseUrl(process.env.POLAR_API_BASE_URL),
-          accessToken: getOptionalEnv("POLAR_ACCESS_TOKEN") ?? "",
-          organizationId: process.env.POLAR_ORGANIZATION_ID?.trim() || null,
-          webhookSecret: getOptionalEnv("POLAR_WEBHOOK_SECRET") ?? "",
+          apiBaseUrl: normalizeBaseUrl(getPolarEnv("POLAR_API_BASE_URL")),
+          accessToken: getPolarEnv("POLAR_ACCESS_TOKEN") ?? "",
+          organizationId: getPolarEnv("POLAR_ORGANIZATION_ID") ?? null,
+          webhookSecret: getPolarEnv("POLAR_WEBHOOK_SECRET") ?? "",
           processorSecret,
           syncSecret,
      };
+}
+
+/**
+ * Resolves a per-webhook secret with sandbox prefix support.
+ * Example: getPolarWebhookSecret("ORDER") checks:
+ *   sandbox → SANDBOX_POLAR_ORDER_WEBHOOK_SECRET → POLAR_ORDER_WEBHOOK_SECRET → general webhook secret
+ *   prod    → POLAR_ORDER_WEBHOOK_SECRET → general webhook secret
+ */
+export function getPolarWebhookSecret(type: string): string {
+     return getPolarEnv(`POLAR_${type}_WEBHOOK_SECRET`) ?? getPolarEnv("POLAR_WEBHOOK_SECRET") ?? "";
 }
 
 export function getBillingProcessorSecret(): string {
@@ -61,18 +83,15 @@ export function getBillingSyncSecret(): string {
 }
 
 export function getBillingDiagnosticsConfig() {
-     const baseUrl = normalizeBaseUrl(process.env.POLAR_API_BASE_URL);
-     const processorSecret = "";
-     const syncSecret = getFirstNonEmptyEnv([
-          "POLAR_RECONCILIATION_SECRET",
-     ]);
+     const env = getPolarEnvironment();
 
      return {
-          apiBaseUrl: baseUrl,
-          hasAccessToken: Boolean(process.env.POLAR_ACCESS_TOKEN?.trim()),
-          hasOrganizationId: Boolean(process.env.POLAR_ORGANIZATION_ID?.trim()),
-          hasWebhookSecret: Boolean(process.env.POLAR_WEBHOOK_SECRET?.trim()),
-          hasProcessorSecret: Boolean(processorSecret),
-          hasSyncSecret: Boolean(syncSecret),
+          apiBaseUrl: env.apiBaseUrl,
+          server: isSandbox() ? "sandbox" : "production",
+          hasAccessToken: Boolean(env.accessToken),
+          hasOrganizationId: Boolean(env.organizationId),
+          hasWebhookSecret: Boolean(env.webhookSecret),
+          hasProcessorSecret: Boolean(env.processorSecret),
+          hasSyncSecret: Boolean(env.syncSecret),
      };
 }

@@ -17,12 +17,12 @@ import { test, expect } from "@playwright/test";
  * - Error handling
  *
  * Environment variables:
- * - TEST_PUBLIC_TENANT_SLUG: slug of a tenant with public booking enabled
- * - TEST_PUBLIC_TENANT_SLUG_B: second tenant for isolation tests (optional)
+ * - TEST_TENANT_SLUG: slug of a tenant with public booking enabled
+ * - TEST_TENANT_SLUG_B: second tenant for isolation tests (optional)
  */
 
-const tenantSlug = process.env.TEST_PUBLIC_TENANT_SLUG ?? "";
-const tenantSlugB = process.env.TEST_PUBLIC_TENANT_SLUG_B ?? "";
+const tenantSlug = process.env.TEST_TENANT_SLUG ?? "";
+const tenantSlugB = process.env.TEST_TENANT_SLUG_B ?? "";
 const hasEnv = Boolean(tenantSlug);
 const hasBothTenants = Boolean(tenantSlug && tenantSlugB);
 
@@ -31,7 +31,7 @@ const hasBothTenants = Boolean(tenantSlug && tenantSlugB);
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public booking — basic flow", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("booking page loads and shows business information", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}`);
@@ -79,7 +79,7 @@ test.describe("public booking — basic flow", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public booking — guest booking journey", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("can navigate through service selection", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}#booking`);
@@ -106,7 +106,7 @@ test.describe("public booking — guest booking journey", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public booking — gift card checkout", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("gift card input is available when feature enabled", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}#booking`);
@@ -138,7 +138,7 @@ test.describe("public booking — gift card checkout", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public booking — recurring appointments", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("recurrence step is accessible in the flow", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}#booking`);
@@ -162,7 +162,7 @@ test.describe("public booking — recurring appointments", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public booking — idempotency", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("confirm button is disabled during submission", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}#booking`);
@@ -179,7 +179,7 @@ test.describe("public booking — idempotency", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public booking — branding isolation", () => {
-  test.skip(!hasBothTenants, "Both TEST_PUBLIC_TENANT_SLUG and TEST_PUBLIC_TENANT_SLUG_B required");
+  test.skip(!hasBothTenants, "Both TEST_TENANT_SLUG and TEST_TENANT_SLUG_B required");
 
   test("tenant A branding does not appear on tenant B", async ({ page }) => {
     // Load tenant A
@@ -207,7 +207,7 @@ test.describe("public booking — branding isolation", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public booking — feature overrides", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("page respects feature state (no dead controls)", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}`);
@@ -223,7 +223,7 @@ test.describe("public booking — feature overrides", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public booking — mobile 320px", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
   test.use({ viewport: { width: 320, height: 568 } });
 
   test("no horizontal overflow at 320px", async ({ page }) => {
@@ -244,7 +244,7 @@ test.describe("public booking — mobile 320px", () => {
 });
 
 test.describe("public booking — mobile 375px", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
   test.use({ viewport: { width: 375, height: 667 } });
 
   test("no horizontal overflow at 375px", async ({ page }) => {
@@ -257,7 +257,7 @@ test.describe("public booking — mobile 375px", () => {
 });
 
 test.describe("public booking — mobile 390px", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("no horizontal overflow at 390px", async ({ page }) => {
@@ -283,7 +283,7 @@ test.describe("public booking — mobile 390px", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public booking — confirmation & calendar", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("confirmation page does not expose internal data", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}`);
@@ -300,7 +300,7 @@ test.describe("public booking — confirmation & calendar", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public booking — SEO metadata", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("page has proper title and meta description", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}`);
@@ -323,7 +323,7 @@ test.describe("public booking — SEO metadata", () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe("public booking — security", () => {
-  test.skip(!hasEnv, "TEST_PUBLIC_TENANT_SLUG not configured");
+  test.skip(!hasEnv, "TEST_TENANT_SLUG not configured");
 
   test("no service-role key in page source", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}`);

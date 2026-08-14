@@ -4,9 +4,10 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 
 /**
- * Global Not Found Page — Milestone 10.3.
+ * Global Not Found Page — Milestones 10.3, 15.13.
  *
  * Shown when a route does not exist or notFound() is called.
+ * "Go Home" navigates to user's appropriate dashboard via /api/home.
  * Does not reveal whether a resource exists (safe for enumeration prevention).
  */
 export default function NotFoundPage() {
@@ -30,7 +31,7 @@ export default function NotFoundPage() {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
           The page you are looking for does not exist or you do not have access.
         </Typography>
-        <Button variant="outlined" component="a" href="/">
+        <Button variant="outlined" component="a" href="/api/home">
           Go Home
         </Button>
       </Paper>

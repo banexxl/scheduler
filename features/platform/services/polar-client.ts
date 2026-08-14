@@ -55,6 +55,16 @@ async function polarFetch<T>(path: string, init?: RequestInit): Promise<T> {
           );
      }
 
+     const contentType = response.headers.get("content-type") ?? "";
+     if (!contentType.includes("application/json")) {
+          const body = await response.text();
+          throw new PolarApiError(
+               response.status,
+               "Invalid Content-Type",
+               `[polar-client] Expected JSON but got ${contentType}. URL: ${url}. Body: ${body.slice(0, 200)}`
+          );
+     }
+
      return (await response.json()) as T;
 }
 

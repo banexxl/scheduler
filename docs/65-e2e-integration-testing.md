@@ -28,7 +28,7 @@ Milestone 10.5 — Completed August 2026.
 |----------|---------|
 | `TEST_BASE_URL` | App URL for integration/E2E (default: NEXT_PUBLIC_APP_URL) |
 | `NOTIFICATION_PROCESSOR_SECRET` | Positive internal API tests |
-| `TEST_PUBLIC_TENANT_SLUG` | Public booking E2E |
+| `TEST_TENANT_SLUG` | Public booking E2E |
 | `E2E_TEST_MODE` | Explicit test mode flag |
 | `INTEGRATION_REQUIRED` | Strict mode (fail if env missing) |
 

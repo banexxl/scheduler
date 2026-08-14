@@ -103,7 +103,7 @@ type Props = {
 
 export default function CreatePlanForm({ action }: Props) {
   const [isFree, setIsFree] = useState(false);
-  const [currency, setCurrency] = useState<{ code: string; name: string } | null>(CURRENCIES[0]!);
+  const [currency, setCurrency] = useState<{ code: string; name: string }>(CURRENCIES[0]!);
   const [billingType, setBillingType] = useState<"recurring" | "one_time">("recurring");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +114,7 @@ export default function CreatePlanForm({ action }: Props) {
 
     // Convert whole units to cents (minor units)
     const priceWhole = Number(formData.get("priceWhole") ?? "0");
-    const currencyCode = currency?.code ?? "usd";
+    const currencyCode = currency.code;
     const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(currencyCode.toUpperCase());
     const priceAmount = isZeroDecimal ? priceWhole : Math.round(priceWhole * 100);
 
@@ -169,7 +169,7 @@ export default function CreatePlanForm({ action }: Props) {
               <TextField
                 size="small"
                 name="priceWhole"
-                label={`Price (${currency?.code ?? "USD"})`}
+                label={`Price (${currency.code})`}
                 type="number"
                 required={!isFree}
                 placeholder="e.g. 29"
@@ -181,7 +181,7 @@ export default function CreatePlanForm({ action }: Props) {
                 size="small"
                 options={CURRENCIES}
                 value={currency}
-                onChange={(_, val) => setCurrency(val)}
+                onChange={(_, val) => { if (val) setCurrency(val); }}
                 getOptionLabel={(opt) => `${opt.code} — ${opt.name}`}
                 renderInput={(params) => <TextField {...params} label="Currency" sx={{ width: 250 }} />}
                 isOptionEqualToValue={(opt, val) => opt.code === val.code}

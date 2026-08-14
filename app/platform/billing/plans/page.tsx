@@ -32,7 +32,7 @@ async function createPlanFormAction(formData: FormData) {
 
      const isFree = String(formData.get("isFree") ?? "") === "on";
 
-     await createBillingPlanAction({
+     const result = await createBillingPlanAction({
           planKey: String(formData.get("planKey") ?? ""),
           name: String(formData.get("name") ?? ""),
           description: String(formData.get("description") ?? "") || null,
@@ -50,6 +50,10 @@ async function createPlanFormAction(formData: FormData) {
                trialDays: Number(formData.get("trialDays") ?? "0") || undefined,
           }),
      });
+
+     if (!result.success) {
+          throw new Error(result.message);
+     }
 }
 
 async function updatePlanFormAction(formData: FormData) {

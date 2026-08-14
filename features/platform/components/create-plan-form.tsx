@@ -27,75 +27,7 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
-
-// ─── All ISO 4217 currencies ─────────────────────────────────────────────────
-
-const CURRENCIES = [
-  { code: "USD", name: "US Dollar" },
-  { code: "EUR", name: "Euro" },
-  { code: "GBP", name: "British Pound" },
-  { code: "RSD", name: "Serbian Dinar" },
-  { code: "CHF", name: "Swiss Franc" },
-  { code: "CAD", name: "Canadian Dollar" },
-  { code: "AUD", name: "Australian Dollar" },
-  { code: "JPY", name: "Japanese Yen" },
-  { code: "CNY", name: "Chinese Yuan" },
-  { code: "INR", name: "Indian Rupee" },
-  { code: "BRL", name: "Brazilian Real" },
-  { code: "MXN", name: "Mexican Peso" },
-  { code: "SEK", name: "Swedish Krona" },
-  { code: "NOK", name: "Norwegian Krone" },
-  { code: "DKK", name: "Danish Krone" },
-  { code: "PLN", name: "Polish Zloty" },
-  { code: "CZK", name: "Czech Koruna" },
-  { code: "HUF", name: "Hungarian Forint" },
-  { code: "RON", name: "Romanian Leu" },
-  { code: "BGN", name: "Bulgarian Lev" },
-  { code: "HRK", name: "Croatian Kuna" },
-  { code: "TRY", name: "Turkish Lira" },
-  { code: "ZAR", name: "South African Rand" },
-  { code: "NZD", name: "New Zealand Dollar" },
-  { code: "SGD", name: "Singapore Dollar" },
-  { code: "HKD", name: "Hong Kong Dollar" },
-  { code: "KRW", name: "South Korean Won" },
-  { code: "THB", name: "Thai Baht" },
-  { code: "IDR", name: "Indonesian Rupiah" },
-  { code: "MYR", name: "Malaysian Ringgit" },
-  { code: "PHP", name: "Philippine Peso" },
-  { code: "VND", name: "Vietnamese Dong" },
-  { code: "AED", name: "UAE Dirham" },
-  { code: "SAR", name: "Saudi Riyal" },
-  { code: "ILS", name: "Israeli Shekel" },
-  { code: "EGP", name: "Egyptian Pound" },
-  { code: "NGN", name: "Nigerian Naira" },
-  { code: "KES", name: "Kenyan Shilling" },
-  { code: "GHS", name: "Ghanaian Cedi" },
-  { code: "COP", name: "Colombian Peso" },
-  { code: "ARS", name: "Argentine Peso" },
-  { code: "CLP", name: "Chilean Peso" },
-  { code: "PEN", name: "Peruvian Sol" },
-  { code: "UAH", name: "Ukrainian Hryvnia" },
-  { code: "BAM", name: "Bosnia-Herzegovina Mark" },
-  { code: "GEL", name: "Georgian Lari" },
-  { code: "AMD", name: "Armenian Dram" },
-  { code: "ISK", name: "Icelandic Krona" },
-  { code: "TWD", name: "Taiwan Dollar" },
-  { code: "PKR", name: "Pakistani Rupee" },
-  { code: "BDT", name: "Bangladeshi Taka" },
-  { code: "LKR", name: "Sri Lankan Rupee" },
-  { code: "QAR", name: "Qatari Riyal" },
-  { code: "KWD", name: "Kuwaiti Dinar" },
-  { code: "BHD", name: "Bahraini Dinar" },
-  { code: "OMR", name: "Omani Rial" },
-  { code: "JOD", name: "Jordanian Dinar" },
-  { code: "MAD", name: "Moroccan Dirham" },
-  { code: "TND", name: "Tunisian Dinar" },
-];
-
-// Zero-decimal currencies (no cents — amount is in whole units already)
-const ZERO_DECIMAL_CURRENCIES = new Set([
-  "JPY", "KRW", "VND", "IDR", "CLP", "HUF", "ISK", "TWD",
-]);
+import { SUPPORTED_CURRENCIES, ZERO_DECIMAL_CURRENCIES } from "@/features/business/utils/supported-currencies";
 
 type Props = {
   action: (formData: FormData) => Promise<void>;
@@ -103,7 +35,7 @@ type Props = {
 
 export default function CreatePlanForm({ action }: Props) {
   const [isFree, setIsFree] = useState(false);
-  const [currency, setCurrency] = useState<{ code: string; name: string }>(CURRENCIES[0]!);
+  const [currency, setCurrency] = useState<{ code: string; name: string }>(SUPPORTED_CURRENCIES[0]!);
   const [billingType, setBillingType] = useState<"recurring" | "one_time">("recurring");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -179,14 +111,14 @@ export default function CreatePlanForm({ action }: Props) {
 
               <Autocomplete
                 size="small"
-                options={CURRENCIES}
+                options={[...SUPPORTED_CURRENCIES]}
                 value={currency}
                 onChange={(_, val) => { if (val) setCurrency(val); }}
                 getOptionLabel={(opt) => `${opt.code} — ${opt.name}`}
-                renderInput={(params) => <TextField {...params} label="Currency" sx={{ width: 250 }} />}
+                renderInput={(params) => <TextField {...params} label="Currency" />}
                 isOptionEqualToValue={(opt, val) => opt.code === val.code}
                 disableClearable
-                sx={{ width: 250 }}
+                sx={{ width: 280 }}
               />
 
               <FormControl size="small" sx={{ minWidth: 140 }}>

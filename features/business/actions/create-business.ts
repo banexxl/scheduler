@@ -176,28 +176,28 @@ export async function createBusinessAction(
   // Use explicitly selected plan if provided
   if (values.selectedPlanId) {
     const { data: explicitPlan } = await supabase
-      .from("subscription_plans")
-      .select("id")
-      .eq("id", values.selectedPlanId)
-      .eq("is_active", true)
+      .from("billing_plans" as never)
+      .select("id" as never)
+      .eq("id" as never, values.selectedPlanId)
+      .eq("is_active" as never, true)
       .maybeSingle();
 
     if (explicitPlan) {
-      selectedPlan = explicitPlan as { id: string };
+      selectedPlan = explicitPlan as unknown as { id: string };
     }
   }
 
   // Fallback: auto-select cheapest/free plan
   if (!selectedPlan) {
     const { data: plans } = await supabase
-      .from("subscription_plans")
-      .select("id, code")
-      .eq("is_active", true)
-      .order("price_amount", { ascending: true })
+      .from("billing_plans" as never)
+      .select("id, plan_key, is_free" as never)
+      .eq("is_active" as never, true)
+      .order("sort_order" as never, { ascending: true })
       .limit(10);
 
-    const allPlans = (plans ?? []) as Array<{ id: string; code: string }>;
-    const freePlan = allPlans.find(p => p.code === "free" || p.code.includes("free"));
+    const allPlans = (plans ?? []) as unknown as Array<{ id: string; plan_key: string; is_free: boolean }>;
+    const freePlan = allPlans.find(p => p.is_free || p.plan_key === "free" || p.plan_key.includes("free"));
     selectedPlan = freePlan ?? allPlans[0] ?? null;
   }
 

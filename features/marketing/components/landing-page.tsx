@@ -75,27 +75,8 @@ function AnimatedSection({ children, variants = fadeUp, className }: { children:
 export default function MarketingLandingPage() {
   return (
     <Box sx={{ overflow: "hidden" }}>
-      {/* Navigation */}
-      <Box sx={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, bgcolor: "rgba(255,255,255,0.92)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-        <Container maxWidth="lg">
-          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ py: 1.5 }}>
-            <Typography sx={{ fontSize: "1.25rem", fontWeight: 800, color: "#1a1a2e", letterSpacing: "-0.02em" }}>
-              get-slot
-            </Typography>
-            <Stack direction="row" spacing={1}>
-              <Button component={Link} href="/login" variant="text" size="small" sx={{ fontWeight: 600 }}>
-                Sign In
-              </Button>
-              <Button component={Link} href="/register" variant="contained" size="small" sx={{ fontWeight: 600, borderRadius: 2, px: 2.5 }}>
-                Start Free
-              </Button>
-            </Stack>
-          </Stack>
-        </Container>
-      </Box>
-
       {/* Hero */}
-      <Box sx={{ pt: { xs: 14, md: 20 }, pb: { xs: 8, md: 14 }, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "#fff", position: "relative" }}>
+      <Box sx={{ pt: { xs: 6, md: 10 }, pb: { xs: 8, md: 14 }, background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "#fff", position: "relative" }}>
         <Container maxWidth="md" sx={{ textAlign: "center", position: "relative", zIndex: 1 }}>
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
             <Typography component="h1" sx={{ fontSize: { xs: "2.25rem", md: "3.5rem" }, fontWeight: 800, lineHeight: 1.15, mb: 2, letterSpacing: "-0.03em" }}>
@@ -220,12 +201,6 @@ export default function MarketingLandingPage() {
         </Container>
       </Box>
 
-      {/* Footer */}
-      <Box sx={{ py: 4, borderTop: "1px solid #e5e7eb", textAlign: "center" }}>
-        <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>
-          &copy; {new Date().getFullYear()} Get Slot. All rights reserved.
-        </Typography>
-      </Box>
     </Box>
   );
 }

@@ -48,7 +48,7 @@ describe("route classification", () => {
       "/manage-appointment/[token]",
     ],
     customer_account: [
-      "/customer",
+      "/book/test-salon/portal",
     ],
     business: [
       "/[tenantSlug]/dashboard",

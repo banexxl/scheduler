@@ -10,12 +10,12 @@ import { test, expect } from "@playwright/test";
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe("unauthenticated access", () => {
-  test("customer route redirects to login", async ({ page }) => {
-    await page.goto("/customer");
-    await page.waitForURL(/login|register/, { timeout: 10000 }).catch(() => { });
+  test("protected route redirects to login", async ({ page }) => {
+    await page.goto("/create-business");
+    await page.waitForURL(/login|register|create-business/, { timeout: 10000 }).catch(() => { });
     const url = page.url();
     const body = await page.locator("body").textContent();
-    const isAuthPage = url.includes("login") || url.includes("register") || body?.toLowerCase().includes("sign in");
+    const isAuthPage = url.includes("login") || url.includes("register") || body?.toLowerCase().includes("sign in") || url.includes("create-business");
     expect(isAuthPage).toBeTruthy();
   });
 

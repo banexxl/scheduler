@@ -27,13 +27,13 @@ export async function requireCustomerAccount(): Promise<CustomerAccountContext> 
   const user = await getUser();
 
   if (!user) {
-    redirect("/login?next=/customer");
+    redirect("/login");
   }
 
   const account = await getCustomerAccountByUserId(user.id);
 
   if (!account || !account.isActive) {
-    redirect("/login?next=/customer");
+    redirect("/login");
   }
 
   return { user, account };

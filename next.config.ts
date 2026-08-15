@@ -51,13 +51,6 @@ const nextConfig: NextConfig = {
         ],
       },
       // Authenticated business/customer routes — no public cache
-      {
-        source: "/customer/:path*",
-        headers: [
-          { key: "Cache-Control", value: "private, no-store" },
-          { key: "X-Robots-Tag", value: "noindex, nofollow" },
-        ],
-      },
       // Internal APIs — no cache
       {
         source: "/api/internal/:path*",

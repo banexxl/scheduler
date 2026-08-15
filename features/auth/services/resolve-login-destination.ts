@@ -45,11 +45,6 @@ export function resolveDestinationFromIdentity(
     return `/${accessible[0]!.tenantSlug}/dashboard`;
   }
 
-  // 3. Customer-only user — has customer relationships but no membership
-  if (identity.tenantCustomerCount > 0) {
-    return "/customer";
-  }
-
-  // 4. Brand-new user — no relationships at all
+  // 3. Any user without a business — send to create-business
   return "/create-business";
 }

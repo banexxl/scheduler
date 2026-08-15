@@ -13,7 +13,6 @@ import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
-import Link from "next/link";
 
 type PlanData = {
   id: string;
@@ -99,7 +98,6 @@ export default function PricingPageClient({ plans }: Props) {
                   <Box sx={{ flex: 1 }} />
 
                   <Button
-                    component={Link}
                     href="/register"
                     variant={plan.isFree ? "outlined" : "contained"}
                     fullWidth

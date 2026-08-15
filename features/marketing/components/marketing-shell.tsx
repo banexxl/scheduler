@@ -49,10 +49,10 @@ export default function MarketingShell({ children, userEmail }: Props) {
             <Stack direction="row" spacing={{ xs: 0.5, sm: 1 }} alignItems="center">
               {/* Nav links — hidden on mobile */}
               <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.5 }}>
-                <Button component={Link} href="/pricing" size="small" sx={{ fontWeight: 500, color: "#4b5563" }}>
+                <Button href="/pricing" size="small" sx={{ fontWeight: 500, color: "#4b5563" }}>
                   Pricing
                 </Button>
-                <Button component={Link} href="/features" size="small" sx={{ fontWeight: 500, color: "#4b5563" }}>
+                <Button href="/features" size="small" sx={{ fontWeight: 500, color: "#4b5563" }}>
                   Features
                 </Button>
               </Box>
@@ -62,16 +62,16 @@ export default function MarketingShell({ children, userEmail }: Props) {
                   <Typography sx={{ fontSize: "0.75rem", color: "#6b7280", display: { xs: "none", sm: "block" } }}>
                     {userEmail}
                   </Typography>
-                  <Button component={Link} href="/api/home" variant="contained" size="small" sx={{ fontWeight: 600, borderRadius: 2, px: 2 }}>
+                  <Button href="/api/home" variant="contained" size="small" sx={{ fontWeight: 600, borderRadius: 2, px: 2 }}>
                     Dashboard
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button component={Link} href="/login" size="small" sx={{ fontWeight: 600, color: "#4b5563" }}>
+                  <Button href="/login" size="small" sx={{ fontWeight: 600, color: "#4b5563" }}>
                     Sign In
                   </Button>
-                  <Button component={Link} href="/register" variant="contained" size="small" sx={{ fontWeight: 600, borderRadius: 2, px: 2 }}>
+                  <Button href="/register" variant="contained" size="small" sx={{ fontWeight: 600, borderRadius: 2, px: 2 }}>
                     Start Free
                   </Button>
                 </>
@@ -90,7 +90,7 @@ export default function MarketingShell({ children, userEmail }: Props) {
       <Box component="footer" sx={{ borderTop: "1px solid #e2e8f0", py: 3, textAlign: "center" }}>
         <Container maxWidth="lg">
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2} justifyContent="space-between" alignItems="center">
-            <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>
+            <Typography component="span" sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>
               &copy; {new Date().getFullYear()} Get Slot. All rights reserved.
             </Typography>
             <Stack direction="row" spacing={2}>
@@ -107,6 +107,6 @@ export default function MarketingShell({ children, userEmail }: Props) {
           </Stack>
         </Container>
       </Box>
-    </Box>
+    </Box >
   );
 }

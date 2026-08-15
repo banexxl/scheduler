@@ -23,7 +23,6 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
-import Link from "next/link";
 
 // ─── Animation Variants ──────────────────────────────────────────────────────
 
@@ -94,10 +93,10 @@ export default function MarketingLandingPage() {
           </motion.div>
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.8 }}>
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} justifyContent="center">
-              <Button component={Link} href="/register" variant="contained" size="large" sx={{ bgcolor: "#fff", color: "#764ba2", fontWeight: 700, px: 4, py: 1.5, borderRadius: 2, fontSize: "1rem", "&:hover": { bgcolor: "#f0f0f0" } }}>
+              <Button href="/register" variant="contained" size="large" sx={{ bgcolor: "#fff", color: "#764ba2", fontWeight: 700, px: 4, py: 1.5, borderRadius: 2, fontSize: "1rem", "&:hover": { bgcolor: "#f0f0f0" } }}>
                 Start Free Trial
               </Button>
-              <Button component={Link} href="/pricing" variant="outlined" size="large" sx={{ borderColor: "rgba(255,255,255,0.5)", color: "#fff", fontWeight: 600, px: 4, py: 1.5, borderRadius: 2, fontSize: "1rem", "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,0.1)" } }}>
+              <Button href="/pricing" variant="outlined" size="large" sx={{ borderColor: "rgba(255,255,255,0.5)", color: "#fff", fontWeight: 600, px: 4, py: 1.5, borderRadius: 2, fontSize: "1rem", "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,0.1)" } }}>
                 View Pricing
               </Button>
             </Stack>
@@ -194,7 +193,7 @@ export default function MarketingLandingPage() {
             <Typography sx={{ color: "#6b7280", mb: 4, lineHeight: 1.6 }}>
               Join thousands of businesses that trust Get Slot for their daily operations. No credit card required.
             </Typography>
-            <Button component={Link} href="/register" variant="contained" size="large" sx={{ fontWeight: 700, px: 5, py: 1.5, borderRadius: 2, fontSize: "1rem", background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
+            <Button href="/register" variant="contained" size="large" sx={{ fontWeight: 700, px: 5, py: 1.5, borderRadius: 2, fontSize: "1rem", background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
               Get Started Free
             </Button>
           </AnimatedSection>

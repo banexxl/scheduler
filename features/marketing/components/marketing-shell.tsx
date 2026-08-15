@@ -8,21 +8,33 @@
  * - Footer
  */
 
-import type { ReactNode } from "react";
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
+import IconButton from "@mui/material/IconButton";
+import Avatar from "@mui/material/Avatar";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Divider from "@mui/material/Divider";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
 import Link from "next/link";
+import { logoutAction } from "@/features/auth/actions/logout";
 
 type Props = {
-  children: ReactNode;
+  children: React.ReactNode;
   userEmail: string | null;
 };
 
 export default function MarketingShell({ children, userEmail }: Props) {
   const isLoggedIn = Boolean(userEmail);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
+
+  const initials = userEmail ? userEmail.charAt(0).toUpperCase() : "?";
 
   return (
     <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", bgcolor: "#f8fafc" }}>
@@ -59,12 +71,50 @@ export default function MarketingShell({ children, userEmail }: Props) {
 
               {isLoggedIn ? (
                 <>
-                  <Typography sx={{ fontSize: "0.75rem", color: "#6b7280", display: { xs: "none", sm: "block" } }}>
-                    {userEmail}
-                  </Typography>
-                  <Button href="/api/home" variant="contained" size="small" sx={{ fontWeight: 600, borderRadius: 2, px: 2 }}>
-                    Dashboard
-                  </Button>
+                  <IconButton
+                    onClick={(e) => setAnchorEl(e.currentTarget)}
+                    size="small"
+                    aria-label="Account menu"
+                    aria-controls={menuOpen ? "account-menu" : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={menuOpen ? "true" : undefined}
+                  >
+                    <Avatar sx={{ width: 32, height: 32, fontSize: "0.875rem", bgcolor: "#667eea", fontWeight: 700 }}>
+                      {initials}
+                    </Avatar>
+                  </IconButton>
+                  <Menu
+                    id="account-menu"
+                    anchorEl={anchorEl}
+                    open={menuOpen}
+                    onClose={() => setAnchorEl(null)}
+                    transformOrigin={{ horizontal: "right", vertical: "top" }}
+                    anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                    slotProps={{ paper: { sx: { mt: 1, minWidth: 220, borderRadius: 2 } } }}
+                  >
+                    <Box sx={{ px: 2, py: 1.5 }}>
+                      <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600 }}>Account</Typography>
+                      <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>{userEmail}</Typography>
+                    </Box>
+                    <Divider />
+                    <MenuItem component="a" href="/api/home" onClick={() => setAnchorEl(null)}>
+                      <ListItemText primary="Dashboard" primaryTypographyProps={{ fontSize: "0.8125rem" }} />
+                    </MenuItem>
+                    <MenuItem component="a" href="/pricing" onClick={() => setAnchorEl(null)}>
+                      <ListItemText primary="Plans & Billing" primaryTypographyProps={{ fontSize: "0.8125rem" }} />
+                    </MenuItem>
+                    <Divider />
+                    <form action={logoutAction} style={{ margin: 0 }}>
+                      <MenuItem
+                        component="button"
+                        type="submit"
+                        onClick={() => setAnchorEl(null)}
+                        sx={{ width: "100%" }}
+                      >
+                        <ListItemText primary="Sign Out" primaryTypographyProps={{ fontSize: "0.8125rem", color: "error.main" }} />
+                      </MenuItem>
+                    </form>
+                  </Menu>
                 </>
               ) : (
                 <>

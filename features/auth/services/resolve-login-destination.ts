@@ -47,7 +47,7 @@ export function resolveDestinationFromIdentity(
 
   // 3. Customer-only user — has customer relationships but no membership
   if (identity.tenantCustomerCount > 0) {
-    return "/account";
+    return "/customer";
   }
 
   // 4. Brand-new user — no relationships at all

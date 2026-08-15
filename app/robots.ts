@@ -39,7 +39,6 @@ export default function robots(): MetadataRoute.Robots {
 
           // Platform admin
           "/platform",
-          "/platform-admin",
 
           // Auth routes
           "/login",

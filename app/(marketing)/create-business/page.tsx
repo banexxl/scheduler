@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Link from "@mui/material/Link";
 import { requireUser } from "@/lib/auth/require-user";
 import { resolveUserIdentity } from "@/features/auth/services/resolve-user-identity";
 import { createServiceRoleClient } from "@/lib/supabase/server";
@@ -90,9 +89,6 @@ export default async function CreateBusinessPage() {
           gap: 1,
         }}
       >
-        <Link href="/account" variant="body2" color="text.secondary">
-          Go to my account
-        </Link>
         <Typography variant="body2" color="text.secondary">
           Signed in as {user.email}
         </Typography>

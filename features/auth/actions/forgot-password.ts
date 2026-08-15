@@ -20,7 +20,7 @@ export async function forgotPasswordAction(
     const supabase = await createClient();
 
     const redirectUrl = new URL(
-      "/auth/callback?next=/update-password",
+      "/api/auth/callback?next=/update-password",
       getAppUrl()
     ).toString();
 

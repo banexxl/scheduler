@@ -19,7 +19,7 @@ export async function registerAction(
 
     const supabase = await createClient();
 
-    const callbackUrl = new URL("/auth/callback", getAppUrl()).toString();
+    const callbackUrl = new URL("/api/auth/callback", getAppUrl()).toString();
 
     const { error } = await supabase.auth.signUp({
       email: validated.email,

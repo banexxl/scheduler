@@ -25,31 +25,31 @@ describe("getSafeRedirectPath", () => {
 
   describe("rejects dangerous inputs", () => {
     it("rejects protocol-relative URLs (//evil.com)", () => {
-      expect(getSafeRedirectPath("//evil.com")).toBe("/account");
+      expect(getSafeRedirectPath("//evil.com")).toBe("/login");
     });
 
     it("rejects absolute URLs with protocol", () => {
-      expect(getSafeRedirectPath("https://evil.com/steal")).toBe("/account");
-      expect(getSafeRedirectPath("http://evil.com")).toBe("/account");
+      expect(getSafeRedirectPath("https://evil.com/steal")).toBe("/login");
+      expect(getSafeRedirectPath("http://evil.com")).toBe("/login");
     });
 
     it("rejects javascript: URIs", () => {
-      expect(getSafeRedirectPath("javascript:alert(1)")).toBe("/account");
+      expect(getSafeRedirectPath("javascript:alert(1)")).toBe("/login");
     });
 
     it("rejects data: URIs", () => {
-      expect(getSafeRedirectPath("data:text/html,<script>")).toBe("/account");
+      expect(getSafeRedirectPath("data:text/html,<script>")).toBe("/login");
     });
 
     it("rejects empty/null/undefined", () => {
-      expect(getSafeRedirectPath(null)).toBe("/account");
-      expect(getSafeRedirectPath(undefined)).toBe("/account");
-      expect(getSafeRedirectPath("")).toBe("/account");
+      expect(getSafeRedirectPath(null)).toBe("/login");
+      expect(getSafeRedirectPath(undefined)).toBe("/login");
+      expect(getSafeRedirectPath("")).toBe("/login");
     });
 
     it("rejects paths not starting with /", () => {
-      expect(getSafeRedirectPath("dashboard")).toBe("/account");
-      expect(getSafeRedirectPath("../etc/passwd")).toBe("/account");
+      expect(getSafeRedirectPath("dashboard")).toBe("/login");
+      expect(getSafeRedirectPath("../etc/passwd")).toBe("/login");
     });
 
     it("rejects encoded slashes at start (%2F/)", () => {

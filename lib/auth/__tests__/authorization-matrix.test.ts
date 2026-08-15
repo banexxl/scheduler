@@ -69,8 +69,8 @@ describe("route classification", () => {
       "/[tenantSlug]/settings/media",
     ],
     platform_admin: [
-      "/platform-admin",
-      "/platform-admin/billing",
+      "/platform",
+      "/platform/billing",
     ],
     internal_api: [
       "/api/internal/notifications/process",

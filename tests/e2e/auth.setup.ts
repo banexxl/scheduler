@@ -11,7 +11,7 @@ const authFile = path.join(__dirname, "../../.playwright-auth/user.json");
  * Env vars:
  *   TEST_TENANT_USER_NAME — tenant owner email (used for auth setup)
  *   TEST_USER_PASSWORD — shared password for all test users
- *   TEST_ADMIN_USER_NAME — platform admin (for platform-admin tests)
+ *   TEST_ADMIN_USER_NAME — platform admin (for platform admin tests)
  *   TEST_CUSTOMER_USER_NAME — customer account (for customer portal tests)
  */
 setup("authenticate", async ({ page }) => {

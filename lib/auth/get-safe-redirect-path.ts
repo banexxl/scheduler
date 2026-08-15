@@ -11,7 +11,7 @@
  */
 export function getSafeRedirectPath(
   requested: string | null | undefined,
-  fallback: string = "/account"
+  fallback: string = "/login"
 ): string {
   if (!requested || typeof requested !== "string") {
     return fallback;

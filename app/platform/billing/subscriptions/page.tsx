@@ -18,6 +18,7 @@ import {
 import { reconcileSubscriptionAdminAction } from "@/features/platform/actions/subscription-admin-actions";
 import PageHeader from "@/features/platform/components/page-header";
 import PolarConfigAlert from "@/features/platform/components/polar-config-alert";
+import ServerActionForm from "@/features/platform/components/server-action-form";
 import SectionCard from "@/features/platform/components/section-card";
 import MetricCard from "@/features/platform/components/metric-card";
 import PlatformEmptyState from "@/features/platform/components/platform-empty-state";
@@ -83,11 +84,11 @@ export default async function PlatformBillingSubscriptionsPage({
                          { label: "Subscriptions" },
                     ]}
                     action={
-                         <form action={reconcileAllAction}>
+                         <ServerActionForm action={reconcileAllAction} successMessage="All subscriptions reconciled.">
                               <Button type="submit" variant="outlined" size="small">
                                    Reconcile All
                               </Button>
-                         </form>
+                         </ServerActionForm>
                     }
                />
 
@@ -207,12 +208,12 @@ export default async function PlatformBillingSubscriptionsPage({
                                                                  >
                                                                       View
                                                                  </Button>
-                                                                 <form action={reconcileSingleAction}>
+                                                                 <ServerActionForm action={reconcileSingleAction} successMessage="Subscription reconciled.">
                                                                       <input type="hidden" name="subscriptionId" value={row.polarSubscriptionId} />
                                                                       <Button type="submit" size="small" variant="outlined">
                                                                            Reconcile
                                                                       </Button>
-                                                                 </form>
+                                                                 </ServerActionForm>
                                                             </Stack>
                                                        </TableCell>
                                                   </TableRow>

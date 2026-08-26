@@ -14,6 +14,7 @@ import {
 } from "@/features/platform/services/platform-billing-admin-queries";
 import { retryBillingWebhookEventAction } from "@/features/platform/actions/billing-plan-admin-actions";
 import PolarConfigAlert from "@/features/platform/components/polar-config-alert";
+import ServerActionForm from "@/features/platform/components/server-action-form";
 
 async function retryWebhookFormAction(formData: FormData) {
      "use server";
@@ -79,12 +80,12 @@ export default async function PlatformBillingWebhooksPage() {
                                                        <TableCell>{String(event.processing_worker_id ?? "-")}</TableCell>
                                                        <TableCell>
                                                             {isRetryable ? (
-                                                                 <form action={retryWebhookFormAction}>
+                                                                 <ServerActionForm action={retryWebhookFormAction} successMessage="Webhook event retried.">
                                                                       <input type="hidden" name="eventId" value={String(event.id)} />
                                                                       <Button type="submit" size="small" variant="outlined">
                                                                            Retry
                                                                       </Button>
-                                                                 </form>
+                                                                 </ServerActionForm>
                                                             ) : (
                                                                  "-"
                                                             )}

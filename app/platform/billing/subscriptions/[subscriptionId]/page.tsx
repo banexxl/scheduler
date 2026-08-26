@@ -12,6 +12,7 @@ import Typography from "@mui/material/Typography";
 import { requirePlatformAdmin } from "@/lib/platform/require-platform-admin";
 import { getPlatformSubscriptionDetail } from "@/features/platform/services/platform-billing-admin-queries";
 import { reconcileSubscriptionAdminAction } from "@/features/platform/actions/subscription-admin-actions";
+import ServerActionForm from "@/features/platform/components/server-action-form";
 
 async function reconcileAction(formData: FormData) {
      "use server";
@@ -114,7 +115,7 @@ export default async function PlatformBillingSubscriptionDetailPage({
                     <Button component="a" href="/platform/billing/subscriptions" variant="outlined">
                          Back
                     </Button>
-                    <form action={reconcileAction}>
+                    <ServerActionForm action={reconcileAction} successMessage="Subscription reconciled.">
                          <input
                               type="hidden"
                               name="polarSubscriptionId"
@@ -123,7 +124,7 @@ export default async function PlatformBillingSubscriptionDetailPage({
                          <Button type="submit" variant="contained">
                               Reconcile Now
                          </Button>
-                    </form>
+                    </ServerActionForm>
                </Stack>
           </Stack>
      );

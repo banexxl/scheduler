@@ -27,6 +27,7 @@ import {
 } from "@/features/platform/actions/billing-plan-admin-actions";
 import { requirePlatformAdmin } from "@/lib/platform/require-platform-admin";
 import PolarConfigAlert from "@/features/platform/components/polar-config-alert";
+import ServerActionForm from "@/features/platform/components/server-action-form";
 import { formatMinorCurrency } from "@/lib/helpers/format-minor-currency";
 
 async function mapAction(formData: FormData) {
@@ -76,11 +77,11 @@ export default async function PlatformBillingProductsPage() {
                               Sync Polar products and map them to local plan keys.
                          </Typography>
                     </Box>
-                    <form action={refreshAllAction}>
+                    <ServerActionForm action={refreshAllAction} successMessage="All products refreshed from Polar.">
                          <Button type="submit" variant="contained">
                               Refresh All Mapped Products
                          </Button>
-                    </form>
+                    </ServerActionForm>
                </Stack>
 
                <PolarConfigAlert />
@@ -120,7 +121,7 @@ export default async function PlatformBillingProductsPage() {
                                              Polar Product ID: {plan.polar_product_id ?? "Not mapped"}
                                         </Typography>
 
-                                        <form action={mapAction}>
+                                        <ServerActionForm action={mapAction} successMessage="Mapping saved!">
                                              <Stack direction={{ xs: "column", md: "row" }} spacing={1}>
                                                   <input type="hidden" name="planId" value={plan.id} />
                                                   <TextField
@@ -134,15 +135,15 @@ export default async function PlatformBillingProductsPage() {
                                                        Save Mapping
                                                   </Button>
                                              </Stack>
-                                        </form>
+                                        </ServerActionForm>
 
                                         {plan.polar_product_id ? (
-                                             <form action={refreshSingleAction}>
+                                             <ServerActionForm action={refreshSingleAction} successMessage="Product refreshed from Polar.">
                                                   <input type="hidden" name="polarProductId" value={plan.polar_product_id} />
                                                   <Button type="submit" variant="text" size="small">
                                                        Refresh This Product
                                                   </Button>
-                                             </form>
+                                             </ServerActionForm>
                                         ) : null}
 
                                         <Divider />

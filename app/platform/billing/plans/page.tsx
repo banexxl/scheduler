@@ -26,6 +26,7 @@ import { requirePlatformAdmin } from "@/lib/platform/require-platform-admin";
 import PolarConfigAlert from "@/features/platform/components/polar-config-alert";
 import CreatePlanForm from "@/features/platform/components/create-plan-form";
 import PlanActionButtons from "@/features/platform/components/plan-action-buttons";
+import ServerActionForm from "@/features/platform/components/server-action-form";
 
 async function createPlanFormAction(formData: FormData): Promise<string | null> {
      "use server";
@@ -112,12 +113,12 @@ export default async function PlatformBillingPlansPage() {
                <Paper variant="outlined" sx={{ p: 2 }}>
                     <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
                          <Typography variant="h6">Plan List</Typography>
-                         <form action={reorderFormAction}>
+                         <ServerActionForm action={reorderFormAction} successMessage="Plan order saved.">
                               <input type="hidden" name="orderedIds" value={orderedIds.join(",")} />
                               <Button type="submit" variant="outlined" size="small">
                                    Save Current Order
                               </Button>
-                         </form>
+                         </ServerActionForm>
                     </Stack>
 
                     <TableContainer>
@@ -184,7 +185,7 @@ export default async function PlatformBillingPlansPage() {
                     </Typography>
                     <Stack spacing={2}>
                          {plans.map((plan) => (
-                              <form key={`edit-${plan.id}`} action={updatePlanFormAction}>
+                              <ServerActionForm key={`edit-${plan.id}`} action={updatePlanFormAction} successMessage="Plan updated.">
                                    <Paper variant="outlined" sx={{ p: 1.5 }}>
                                         <input type="hidden" name="id" value={plan.id} />
                                         <Stack direction={{ xs: "column", md: "row" }} spacing={1} alignItems="center">
@@ -203,7 +204,7 @@ export default async function PlatformBillingPlansPage() {
                                              <Button size="small" type="submit" variant="contained">Save</Button>
                                         </Stack>
                                    </Paper>
-                              </form>
+                              </ServerActionForm>
                          ))}
                     </Stack>
                </Paper>

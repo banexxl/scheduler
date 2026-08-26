@@ -73,6 +73,11 @@ describeIntegration("tenant deletion (live DB)", () => {
     try {
       await admin().rpc("delete_tenant_for_test", { p_tenant_id: retainedTenantId });
     } catch { /* may already be gone */ }
+    // Clean up test users
+    const { deleteTestUser } = await import("../helpers/supabase-test-client");
+    for (const id of [ownerUserId, staffUserId]) {
+      if (id) await deleteTestUser(id).catch(() => { });
+    }
   }, 15_000);
 
   describe("authorization", () => {

@@ -397,6 +397,19 @@ export async function teardownFullTestEnvironment(
 ): Promise<void> {
   await teardownTestTenant(env.tenantA.tenantId);
   await teardownTestTenant(env.tenantB.tenantId);
-  // Note: users are NOT deleted here — they may be shared or cached.
-  // Deletion can be done explicitly if needed.
+
+  // Delete test users
+  const admin = createTestAdminClient();
+  const userIds = [
+    env.ownerA.userId,
+    env.staffA.userId,
+    env.ownerB.userId,
+  ];
+  for (const userId of userIds) {
+    try {
+      await admin.auth.admin.deleteUser(userId);
+    } catch {
+      // Ignore — user may already be deleted
+    }
+  }
 }

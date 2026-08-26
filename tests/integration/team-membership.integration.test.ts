@@ -63,6 +63,11 @@ describeIntegration("team membership integrity (live DB)", () => {
 
   afterAll(async () => {
     if (tenantId) await teardownTestTenant(tenantId);
+    // Clean up test users
+    const { deleteTestUser } = await import("../helpers/supabase-test-client");
+    for (const id of [ownerUserId, secondOwnerUserId, staffUserId]) {
+      if (id) await deleteTestUser(id).catch(() => { });
+    }
   }, 15_000);
 
   // ─── Last-Owner Protection ──────────────────────────────────────────────────

@@ -11,6 +11,7 @@ import {
 } from "../schemas/update-password-schema";
 import { updatePasswordAction } from "../actions/update-password";
 import AuthFormAlert from "./auth-form-alert";
+import PasswordField from "./password-field";
 import type { AuthActionResult } from "../types/auth-action-result";
 
 export default function UpdatePasswordForm() {
@@ -53,13 +54,10 @@ export default function UpdatePasswordForm() {
 
           <Field name="password">
             {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-              <TextField
+              <PasswordField
                 {...field}
                 label="New Password"
-                type="password"
                 autoComplete="new-password"
-                fullWidth
-                margin="normal"
                 error={
                   (!!touched.password && !!errors.password) ||
                   !!actionResult?.fieldErrors?.password
@@ -75,13 +73,10 @@ export default function UpdatePasswordForm() {
 
           <Field name="confirmPassword">
             {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-              <TextField
+              <PasswordField
                 {...field}
                 label="Confirm New Password"
-                type="password"
                 autoComplete="new-password"
-                fullWidth
-                margin="normal"
                 error={
                   (!!touched.confirmPassword && !!errors.confirmPassword) ||
                   !!actionResult?.fieldErrors?.confirmPassword

@@ -11,6 +11,7 @@ import { loginSchema, type LoginFormValues } from "../schemas/login-schema";
 import { loginAction } from "../actions/login";
 import { googleLoginAction } from "../actions/google-login";
 import AuthFormAlert from "./auth-form-alert";
+import PasswordField from "./password-field";
 import type { AuthActionResult } from "../types/auth-action-result";
 
 export default function LoginForm() {
@@ -76,13 +77,10 @@ export default function LoginForm() {
 
           <Field name="password">
             {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-              <TextField
+              <PasswordField
                 {...field}
                 label="Password"
-                type="password"
                 autoComplete="current-password"
-                fullWidth
-                margin="normal"
                 error={
                   (!!touched.password && !!errors.password) ||
                   !!actionResult?.fieldErrors?.password

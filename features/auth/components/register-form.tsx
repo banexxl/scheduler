@@ -13,6 +13,7 @@ import {
 } from "../schemas/register-schema";
 import { registerAction } from "../actions/register";
 import AuthFormAlert from "./auth-form-alert";
+import PasswordField from "./password-field";
 import type { AuthActionResult } from "../types/auth-action-result";
 
 export default function RegisterForm() {
@@ -84,13 +85,10 @@ export default function RegisterForm() {
 
           <Field name="password">
             {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-              <TextField
+              <PasswordField
                 {...field}
                 label="Password"
-                type="password"
                 autoComplete="new-password"
-                fullWidth
-                margin="normal"
                 error={
                   (!!touched.password && !!errors.password) ||
                   !!actionResult?.fieldErrors?.password
@@ -106,13 +104,10 @@ export default function RegisterForm() {
 
           <Field name="confirmPassword">
             {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-              <TextField
+              <PasswordField
                 {...field}
                 label="Confirm Password"
-                type="password"
                 autoComplete="new-password"
-                fullWidth
-                margin="normal"
                 error={
                   (!!touched.confirmPassword && !!errors.confirmPassword) ||
                   !!actionResult?.fieldErrors?.confirmPassword

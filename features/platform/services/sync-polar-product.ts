@@ -42,6 +42,22 @@ function extractPlanKeyFromMetadata(metadata: Record<string, unknown>): string |
      return null;
 }
 
+/** Convert Polar's trial_interval + trial_interval_count into approximate days. */
+function computeTrialDays(interval: string, count: number): number {
+     switch (interval.toLowerCase()) {
+          case "day":
+               return count;
+          case "week":
+               return count * 7;
+          case "month":
+               return count * 30;
+          case "year":
+               return count * 365;
+          default:
+               return count;
+     }
+}
+
 async function getOrCreateSyncRun(params: {
      runType: BillingSyncRunType;
      source: BillingSyncSource;
@@ -156,11 +172,11 @@ async function syncPrices(params: {
                polar_product_id: params.product.id,
                polar_price_id: price.id,
                price_type: price.type,
-               billing_interval: price.recurringInterval,
-               billing_interval_count: price.recurringIntervalCount,
+               billing_interval: price.recurringInterval ?? params.product.recurringInterval,
+               billing_interval_count: price.recurringIntervalCount ?? params.product.recurringIntervalCount,
                amount: price.unitAmount,
                currency: price.currency,
-               is_recurring: price.isRecurring,
+               is_recurring: price.isRecurring || params.product.isRecurring,
                is_checkout_eligible: classifyCheckoutEligibility(price),
                is_active: !price.isArchived,
                is_archived: price.isArchived,
@@ -253,6 +269,10 @@ export async function syncPolarProduct(
                     polar_created_at: toIsoOrNull(product.createdAt),
                     polar_modified_at: toIsoOrNull(product.modifiedAt),
                     last_synced_at: new Date().toISOString(),
+                    // Sync trial info from Polar product level
+                    ...(product.trialInterval && product.trialIntervalCount
+                         ? { trial_days: computeTrialDays(product.trialInterval, product.trialIntervalCount) }
+                         : {}),
                } as never
           )
           .eq("id" as never, resolution.planId);

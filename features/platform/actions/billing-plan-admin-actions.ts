@@ -134,6 +134,7 @@ export async function createBillingPlanAction(input: {
                          polar_product_description: validated.description ?? null,
                          polar_created_at: polarCreatedAt,
                          last_synced_at: polarProductId ? new Date().toISOString() : null,
+                         trial_days: input.trialDays && input.trialDays > 0 ? input.trialDays : null,
                          product_metadata: {
                               application: "scheduling-platform",
                               plan_key: validated.planKey,
@@ -160,7 +161,7 @@ export async function createBillingPlanAction(input: {
                          polar_price_id: polarPriceId,
                          price_type: input.isRecurring ? "recurring" : "one_time",
                          amount: input.priceAmount,
-                         currency: input.priceCurrency,
+                         currency: (input.priceCurrency ?? "usd").toUpperCase(),
                          billing_interval: input.recurringInterval ?? null,
                          billing_interval_count: input.recurringIntervalCount ?? null,
                          is_recurring: input.isRecurring ?? true,

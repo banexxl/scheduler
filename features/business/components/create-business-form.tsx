@@ -205,13 +205,6 @@ export default function CreateBusinessForm({ selectedPlanId }: { selectedPlanId?
           noValidate
           aria-label="Create business form"
         >
-          {/* General action error */}
-          {actionResult && !actionResult.success && actionResult.message && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {actionResult.message}
-            </Alert>
-          )}
-
           {/* Business Name */}
           <Field name="businessName">
             {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
@@ -405,6 +398,13 @@ export default function CreateBusinessForm({ selectedPlanId }: { selectedPlanId?
           >
             {isSubmitting ? "Creating business..." : "Create Business"}
           </Button>
+
+          {/* Action error — shown below button */}
+          {actionResult && !actionResult.success && actionResult.message && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {actionResult.message}
+            </Alert>
+          )}
         </Box>
       )}
     </Formik>

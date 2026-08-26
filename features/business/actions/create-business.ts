@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { generateTenantSlug } from "@/lib/tenants/generate-tenant-slug";
 import {
@@ -171,32 +171,39 @@ export async function createBusinessAction(
   }
 
   // 5. Resolve subscription plan
-  let selectedPlan: { id: string } | null = null;
+  // Use service-role client for plan lookups — billing_plans RLS restricts
+  // SELECT to platform admins, but all authenticated users need plan access
+  // during onboarding.
+  const adminClient = createServiceRoleClient();
+  let selectedPlan: { id: string; trial_days: number | null } | null = null;
 
   // Use explicitly selected plan if provided
   if (values.selectedPlanId) {
-    const { data: explicitPlan } = await supabase
+    const { data: explicitPlan } = await adminClient
       .from("billing_plans" as never)
-      .select("id" as never)
+      .select("id, trial_days" as never)
       .eq("id" as never, values.selectedPlanId)
       .eq("is_active" as never, true)
       .maybeSingle();
 
     if (explicitPlan) {
-      selectedPlan = explicitPlan as unknown as { id: string };
+      selectedPlan = explicitPlan as unknown as { id: string; trial_days: number | null };
+      console.log("[create-business] Resolved explicit plan:", selectedPlan.id, "trial_days:", selectedPlan.trial_days);
+    } else {
+      console.warn("[create-business] Explicit plan not found for id:", values.selectedPlanId);
     }
   }
 
   // Fallback: auto-select cheapest/free plan
   if (!selectedPlan) {
-    const { data: plans } = await supabase
+    const { data: plans } = await adminClient
       .from("billing_plans" as never)
-      .select("id, plan_key, is_free" as never)
+      .select("id, plan_key, is_free, trial_days" as never)
       .eq("is_active" as never, true)
       .order("sort_order" as never, { ascending: true })
       .limit(10);
 
-    const allPlans = (plans ?? []) as unknown as Array<{ id: string; plan_key: string; is_free: boolean }>;
+    const allPlans = (plans ?? []) as unknown as Array<{ id: string; plan_key: string; is_free: boolean; trial_days: number | null }>;
     const freePlan = allPlans.find(p => p.is_free || p.plan_key === "free" || p.plan_key.includes("free"));
     selectedPlan = freePlan ?? allPlans[0] ?? null;
   }
@@ -209,11 +216,14 @@ export async function createBusinessAction(
     };
   }
 
+  const trialDays = selectedPlan.trial_days ?? DEFAULT_TRIAL_DAYS;
+
   return await executeCreateTenant(
     supabase,
     validated,
     normalizedSlug,
-    selectedPlan.id
+    selectedPlan.id,
+    trialDays
   );
 }
 
@@ -230,7 +240,8 @@ async function executeCreateTenant(
     currency: string;
   },
   normalizedSlug: string,
-  planId: string
+  planId: string,
+  trialDays: number
 ): Promise<CreateBusinessActionResult> {
   // Generate primary location slug
   const locationSlug =
@@ -245,7 +256,7 @@ async function executeCreateTenant(
     timezone_name: validated.timezone,
     currency_code: validated.currency,
     subscription_plan_id: planId,
-    trial_days: DEFAULT_TRIAL_DAYS,
+    trial_days: trialDays,
   });
 
   // 7. Handle errors
@@ -278,7 +289,7 @@ async function executeCreateTenant(
 
   // 8. Initialize free trial fields on the tenant
   const now = new Date();
-  const trialEnd = new Date(now.getTime() + DEFAULT_TRIAL_DAYS * 24 * 60 * 60 * 1000);
+  const trialEnd = new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000);
 
   await supabase
     .from("tenants")

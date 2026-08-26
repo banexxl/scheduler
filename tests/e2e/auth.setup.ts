@@ -27,7 +27,7 @@ setup("authenticate", async ({ page }) => {
 
   // Fill credentials
   await page.getByLabel(/email/i).fill(username);
-  await page.getByLabel(/password/i).fill(password);
+  await page.getByRole("textbox", { name: /password/i }).fill(password);
 
   // Submit
   await page.getByRole("button", { name: /sign in|log in|submit/i }).click();

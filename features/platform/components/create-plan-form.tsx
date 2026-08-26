@@ -51,6 +51,8 @@ export default function CreatePlanForm({ action }: Props) {
     const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(currencyCode.toUpperCase());
     const priceAmount = isZeroDecimal ? priceWhole : Math.round(priceWhole * 100);
 
+    console.log("[create-plan-form] Price:", { priceWhole, priceAmount, currencyCode, isFree });
+
     const submissionData = new FormData();
     submissionData.set("planKey", formData.get("planKey") as string);
     submissionData.set("name", formData.get("name") as string);

@@ -18,7 +18,7 @@ type Props = {
 };
 
 export default function ServerActionForm({ action, successMessage = "Done!", errorMessage, children }: Props) {
-  const [pending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = (formData: FormData) => {

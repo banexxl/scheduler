@@ -189,6 +189,18 @@ export async function createPolarProduct(input: CreatePolarProductInput): Promis
 
      if (input.description) productPayload.description = input.description;
 
+     // Set product-level recurring interval (Polar uses this at the product level)
+     if (input.isRecurring && input.recurringInterval) {
+          productPayload.recurring_interval = input.recurringInterval;
+          productPayload.recurring_interval_count = input.recurringIntervalCount ?? 1;
+     }
+
+     // Add trial period if specified (Polar uses interval-based trials)
+     if (input.trialDays && input.trialDays > 0) {
+          productPayload.trial_interval = "day";
+          productPayload.trial_interval_count = input.trialDays;
+     }
+
      const response = await polarFetch<Record<string, unknown>>("/v1/products", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -198,8 +210,10 @@ export async function createPolarProduct(input: CreatePolarProductInput): Promis
      const productId = String(response.id ?? "");
      if (!productId) throw new Error("[polar-client] Product create response missing id");
 
-     // Extract price ID from response
-     const priceId = String(prices[0]?.id ?? "");
+     // Extract price ID from the API response (Polar returns the product with populated prices)
+     const responsePrices = Array.isArray(response.prices) ? response.prices : [];
+     const firstPrice = responsePrices[0] as Record<string, unknown> | undefined;
+     const priceId = String(firstPrice?.id ?? "");
 
      return {
           productId,

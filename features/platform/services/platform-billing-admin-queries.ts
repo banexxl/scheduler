@@ -8,6 +8,7 @@ import {
 import { listPolarProductPrices, listPolarProducts } from "./polar-client";
 import type {
      DiscoveredPolarProduct,
+     PlanPriceSummary,
      PlatformSubscriptionListItem,
      PlatformBillingPlanSummary,
      PolarProductDiscoveryResult,
@@ -69,6 +70,8 @@ export async function listPlatformBillingPlanSummaries(): Promise<
                     typeof row.polar_product_id === "string" ? row.polar_product_id : null,
                activePriceCount: 0,
                archivedPriceCount: 0,
+               trialDays: typeof row.trial_days === "number" ? row.trial_days : null,
+               prices: [] as PlanPriceSummary[],
                lastSyncedAt:
                     typeof row.last_synced_at === "string" ? row.last_synced_at : null,
           })) ?? [];
@@ -78,7 +81,7 @@ export async function listPlatformBillingPlanSummaries(): Promise<
      const planIds = rows.map((row) => row.id);
      const { data: prices, error: priceError } = await adminClient
           .from("billing_plan_prices" as never)
-          .select("billing_plan_id,is_active,is_archived")
+          .select("billing_plan_id,is_active,is_archived,amount,currency,billing_interval,billing_interval_count,price_type,is_recurring")
           .in("billing_plan_id" as never, planIds as never);
 
      if (priceError) {
@@ -88,6 +91,7 @@ export async function listPlatformBillingPlanSummaries(): Promise<
      }
 
      const counters = new Map<string, { active: number; archived: number }>();
+     const priceDetails = new Map<string, PlanPriceSummary[]>();
 
      for (const price of (prices as Array<Record<string, unknown>> | null) ?? []) {
           const planId = String(price.billing_plan_id ?? "");
@@ -98,6 +102,18 @@ export async function listPlatformBillingPlanSummaries(): Promise<
                entry.archived += 1;
           } else if (Boolean(price.is_active)) {
                entry.active += 1;
+
+               // Collect active price details for display
+               const details = priceDetails.get(planId) ?? [];
+               details.push({
+                    amount: typeof price.amount === "number" ? price.amount : null,
+                    currency: typeof price.currency === "string" ? price.currency : null,
+                    billingInterval: typeof price.billing_interval === "string" ? price.billing_interval : null,
+                    billingIntervalCount: typeof price.billing_interval_count === "number" ? price.billing_interval_count : null,
+                    priceType: String(price.price_type ?? "unknown"),
+                    isRecurring: Boolean(price.is_recurring) || String(price.price_type ?? "") === "recurring",
+               });
+               priceDetails.set(planId, details);
           }
 
           counters.set(planId, entry);
@@ -107,6 +123,7 @@ export async function listPlatformBillingPlanSummaries(): Promise<
           ...row,
           activePriceCount: counters.get(row.id)?.active ?? 0,
           archivedPriceCount: counters.get(row.id)?.archived ?? 0,
+          prices: priceDetails.get(row.id) ?? [],
      }));
 }
 
@@ -272,7 +289,7 @@ export async function listPlatformSubscriptions(input?: {
      let query = adminClient
           .from("tenant_subscriptions" as never)
           .select(
-               "id,tenant_id,polar_subscription_id,polar_customer_id,polar_product_id,polar_price_id,status,billing_interval,billing_interval_count,current_period_ends_at,cancel_at_period_end,trial_ends_at,last_synced_at,status,subscription_plans(name,code),tenants(name,slug)"
+               "id,tenant_id,polar_subscription_id,polar_customer_id,polar_product_id,polar_price_id,status,billing_interval,billing_interval_count,current_period_ends_at,cancel_at_period_end,trial_ends_at,last_synced_at,status,billing_plans(name,plan_key),tenants(name,slug)"
           )
           .order("last_synced_at" as never, { ascending: false })
           .limit(limit);

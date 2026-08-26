@@ -39,7 +39,7 @@ export default async function CreateBusinessPage() {
   const supabase = createServiceRoleClient();
   const { data: planRows } = await supabase
     .from("billing_plans" as never)
-    .select("id, name, description, plan_key, is_free, is_active, is_public, polar_product_id, sort_order" as never)
+    .select("id, name, description, plan_key, is_free, is_active, is_public, polar_product_id, sort_order, trial_days" as never)
     .eq("is_active" as never, true)
     .eq("is_public" as never, true)
     .order("sort_order" as never, { ascending: true });
@@ -68,7 +68,7 @@ export default async function CreateBusinessPage() {
 
   const plans: PlanOption[] = ((planRows ?? []) as unknown as Array<{
     id: string; name: string; description: string | null; plan_key: string;
-    is_free: boolean; polar_product_id: string | null;
+    is_free: boolean; polar_product_id: string | null; trial_days: number | null;
   }>).map(p => {
     const price = priceMap.get(p.id);
     return {
@@ -80,7 +80,7 @@ export default async function CreateBusinessPage() {
       currency: price?.currency ?? "usd",
       billingInterval: price?.billingInterval ?? null,
       isFree: p.is_free,
-      trialDays: p.is_free ? 0 : 14,
+      trialDays: p.is_free ? 0 : (p.trial_days ?? 0),
       polarProductId: p.polar_product_id ?? null,
     };
   });

@@ -15,6 +15,7 @@ import Typography from "@mui/material/Typography";
 import {
      createBillingPlanAction,
      deleteBillingPlanAction,
+     refreshAllMappedProductsAction,
      refreshSinglePolarProductAction,
      reorderBillingPlansAction,
      toggleBillingPlanActiveAction,
@@ -84,6 +85,11 @@ async function reorderFormAction(formData: FormData) {
      await reorderBillingPlansAction({ orderedPlanIds: ids });
 }
 
+async function syncAllProductsAction() {
+     "use server";
+     await refreshAllMappedProductsAction();
+}
+
 export default async function PlatformBillingPlansPage() {
      await requirePlatformAdmin();
      const plans = await listPlatformBillingPlanSummaries();
@@ -119,6 +125,11 @@ export default async function PlatformBillingPlansPage() {
                                    Save Current Order
                               </Button>
                          </ServerActionForm>
+                         <ServerActionForm action={syncAllProductsAction} successMessage="All products synced from Polar.">
+                              <Button type="submit" variant="outlined" size="small" color="secondary">
+                                   Sync All from Polar
+                              </Button>
+                         </ServerActionForm>
                     </Stack>
 
                     <TableContainer>
@@ -127,8 +138,10 @@ export default async function PlatformBillingPlansPage() {
                                    <TableRow>
                                         <TableCell>Plan</TableCell>
                                         <TableCell>State</TableCell>
+                                        <TableCell>Price</TableCell>
+                                        <TableCell>Interval</TableCell>
+                                        <TableCell>Trial</TableCell>
                                         <TableCell>Mapping</TableCell>
-                                        <TableCell>Prices</TableCell>
                                         <TableCell>Sort</TableCell>
                                         <TableCell>Actions</TableCell>
                                    </TableRow>
@@ -151,10 +164,48 @@ export default async function PlatformBillingPlansPage() {
                                                        {plan.isPublic ? <Chip size="small" label="public" color="info" /> : <Chip size="small" label="hidden" />}
                                                   </Stack>
                                              </TableCell>
-                                             <TableCell>{plan.polarProductId ?? "Not mapped"}</TableCell>
                                              <TableCell>
-                                                  {plan.activePriceCount} active / {plan.archivedPriceCount} archived
+                                                  {plan.isFree ? (
+                                                       <Typography variant="body2" color="text.secondary">Free</Typography>
+                                                  ) : plan.prices.length > 0 ? (
+                                                       <Stack spacing={0.25}>
+                                                            {plan.prices.map((p, idx) => (
+                                                                 <Typography key={idx} variant="body2">
+                                                                      {p.amount != null
+                                                                           ? `${(p.amount / 100).toFixed(2)} ${(p.currency ?? "").toUpperCase()}`
+                                                                           : "—"}
+                                                                 </Typography>
+                                                            ))}
+                                                       </Stack>
+                                                  ) : (
+                                                       <Typography variant="body2" color="text.secondary">No price</Typography>
+                                                  )}
                                              </TableCell>
+                                             <TableCell>
+                                                  {plan.isFree ? (
+                                                       <Typography variant="body2" color="text.secondary">—</Typography>
+                                                  ) : plan.prices.length > 0 ? (
+                                                       <Stack spacing={0.25}>
+                                                            {plan.prices.map((p, idx) => (
+                                                                 <Typography key={idx} variant="body2">
+                                                                      {p.isRecurring
+                                                                           ? `${p.billingInterval ?? "month"}${(p.billingIntervalCount ?? 1) > 1 ? ` ×${p.billingIntervalCount}` : ""}`
+                                                                           : "one-time"}
+                                                                 </Typography>
+                                                            ))}
+                                                       </Stack>
+                                                  ) : (
+                                                       <Typography variant="body2" color="text.secondary">—</Typography>
+                                                  )}
+                                             </TableCell>
+                                             <TableCell>
+                                                  {plan.trialDays != null && plan.trialDays > 0 ? (
+                                                       <Chip size="small" label={`${plan.trialDays}d trial`} variant="outlined" />
+                                                  ) : (
+                                                       <Typography variant="body2" color="text.secondary">—</Typography>
+                                                  )}
+                                             </TableCell>
+                                             <TableCell>{plan.polarProductId ?? "Not mapped"}</TableCell>
                                              <TableCell>{plan.sortOrder}</TableCell>
                                              <TableCell>
                                                   <PlanActionButtons
@@ -208,6 +259,6 @@ export default async function PlatformBillingPlansPage() {
                          ))}
                     </Stack>
                </Paper>
-          </Stack>
+          </Stack >
      );
 }

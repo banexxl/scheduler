@@ -1,3 +1,12 @@
+export type PlanPriceSummary = {
+     amount: number | null;
+     currency: string | null;
+     billingInterval: string | null;
+     billingIntervalCount: number | null;
+     priceType: string;
+     isRecurring: boolean;
+};
+
 export type PlatformBillingPlanSummary = {
      id: string;
      planKey: string;
@@ -10,6 +19,9 @@ export type PlatformBillingPlanSummary = {
      polarProductId: string | null;
      activePriceCount: number;
      archivedPriceCount: number;
+     trialDays: number | null;
+     /** Active prices with their details (amount, currency, interval) */
+     prices: PlanPriceSummary[];
      lastSyncedAt: string | null;
 };
 

@@ -58,8 +58,11 @@ function extractPriceCurrency(payload: UnknownRecord): string | null {
      const direct = asString(payload.currency);
      if (direct) return direct.toUpperCase();
 
+     const priceCurrency = asString(payload.price_currency);
+     if (priceCurrency) return priceCurrency.toUpperCase();
+
      const nested = asRecord(payload.price);
-     const value = asString(nested.currency);
+     const value = asString(nested.currency) ?? asString(nested.price_currency);
      return value ? value.toUpperCase() : null;
 }
 
@@ -80,10 +83,14 @@ function extractRecurring(payload: UnknownRecord): {
           asNumber(recurring.interval_count) ??
           asNumber(recurring.recurring_interval_count);
 
+     // Polar prices have a `type` field of "recurring" or "one_time"
+     const typeField = asString(payload.type);
+     const isRecurring = Boolean(interval) || typeField === "recurring";
+
      return {
           interval,
           intervalCount,
-          isRecurring: Boolean(interval),
+          isRecurring,
      };
 }
 
@@ -127,12 +134,18 @@ function normalizePriceList(
 export function normalizePolarProduct(payload: UnknownRecord): NormalizedPolarProduct {
      const metadata = asRecord(payload.metadata);
      const productId = asString(payload.id) ?? "";
+     const recurring = extractRecurring(payload);
 
      return {
           id: productId,
           name: asString(payload.name) ?? "Unnamed product",
           description: asString(payload.description),
           isArchived: asBoolean(payload.is_archived) || asBoolean(payload.archived),
+          isRecurring: recurring.isRecurring,
+          recurringInterval: recurring.interval,
+          recurringIntervalCount: recurring.intervalCount,
+          trialInterval: asString(payload.trial_interval),
+          trialIntervalCount: asNumber(payload.trial_interval_count),
           metadata,
           createdAt: toIsoTimestamp(payload.created_at),
           modifiedAt: toIsoTimestamp(payload.modified_at ?? payload.updated_at),

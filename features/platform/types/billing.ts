@@ -36,6 +36,11 @@ export type NormalizedPolarProduct = {
      name: string;
      description: string | null;
      isArchived: boolean;
+     isRecurring: boolean;
+     recurringInterval: string | null;
+     recurringIntervalCount: number | null;
+     trialInterval: string | null;
+     trialIntervalCount: number | null;
      metadata: Record<string, unknown>;
      createdAt: string | null;
      modifiedAt: string | null;

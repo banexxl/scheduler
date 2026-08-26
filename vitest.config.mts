@@ -13,6 +13,7 @@ export default defineConfig({
     globals: true,
     environment: "node",
     exclude: ["**/node_modules/**", "**/tests/e2e/**"],
+    globalSetup: ["./tests/helpers/vitest-global-teardown.ts"],
   },
   resolve: {
     alias: {

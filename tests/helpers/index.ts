@@ -19,6 +19,8 @@ export {
   deleteTestUser,
 } from "./supabase-test-client";
 
+export { cleanupTestData } from "./global-test-cleanup";
+
 export {
   createTestTenant,
   createTestMembership,

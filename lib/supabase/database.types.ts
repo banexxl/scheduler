@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -1450,6 +1450,7 @@ export type Database = {
           polar_product_name: string | null
           product_metadata: Json
           sort_order: number
+          trial_days: number | null
           updated_at: string
         }
         Insert: {
@@ -1469,6 +1470,7 @@ export type Database = {
           polar_product_name?: string | null
           product_metadata?: Json
           sort_order?: number
+          trial_days?: number | null
           updated_at?: string
         }
         Update: {
@@ -1488,6 +1490,7 @@ export type Database = {
           polar_product_name?: string | null
           product_metadata?: Json
           sort_order?: number
+          trial_days?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -5966,54 +5969,6 @@ export type Database = {
           },
         ]
       }
-      subscription_plans: {
-        Row: {
-          billing_interval: string
-          code: string
-          created_at: string
-          currency: string
-          description: string | null
-          external_price_id: string | null
-          external_product_id: string | null
-          features: Json
-          id: string
-          is_active: boolean
-          name: string
-          price_amount: number
-          updated_at: string
-        }
-        Insert: {
-          billing_interval?: string
-          code: string
-          created_at?: string
-          currency?: string
-          description?: string | null
-          external_price_id?: string | null
-          external_product_id?: string | null
-          features?: Json
-          id?: string
-          is_active?: boolean
-          name: string
-          price_amount?: number
-          updated_at?: string
-        }
-        Update: {
-          billing_interval?: string
-          code?: string
-          created_at?: string
-          currency?: string
-          description?: string | null
-          external_price_id?: string | null
-          external_product_id?: string | null
-          features?: Json
-          id?: string
-          is_active?: boolean
-          name?: string
-          price_amount?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
       tenant_billing_customers: {
         Row: {
           created_at: string
@@ -7269,13 +7224,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "tenant_subscriptions_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_plans"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
             columns: ["tenant_id"]

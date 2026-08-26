@@ -20,6 +20,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? "github" : "html",
+  globalTeardown: "./tests/helpers/global-test-cleanup.ts",
 
   use: {
     baseURL: process.env.TEST_BASE_URL ?? "http://localhost:3000",

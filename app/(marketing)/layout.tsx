@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Box from "@mui/material/Box";
 import { createClient } from "@/lib/supabase/server";
 import MarketingShell from "@/features/marketing/components/marketing-shell";
 

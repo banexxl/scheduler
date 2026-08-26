@@ -276,7 +276,20 @@ async function executeCreateTenant(
     };
   }
 
-  // 8. Success — invalidate caches and redirect
+  // 8. Initialize free trial fields on the tenant
+  const now = new Date();
+  const trialEnd = new Date(now.getTime() + DEFAULT_TRIAL_DAYS * 24 * 60 * 60 * 1000);
+
+  await supabase
+    .from("tenants")
+    .update({
+      trial_started_at: now.toISOString(),
+      trial_ends_at: trialEnd.toISOString(),
+      trial_used: true,
+    })
+    .eq("slug", normalizedSlug);
+
+  // 9. Success — invalidate caches and redirect
   revalidatePath("/create-business");
   revalidatePath(`/${normalizedSlug}`);
 

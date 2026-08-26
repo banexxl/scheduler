@@ -7301,6 +7301,9 @@ export type Database = {
           slug: string
           social_links: Json
           status: string
+          trial_ends_at: string | null
+          trial_started_at: string | null
+          trial_used: boolean
           updated_at: string
           website_url: string | null
         }
@@ -7319,6 +7322,9 @@ export type Database = {
           slug: string
           social_links?: Json
           status?: string
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
+          trial_used?: boolean
           updated_at?: string
           website_url?: string | null
         }
@@ -7337,6 +7343,9 @@ export type Database = {
           slug?: string
           social_links?: Json
           status?: string
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
+          trial_used?: boolean
           updated_at?: string
           website_url?: string | null
         }

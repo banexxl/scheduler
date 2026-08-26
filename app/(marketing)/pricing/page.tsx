@@ -18,7 +18,7 @@ export default async function PricingPage() {
 
   // Load prices for each plan
   const planIds = ((plans ?? []) as unknown as Array<{ id: string }>).map(p => p.id);
-  let priceMap = new Map<string, { amount: number; currency: string; billingInterval: string | null }>();
+  const priceMap = new Map<string, { amount: number; currency: string; billingInterval: string | null }>();
 
   if (planIds.length > 0) {
     const { data: prices } = await supabase

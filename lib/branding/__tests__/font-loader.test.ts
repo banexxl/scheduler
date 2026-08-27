@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import type { SupportedFont } from "@/types/branding";
+import { TENANT_FONT_CSS_VAR } from "@/types/branding";
 
 /**
  * Font Loader Tests — Milestone 16.1.
@@ -7,8 +8,6 @@ import type { SupportedFont } from "@/types/branding";
  * Tests the pure detection logic without needing next/font/google runtime.
  */
 
-// We can't import font-loader directly because it calls next/font/google
-// at module scope. Instead, test the detection logic inline.
 const SUPPORTED_FONTS: SupportedFont[] = [
   "Inter",
   "Poppins",
@@ -72,8 +71,6 @@ describe("detectSupportedFont", () => {
 
 describe("TENANT_FONT_CSS_VAR", () => {
   it("has the expected value", () => {
-    // Import from types which doesn't depend on next/font
-    const { TENANT_FONT_CSS_VAR } = require("@/types/branding");
     expect(TENANT_FONT_CSS_VAR).toBe("--tenant-font-family");
   });
 });

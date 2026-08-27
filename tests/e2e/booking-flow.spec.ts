@@ -42,9 +42,7 @@ test.describe("booking services page", () => {
     const text = await summary.textContent();
     if (text?.includes("Select at least one service")) {
       const continueButton = page.getByRole("link", { name: /continue/i });
-      // Button should be present but disabled
-      const isDisabled = await continueButton.getAttribute("aria-disabled") ?? "false";
-      // MUI disables links via pointer-events CSS, check it exists
+      // Button should be present (MUI disables links via pointer-events CSS)
       await expect(continueButton).toBeVisible();
     }
   });

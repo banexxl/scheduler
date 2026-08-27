@@ -4,7 +4,7 @@ import { resolvePublicBookingContext } from "@/features/public-booking/services/
 import { getAvailableServices } from "@/features/booking/actions/booking-data-actions";
 import ServicesClientPage from "./client-page";
 
-export async function generateMetadata({ params }: { params: Promise<{ tenantSlug: string }> }) {
+export async function generateMetadata() {
   return { title: "Select Services" };
 }
 

@@ -31,8 +31,7 @@ export default function StaffClientPage({ tenantSlug, tenantId }: Props) {
   const router = useRouter();
   const { state, setStaff, hasServices } = useBooking();
   const [staffList, setStaffList] = useState<EligibleStaffMember[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
 
   // Redirect if no services selected
   useEffect(() => {
@@ -44,12 +43,10 @@ export default function StaffClientPage({ tenantSlug, tenantId }: Props) {
   // Load eligible staff when services change
   useEffect(() => {
     if (!hasServices) return;
-    setLoading(true);
     const serviceIds = state.services.map((s) => s.id);
     startTransition(async () => {
       const staff = await getEligibleStaff(tenantId, serviceIds);
       setStaffList(staff);
-      setLoading(false);
     });
   }, [tenantId, state.services, hasServices]);
 
@@ -75,7 +72,7 @@ export default function StaffClientPage({ tenantSlug, tenantId }: Props) {
           Select who you&apos;d like to book with, or let us assign the best available.
         </Typography>
 
-        {loading ? (
+        {isPending ? (
           <Box sx={{ textAlign: "center", py: 6 }}>
             <CircularProgress size={28} />
           </Box>
@@ -117,7 +114,7 @@ export default function StaffClientPage({ tenantSlug, tenantId }: Props) {
           <Button
             variant="contained"
             onClick={handleContinue}
-            disabled={loading}
+            disabled={isPending}
             sx={{ textTransform: "none", fontWeight: 600 }}
           >
             Continue

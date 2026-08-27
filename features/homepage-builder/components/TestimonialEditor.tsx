@@ -18,7 +18,6 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Rating from "@mui/material/Rating";
 import Alert from "@mui/material/Alert";
-import Divider from "@mui/material/Divider";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import {

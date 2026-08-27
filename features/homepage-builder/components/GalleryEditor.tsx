@@ -64,10 +64,14 @@ export default function GalleryEditor({ tenantSlug, images, onChanged }: Props) 
   };
 
   const handleMove = (index: number, direction: -1 | 1) => {
-    const newOrder = [...images];
     const target = index + direction;
-    if (target < 0 || target >= newOrder.length) return;
-    [newOrder[index], newOrder[target]] = [newOrder[target], newOrder[index]];
+    if (target < 0 || target >= images.length) return;
+    const newOrder = [...images];
+    const a = newOrder[index];
+    const b = newOrder[target];
+    if (a === undefined || b === undefined) return;
+    newOrder[index] = b;
+    newOrder[target] = a;
     setError(null);
     startTransition(async () => {
       const r = await reorderGalleryImages(tenantSlug, newOrder.map((img) => img.id));

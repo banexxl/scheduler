@@ -6459,6 +6459,44 @@ export type Database = {
           },
         ]
       }
+      tenant_gallery_images: {
+        Row: {
+          alt_text: string | null
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          sort_order: number
+          tenant_id: string
+        }
+        Insert: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          sort_order?: number
+          tenant_id: string
+        }
+        Update: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          sort_order?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_gallery_images_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant_gift_card_settings: {
         Row: {
           allow_appointment_redemption: boolean
@@ -6502,6 +6540,59 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "tenant_gift_card_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_homepage: {
+        Row: {
+          about_body: string | null
+          about_image_url: string | null
+          about_title: string | null
+          created_at: string
+          hero_cta_label: string
+          hero_cta_target: string
+          hero_subtitle: string | null
+          hero_title: string | null
+          section_order: Json
+          section_visibility: Json
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          about_body?: string | null
+          about_image_url?: string | null
+          about_title?: string | null
+          created_at?: string
+          hero_cta_label?: string
+          hero_cta_target?: string
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          section_order?: Json
+          section_visibility?: Json
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          about_body?: string | null
+          about_image_url?: string | null
+          about_title?: string | null
+          created_at?: string
+          hero_cta_label?: string
+          hero_cta_target?: string
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          section_order?: Json
+          section_visibility?: Json
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_homepage_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: true
             referencedRelation: "tenants"
@@ -7245,6 +7336,50 @@ export type Database = {
             foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_testimonials: {
+        Row: {
+          author_name: string
+          avatar_url: string | null
+          body: string
+          created_at: string
+          id: string
+          rating: number
+          sort_order: number
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_name: string
+          avatar_url?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          rating?: number
+          sort_order?: number
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          avatar_url?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          sort_order?: number
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_testimonials_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },

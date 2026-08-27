@@ -9,7 +9,6 @@
 import { revalidatePath } from "next/cache";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
-import { getTenantBySlug } from "@/lib/tenants/get-tenant-by-slug";
 import { createServerActionLogger } from "@/lib/logging/server-action-logger";
 import {
   DEFAULT_HOMEPAGE_CONTENT,
@@ -354,10 +353,12 @@ export async function reorderGalleryImages(
 
   // Update sort_order for each image
   for (let i = 0; i < orderedIds.length; i++) {
+    const imageId = orderedIds[i];
+    if (!imageId) continue;
     await supabase
       .from("tenant_gallery_images" as never)
       .update({ sort_order: i } as never)
-      .eq("id" as never, orderedIds[i])
+      .eq("id" as never, imageId)
       .eq("tenant_id" as never, tenant.id);
   }
 

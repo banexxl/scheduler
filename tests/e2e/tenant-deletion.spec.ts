@@ -31,8 +31,8 @@ test.describe("tenant deletion UI", () => {
     const deleteButton = page.getByRole("button", { name: /delete business/i });
     await deleteButton.click();
 
-    // Dialog should appear
-    const dialog = page.getByRole("dialog");
+    // Dialog should appear — use the MuiDialog container (not the Drawer which also has role="dialog")
+    const dialog = page.locator(".MuiDialog-root [role='dialog']");
     await expect(dialog).toBeVisible({ timeout: 10000 });
 
     // Wait for preview to load (dialog gets populated with content)
@@ -49,7 +49,7 @@ test.describe("tenant deletion UI", () => {
     const deleteButton = page.getByRole("button", { name: /delete business/i });
     await deleteButton.click();
 
-    const dialog = page.getByRole("dialog");
+    const dialog = page.locator(".MuiDialog-root [role='dialog']");
     await expect(dialog).toBeVisible({ timeout: 10000 });
 
     // The "Delete Permanently" button should be disabled

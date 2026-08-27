@@ -1,15 +1,22 @@
 "use client";
 
 /**
- * Elegant Template Shell — Milestone 16.2.
+ * Elegant Template Shell — Milestones 16.2 + 16.3.
  *
- * Refined, symmetrical layout with subtle borders and generous
- * whitespace. Suited for premium or professional services.
+ * Refined, symmetrical layout with portal shell components.
+ * Subtle borders and generous whitespace for premium feel.
+ *
+ * Composition:
+ *   Header → Hero → accent divider → main (880px) → divider → CTA → Footer
  */
 
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import type { TemplateShellProps } from "@/features/templates/types";
+import PortalHeader from "@/features/customer-portal/components/Header/PortalHeader";
+import PortalHero from "@/features/customer-portal/components/Hero/PortalHero";
+import PortalCTA from "@/features/customer-portal/components/CTA/PortalCTA";
+import PortalFooter from "@/features/customer-portal/components/Footer/PortalFooter";
 
 export default function ElegantShell({ children }: TemplateShellProps) {
   return (
@@ -18,19 +25,23 @@ export default function ElegantShell({ children }: TemplateShellProps) {
         minHeight: "100vh",
         bgcolor: "background.default",
         color: "text.primary",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      {/* Top accent line */}
-      <Box sx={{ height: 4, bgcolor: "primary.main" }} />
+      <PortalHeader />
+      <PortalHero />
 
       {/* Centered content with elegant spacing */}
       <Box
         component="main"
         sx={{
           maxWidth: 880,
+          width: "100%",
           mx: "auto",
           px: { xs: 2, sm: 4 },
           py: { xs: 4, sm: 6 },
+          flexGrow: 1,
         }}
       >
         <Divider sx={{ mb: { xs: 3, sm: 5 }, borderColor: "divider" }} />
@@ -38,17 +49,10 @@ export default function ElegantShell({ children }: TemplateShellProps) {
         {children}
 
         <Divider sx={{ mt: { xs: 4, sm: 6 }, borderColor: "divider" }} />
-
-        <Box
-          component="footer"
-          sx={{
-            mt: 3,
-            textAlign: "center",
-            color: "text.secondary",
-            fontSize: "0.75rem",
-          }}
-        />
       </Box>
+
+      <PortalCTA />
+      <PortalFooter />
     </Box>
   );
 }

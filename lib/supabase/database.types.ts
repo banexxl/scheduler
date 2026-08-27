@@ -7228,6 +7228,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "tenant_subscriptions_billing_plan_id_fkey"
+            columns: ["billing_plan_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_subscriptions_billing_plan_price_id_fkey"
+            columns: ["billing_plan_price_id"]
+            isOneToOne: false
+            referencedRelation: "billing_plan_prices"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tenant_subscriptions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: true

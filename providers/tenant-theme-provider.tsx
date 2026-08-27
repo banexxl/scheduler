@@ -70,8 +70,9 @@ export default function TenantThemeProvider({ branding, children }: Props) {
       muiTheme,
       tenant,
       template: branding.templateId,
+      portal: branding.portal,
     }),
-    [resolvedTheme, muiTheme, tenant, branding.templateId]
+    [resolvedTheme, muiTheme, tenant, branding.templateId, branding.portal]
   );
 
   return (

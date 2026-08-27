@@ -15,6 +15,7 @@ import type {
   HeroLayout,
 } from "@/features/branding/types/branding-config";
 import type { TemplateId } from "@/features/templates/types";
+import type { PortalData } from "@/features/customer-portal/types";
 
 // ─── Re-exports ──────────────────────────────────────────────────────────────
 
@@ -25,6 +26,7 @@ export type {
   HeroLayout,
 };
 export type { TemplateId };
+export type { PortalData };
 
 // ─── Google Font Enum ────────────────────────────────────────────────────────
 
@@ -68,6 +70,8 @@ export type TenantBranding = {
   fontName: SupportedFont | null;
   /** Active template ID for the booking portal. */
   templateId: TemplateId;
+  /** Portal data for shell components (contact, address, hero config). */
+  portal: PortalData;
 };
 
 // ─── Theme Context ───────────────────────────────────────────────────────────
@@ -89,4 +93,6 @@ export type TenantThemeContextValue = {
   };
   /** Active template for the booking portal — Milestone 16.2. */
   template: TemplateId;
+  /** Portal data for shell components — Milestone 16.3. */
+  portal: PortalData;
 };

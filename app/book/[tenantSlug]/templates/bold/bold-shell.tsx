@@ -1,15 +1,21 @@
 "use client";
 
 /**
- * Bold Template Shell — Milestone 16.2.
+ * Bold Template Shell — Milestones 16.2 + 16.3.
  *
- * Striking, full-width layout with a colored header band and
- * prominent use of the primary color. Good for businesses that
- * want a strong visual presence.
+ * Striking, full-width layout with portal shell components.
+ * Content in an elevated card container for strong visual presence.
+ *
+ * Composition:
+ *   Header → Hero → main (card at 1200px) → CTA → Footer
  */
 
 import Box from "@mui/material/Box";
 import type { TemplateShellProps } from "@/features/templates/types";
+import PortalHeader from "@/features/customer-portal/components/Header/PortalHeader";
+import PortalHero from "@/features/customer-portal/components/Hero/PortalHero";
+import PortalCTA from "@/features/customer-portal/components/CTA/PortalCTA";
+import PortalFooter from "@/features/customer-portal/components/Footer/PortalFooter";
 
 export default function BoldShell({ children }: TemplateShellProps) {
   return (
@@ -18,30 +24,25 @@ export default function BoldShell({ children }: TemplateShellProps) {
         minHeight: "100vh",
         bgcolor: "background.default",
         color: "text.primary",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      {/* Colored header band */}
-      <Box
-        sx={{
-          bgcolor: "primary.main",
-          color: "primary.contrastText",
-          py: { xs: 3, sm: 5 },
-          px: { xs: 2, sm: 3 },
-        }}
-      >
-        <Box sx={{ maxWidth: 1200, mx: "auto" }} />
-      </Box>
+      <PortalHeader />
+      <PortalHero />
 
-      {/* Content area — full-width container */}
+      {/* Content in elevated card */}
       <Box
         component="main"
         sx={{
           maxWidth: 1200,
+          width: "100%",
           mx: "auto",
           px: { xs: 2, sm: 3 },
           py: { xs: 3, sm: 4 },
           mt: { xs: -2, sm: -3 },
           position: "relative",
+          flexGrow: 1,
         }}
       >
         <Box
@@ -55,6 +56,9 @@ export default function BoldShell({ children }: TemplateShellProps) {
           {children}
         </Box>
       </Box>
+
+      <PortalCTA />
+      <PortalFooter />
     </Box>
   );
 }

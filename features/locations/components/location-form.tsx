@@ -96,7 +96,7 @@ export default function LocationForm({ initialValues, onSubmit, submitLabel, can
               <Typography variant="subtitle2" gutterBottom>What is a location?</Typography>
               <Typography variant="body2" color="text.secondary">
                 A location is a place where your business operates — a physical address, an online meeting room,
-                or the customer's own address for mobile services. Each location has its own working hours,
+                or the customer&apos;s own address for mobile services. Each location has its own working hours,
                 resources, and services. Customers choose a location when booking.
               </Typography>
             </Paper>
@@ -107,7 +107,7 @@ export default function LocationForm({ initialValues, onSubmit, submitLabel, can
               <VisibilityBadge visible />
             </Stack>
             <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-              Shown to customers when they choose where to book (e.g. "Downtown Studio", "Belgrade Center").
+              Shown to customers when they choose where to book (e.g. &quot;Downtown Studio&quot;, &quot;Belgrade Center&quot;).
             </Typography>
             <Field name="name">
               {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
@@ -312,7 +312,7 @@ export default function LocationForm({ initialValues, onSubmit, submitLabel, can
                 label="Active"
               />
               <Typography variant="caption" color="text.secondary">
-                Inactive locations won't appear on the booking page or accept new appointments.
+                Inactive locations won&apos;t appear on the booking page or accept new appointments.
               </Typography>
             </Stack>
 

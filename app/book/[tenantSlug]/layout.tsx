@@ -1,13 +1,21 @@
-import { resolvePublishedTenantTheme } from "@/features/branding/services/resolve-tenant-theme";
-import TenantPublicThemeProvider from "@/features/branding/components/tenant-public-theme-provider";
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { notFound } from "next/navigation";
+import { getTenantBranding } from "@/lib/branding/get-branding";
+import { getFontEntry } from "@/lib/branding/font-loader";
+import TenantThemeProvider from "@/providers/tenant-theme-provider";
 
 /**
- * Public booking layout — Milestone 15.5.
+ * Public Booking Layout — Milestone 16.1 (Dynamic Theme Engine).
  *
- * Wraps all /book/{tenantSlug} routes with the tenant's published branding.
- * Falls back to default theme if no branding is configured.
- * Draft branding is NEVER exposed here.
+ * Server Component that loads tenant branding and wraps all
+ * /book/{tenantSlug} routes with the tenant's dynamic theme.
+ *
+ * Flow:
+ * 1. Read tenant slug from route params
+ * 2. Load branding (tenant record + published config + defaults)
+ * 3. Resolve the Google Font to load
+ * 4. Wrap children with TenantThemeProvider (MUI theme + CssBaseline + context)
+ *
+ * No page components are changed — all inherit the theme automatically.
  */
 export default async function PublicBookingLayout({
   children,
@@ -18,26 +26,28 @@ export default async function PublicBookingLayout({
 }) {
   const { tenantSlug } = await params;
 
-  // Resolve tenant ID from slug
-  const supabase = createServiceRoleClient();
-  const { data: tenant } = await supabase
-    .from("tenants")
-    .select("id")
-    .eq("slug", tenantSlug)
-    .in("status", ["active", "trialing"])
-    .maybeSingle();
+  // 1. Load branding (resolves tenant, published config, font detection)
+  const result = await getTenantBranding(tenantSlug);
 
-  if (!tenant) {
-    // No tenant — render children without branding (will show 404 at page level)
-    return <>{children}</>;
+  if (!result.ok) {
+    notFound();
   }
 
-  // Resolve published theme (falls back to defaults if no branding configured)
-  const theme = await resolvePublishedTenantTheme(tenant.id);
+  const { branding } = result;
+
+  // 2. Resolve Google Font entry for CSS variable injection
+  const fontEntry = getFontEntry(branding.fontName);
+
+  // 3. Build the className that injects the font CSS variable.
+  //    If no supported font matched, fall back to the system font stack
+  //    (MUI typography already includes fallbacks via the CSS var reference).
+  const fontClassName = fontEntry?.variableClassName ?? "";
 
   return (
-    <TenantPublicThemeProvider theme={theme}>
-      {children}
-    </TenantPublicThemeProvider>
+    <div className={fontClassName || undefined}>
+      <TenantThemeProvider branding={branding}>
+        {children}
+      </TenantThemeProvider>
+    </div>
   );
 }

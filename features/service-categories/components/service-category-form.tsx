@@ -56,8 +56,8 @@ export default function ServiceCategoryForm({ initialValues, onSubmit, submitLab
           <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "action.hover" }}>
             <Typography variant="subtitle2" gutterBottom>What is a service category?</Typography>
             <Typography variant="body2" color="text.secondary">
-              Categories group related services together on the booking page (e.g. "Hair", "Nails", "Massage").
-              Customers browse by category to find the service they want. Services without a category appear under "Other".
+              Categories group related services together on the booking page (e.g. &quot;Hair&quot;, &quot;Nails&quot;, &quot;Massage&quot;).
+              Customers browse by category to find the service they want. Services without a category appear under &quot;Other&quot;.
             </Typography>
           </Paper>
 
@@ -67,7 +67,7 @@ export default function ServiceCategoryForm({ initialValues, onSubmit, submitLab
             <VisibilityBadge visible />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-            Shown to customers as a section heading on the booking page (e.g. "Hair Services", "Body Treatments").
+            Shown to customers as a section heading on the booking page (e.g. &quot;Hair Services&quot;, &quot;Body Treatments&quot;).
           </Typography>
           <Field name="name">
             {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
@@ -140,7 +140,7 @@ export default function ServiceCategoryForm({ initialValues, onSubmit, submitLab
               label="Active"
             />
             <Typography variant="caption" color="text.secondary">
-              Inactive categories and their services won't appear on the booking page.
+              Inactive categories and their services won&apos;t appear on the booking page.
             </Typography>
           </Stack>
 

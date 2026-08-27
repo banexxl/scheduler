@@ -66,7 +66,7 @@ export default function ResourceTypeForm({ initialValues, onSubmit, submitLabel,
           <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "action.hover" }}>
             <Typography variant="subtitle2" gutterBottom>What is a resource type?</Typography>
             <Typography variant="body2" color="text.secondary">
-              A resource type is a category that groups similar resources together (e.g. "Barbers", "Treatment Rooms").
+              A resource type is a category that groups similar resources together (e.g. &quot;Barbers&quot;, &quot;Treatment Rooms&quot;).
               Individual resources (people, rooms, etc.) belong to a type. Services are then assigned to resources,
               and customers book time with a specific resource or let the system pick one automatically.
             </Typography>
@@ -78,7 +78,7 @@ export default function ResourceTypeForm({ initialValues, onSubmit, submitLabel,
             <VisibilityBadge visible />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-            The category name shown to customers on the booking page (e.g. "Barbers", "Massage Therapists").
+            The category name shown to customers on the booking page (e.g. &quot;Barbers&quot;, &quot;Massage Therapists&quot;).
           </Typography>
           <Field name="name">
             {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
@@ -161,7 +161,7 @@ export default function ResourceTypeForm({ initialValues, onSubmit, submitLabel,
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
             These labels appear on the public booking page and in the dashboard. For example,
-            customers might see "Choose a Barber" (singular) or "Available Barbers" (plural).
+            customers might see &quot;Choose a Barber&quot; (singular) or &quot;Available Barbers&quot; (plural).
           </Typography>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <Field name="displayNameSingular">
@@ -226,7 +226,7 @@ export default function ResourceTypeForm({ initialValues, onSubmit, submitLabel,
               label="Active"
             />
             <Typography variant="caption" color="text.secondary">
-              Inactive types and their resources won't appear in booking or scheduling.
+              Inactive types and their resources won&apos;t appear in booking or scheduling.
             </Typography>
           </Stack>
 

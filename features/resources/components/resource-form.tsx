@@ -16,7 +16,6 @@ import Typography from "@mui/material/Typography";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
@@ -80,7 +79,7 @@ export default function ResourceForm({ initialValues, onSubmit, submitLabel, can
             <VisibilityBadge visible />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-            The name shown to customers on the booking page when they choose a resource (e.g. "Ana", "Room 3", "Laser Unit A").
+            The name shown to customers on the booking page when they choose a resource (e.g. &quot;Ana&quot;, &quot;Room 3&quot;, &quot;Laser Unit A&quot;).
           </Typography>
           <Field name="name">
             {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
@@ -225,7 +224,7 @@ export default function ResourceForm({ initialValues, onSubmit, submitLabel, can
               label="Active"
             />
             <Typography variant="caption" color="text.secondary">
-              Inactive resources won't appear in the booking flow or calendar.
+              Inactive resources won&apos;t appear in the booking flow or calendar.
             </Typography>
           </Stack>
 

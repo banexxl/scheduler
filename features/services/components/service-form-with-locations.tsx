@@ -98,7 +98,7 @@ export default function ServiceFormWithLocations({
             <VisibilityBadge visible />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-            The name customers see on the booking page and in confirmations (e.g. "Classic Haircut", "Deep Tissue Massage").
+            The name customers see on the booking page and in confirmations (e.g. &quot;Classic Haircut&quot;, &quot;Deep Tissue Massage&quot;).
           </Typography>
           <Field name="name">
             {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
@@ -142,7 +142,7 @@ export default function ServiceFormWithLocations({
             <VisibilityBadge visible />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-            Groups services on the booking page (e.g. "Hair", "Nails", "Massage"). Optional — services without a category appear under "Other".
+            Groups services on the booking page (e.g. &quot;Hair&quot;, &quot;Nails&quot;, &quot;Massage&quot;). Optional — services without a category appear under &quot;Other&quot;.
             {" "}<Link href={`/${tenantSlug}/services/categories`} variant="caption">Create a new category</Link>
           </Typography>
           <Field name="serviceCategoryId">
@@ -315,7 +315,7 @@ export default function ServiceFormWithLocations({
               label="Active"
             />
             <Typography variant="caption" color="text.secondary">
-              Inactive services won't appear on the booking page or in the calendar.
+              Inactive services won&apos;t appear on the booking page or in the calendar.
             </Typography>
           </Stack>
 

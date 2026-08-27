@@ -322,9 +322,14 @@ export default function OnboardingClientPage({ data, tenantSlug }: Props) {
                                    <Typography variant="body2" color="text.secondary">
                                         These defaults help keep new appointments within a sensible window.
                                    </Typography>
-                                   <Button variant="contained" onClick={handleBookingSubmit} disabled={loading}>
-                                        Save booking defaults
-                                   </Button>
+                                   <Stack direction="row" spacing={1}>
+                                        <Button variant="contained" href={`/${tenantSlug}/settings/booking`} disabled={loading}>
+                                             Go to Booking Settings
+                                        </Button>
+                                        <Button variant="outlined" onClick={handleBookingSubmit} disabled={loading}>
+                                             Save defaults and continue
+                                        </Button>
+                                   </Stack>
                               </Box>
                          )
                     )}
@@ -334,11 +339,16 @@ export default function OnboardingClientPage({ data, tenantSlug }: Props) {
                          stepDone.public_booking ? doneBlock("Public booking already configured.") : (
                               <Box sx={{ display: "grid", gap: 1 }}>
                                    <Typography variant="body2" color="text.secondary">
-                                        Public booking can be enabled later if your plan allows it.
+                                        Enable public booking so customers can book online through your booking page.
                                    </Typography>
-                                   <Button variant="contained" onClick={handlePublicBookingSubmit} disabled={loading}>
-                                        Continue
-                                   </Button>
+                                   <Stack direction="row" spacing={1}>
+                                        <Button variant="contained" href={`/${tenantSlug}/settings/public-booking`} disabled={loading}>
+                                             Go to Public Booking Settings
+                                        </Button>
+                                        <Button variant="outlined" onClick={handlePublicBookingSubmit} disabled={loading}>
+                                             Skip for now
+                                        </Button>
+                                   </Stack>
                               </Box>
                          )
                     )}

@@ -30,7 +30,7 @@ export async function resolvePublicTenant(
     .from("tenants")
     .select("id, slug, name, default_timezone, description")
     .eq("slug", slug)
-    .eq("status", "active")
+    .in("status", ["active", "trialing"])
     .single();
 
   if (!data) return null;

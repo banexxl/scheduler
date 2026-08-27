@@ -6,6 +6,7 @@ import { getPublicBookingSettings } from "@/features/public-booking/services/pub
 import PublicBookingSettingsForm from "@/features/public-booking/components/public-booking-settings-form";
 import BookingLinkPreview from "@/features/public-booking/components/booking-link-preview";
 import { hasFeature, resolveBillingState } from "@/features/billing/services/tenant-entitlements";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function PublicBookingSettingsPage({
   params,
@@ -15,10 +16,23 @@ export default async function PublicBookingSettingsPage({
   const { tenantSlug } = await params;
   const { tenant } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
 
-  const settings = await getPublicBookingSettings(tenant.id);
-  const billingState = resolveBillingState({ accessState: null, status: null });
+  const supabase = await createClient();
+  const [settings, subscriptionResult] = await Promise.all([
+    getPublicBookingSettings(tenant.id),
+    supabase
+      .from("tenant_subscriptions" as never)
+      .select("status, access_state" as never)
+      .eq("tenant_id" as never, tenant.id)
+      .maybeSingle(),
+  ]);
+
+  const sub = subscriptionResult.data as { status: string | null; access_state: string | null } | null;
+  const billingState = resolveBillingState({
+    accessState: sub?.access_state ?? null,
+    status: sub?.status ?? null,
+  });
   const enabled = hasFeature("public_booking", {
-    publicBookingEnabled: billingState === "active" || billingState === "trial",
+    publicBookingEnabled: billingState === "active" || billingState === "trial" || billingState === "free",
   });
 
   return (

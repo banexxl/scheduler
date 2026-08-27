@@ -17,6 +17,8 @@ import "server-only";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { resolvePublishedTenantTheme } from "@/features/branding/services/resolve-tenant-theme";
 import { detectSupportedFont } from "./font-loader";
+import { isValidTemplateId } from "@/features/templates/registry";
+import { DEFAULT_TEMPLATE_ID } from "@/features/templates/types";
 import type { TenantBranding } from "@/types/branding";
 
 /**
@@ -55,10 +57,23 @@ export async function getTenantBranding(
   // 2. Resolve published theme (falls back to defaults internally)
   const theme = await resolvePublishedTenantTheme(tenant.id);
 
-  // 3. Detect which Google Font to load from the resolved fontFamily
+  // 3. Load active template
+  const { data: brandingRow } = await supabase
+    .from("tenant_branding_settings")
+    .select("template")
+    .eq("tenant_id", tenant.id)
+    .maybeSingle();
+
+  const rawTemplate = (brandingRow as { template?: string } | null)?.template;
+  const templateId =
+    rawTemplate && isValidTemplateId(rawTemplate)
+      ? rawTemplate
+      : DEFAULT_TEMPLATE_ID;
+
+  // 4. Detect which Google Font to load from the resolved fontFamily
   const fontName = detectSupportedFont(theme.fontFamily);
 
-  // 4. Return strongly typed branding payload
+  // 5. Return strongly typed branding payload
   return {
     ok: true,
     branding: {
@@ -69,6 +84,7 @@ export async function getTenantBranding(
         name: tenant.name,
       },
       fontName,
+      templateId,
     },
   };
 }

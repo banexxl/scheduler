@@ -41,7 +41,7 @@ export function useTenantTheme(): TenantThemeContextValue {
   if (!ctx) {
     throw new Error(
       "useTenantTheme must be used within <TenantThemeProvider>. " +
-        "Ensure this component is rendered inside app/book/[tenantSlug]/layout.tsx."
+      "Ensure this component is rendered inside app/book/[tenantSlug]/layout.tsx."
     );
   }
   return ctx;
@@ -69,9 +69,9 @@ export default function TenantThemeProvider({ branding, children }: Props) {
       branding: resolvedTheme,
       muiTheme,
       tenant,
-      template: null, // Placeholder for Milestone 16.2
+      template: branding.templateId,
     }),
-    [resolvedTheme, muiTheme, tenant]
+    [resolvedTheme, muiTheme, tenant, branding.templateId]
   );
 
   return (

@@ -1,21 +1,20 @@
 import { notFound } from "next/navigation";
 import { getTenantBranding } from "@/lib/branding/get-branding";
 import { getFontEntry } from "@/lib/branding/font-loader";
+import { getTemplateDefinition } from "@/features/templates/registry";
 import TenantThemeProvider from "@/providers/tenant-theme-provider";
 
 /**
- * Public Booking Layout — Milestone 16.1 (Dynamic Theme Engine).
+ * Public Booking Layout — Milestones 16.1 + 16.2.
  *
  * Server Component that loads tenant branding and wraps all
- * /book/{tenantSlug} routes with the tenant's dynamic theme.
+ * /book/{tenantSlug} routes with:
+ * 1. Dynamic MUI theme (colors, typography, shape)
+ * 2. Google Font loading via CSS variable injection
+ * 3. Active template shell (layout wrapper)
  *
- * Flow:
- * 1. Read tenant slug from route params
- * 2. Load branding (tenant record + published config + defaults)
- * 3. Resolve the Google Font to load
- * 4. Wrap children with TenantThemeProvider (MUI theme + CssBaseline + context)
- *
- * No page components are changed — all inherit the theme automatically.
+ * No page components are changed — all inherit the theme and
+ * template automatically.
  */
 export default async function PublicBookingLayout({
   children,
@@ -26,7 +25,7 @@ export default async function PublicBookingLayout({
 }) {
   const { tenantSlug } = await params;
 
-  // 1. Load branding (resolves tenant, published config, font detection)
+  // 1. Load branding + template (resolves tenant, published config, font, template)
   const result = await getTenantBranding(tenantSlug);
 
   if (!result.ok) {
@@ -37,16 +36,18 @@ export default async function PublicBookingLayout({
 
   // 2. Resolve Google Font entry for CSS variable injection
   const fontEntry = getFontEntry(branding.fontName);
-
-  // 3. Build the className that injects the font CSS variable.
-  //    If no supported font matched, fall back to the system font stack
-  //    (MUI typography already includes fallbacks via the CSS var reference).
   const fontClassName = fontEntry?.variableClassName ?? "";
+
+  // 3. Resolve template shell component
+  const templateDef = getTemplateDefinition(branding.templateId);
+  const TemplateShell = templateDef.component;
 
   return (
     <div className={fontClassName || undefined}>
       <TenantThemeProvider branding={branding}>
-        {children}
+        <TemplateShell>
+          {children}
+        </TemplateShell>
       </TenantThemeProvider>
     </div>
   );

@@ -83,6 +83,14 @@ export default async function SettingsPage({
             Notification Settings
           </Button>
           <Button
+            href={`/${tenantSlug}/settings/templates`}
+            variant="outlined"
+            size="small"
+            sx={{ width: "fit-content" }}
+          >
+            Templates
+          </Button>
+          <Button
             href={`/${tenantSlug}/settings/payments`}
             variant="outlined"
             size="small"

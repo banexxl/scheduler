@@ -6102,6 +6102,7 @@ export type Database = {
           published_at: string | null
           published_config: Json
           published_version: number
+          template: string
           tenant_id: string
           updated_at: string
         }
@@ -6113,6 +6114,7 @@ export type Database = {
           published_at?: string | null
           published_config?: Json
           published_version?: number
+          template?: string
           tenant_id: string
           updated_at?: string
         }
@@ -6124,6 +6126,7 @@ export type Database = {
           published_at?: string | null
           published_config?: Json
           published_version?: number
+          template?: string
           tenant_id?: string
           updated_at?: string
         }
@@ -8072,6 +8075,7 @@ export type Database = {
         Args: { p_from: string; p_tenant_id: string; p_to: string }
         Returns: Json
       }
+      get_tenant_template: { Args: { p_tenant_slug: string }; Returns: string }
       get_today_appointment_counts: {
         Args: {
           p_tenant_id: string
@@ -8516,6 +8520,14 @@ export type Database = {
           p_title?: string
         }
         Returns: boolean
+      }
+      update_tenant_template: {
+        Args: {
+          p_actor_user_id: string
+          p_template: string
+          p_tenant_id: string
+        }
+        Returns: Json
       }
     }
     Enums: {

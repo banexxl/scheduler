@@ -14,6 +14,7 @@ import type {
   AppearanceMode,
   HeroLayout,
 } from "@/features/branding/types/branding-config";
+import type { TemplateId } from "@/features/templates/types";
 
 // ─── Re-exports ──────────────────────────────────────────────────────────────
 
@@ -23,6 +24,7 @@ export type {
   AppearanceMode,
   HeroLayout,
 };
+export type { TemplateId };
 
 // ─── Google Font Enum ────────────────────────────────────────────────────────
 
@@ -64,6 +66,8 @@ export type TenantBranding = {
   };
   /** Matched Google Font name, or null if the font isn't in the supported set. */
   fontName: SupportedFont | null;
+  /** Active template ID for the booking portal. */
+  templateId: TemplateId;
 };
 
 // ─── Theme Context ───────────────────────────────────────────────────────────
@@ -83,6 +87,6 @@ export type TenantThemeContextValue = {
     slug: string;
     name: string;
   };
-  /** Placeholder for Milestone 16.2 template system. */
-  template: null;
+  /** Active template for the booking portal — Milestone 16.2. */
+  template: TemplateId;
 };

@@ -37,6 +37,7 @@ import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import GroupIcon from "@mui/icons-material/Group";
 import SettingsIcon from "@mui/icons-material/Settings";
 import CampaignIcon from "@mui/icons-material/Campaign";
+import WebIcon from "@mui/icons-material/Web";
 import {
   TENANT_SIDEBAR_WIDTH,
   tenantPalette,
@@ -83,6 +84,12 @@ function getNavGroups(slug: string): NavGroup[] {
         { label: "Services", href: `/${slug}/services`, icon: <ContentCutIcon fontSize="small" />, matchPrefix: `/${slug}/services` },
         { label: "Resources", href: `/${slug}/resources`, icon: <DevicesIcon fontSize="small" />, matchPrefix: `/${slug}/resources` },
         { label: "Locations", href: `/${slug}/locations`, icon: <LocationOnIcon fontSize="small" />, matchPrefix: `/${slug}/locations` },
+      ],
+    },
+    {
+      label: "Website",
+      items: [
+        { label: "Homepage", href: `/${slug}/site/homepage`, icon: <WebIcon fontSize="small" />, matchPrefix: `/${slug}/site` },
       ],
     },
     {

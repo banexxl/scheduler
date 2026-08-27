@@ -26,7 +26,10 @@ export default async function ResourceTypesPage({ params }: { params: Promise<{ 
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>Resource Types</Typography>
-        {canEdit && <Button component="a" href={`/${tenantSlug}/resources/types/new`} variant="contained">Add Type</Button>}
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button component="a" href={`/${tenantSlug}/resources`} variant="outlined">Resources</Button>
+          {canEdit && <Button component="a" href={`/${tenantSlug}/resources/types/new`} variant="contained">Add Type</Button>}
+        </Box>
       </Box>
       <ResourceTypeList types={types} tenantSlug={tenantSlug} canEdit={canEdit} resourceCounts={resourceCounts} />
     </Box>

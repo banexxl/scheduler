@@ -70,6 +70,8 @@ export default async function OnboardingPage({ params }: { params: Promise<{ ten
                serviceCount: servicesResult.data?.length ?? 0,
                hasLocationHours: (locationHoursResult.data?.length ?? 0) > 0,
                hasResourceHours: (resourceHoursResult.data?.length ?? 0) > 0,
+               hasBookingRules: bookingRulesResult.data != null && (bookingRulesResult.data.minimum_notice_minutes ?? 0) > 0,
+               hasPublicBookingSettings: publicBookingResult.data != null,
           },
      };
 

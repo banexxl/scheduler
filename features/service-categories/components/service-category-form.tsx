@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Formik, Form, Field } from "formik";
 import { showActionToast } from "@/lib/hooks/use-action-toast";
 import Box from "@mui/material/Box";
@@ -9,6 +9,13 @@ import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import LockIcon from "@mui/icons-material/Lock";
 import { serviceCategorySchema, type ServiceCategoryFormValues } from "../schemas/service-category-schema";
 import { generateTenantSlug } from "@/lib/tenants/generate-tenant-slug";
 
@@ -19,11 +26,17 @@ type ServiceCategoryFormProps = {
   canEdit: boolean;
 };
 
+function VisibilityBadge({ visible }: { visible: boolean }) {
+  return visible ? (
+    <Chip icon={<VisibilityIcon sx={{ fontSize: 14 }} />} label="Customer-visible" size="small" color="info" variant="outlined" sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: "0.7rem" } }} />
+  ) : (
+    <Chip icon={<LockIcon sx={{ fontSize: 14 }} />} label="Internal only" size="small" variant="outlined" sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: "0.7rem" } }} />
+  );
+}
+
 export default function ServiceCategoryForm({ initialValues, onSubmit, submitLabel, canEdit }: ServiceCategoryFormProps) {
   const [isPending, startTransition] = useTransition();
   const [actionResult, setActionResult] = useState<{ success: boolean; message?: string; fieldErrors?: Record<string, string> } | null>(null);
-  const slugEdited = useRef<boolean | null>(null);
-  if (slugEdited.current == null) slugEdited.current = initialValues.slug !== "";
 
   const handleSubmit = (values: ServiceCategoryFormValues, { resetForm }: { resetForm: (o: { values: ServiceCategoryFormValues }) => void }) => {
     if (!canEdit) return;
@@ -39,36 +52,106 @@ export default function ServiceCategoryForm({ initialValues, onSubmit, submitLab
           {actionResult?.success && <Alert severity="success" sx={{ mb: 2 }}>{actionResult.message}</Alert>}
           {actionResult && !actionResult.success && actionResult.message && <Alert severity="error" sx={{ mb: 2 }}>{actionResult.message}</Alert>}
 
+          {/* ── Intro ───────────────────────────────────────── */}
+          <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "action.hover" }}>
+            <Typography variant="subtitle2" gutterBottom>What is a service category?</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Categories group related services together on the booking page (e.g. "Hair", "Nails", "Massage").
+              Customers browse by category to find the service they want. Services without a category appear under "Other".
+            </Typography>
+          </Paper>
+
+          {/* ── Name ────────────────────────────────────────── */}
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+            <Typography variant="subtitle2">Category Name</Typography>
+            <VisibilityBadge visible />
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+            Shown to customers as a section heading on the booking page (e.g. "Hair Services", "Body Treatments").
+          </Typography>
           <Field name="name">
             {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
-              <TextField {...field} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { formik.setFieldValue("name", e.target.value); if (!slugEdited.current) formik.setFieldValue("slug", generateTenantSlug(e.target.value)); }}
-                label="Category Name" placeholder="e.g. Hair, Massage, Consultations" fullWidth margin="normal" disabled={isPending || !canEdit}
+              <TextField
+                {...field}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  formik.setFieldValue("name", e.target.value);
+                  formik.setFieldValue("slug", generateTenantSlug(e.target.value));
+                }}
+                placeholder="e.g. Hair Services"
+                fullWidth
+                margin="dense"
+                disabled={isPending || !canEdit}
                 error={(!!formik.touched.name && !!formik.errors.name) || !!actionResult?.fieldErrors?.name}
-                helperText={(formik.touched.name && formik.errors.name) || actionResult?.fieldErrors?.name} slotProps={{ htmlInput: { maxLength: 120 } }} />
+                helperText={(formik.touched.name && formik.errors.name) || actionResult?.fieldErrors?.name}
+                slotProps={{ htmlInput: { maxLength: 120 } }}
+              />
             )}
           </Field>
 
+          {/* ── Slug (auto-generated, read-only) ──────────── */}
           <Field name="slug">
             {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
-              <TextField {...field} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { slugEdited.current = true; formik.setFieldValue("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")); }}
-                label="Slug" fullWidth margin="normal" disabled={isPending || !canEdit}
-                error={(!!formik.touched.slug && !!formik.errors.slug) || !!actionResult?.fieldErrors?.slug}
-                helperText={(formik.touched.slug && formik.errors.slug) || actionResult?.fieldErrors?.slug || "Unique identifier within your business"} slotProps={{ htmlInput: { maxLength: 63 } }} />
+              <TextField
+                {...field}
+                fullWidth
+                margin="dense"
+                disabled
+                helperText="Auto-generated from the name"
+                slotProps={{ htmlInput: { maxLength: 63 } }}
+                sx={{ mt: 1 }}
+              />
             )}
           </Field>
 
+          <Divider sx={{ my: 3 }} />
+
+          {/* ── Description ─────────────────────────────────── */}
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+            <Typography variant="subtitle2">Description</Typography>
+            <VisibilityBadge visible />
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+            Optional text shown below the category heading on the booking page. Use it to give customers a quick overview of what this category includes.
+          </Typography>
           <Field name="description">
             {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-              <TextField {...field} label="Description (optional)" multiline minRows={2} maxRows={4} fullWidth margin="normal" disabled={isPending || !canEdit}
+              <TextField
+                {...field}
+                placeholder="e.g. Professional hair services including cuts, coloring, and styling."
+                multiline
+                minRows={2}
+                maxRows={4}
+                fullWidth
+                margin="dense"
+                disabled={isPending || !canEdit}
                 error={!!formik.touched.description && !!formik.errors.description}
                 helperText={(formik.touched.description && formik.errors.description) || `${(field.value ?? "").length} / 1000`}
-                slotProps={{ htmlInput: { maxLength: 1000 } }} />
+                slotProps={{ htmlInput: { maxLength: 1000 } }}
+              />
             )}
           </Field>
 
-          <FormControlLabel control={<Switch checked={formik.values.isActive} onChange={(e) => formik.setFieldValue("isActive", e.target.checked)} disabled={isPending || !canEdit} />} label="Active" sx={{ mt: 1 }} />
+          <Divider sx={{ my: 3 }} />
 
-          {canEdit && <Box sx={{ mt: 3 }}><Button type="submit" variant="contained" size="large" disabled={isPending || !formik.dirty}>{isPending ? "Saving..." : submitLabel}</Button></Box>}
+          {/* ── Active toggle ───────────────────────────────── */}
+          <Stack direction="row" spacing={1} alignItems="center">
+            <FormControlLabel
+              control={<Switch checked={formik.values.isActive} onChange={(e) => formik.setFieldValue("isActive", e.target.checked)} disabled={isPending || !canEdit} />}
+              label="Active"
+            />
+            <Typography variant="caption" color="text.secondary">
+              Inactive categories and their services won't appear on the booking page.
+            </Typography>
+          </Stack>
+
+          {/* ── Submit ──────────────────────────────────────── */}
+          {canEdit && (
+            <Box sx={{ mt: 3 }}>
+              <Button type="submit" variant="contained" size="large" disabled={isPending || !formik.dirty}>
+                {isPending ? "Saving..." : submitLabel}
+              </Button>
+            </Box>
+          )}
         </Box>
       )}
     </Formik>

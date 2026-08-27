@@ -28,7 +28,7 @@ export default async function CreateBusinessPage() {
 
   // Prevent existing business members from re-onboarding
   const accessible = identity.tenantMemberships
-    .filter((m) => m.tenantStatus === "active")
+    .filter((m) => m.tenantStatus === "active" || m.tenantStatus === "trialing")
     .sort((a, b) => a.tenantName.localeCompare(b.tenantName));
 
   if (accessible.length > 0) {

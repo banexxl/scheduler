@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Formik, Form, Field } from "formik";
 import { showActionToast } from "@/lib/hooks/use-action-toast";
 import Box from "@mui/material/Box";
@@ -17,6 +17,12 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import LockIcon from "@mui/icons-material/Lock";
 import { resourceSchema, type ResourceFormValues } from "../schemas/resource-schema";
 import type { ResourceType } from "../types/resource";
 import { generateTenantSlug } from "@/lib/tenants/generate-tenant-slug";
@@ -31,11 +37,17 @@ type ResourceFormProps = {
   locations: LocationOption[];
 };
 
+function VisibilityBadge({ visible }: { visible: boolean }) {
+  return visible ? (
+    <Chip icon={<VisibilityIcon sx={{ fontSize: 14 }} />} label="Customer-visible" size="small" color="info" variant="outlined" sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: "0.7rem" } }} />
+  ) : (
+    <Chip icon={<LockIcon sx={{ fontSize: 14 }} />} label="Internal only" size="small" variant="outlined" sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: "0.7rem" } }} />
+  );
+}
+
 export default function ResourceForm({ initialValues, onSubmit, submitLabel, canEdit, resourceTypes, locations }: ResourceFormProps) {
   const [isPending, startTransition] = useTransition();
   const [actionResult, setActionResult] = useState<{ success: boolean; message?: string; fieldErrors?: Record<string, string> } | null>(null);
-  const slugEdited = useRef<boolean | null>(null);
-  if (slugEdited.current == null) slugEdited.current = initialValues.slug !== "";
 
   const handleSubmit = (values: ResourceFormValues, { resetForm }: { resetForm: (o: { values: ResourceFormValues }) => void }) => {
     if (!canEdit) return;
@@ -52,88 +64,237 @@ export default function ResourceForm({ initialValues, onSubmit, submitLabel, can
           {actionResult?.success && <Alert severity="success" sx={{ mb: 2 }}>{actionResult.message}</Alert>}
           {actionResult && !actionResult.success && actionResult.message && <Alert severity="error" sx={{ mb: 2 }}>{actionResult.message}</Alert>}
 
+          {/* ── Intro ───────────────────────────────────────── */}
+          <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "action.hover" }}>
+            <Typography variant="subtitle2" gutterBottom>What is a resource?</Typography>
+            <Typography variant="body2" color="text.secondary">
+              A resource is an individual person, room, or piece of equipment that delivers a service.
+              Customers book time with a specific resource, or the system can auto-assign one based on availability.
+              Each resource belongs to a resource type and is assigned to one or more locations.
+            </Typography>
+          </Paper>
+
+          {/* ── Name ────────────────────────────────────────── */}
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+            <Typography variant="subtitle2">Name</Typography>
+            <VisibilityBadge visible />
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+            The name shown to customers on the booking page when they choose a resource (e.g. "Ana", "Room 3", "Laser Unit A").
+          </Typography>
           <Field name="name">
             {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
-              <TextField {...field} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { formik.setFieldValue("name", e.target.value); if (!slugEdited.current) formik.setFieldValue("slug", generateTenantSlug(e.target.value)); }}
-                label="Name" fullWidth margin="normal" disabled={isPending || !canEdit}
+              <TextField
+                {...field}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  formik.setFieldValue("name", e.target.value);
+                  formik.setFieldValue("slug", generateTenantSlug(e.target.value));
+                }}
+                placeholder="e.g. Ana, Room 3"
+                fullWidth
+                margin="dense"
+                disabled={isPending || !canEdit}
                 error={(!!formik.touched.name && !!formik.errors.name) || !!actionResult?.fieldErrors?.name}
-                helperText={(formik.touched.name && formik.errors.name) || actionResult?.fieldErrors?.name} slotProps={{ htmlInput: { maxLength: 120 } }} />
+                helperText={(formik.touched.name && formik.errors.name) || actionResult?.fieldErrors?.name}
+                slotProps={{ htmlInput: { maxLength: 120 } }}
+              />
             )}
           </Field>
 
+          {/* ── Slug (auto-generated, read-only) ──────────── */}
           <Field name="slug">
             {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
-              <TextField {...field} onChange={(e: React.ChangeEvent<HTMLInputElement>) => { slugEdited.current = true; formik.setFieldValue("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")); }}
-                label="Slug" fullWidth margin="normal" disabled={isPending || !canEdit}
-                error={(!!formik.touched.slug && !!formik.errors.slug) || !!actionResult?.fieldErrors?.slug}
-                helperText={(formik.touched.slug && formik.errors.slug) || actionResult?.fieldErrors?.slug} slotProps={{ htmlInput: { maxLength: 63 } }} />
+              <TextField
+                {...field}
+                fullWidth
+                margin="dense"
+                disabled
+                helperText="Auto-generated from the name"
+                slotProps={{ htmlInput: { maxLength: 63 } }}
+                sx={{ mt: 1 }}
+              />
             )}
           </Field>
 
+          <Divider sx={{ my: 3 }} />
+
+          {/* ── Resource Type ───────────────────────────────── */}
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+            <Typography variant="subtitle2">Resource Type</Typography>
+            <VisibilityBadge visible={false} />
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+            The category this resource belongs to. Determines how it appears in scheduling and which services it can be assigned to.
+          </Typography>
           <Field name="resourceTypeId">
             {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-              <TextField {...field} select label="Resource Type" fullWidth margin="normal" disabled={isPending || !canEdit}
+              <TextField
+                {...field}
+                select
+                fullWidth
+                margin="dense"
+                disabled={isPending || !canEdit}
                 error={!!formik.touched.resourceTypeId && !!formik.errors.resourceTypeId}
-                helperText={formik.touched.resourceTypeId && formik.errors.resourceTypeId}>
-                {activeTypes.map((t) => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
+                helperText={formik.touched.resourceTypeId && formik.errors.resourceTypeId}
+              >
+                {activeTypes.map((t) => (
+                  <MenuItem key={t.id} value={t.id}>
+                    <Stack>
+                      <Typography variant="body2">{t.name}</Typography>
+                      <Typography variant="caption" color="text.secondary">{t.displayNameSingular} ({t.resourceKind})</Typography>
+                    </Stack>
+                  </MenuItem>
+                ))}
               </TextField>
             )}
           </Field>
 
+          <Divider sx={{ my: 3 }} />
+
+          {/* ── Description ─────────────────────────────────── */}
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+            <Typography variant="subtitle2">Description</Typography>
+            <VisibilityBadge visible={false} />
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+            Internal notes about this resource. Not shown to customers. Use this for specialties, qualifications, or scheduling notes.
+          </Typography>
           <Field name="description">
             {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-              <TextField {...field} label="Description" multiline minRows={2} fullWidth margin="normal" disabled={isPending || !canEdit} slotProps={{ htmlInput: { maxLength: 2000 } }} />
+              <TextField
+                {...field}
+                placeholder="e.g. Senior barber, specializes in fades and beard styling"
+                multiline
+                minRows={2}
+                fullWidth
+                margin="dense"
+                disabled={isPending || !canEdit}
+                slotProps={{ htmlInput: { maxLength: 2000 } }}
+              />
             )}
           </Field>
 
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <Divider sx={{ my: 3 }} />
+
+          {/* ── Contact Info ─────────────────────────────────── */}
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+            <Typography variant="subtitle2">Contact Information</Typography>
+            <VisibilityBadge visible={false} />
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+            Used internally for notifications and reminders. Not shown to customers. Leave blank if not applicable (e.g. for rooms or equipment).
+          </Typography>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <Field name="email">
               {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                <TextField {...field} label="Email" type="email" fullWidth margin="normal" disabled={isPending || !canEdit}
-                  error={!!formik.touched.email && !!formik.errors.email} helperText={formik.touched.email && formik.errors.email} />
+                <TextField
+                  {...field}
+                  label="Email"
+                  type="email"
+                  placeholder="e.g. ana@business.com"
+                  fullWidth
+                  margin="dense"
+                  disabled={isPending || !canEdit}
+                  error={!!formik.touched.email && !!formik.errors.email}
+                  helperText={(formik.touched.email && formik.errors.email) || "For appointment notifications"}
+                />
               )}
             </Field>
             <Field name="phoneNumber">
               {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                <TextField {...field} label="Phone" fullWidth margin="normal" disabled={isPending || !canEdit}
-                  error={!!formik.touched.phoneNumber && !!formik.errors.phoneNumber} helperText={formik.touched.phoneNumber && formik.errors.phoneNumber} />
+                <TextField
+                  {...field}
+                  label="Phone"
+                  placeholder="e.g. +381 61 123 4567"
+                  fullWidth
+                  margin="dense"
+                  disabled={isPending || !canEdit}
+                  error={!!formik.touched.phoneNumber && !!formik.errors.phoneNumber}
+                  helperText={(formik.touched.phoneNumber && formik.errors.phoneNumber) || "For SMS reminders"}
+                />
               )}
             </Field>
-          </Box>
+          </Stack>
 
-          <FormControlLabel control={<Switch checked={formik.values.isActive} onChange={(e) => formik.setFieldValue("isActive", e.target.checked)} disabled={isPending || !canEdit} />} label="Active" sx={{ mt: 1, mb: 2 }} />
+          <Divider sx={{ my: 3 }} />
 
-          {/* Location assignments */}
-          <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>Assigned Locations</Typography>
-          {formik.touched.locationIds && formik.errors.locationIds && <Typography variant="caption" color="error">{formik.errors.locationIds}</Typography>}
+          {/* ── Active toggle ───────────────────────────────── */}
+          <Stack direction="row" spacing={1} alignItems="center">
+            <FormControlLabel
+              control={<Switch checked={formik.values.isActive} onChange={(e) => formik.setFieldValue("isActive", e.target.checked)} disabled={isPending || !canEdit} />}
+              label="Active"
+            />
+            <Typography variant="caption" color="text.secondary">
+              Inactive resources won't appear in the booking flow or calendar.
+            </Typography>
+          </Stack>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* ── Location Assignments ────────────────────────── */}
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+            <Typography variant="subtitle2">Assigned Locations</Typography>
+            <VisibilityBadge visible={false} />
+          </Stack>
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+            Which locations this resource works at. A resource must be assigned to at least one location to appear in the booking flow for that location.
+          </Typography>
+          {formik.touched.locationIds && formik.errors.locationIds && (
+            <Typography variant="caption" color="error" sx={{ display: "block", mb: 0.5 }}>{formik.errors.locationIds}</Typography>
+          )}
           <FormGroup>
             {locations.map((loc) => (
-              <FormControlLabel key={loc.id} disabled={isPending || !canEdit}
-                control={<Checkbox checked={(formik.values.locationIds as string[]).includes(loc.id)} onChange={(e) => {
-                  const current = formik.values.locationIds as string[];
-                  const updated = e.target.checked ? [...current, loc.id] : current.filter((id) => id !== loc.id);
-                  formik.setFieldValue("locationIds", updated);
-                  if (!updated.includes(formik.values.primaryLocationId)) formik.setFieldValue("primaryLocationId", updated[0] ?? "");
-                }} />}
-                label={loc.name} />
+              <FormControlLabel
+                key={loc.id}
+                disabled={isPending || !canEdit}
+                control={
+                  <Checkbox
+                    checked={(formik.values.locationIds as string[]).includes(loc.id)}
+                    onChange={(e) => {
+                      const current = formik.values.locationIds as string[];
+                      const updated = e.target.checked ? [...current, loc.id] : current.filter((id) => id !== loc.id);
+                      formik.setFieldValue("locationIds", updated);
+                      if (!updated.includes(formik.values.primaryLocationId)) formik.setFieldValue("primaryLocationId", updated[0] ?? "");
+                    }}
+                  />
+                }
+                label={loc.name}
+              />
             ))}
           </FormGroup>
 
-          {/* Primary location */}
+          {/* ── Primary Location ─────────────────────────────── */}
           {(formik.values.locationIds as string[]).length > 0 && (
-            <FormControl sx={{ mt: 2 }} disabled={isPending || !canEdit}>
-              <FormLabel>Primary Location</FormLabel>
-              {formik.touched.primaryLocationId && formik.errors.primaryLocationId && <Typography variant="caption" color="error">{formik.errors.primaryLocationId}</Typography>}
-              <RadioGroup value={formik.values.primaryLocationId} onChange={(e) => formik.setFieldValue("primaryLocationId", e.target.value)}>
-                {(formik.values.locationIds as string[]).map((locId) => {
-                  const loc = locations.find((l) => l.id === locId);
-                  return <FormControlLabel key={locId} value={locId} control={<Radio />} label={loc?.name ?? locId} />;
-                })}
-              </RadioGroup>
-            </FormControl>
+            <>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 2, mb: 0.5 }}>
+                <Typography variant="subtitle2">Primary Location</Typography>
+                <VisibilityBadge visible={false} />
+              </Stack>
+              <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+                The default location for this resource. Used when the system auto-assigns a resource and no location preference is specified.
+              </Typography>
+              {formik.touched.primaryLocationId && formik.errors.primaryLocationId && (
+                <Typography variant="caption" color="error" sx={{ display: "block", mb: 0.5 }}>{formik.errors.primaryLocationId}</Typography>
+              )}
+              <FormControl disabled={isPending || !canEdit}>
+                <RadioGroup value={formik.values.primaryLocationId} onChange={(e) => formik.setFieldValue("primaryLocationId", e.target.value)}>
+                  {(formik.values.locationIds as string[]).map((locId) => {
+                    const loc = locations.find((l) => l.id === locId);
+                    return <FormControlLabel key={locId} value={locId} control={<Radio />} label={loc?.name ?? locId} />;
+                  })}
+                </RadioGroup>
+              </FormControl>
+            </>
           )}
 
-          {canEdit && <Box sx={{ mt: 3 }}><Button type="submit" variant="contained" size="large" disabled={isPending || !formik.dirty}>{isPending ? "Saving..." : submitLabel}</Button></Box>}
+          {/* ── Submit ──────────────────────────────────────── */}
+          {canEdit && (
+            <Box sx={{ mt: 3 }}>
+              <Button type="submit" variant="contained" size="large" disabled={isPending || !formik.dirty}>
+                {isPending ? "Saving..." : submitLabel}
+              </Button>
+            </Box>
+          )}
         </Box>
       )}
     </Formik>

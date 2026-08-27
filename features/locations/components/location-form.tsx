@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useTransition } from "react";
+import { useState, useCallback, useTransition } from "react";
 import { Formik, Form, Field } from "formik";
 import { showActionToast } from "@/lib/hooks/use-action-toast";
 import Box from "@mui/material/Box";
@@ -13,6 +13,11 @@ import Typography from "@mui/material/Typography";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import ListSubheader from "@mui/material/ListSubheader";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Chip from "@mui/material/Chip";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import LockIcon from "@mui/icons-material/Lock";
 import { locationSchema, type LocationFormValues, LOCATION_TYPES } from "../schemas/location-schema";
 import { generateLocationSlug } from "../utils/location-slug";
 import { TIMEZONE_LIST } from "@/features/business/utils/timezone-list";
@@ -23,6 +28,12 @@ const LOCATION_TYPE_LABELS: Record<string, string> = {
   customer_address: "Customer's address",
 };
 
+const LOCATION_TYPE_DESCRIPTIONS: Record<string, string> = {
+  physical: "A brick-and-mortar place customers visit — a salon, office, clinic, studio.",
+  online: "Services delivered remotely via video call or phone.",
+  customer_address: "You travel to the customer's location (mobile services, home visits).",
+};
+
 type LocationFormProps = {
   initialValues: LocationFormValues;
   onSubmit: (values: LocationFormValues) => Promise<{ success: boolean; message?: string; fieldErrors?: Record<string, string> }>;
@@ -30,113 +41,82 @@ type LocationFormProps = {
   canEdit: boolean;
 };
 
-export default function LocationForm({
-  initialValues,
-  onSubmit,
-  submitLabel,
-  canEdit,
-}: LocationFormProps) {
-  const [isPending, startTransition] = useTransition();
-  const [actionResult, setActionResult] = useState<{
-    success: boolean;
-    message?: string;
-    fieldErrors?: Record<string, string>;
-  } | null>(null);
+function VisibilityBadge({ visible }: { visible: boolean }) {
+  return visible ? (
+    <Chip icon={<VisibilityIcon sx={{ fontSize: 14 }} />} label="Customer-visible" size="small" color="info" variant="outlined" sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: "0.7rem" } }} />
+  ) : (
+    <Chip icon={<LockIcon sx={{ fontSize: 14 }} />} label="Internal only" size="small" variant="outlined" sx={{ height: 22, "& .MuiChip-label": { px: 0.75, fontSize: "0.7rem" } }} />
+  );
+}
 
-  const slugManuallyEdited = useRef<boolean | null>(null);
-  if (slugManuallyEdited.current == null) {
-    slugManuallyEdited.current = initialValues.slug !== "";
-  }
+export default function LocationForm({ initialValues, onSubmit, submitLabel, canEdit }: LocationFormProps) {
+  const [isPending, startTransition] = useTransition();
+  const [actionResult, setActionResult] = useState<{ success: boolean; message?: string; fieldErrors?: Record<string, string> } | null>(null);
 
   // Group timezones
   const groupedTimezones: Array<[string, typeof TIMEZONE_LIST]> = [];
   const groupMap = new Map<string, (typeof TIMEZONE_LIST)[number][]>();
   for (const tz of TIMEZONE_LIST) {
     const existing = groupMap.get(tz.group);
-    if (existing) {
-      existing.push(tz);
-    } else {
-      const arr = [tz];
-      groupMap.set(tz.group, arr);
-      groupedTimezones.push([tz.group, arr]);
-    }
+    if (existing) { existing.push(tz); }
+    else { const arr = [tz]; groupMap.set(tz.group, arr); groupedTimezones.push([tz.group, arr]); }
   }
 
   const handleNameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, setFieldValue: (field: string, value: string) => void) => {
-      const newName = e.target.value;
-      setFieldValue("name", newName);
-      if (!slugManuallyEdited.current) {
-        setFieldValue("slug", generateLocationSlug(newName));
-      }
-    },
-    []
+      setFieldValue("name", e.target.value);
+      setFieldValue("slug", generateLocationSlug(e.target.value));
+    }, []
   );
 
-  const handleSlugChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>, setFieldValue: (field: string, value: string) => void) => {
-      slugManuallyEdited.current = true;
-      const raw = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
-      setFieldValue("slug", raw);
-    },
-    []
-  );
-
-  const handleFormSubmit = (
-    values: LocationFormValues,
-    { resetForm }: { resetForm: (opts: { values: LocationFormValues }) => void }
-  ) => {
+  const handleFormSubmit = (values: LocationFormValues, { resetForm }: { resetForm: (opts: { values: LocationFormValues }) => void }) => {
     if (!canEdit) return;
     setActionResult(null);
     startTransition(async () => {
       const result = await onSubmit(values);
       setActionResult(result);
       showActionToast(result, "Location saved!");
-      if (result.success) {
-        resetForm({ values });
-      }
+      if (result.success) resetForm({ values });
     });
   };
 
   return (
-    <Formik<LocationFormValues>
-      initialValues={initialValues}
-      validationSchema={locationSchema}
-      onSubmit={handleFormSubmit}
-      validateOnBlur
-      validateOnChange={false}
-    >
+    <Formik<LocationFormValues> initialValues={initialValues} validationSchema={locationSchema} onSubmit={handleFormSubmit} validateOnBlur validateOnChange={false}>
       {(formik) => {
         const isDisabled = isPending || !canEdit;
 
         return (
           <Box component={Form} noValidate>
-            {!canEdit && (
-              <Alert severity="info" sx={{ mb: 3 }}>
-                You have view-only access. Contact the business owner to request changes.
-              </Alert>
-            )}
+            {!canEdit && <Alert severity="info" sx={{ mb: 3 }}>You have view-only access. Contact the business owner to request changes.</Alert>}
+            {actionResult?.success && <Alert severity="success" sx={{ mb: 2 }}>{actionResult.message}</Alert>}
+            {actionResult && !actionResult.success && actionResult.message && <Alert severity="error" sx={{ mb: 2 }}>{actionResult.message}</Alert>}
 
-            {actionResult?.success && (
-              <Alert severity="success" sx={{ mb: 2 }}>{actionResult.message}</Alert>
-            )}
-            {actionResult && !actionResult.success && actionResult.message && (
-              <Alert severity="error" sx={{ mb: 2 }}>{actionResult.message}</Alert>
-            )}
+            {/* ── Intro ───────────────────────────────────────── */}
+            <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "action.hover" }}>
+              <Typography variant="subtitle2" gutterBottom>What is a location?</Typography>
+              <Typography variant="body2" color="text.secondary">
+                A location is a place where your business operates — a physical address, an online meeting room,
+                or the customer's own address for mobile services. Each location has its own working hours,
+                resources, and services. Customers choose a location when booking.
+              </Typography>
+            </Paper>
 
-            <Typography variant="h6" sx={{ mb: 1 }}>Basic Information</Typography>
-
+            {/* ── Name ────────────────────────────────────────── */}
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+              <Typography variant="subtitle2">Location Name</Typography>
+              <VisibilityBadge visible />
+            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+              Shown to customers when they choose where to book (e.g. "Downtown Studio", "Belgrade Center").
+            </Typography>
             <Field name="name">
               {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
                 <TextField
                   {...field}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    handleNameChange(e, formik.setFieldValue)
-                  }
-                  label="Location Name"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleNameChange(e, formik.setFieldValue)}
                   placeholder="e.g. Belgrade Center"
                   fullWidth
-                  margin="normal"
+                  margin="dense"
                   error={(!!formik.touched.name && !!formik.errors.name) || !!actionResult?.fieldErrors?.name}
                   helperText={(formik.touched.name && formik.errors.name) || actionResult?.fieldErrors?.name}
                   disabled={isDisabled}
@@ -145,56 +125,69 @@ export default function LocationForm({
               )}
             </Field>
 
+            {/* ── Slug (auto-generated, read-only) ──────────── */}
             <Field name="slug">
               {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
                 <TextField
                   {...field}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    handleSlugChange(e, formik.setFieldValue)
-                  }
-                  label="Location Address (slug)"
-                  placeholder="e.g. belgrade-center"
                   fullWidth
-                  margin="normal"
-                  error={(!!formik.touched.slug && !!formik.errors.slug) || !!actionResult?.fieldErrors?.slug}
-                  helperText={(formik.touched.slug && formik.errors.slug) || actionResult?.fieldErrors?.slug || "Unique within your business"}
-                  disabled={isDisabled}
+                  margin="dense"
+                  disabled
+                  helperText="Auto-generated from the name"
                   slotProps={{ htmlInput: { maxLength: 63 } }}
+                  sx={{ mt: 1 }}
                 />
               )}
             </Field>
 
+            <Divider sx={{ my: 3 }} />
+
+            {/* ── Location Type ──────────────────────────────── */}
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+              <Typography variant="subtitle2">Location Type</Typography>
+              <VisibilityBadge visible={false} />
+            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+              Determines how the location is treated in scheduling. Affects whether address fields are required and how customers see it.
+            </Typography>
             <Field name="locationType">
               {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Location Type"
-                  fullWidth
-                  margin="normal"
+                <TextField {...field} select fullWidth margin="dense" disabled={isDisabled}
                   error={!!formik.touched.locationType && !!formik.errors.locationType}
                   helperText={formik.touched.locationType && formik.errors.locationType}
-                  disabled={isDisabled}
                 >
                   {LOCATION_TYPES.map((type) => (
                     <MenuItem key={type} value={type}>
-                      {LOCATION_TYPE_LABELS[type] ?? type}
+                      <Stack>
+                        <Typography variant="body2">{LOCATION_TYPE_LABELS[type] ?? type}</Typography>
+                        <Typography variant="caption" color="text.secondary">{LOCATION_TYPE_DESCRIPTIONS[type]}</Typography>
+                      </Stack>
                     </MenuItem>
                   ))}
                 </TextField>
               )}
             </Field>
 
+            <Divider sx={{ my: 3 }} />
+
+            {/* ── Description ─────────────────────────────────── */}
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+              <Typography variant="subtitle2">Description</Typography>
+              <VisibilityBadge visible />
+            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+              Shown to customers on the booking page. Describe the location, parking, access instructions, etc.
+            </Typography>
             <Field name="description">
               {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
                 <TextField
                   {...field}
-                  label="Description"
+                  placeholder="e.g. Ground floor, free street parking available."
                   multiline
                   minRows={2}
                   maxRows={5}
                   fullWidth
-                  margin="normal"
+                  margin="dense"
                   error={!!formik.touched.description && !!formik.errors.description}
                   helperText={formik.touched.description && formik.errors.description}
                   disabled={isDisabled}
@@ -204,81 +197,101 @@ export default function LocationForm({
             </Field>
 
             <Divider sx={{ my: 3 }} />
-            <Typography variant="h6" sx={{ mb: 1 }}>Address</Typography>
+
+            {/* ── Address ─────────────────────────────────────── */}
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+              <Typography variant="subtitle2">Address</Typography>
+              <VisibilityBadge visible />
+            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+              Shown to customers in booking confirmations and on the public site. Leave blank for online or mobile locations.
+            </Typography>
 
             <Field name="streetAddress">
               {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                <TextField {...field} label="Street Address" fullWidth margin="normal" disabled={isDisabled}
+                <TextField {...field} label="Street Address" placeholder="e.g. 123 Main Street" fullWidth margin="dense" disabled={isDisabled}
                   error={!!formik.touched.streetAddress && !!formik.errors.streetAddress}
                   helperText={formik.touched.streetAddress && formik.errors.streetAddress} />
               )}
             </Field>
 
-            <Box sx={{ display: "flex", gap: 2 }}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <Field name="city">
                 {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                  <TextField {...field} label="City" fullWidth margin="normal" disabled={isDisabled}
+                  <TextField {...field} label="City" fullWidth margin="dense" disabled={isDisabled}
                     error={!!formik.touched.city && !!formik.errors.city}
                     helperText={formik.touched.city && formik.errors.city} />
                 )}
               </Field>
               <Field name="provinceState">
                 {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                  <TextField {...field} label="Province/State" fullWidth margin="normal" disabled={isDisabled}
+                  <TextField {...field} label="Province / State" fullWidth margin="dense" disabled={isDisabled}
                     error={!!formik.touched.provinceState && !!formik.errors.provinceState}
                     helperText={formik.touched.provinceState && formik.errors.provinceState} />
                 )}
               </Field>
-            </Box>
+            </Stack>
 
-            <Box sx={{ display: "flex", gap: 2 }}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <Field name="country">
                 {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                  <TextField {...field} label="Country" fullWidth margin="normal" disabled={isDisabled}
+                  <TextField {...field} label="Country" fullWidth margin="dense" disabled={isDisabled}
                     error={!!formik.touched.country && !!formik.errors.country}
                     helperText={formik.touched.country && formik.errors.country} />
                 )}
               </Field>
               <Field name="postalCode">
                 {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                  <TextField {...field} label="Postal Code" fullWidth margin="normal" disabled={isDisabled}
+                  <TextField {...field} label="Postal Code" fullWidth margin="dense" disabled={isDisabled}
                     error={!!formik.touched.postalCode && !!formik.errors.postalCode}
                     helperText={formik.touched.postalCode && formik.errors.postalCode} />
                 )}
               </Field>
-            </Box>
+            </Stack>
 
             <Divider sx={{ my: 3 }} />
-            <Typography variant="h6" sx={{ mb: 1 }}>Contact & Settings</Typography>
 
-            <Box sx={{ display: "flex", gap: 2 }}>
+            {/* ── Contact ─────────────────────────────────────── */}
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+              <Typography variant="subtitle2">Contact Information</Typography>
+              <VisibilityBadge visible />
+            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+              Shown to customers in booking confirmations. Also used for location-specific notifications.
+            </Typography>
+
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <Field name="phoneNumber">
                 {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                  <TextField {...field} label="Phone" fullWidth margin="normal" disabled={isDisabled}
+                  <TextField {...field} label="Phone" placeholder="e.g. +381 11 123 4567" fullWidth margin="dense" disabled={isDisabled}
                     error={!!formik.touched.phoneNumber && !!formik.errors.phoneNumber}
-                    helperText={formik.touched.phoneNumber && formik.errors.phoneNumber} />
+                    helperText={(formik.touched.phoneNumber && formik.errors.phoneNumber) || "For customer inquiries"} />
                 )}
               </Field>
               <Field name="email">
                 {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                  <TextField {...field} label="Email" type="email" fullWidth margin="normal" disabled={isDisabled}
+                  <TextField {...field} label="Email" type="email" placeholder="e.g. center@business.com" fullWidth margin="dense" disabled={isDisabled}
                     error={!!formik.touched.email && !!formik.errors.email}
-                    helperText={formik.touched.email && formik.errors.email} />
+                    helperText={(formik.touched.email && formik.errors.email) || "For booking confirmations"} />
                 )}
               </Field>
-            </Box>
+            </Stack>
 
+            <Divider sx={{ my: 3 }} />
+
+            {/* ── Timezone ────────────────────────────────────── */}
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+              <Typography variant="subtitle2">Timezone</Typography>
+              <VisibilityBadge visible={false} />
+            </Stack>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+              Controls working hours and availability calculations for this location. Customers see appointment times in their own timezone.
+            </Typography>
             <Field name="timezone">
               {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Timezone"
-                  fullWidth
-                  margin="normal"
+                <TextField {...field} select fullWidth margin="dense" disabled={isDisabled}
                   error={!!formik.touched.timezone && !!formik.errors.timezone}
                   helperText={formik.touched.timezone && formik.errors.timezone}
-                  disabled={isDisabled}
                 >
                   {groupedTimezones.map(([group, tzList]) => [
                     <ListSubheader key={`group-${group}`}>{group}</ListSubheader>,
@@ -290,26 +303,23 @@ export default function LocationForm({
               )}
             </Field>
 
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formik.values.isActive}
-                  onChange={(e) => formik.setFieldValue("isActive", e.target.checked)}
-                  disabled={isDisabled}
-                />
-              }
-              label="Active"
-              sx={{ mt: 1 }}
-            />
+            <Divider sx={{ my: 3 }} />
 
+            {/* ── Active toggle ───────────────────────────────── */}
+            <Stack direction="row" spacing={1} alignItems="center">
+              <FormControlLabel
+                control={<Switch checked={formik.values.isActive} onChange={(e) => formik.setFieldValue("isActive", e.target.checked)} disabled={isDisabled} />}
+                label="Active"
+              />
+              <Typography variant="caption" color="text.secondary">
+                Inactive locations won't appear on the booking page or accept new appointments.
+              </Typography>
+            </Stack>
+
+            {/* ── Submit ──────────────────────────────────────── */}
             {canEdit && (
               <Box sx={{ mt: 3 }}>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  disabled={isPending || !formik.dirty}
-                >
+                <Button type="submit" variant="contained" size="large" disabled={isPending || !formik.dirty}>
                   {isPending ? "Saving..." : submitLabel}
                 </Button>
               </Box>

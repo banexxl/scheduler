@@ -21,7 +21,10 @@ export default async function ServiceCategoriesPage({ params }: { params: Promis
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>Service Categories</Typography>
-        {canEdit && <Button component="a" href={`/${tenantSlug}/services/categories/new`} variant="contained">Add Category</Button>}
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button component="a" href={`/${tenantSlug}/services`} variant="outlined">Services</Button>
+          {canEdit && <Button component="a" href={`/${tenantSlug}/services/categories/new`} variant="contained">Add Category</Button>}
+        </Box>
       </Box>
       <ServiceCategoryList categories={categories} tenantSlug={tenantSlug} canEdit={canEdit} />
     </Box>

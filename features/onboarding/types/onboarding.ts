@@ -37,5 +37,7 @@ export type OnboardingPageData = {
           serviceCount: number;
           hasLocationHours: boolean;
           hasResourceHours: boolean;
+          hasBookingRules: boolean;
+          hasPublicBookingSettings: boolean;
      };
 };

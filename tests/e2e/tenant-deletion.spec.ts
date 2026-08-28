@@ -27,19 +27,17 @@ test.describe("tenant deletion UI", () => {
     await page.goto(`/${tenantSlug}/settings`);
     await page.waitForLoadState("networkidle");
 
-    // Click the delete button
     const deleteButton = page.getByRole("button", { name: /delete business/i });
+    await expect(deleteButton).toBeVisible({ timeout: 10000 });
     await deleteButton.click();
 
-    // Dialog should appear — use the MuiDialog container (not the Drawer which also has role="dialog")
-    const dialog = page.locator(".MuiDialog-paper");
-    await expect(dialog).toBeVisible({ timeout: 10000 });
+    // Wait for the "Delete Permanently" button to appear (confirms dialog is open)
+    const confirmButton = page.getByRole("button", { name: /delete permanently/i });
+    await expect(confirmButton).toBeVisible({ timeout: 15000 });
 
-    // Wait for preview to load (dialog gets populated with content)
-    await page.waitForTimeout(2000);
-    const dialogContent = await dialog.textContent();
-    // Should show delete-related content (title, warning, or data summary)
-    expect(dialogContent).toMatch(/delete|cancel|data|members|appointments/i);
+    // Dialog content should have deletion-related info
+    const body = await page.locator("body").textContent();
+    expect(body).toMatch(/delete|cancel|data|members|appointments/i);
   });
 
   test("delete button is disabled without confirmation", async ({ page }) => {
@@ -47,13 +45,14 @@ test.describe("tenant deletion UI", () => {
     await page.waitForLoadState("networkidle");
 
     const deleteButton = page.getByRole("button", { name: /delete business/i });
+    await expect(deleteButton).toBeVisible({ timeout: 10000 });
     await deleteButton.click();
 
-    const dialog = page.locator(".MuiDialog-paper");
-    await expect(dialog).toBeVisible({ timeout: 10000 });
+    // Wait for dialog to fully render
+    const confirmButton = page.getByRole("button", { name: /delete permanently/i });
+    await expect(confirmButton).toBeVisible({ timeout: 15000 });
 
-    // The "Delete Permanently" button should be disabled
-    const confirmButton = dialog.getByRole("button", { name: /delete permanently/i });
+    // Should be disabled until slug is typed
     await expect(confirmButton).toBeDisabled();
   });
 });

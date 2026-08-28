@@ -61,6 +61,8 @@ function bookingReducer(state: BookingState, action: BookingAction): BookingStat
       return { ...state, date: action.date, slot: null };
     case "SET_SLOT":
       return { ...state, slot: action.slot };
+    case "SET_CUSTOMER":
+      return { ...state, customer: action.customer };
     case "RESET":
       return INITIAL_BOOKING_STATE;
     default:

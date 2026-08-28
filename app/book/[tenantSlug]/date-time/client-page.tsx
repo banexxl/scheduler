@@ -217,9 +217,10 @@ export default function DateTimeClientPage({ tenantSlug, tenantId, timeZone }: P
           <Button
             variant="contained"
             disabled={!state.slot}
+            href={`/book/${tenantSlug}/details`}
             sx={{ textTransform: "none", fontWeight: 600 }}
           >
-            Details (Coming Soon)
+            Continue
           </Button>
         </Box>
       </Box>

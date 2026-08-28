@@ -14,6 +14,7 @@ import {
   computeTotalPrice,
   type SelectedService,
   type BookingTimeSlot,
+  type CustomerInfo,
 } from "../types";
 
 export function useBooking() {
@@ -74,6 +75,11 @@ export function useBooking() {
     [dispatch]
   );
 
+  const setCustomer = useCallback(
+    (customer: CustomerInfo) => dispatch({ type: "SET_CUSTOMER", customer }),
+    [dispatch]
+  );
+
   const reset = useCallback(() => dispatch({ type: "RESET" }), [dispatch]);
 
   const totalDuration = useMemo(
@@ -98,6 +104,7 @@ export function useBooking() {
     setLocation,
     setDate,
     setSlot,
+    setCustomer,
     reset,
     // Computed
     totalDuration,

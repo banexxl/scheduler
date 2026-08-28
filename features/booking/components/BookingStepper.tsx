@@ -13,7 +13,7 @@ import StepLabel from "@mui/material/StepLabel";
 import Box from "@mui/material/Box";
 import { BOOKING_STEPS, type BookingStepKey } from "../types";
 
-const ENABLED_STEPS: BookingStepKey[] = ["services", "staff", "location", "datetime"];
+const ENABLED_STEPS: BookingStepKey[] = ["services", "staff", "location", "datetime", "details", "confirm"];
 
 type Props = {
   activeStep: BookingStepKey;

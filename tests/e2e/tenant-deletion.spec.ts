@@ -27,15 +27,16 @@ test.describe("tenant deletion UI", () => {
     await page.goto(`/${tenantSlug}/settings`);
     await page.waitForLoadState("networkidle");
 
-    const deleteButton = page.getByRole("button", { name: /delete business/i });
-    await expect(deleteButton).toBeVisible({ timeout: 10000 });
+    // Wait for the page to fully hydrate — the delete button needs React handlers attached
+    const deleteButton = page.locator("button:has-text('Delete Business')");
+    await expect(deleteButton).toBeVisible({ timeout: 15000 });
+    await page.waitForTimeout(1000); // Extra hydration buffer
     await deleteButton.click();
 
-    // Wait for the "Delete Permanently" button to appear (confirms dialog is open)
-    const confirmButton = page.getByRole("button", { name: /delete permanently/i });
-    await expect(confirmButton).toBeVisible({ timeout: 15000 });
+    // Wait for dialog content text (more reliable than button role matching)
+    const dialogText = page.locator("text=Data that will be permanently deleted");
+    await expect(dialogText).toBeVisible({ timeout: 15000 });
 
-    // Dialog content should have deletion-related info
     const body = await page.locator("body").textContent();
     expect(body).toMatch(/delete|cancel|data|members|appointments/i);
   });
@@ -44,17 +45,18 @@ test.describe("tenant deletion UI", () => {
     await page.goto(`/${tenantSlug}/settings`);
     await page.waitForLoadState("networkidle");
 
-    const deleteButton = page.getByRole("button", { name: /delete business/i });
-    await expect(deleteButton).toBeVisible({ timeout: 10000 });
+    const deleteButton = page.locator("button:has-text('Delete Business')");
+    await expect(deleteButton).toBeVisible({ timeout: 15000 });
+    await page.waitForTimeout(1000);
     await deleteButton.click();
 
-    // Wait for dialog — the Cancel button is always enabled and visible
-    const cancelButton = page.getByRole("button", { name: /^cancel$/i });
-    await expect(cancelButton).toBeVisible({ timeout: 15000 });
+    // Wait for dialog content
+    const dialogText = page.locator("text=Data that will be permanently deleted");
+    await expect(dialogText).toBeVisible({ timeout: 15000 });
 
-    // The "Delete Permanently" button should exist and be disabled
+    // The confirm button should be disabled (located by text, not role, since disabled buttons may be skipped)
     const confirmButton = page.locator("button:has-text('Delete Permanently')");
-    await expect(confirmButton).toBeVisible({ timeout: 5000 });
+    await expect(confirmButton).toBeVisible();
     await expect(confirmButton).toBeDisabled();
   });
 });

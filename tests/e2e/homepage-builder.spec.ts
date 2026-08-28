@@ -28,7 +28,7 @@ test.describe("homepage builder page", () => {
     await page.waitForLoadState("networkidle");
 
     // Hero accordion should be expanded by default
-    const headlineInput = page.getByRole("textbox", { name: "Headline" });
+    const headlineInput = page.getByRole("textbox", { name: "Headline", exact: true });
     await expect(headlineInput).toBeVisible();
 
     const ctaLabelInput = page.getByLabel(/cta button label/i);

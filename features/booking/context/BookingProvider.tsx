@@ -1,10 +1,16 @@
 "use client";
 
 /**
- * Booking Provider — Milestone 17.0.
+ * Booking Provider — Milestones 17.0 + 17.1.
  *
  * React Context + useReducer for shared booking state
- * across all booking pages (/services, /staff, /locations).
+ * across all booking pages (/services, /staff, /locations, /date-time).
+ *
+ * Cascade rules:
+ * - Changing services → resets staff, date, slot
+ * - Changing staff → resets date, slot
+ * - Changing location → resets date, slot
+ * - Changing date → resets slot
  *
  * Session-only — no persistence, no localStorage, no URL params.
  */
@@ -26,13 +32,13 @@ import {
 function bookingReducer(state: BookingState, action: BookingAction): BookingState {
   switch (action.type) {
     case "ADD_SERVICE": {
-      // Don't add duplicates
       if (state.services.some((s) => s.id === action.service.id)) return state;
       return {
         ...state,
         services: [...state.services, action.service],
-        // Reset downstream selections when services change
         staffId: null,
+        date: null,
+        slot: null,
       };
     }
     case "REMOVE_SERVICE": {
@@ -40,16 +46,21 @@ function bookingReducer(state: BookingState, action: BookingAction): BookingStat
       return {
         ...state,
         services: next,
-        // Reset downstream if all services removed
         staffId: next.length === 0 ? null : state.staffId,
+        date: next.length === 0 ? null : state.date,
+        slot: next.length === 0 ? null : state.slot,
       };
     }
     case "SET_SERVICES":
-      return { ...state, services: action.services, staffId: null };
+      return { ...state, services: action.services, staffId: null, date: null, slot: null };
     case "SET_STAFF":
-      return { ...state, staffId: action.staffId };
+      return { ...state, staffId: action.staffId, date: null, slot: null };
     case "SET_LOCATION":
-      return { ...state, locationId: action.locationId };
+      return { ...state, locationId: action.locationId, date: null, slot: null };
+    case "SET_DATE":
+      return { ...state, date: action.date, slot: null };
+    case "SET_SLOT":
+      return { ...state, slot: action.slot };
     case "RESET":
       return INITIAL_BOOKING_STATE;
     default:

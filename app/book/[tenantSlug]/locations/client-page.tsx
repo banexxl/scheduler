@@ -72,14 +72,14 @@ export default function LocationsClientPage({ tenantSlug, locations }: Props) {
             Your appointment will be at <strong>{loc?.name}</strong>.
           </Alert>
           {loc && (
-            <LocationCard location={loc} selected={true} onSelect={() => {}} />
+            <LocationCard location={loc} selected={true} onSelect={() => { }} />
           )}
           <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
             <Button href={`/book/${tenantSlug}/staff`} variant="outlined" sx={{ textTransform: "none" }}>
               Back
             </Button>
-            <Button variant="contained" disabled sx={{ textTransform: "none", fontWeight: 600 }}>
-              Date &amp; Time (Coming Soon)
+            <Button variant="contained" href={`/book/${tenantSlug}/date-time`} sx={{ textTransform: "none", fontWeight: 600 }}>
+              Continue
             </Button>
           </Box>
         </Box>
@@ -118,9 +118,10 @@ export default function LocationsClientPage({ tenantSlug, locations }: Props) {
           <Button
             variant="contained"
             disabled={!state.locationId}
+            href={`/book/${tenantSlug}/date-time`}
             sx={{ textTransform: "none", fontWeight: 600 }}
           >
-            Date &amp; Time (Coming Soon)
+            Continue
           </Button>
         </Box>
       </Box>

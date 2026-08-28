@@ -1,5 +1,5 @@
 /**
- * Booking Flow Types — Milestone 17.0.
+ * Booking Flow Types — Milestones 17.0 + 17.1.
  *
  * Shared state model for the multi-page booking flow.
  * Session-only — no localStorage, no URL params.
@@ -38,15 +38,34 @@ export type BookingLocation = {
   phoneNumber: string | null;
 };
 
+// ─── Time Slot (Milestone 17.1) ──────────────────────────────────────────────
+
+export type BookingTimeSlot = {
+  /** ISO 8601 instant — customer-visible start */
+  startsAt: string;
+  /** ISO 8601 instant — customer-visible end */
+  endsAt: string;
+  /** "HH:mm" in tenant timezone */
+  localStartTime: string;
+  /** "HH:mm" in tenant timezone */
+  localEndTime: string;
+  /** Resource that will perform the service */
+  resourceId: string;
+  /** Duration in minutes */
+  durationMinutes: number;
+};
+
 // ─── Booking State ───────────────────────────────────────────────────────────
 
 export type BookingState = {
   services: SelectedService[];
   staffId: string | null;
   locationId: string | null;
-  /** Future milestones */
-  date: null;
-  slot: null;
+  /** Selected date in "YYYY-MM-DD" (tenant-local) */
+  date: string | null;
+  /** Selected time slot */
+  slot: BookingTimeSlot | null;
+  /** Future milestone */
   customer: null;
   notes: string;
 };
@@ -69,6 +88,8 @@ export type BookingAction =
   | { type: "SET_SERVICES"; services: SelectedService[] }
   | { type: "SET_STAFF"; staffId: string | null }
   | { type: "SET_LOCATION"; locationId: string | null }
+  | { type: "SET_DATE"; date: string | null }
+  | { type: "SET_SLOT"; slot: BookingTimeSlot | null }
   | { type: "RESET" };
 
 // ─── Stepper ─────────────────────────────────────────────────────────────────

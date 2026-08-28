@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * useBooking Hook — Milestone 17.0.
+ * useBooking Hook — Milestones 17.0 + 17.1.
  *
  * Convenience hook for accessing booking state and dispatch.
  * Provides typed helper methods for common operations.
@@ -13,6 +13,7 @@ import {
   computeTotalDuration,
   computeTotalPrice,
   type SelectedService,
+  type BookingTimeSlot,
 } from "../types";
 
 export function useBooking() {
@@ -20,7 +21,7 @@ export function useBooking() {
   if (!ctx) {
     throw new Error(
       "useBooking must be used within <BookingProvider>. " +
-        "Ensure BookingProvider wraps the booking pages."
+      "Ensure BookingProvider wraps the booking pages."
     );
   }
 
@@ -63,6 +64,16 @@ export function useBooking() {
     [dispatch]
   );
 
+  const setDate = useCallback(
+    (date: string | null) => dispatch({ type: "SET_DATE", date }),
+    [dispatch]
+  );
+
+  const setSlot = useCallback(
+    (slot: BookingTimeSlot | null) => dispatch({ type: "SET_SLOT", slot }),
+    [dispatch]
+  );
+
   const reset = useCallback(() => dispatch({ type: "RESET" }), [dispatch]);
 
   const totalDuration = useMemo(
@@ -85,6 +96,8 @@ export function useBooking() {
     isServiceSelected,
     setStaff,
     setLocation,
+    setDate,
+    setSlot,
     reset,
     // Computed
     totalDuration,

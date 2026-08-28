@@ -44,7 +44,7 @@ test.describe("template settings page", () => {
     await previewButton.click();
 
     // Full-screen dialog should appear
-    const dialog = page.locator("[role='dialog']");
+    const dialog = page.locator(".MuiDialog-root [role='dialog']");
     await expect(dialog).toBeVisible({ timeout: 5000 });
 
     // Should have device toggle
@@ -70,7 +70,7 @@ test.describe("template authorization", () => {
 
   test("unauthenticated cannot access template settings", async ({ page }) => {
     await page.goto(`/${tenantSlug}/settings/templates`, { timeout: 60000 });
-    await page.waitForURL(/login/, { timeout: 10000 }).catch(() => {});
+    await page.waitForURL(/login/, { timeout: 10000 }).catch(() => { });
     const url = page.url();
     const body = await page.locator("body").textContent();
     const blocked = url.includes("login") || body?.toLowerCase().includes("not found");

@@ -28,7 +28,7 @@ test.describe("homepage builder page", () => {
     await page.waitForLoadState("networkidle");
 
     // Hero accordion should be expanded by default
-    const headlineInput = page.getByLabel(/headline/i);
+    const headlineInput = page.getByRole("textbox", { name: "Headline" });
     await expect(headlineInput).toBeVisible();
 
     const ctaLabelInput = page.getByLabel(/cta button label/i);
@@ -66,8 +66,15 @@ test.describe("homepage builder sidebar nav", () => {
     await page.goto(`/${tenantSlug}/dashboard`, { timeout: 60000 });
     await page.waitForLoadState("networkidle");
 
+    // On mobile, the sidebar is a drawer — open it first
+    const hamburger = page.getByRole("button", { name: /open navigation/i });
+    if (await hamburger.isVisible().catch(() => false)) {
+      await hamburger.click();
+      await page.waitForTimeout(500);
+    }
+
     const homepageLink = page.getByRole("link", { name: /homepage/i });
-    await expect(homepageLink).toBeVisible();
+    await expect(homepageLink).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -99,7 +106,7 @@ test.describe("homepage builder authorization", () => {
 
   test("unauthenticated cannot access homepage builder", async ({ page }) => {
     await page.goto(`/${tenantSlug}/site/homepage`, { timeout: 60000 });
-    await page.waitForURL(/login/, { timeout: 10000 }).catch(() => {});
+    await page.waitForURL(/login/, { timeout: 10000 }).catch(() => { });
     const url = page.url();
     const body = await page.locator("body").textContent();
     const blocked = url.includes("login") || body?.toLowerCase().includes("not found");

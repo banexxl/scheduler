@@ -48,11 +48,13 @@ test.describe("tenant deletion UI", () => {
     await expect(deleteButton).toBeVisible({ timeout: 10000 });
     await deleteButton.click();
 
-    // Wait for dialog to fully render
-    const confirmButton = page.getByRole("button", { name: /delete permanently/i });
-    await expect(confirmButton).toBeVisible({ timeout: 15000 });
+    // Wait for dialog — the Cancel button is always enabled and visible
+    const cancelButton = page.getByRole("button", { name: /^cancel$/i });
+    await expect(cancelButton).toBeVisible({ timeout: 15000 });
 
-    // Should be disabled until slug is typed
+    // The "Delete Permanently" button should exist and be disabled
+    const confirmButton = page.locator("button:has-text('Delete Permanently')");
+    await expect(confirmButton).toBeVisible({ timeout: 5000 });
     await expect(confirmButton).toBeDisabled();
   });
 });

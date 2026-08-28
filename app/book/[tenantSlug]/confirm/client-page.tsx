@@ -5,9 +5,10 @@
  *
  * Reads the booking confirmation from sessionStorage
  * (set by the details page after successful booking creation).
+ * Uses useSyncExternalStore pattern to avoid setState-in-effect.
  */
 
-import { useEffect, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -18,25 +19,35 @@ type Props = {
   tenantSlug: string;
 };
 
-export default function ConfirmClientWrapper({ tenantSlug }: Props) {
-  const [confirmation, setConfirmation] = useState<BookingConfirmation | null>(null);
-  const [loaded, setLoaded] = useState(false);
+function useSessionConfirmation(tenantSlug: string): BookingConfirmation | null {
+  const key = `booking-confirmation-${tenantSlug}`;
 
-  useEffect(() => {
-    const key = `booking-confirmation-${tenantSlug}`;
-    const stored = sessionStorage.getItem(key);
-    if (stored) {
+  // Subscribe is a no-op since sessionStorage doesn't fire events for same-tab writes
+  const subscribe = useMemo(() => () => () => { }, []);
+
+  const getSnapshot = useMemo(
+    () => () => {
+      if (typeof window === "undefined") return null;
+      const stored = sessionStorage.getItem(key);
+      if (!stored) return null;
       try {
-        setConfirmation(JSON.parse(stored) as BookingConfirmation);
+        const parsed = JSON.parse(stored) as BookingConfirmation;
+        sessionStorage.removeItem(key);
+        return parsed;
       } catch {
-        // Invalid data
+        return null;
       }
-      sessionStorage.removeItem(key);
-    }
-    setLoaded(true);
-  }, [tenantSlug]);
+    },
+    [key]
+  );
 
-  if (!loaded) return null;
+  const getServerSnapshot = useMemo(() => () => null, []);
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+export default function ConfirmClientWrapper({ tenantSlug }: Props) {
+  const confirmation = useSessionConfirmation(tenantSlug);
 
   if (!confirmation) {
     return (

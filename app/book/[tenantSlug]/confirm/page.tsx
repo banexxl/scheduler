@@ -1,5 +1,4 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import ConfirmClientWrapper from "./client-page";
 
 export async function generateMetadata() {
   return { title: "Booking Confirmed" };
@@ -20,6 +19,3 @@ export default async function ConfirmPage({
 
   return <ConfirmClientWrapper tenantSlug={tenantSlug} />;
 }
-
-// Need a separate client component since we read sessionStorage
-import ConfirmClientWrapper from "./client-page";

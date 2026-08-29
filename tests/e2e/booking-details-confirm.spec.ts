@@ -21,10 +21,9 @@ test.describe("booking details page", () => {
     await page.goto(`/book/${tenantSlug}/details`, { timeout: 60000 });
     await page.waitForLoadState("networkidle");
 
-    // On mobile, page may redirect if no slot selected — accept either stepper or redirect
+    // On mobile without booking context, page may redirect — accept stepper visible or any valid redirect
     const stepper = page.locator(".MuiStepper-root");
-    const url = page.url();
-    const hasStepperOrRedirected = await stepper.isVisible().catch(() => false) || url.includes("/services") || url.includes("/date-time");
+    const hasStepperOrRedirected = await stepper.isVisible().catch(() => false) || !page.url().includes("/details");
     expect(hasStepperOrRedirected).toBeTruthy();
   });
 

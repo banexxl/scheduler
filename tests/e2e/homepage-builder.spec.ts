@@ -73,7 +73,9 @@ test.describe("homepage builder sidebar nav", () => {
       await page.waitForTimeout(500);
     }
 
-    const homepageLink = page.getByLabel("Business navigation").getByRole("link", { name: /homepage/i });
+    // On mobile, sidebar is inside a MUI Drawer (dialog); on desktop, it's a nav
+    const homepageLink = page.getByRole("dialog").getByRole("link", { name: /homepage/i })
+      .or(page.getByLabel("Business navigation").getByRole("link", { name: /homepage/i }));
     await expect(homepageLink).toBeVisible({ timeout: 10000 });
   });
 });

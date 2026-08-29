@@ -46,7 +46,7 @@ export function resolveDestinationFromIdentity(
   }
 
   // 3. Customer-only user — redirect to their tenant's portal
-  if (identity.tenantCustomerCount > 0 && identity.firstCustomerTenantSlug) {
+  if (identity.isCustomer && identity.firstCustomerTenantSlug) {
     return `/book/${identity.firstCustomerTenantSlug}/portal`;
   }
 

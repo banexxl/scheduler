@@ -178,7 +178,7 @@ export default function PortalHeader() {
                 Sign In
               </Button>
             )}
-            <Button
+            {/* <Button
               href={`/book/${tenantSlug}#booking`}
               variant="contained"
               size="small"
@@ -194,7 +194,7 @@ export default function PortalHeader() {
               }}
             >
               Book
-            </Button>
+            </Button> */}
           </Box>
         </Toolbar>
       </AppBar>

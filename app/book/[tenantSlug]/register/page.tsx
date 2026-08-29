@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { resolvePublicTenant } from "@/features/public-booking/services/public-tenant-resolver";
-import { getUser } from "@/lib/auth/get-user";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import CustomerRegisterForm from "@/features/customer-portal/components/customer-register-form";
 
 /**
@@ -8,7 +8,7 @@ import CustomerRegisterForm from "@/features/customer-portal/components/customer
  *
  * /book/{tenantSlug}/register
  *
- * If already logged in, redirects to portal.
+ * If already logged in AND is a customer of this tenant, redirects to portal.
  */
 export default async function CustomerRegisterPage({
   params,
@@ -17,18 +17,41 @@ export default async function CustomerRegisterPage({
 }) {
   const { tenantSlug } = await params;
 
-  const tenant = await resolvePublicTenant(tenantSlug);
-  if (!tenant) redirect(`/book/${tenantSlug}`);
+  // Resolve tenant via admin client (avoids RLS/session issues)
+  const adminClient = createAdminClient();
+  const { data: tenantRow } = await adminClient
+    .from("tenants")
+    .select("id, name, slug")
+    .eq("slug", tenantSlug)
+    .in("status", ["active", "trialing"])
+    .single();
 
-  const user = await getUser();
-  if (user) {
-    redirect(`/book/${tenantSlug}/portal`);
+  if (!tenantRow) redirect(`/book/${tenantSlug}`);
+
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user?.email) {
+      const { data: customerRow } = await (adminClient as never as ReturnType<typeof createAdminClient>)
+        .from("tenant_customers" as never)
+        .select("id" as never)
+        .eq("tenant_id" as never, tenantRow.id)
+        .eq("email" as never, user.email.trim().toLowerCase())
+        .maybeSingle();
+
+      if (customerRow) {
+        redirect(`/book/${tenantSlug}/portal`);
+      }
+    }
+  } catch (error) {
+    if (error && typeof error === "object" && "digest" in error) throw error;
   }
 
   return (
     <CustomerRegisterForm
       tenantSlug={tenantSlug}
-      tenantName={tenant.name}
+      tenantName={tenantRow.name}
     />
   );
 }

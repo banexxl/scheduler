@@ -20,11 +20,12 @@ test.describe("booking details page", () => {
   test("details page has stepper", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}/details`, { timeout: 60000 });
     await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
 
-    // On mobile without booking context, page may redirect — accept stepper visible or any valid redirect
     const stepper = page.locator(".MuiStepper-root");
-    const hasStepperOrRedirected = await stepper.isVisible().catch(() => false) || !page.url().includes("/details");
-    expect(hasStepperOrRedirected).toBeTruthy();
+    const stepperVisible = await stepper.isVisible().catch(() => false);
+    const stayedOnPage = page.url().includes("/details");
+    expect(stepperVisible || !stayedOnPage).toBeTruthy();
   });
 
   test("details page redirects when no slot selected", async ({ page }) => {

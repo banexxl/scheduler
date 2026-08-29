@@ -45,6 +45,6 @@ export function resolveDestinationFromIdentity(
     return `/${accessible[0]!.tenantSlug}/dashboard`;
   }
 
-  // 3. Any user without a business — send to create-business
+  // 3. Customer-only user — send to create-business (no customer portal at /customer)
   return "/create-business";
 }

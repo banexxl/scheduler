@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Customer Portal Logout — Milestone 8.6.
+ * Customer Portal Logout — Supabase Auth based.
  */
 
 import { redirect } from "next/navigation";

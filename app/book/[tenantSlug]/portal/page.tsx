@@ -7,10 +7,10 @@ import { getCustomerPortalAppointments } from "@/features/customer-portal/servic
 import { getCustomerWaitlistEntries } from "@/features/waitlist/services/waitlist-portal-queries";
 
 /**
- * Customer Portal — Milestone 8.6.
+ * Customer Portal — Supabase Auth based.
  *
- * If session exists → show appointment dashboard.
- * If no session → show email access form.
+ * If Supabase session exists + tenant customer match → show appointment dashboard.
+ * If no session → show email magic-link form.
  */
 export default async function CustomerPortalPage({
   params,
@@ -22,7 +22,7 @@ export default async function CustomerPortalPage({
   const tenant = await resolvePublicTenant(tenantSlug);
   if (!tenant) redirect(`/book/${tenantSlug}`);
 
-  // Check for existing session
+  // Check for existing Supabase Auth session
   const session = await getPortalSessionFromCookie(tenantSlug);
 
   if (session && session.tenantId === tenant.id) {

@@ -59,11 +59,14 @@ test.describe("booking staff page", () => {
   test("staff page has stepper", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}/staff`, { timeout: 60000 });
     await page.waitForLoadState("networkidle");
+    // Allow time for client-side redirects to settle
+    await page.waitForTimeout(2000);
 
-    // On mobile without booking context, page may redirect — accept stepper visible or any valid redirect
     const stepper = page.locator(".MuiStepper-root");
-    const hasStepperOrRedirected = await stepper.isVisible().catch(() => false) || !page.url().includes("/staff");
-    expect(hasStepperOrRedirected).toBeTruthy();
+    const stepperVisible = await stepper.isVisible().catch(() => false);
+    const stayedOnPage = page.url().includes("/staff");
+    // Either stepper is visible, or page redirected away (valid when no booking context)
+    expect(stepperVisible || !stayedOnPage).toBeTruthy();
   });
 
   test("staff page shows content or redirects", async ({ page }) => {
@@ -93,11 +96,12 @@ test.describe("booking locations page", () => {
   test("locations page has stepper", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}/locations`, { timeout: 60000 });
     await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
 
-    // On mobile without booking context, page may redirect — accept stepper visible or any valid redirect
     const stepper = page.locator(".MuiStepper-root");
-    const hasStepperOrRedirected = await stepper.isVisible().catch(() => false) || !page.url().includes("/locations");
-    expect(hasStepperOrRedirected).toBeTruthy();
+    const stepperVisible = await stepper.isVisible().catch(() => false);
+    const stayedOnPage = page.url().includes("/locations");
+    expect(stepperVisible || !stayedOnPage).toBeTruthy();
   });
 });
 

@@ -1,10 +1,11 @@
 "use client";
 
 /**
- * Portal Access Form — Milestone 8.6.
+ * Portal Access Form — Supabase Auth Magic Link.
  *
- * Email input form for requesting a magic-link.
- * Shows generic success message regardless of match.
+ * Email input form that sends a Supabase Auth magic link.
+ * On click, the user receives an email from Supabase with a
+ * sign-in link. After clicking, they're redirected back to the portal.
  */
 
 import { useState, useTransition } from "react";
@@ -75,12 +76,12 @@ export default function PortalAccessForm({ tenantSlug, tenantName }: Props) {
             fullWidth
             disabled={isPending || !email.trim()}
           >
-            {isPending ? "Sending..." : "Send access link"}
+            {isPending ? "Sending..." : "Send sign-in link"}
           </Button>
         </Box>
 
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2, textAlign: "center" }}>
-          We&apos;ll send a secure one-time link to your email.
+          We&apos;ll send a secure sign-in link to your email.
         </Typography>
 
         <Button

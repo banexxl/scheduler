@@ -4,7 +4,7 @@ import MarketingShell from "@/features/marketing/components/marketing-shell";
 
 export const metadata: Metadata = {
   title: {
-    default: "Get Slot — Online Scheduling Platform",
+    default: "Get Slot - Online Scheduling Platform",
     template: "%s — Get Slot",
   },
 };

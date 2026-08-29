@@ -214,8 +214,8 @@ export default function SegmentBuilderClient({
       </Stack>
 
       {/* Summary */}
-      <Box sx={{ p: 2, bgcolor: "#f0f9ff", borderRadius: 1.5 }}>
-        <Typography sx={{ fontSize: "0.8125rem", fontWeight: 500, color: "#1d4ed8" }}>
+      <Box sx={{ p: 2, bgcolor: "rgba(124, 58, 237, 0.08)", borderRadius: 1.5 }}>
+        <Typography sx={{ fontSize: "0.8125rem", fontWeight: 500, color: "#a78bfa" }}>
           {summary}
         </Typography>
       </Box>

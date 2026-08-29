@@ -128,7 +128,7 @@ export default async function CampaignsDashboardPage({
                 {rows.map((c) => (
                   <TableRow key={c.id} hover>
                     <TableCell sx={{ fontSize: "0.8125rem" }}>{c.name}</TableCell>
-                    <TableCell sx={{ fontSize: "0.8125rem", color: "#6b7280" }}>
+                    <TableCell sx={{ fontSize: "0.8125rem", color: "#8b8b9e" }}>
                       {c.audience_name_snapshot ?? "—"}
                     </TableCell>
                     <TableCell>
@@ -137,7 +137,7 @@ export default async function CampaignsDashboardPage({
                     <TableCell sx={{ fontSize: "0.8125rem" }}>
                       {c.sent_count > 0 ? `${c.sent_count}/${c.eligible_count}` : "—"}
                     </TableCell>
-                    <TableCell sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>
+                    <TableCell sx={{ fontSize: "0.75rem", color: "#5c5c72" }}>
                       {c.completed_at
                         ? new Date(c.completed_at).toLocaleDateString()
                         : c.scheduled_for
@@ -162,7 +162,7 @@ export default async function CampaignsDashboardPage({
                     Previous
                   </Button>
                 )}
-                <Typography sx={{ fontSize: "0.8125rem", lineHeight: "32px", color: "#6b7280" }}>
+                <Typography sx={{ fontSize: "0.8125rem", lineHeight: "32px", color: "#8b8b9e" }}>
                   Page {currentPage} of {totalPages}
                 </Typography>
                 {currentPage < totalPages && (

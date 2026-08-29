@@ -64,7 +64,7 @@ export default async function StaffAnalyticsPage({
                   <TableCell sx={{ fontSize: "0.8125rem" }}>{r.completedAppointments}</TableCell>
                   <TableCell sx={{ fontSize: "0.8125rem" }}>{r.bookedMinutes}</TableCell>
                   <TableCell sx={{ fontSize: "0.8125rem" }}>{r.availableMinutes ?? "—"}</TableCell>
-                  <TableCell sx={{ fontSize: "0.8125rem", fontWeight: 600, color: r.utilization !== null && r.utilization > 0.7 ? "#16a34a" : r.utilization !== null && r.utilization > 0.4 ? "#ca8a04" : "#6b7280" }}>
+                  <TableCell sx={{ fontSize: "0.8125rem", fontWeight: 600, color: r.utilization !== null && r.utilization > 0.7 ? "#10B981" : r.utilization !== null && r.utilization > 0.4 ? "#F59E0B" : "#8b8b9e" }}>
                     {r.utilization !== null ? `${(r.utilization * 100).toFixed(1)}%` : "—"}
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.8125rem" }}>{r.uniqueCustomers}</TableCell>

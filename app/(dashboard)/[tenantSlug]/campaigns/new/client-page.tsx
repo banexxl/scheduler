@@ -99,7 +99,7 @@ export default function CampaignBuilderClient({ tenantSlug, savedSegments, built
       {step === 0 && (
         <Stack spacing={2}>
           <TextField label="Campaign Name" value={name} onChange={(e) => setName(e.target.value)} size="small" required fullWidth placeholder="e.g. Win Back Inactive Customers" />
-          <Box sx={{ p: 2, bgcolor: "#f8fafc", borderRadius: 1, fontSize: "0.8125rem", color: "#6b7280" }}>
+          <Box sx={{ p: 2, bgcolor: "rgba(255,255,255,0.03)", borderRadius: 1, fontSize: "0.8125rem", color: "#8b8b9e" }}>
             Channel: Email (only supported channel)
           </Box>
         </Stack>
@@ -138,7 +138,7 @@ export default function CampaignBuilderClient({ tenantSlug, savedSegments, built
             </FormControl>
           )}
 
-          <Box sx={{ p: 2, bgcolor: "#fef3c7", borderRadius: 1, fontSize: "0.8125rem", color: "#92400e" }}>
+          <Box sx={{ p: 2, bgcolor: "rgba(245, 158, 11, 0.08)", borderRadius: 1, fontSize: "0.8125rem", color: "#F59E0B" }}>
             Audience will be re-evaluated when the campaign is sent. Counts shown are previews only.
           </Box>
         </Stack>
@@ -157,20 +157,20 @@ export default function CampaignBuilderClient({ tenantSlug, savedSegments, built
       {/* Step 3: Review */}
       {step === 3 && (
         <Stack spacing={2}>
-          <Box sx={{ p: 2, border: "1px solid #e5e7eb", borderRadius: 1.5 }}>
-            <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af", mb: 0.5 }}>Campaign</Typography>
+          <Box sx={{ p: 2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 1.5 }}>
+            <Typography sx={{ fontSize: "0.75rem", color: "#5c5c72", mb: 0.5 }}>Campaign</Typography>
             <Typography sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{name}</Typography>
           </Box>
-          <Box sx={{ p: 2, border: "1px solid #e5e7eb", borderRadius: 1.5 }}>
-            <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af", mb: 0.5 }}>Audience</Typography>
+          <Box sx={{ p: 2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 1.5 }}>
+            <Typography sx={{ fontSize: "0.75rem", color: "#5c5c72", mb: 0.5 }}>Audience</Typography>
             <Typography sx={{ fontSize: "0.875rem" }}>{selectedAudienceName ?? "Not selected"}</Typography>
           </Box>
-          <Box sx={{ p: 2, border: "1px solid #e5e7eb", borderRadius: 1.5 }}>
-            <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af", mb: 0.5 }}>Subject</Typography>
+          <Box sx={{ p: 2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 1.5 }}>
+            <Typography sx={{ fontSize: "0.75rem", color: "#5c5c72", mb: 0.5 }}>Subject</Typography>
             <Typography sx={{ fontSize: "0.875rem" }}>{subject}</Typography>
           </Box>
-          <Box sx={{ p: 2, border: "1px solid #e5e7eb", borderRadius: 1.5 }}>
-            <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af", mb: 0.5 }}>Message</Typography>
+          <Box sx={{ p: 2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 1.5 }}>
+            <Typography sx={{ fontSize: "0.75rem", color: "#5c5c72", mb: 0.5 }}>Message</Typography>
             <Typography sx={{ fontSize: "0.8125rem", whiteSpace: "pre-wrap" }}>{content}</Typography>
           </Box>
           {ctaText && (

@@ -112,11 +112,11 @@ export default function AutomationBuilderClient({ tenantSlug }: Props) {
         <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, mb: 1 }}>Steps</Typography>
         <Stack spacing={1.5}>
           {steps.map((step, idx) => (
-            <Box key={idx} sx={{ p: 2, border: "1px solid #e5e7eb", borderRadius: 1.5, position: "relative" }}>
+            <Box key={idx} sx={{ p: 2, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 1.5, position: "relative" }}>
               <IconButton size="small" onClick={() => removeStep(idx)} sx={{ position: "absolute", top: 4, right: 4 }} aria-label="Remove step">
                 <DeleteIcon fontSize="small" />
               </IconButton>
-              <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, color: "#6b7280", mb: 1 }}>
+              <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, color: "#8b8b9e", mb: 1 }}>
                 {step.stepType === "delay" ? "Wait" : step.stepType === "condition" ? "Condition" : "Send Email"}
               </Typography>
 
@@ -159,9 +159,9 @@ export default function AutomationBuilderClient({ tenantSlug }: Props) {
 
       {/* Preview */}
       {steps.length > 0 && (
-        <Box sx={{ p: 2, bgcolor: "#f0f9ff", borderRadius: 1.5 }}>
-          <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, color: "#1d4ed8", mb: 0.5 }}>Flow Preview</Typography>
-          <Typography sx={{ fontSize: "0.8125rem", fontFamily: "monospace", color: "#374151" }}>
+        <Box sx={{ p: 2, bgcolor: "rgba(124, 58, 237, 0.08)", borderRadius: 1.5 }}>
+          <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, color: "#a78bfa", mb: 0.5 }}>Flow Preview</Typography>
+          <Typography sx={{ fontSize: "0.8125rem", fontFamily: "monospace", color: "#8b8b9e" }}>
             WHEN {triggerType.replace(/_/g, " ")}
             {steps.map((s) => {
               if (s.stepType === "delay") return `\n  → Wait ${s.config.value} ${s.config.unit}`;

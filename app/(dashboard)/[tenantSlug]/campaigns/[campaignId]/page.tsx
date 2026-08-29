@@ -121,33 +121,33 @@ export default async function CampaignDetailPage({
       {/* Metrics */}
       <Grid container spacing={2}>
         <Grid size={{ xs: 6, sm: 2 }}>
-          <Box sx={{ p: 1.5, bgcolor: "#f0f9ff", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#2563eb" }}>{c.matched_count}</Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Matched</Typography>
+          <Box sx={{ p: 1.5, bgcolor: "rgba(124, 58, 237, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#8B5CF6" }}>{c.matched_count}</Typography>
+            <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Matched</Typography>
           </Box>
         </Grid>
         <Grid size={{ xs: 6, sm: 2 }}>
-          <Box sx={{ p: 1.5, bgcolor: "#f0fdf4", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#16a34a" }}>{c.eligible_count}</Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Eligible</Typography>
+          <Box sx={{ p: 1.5, bgcolor: "rgba(16, 185, 129, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#10B981" }}>{c.eligible_count}</Typography>
+            <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Eligible</Typography>
           </Box>
         </Grid>
         <Grid size={{ xs: 6, sm: 2 }}>
-          <Box sx={{ p: 1.5, bgcolor: "#ecfdf5", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#059669" }}>{c.sent_count}</Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Sent</Typography>
+          <Box sx={{ p: 1.5, bgcolor: "rgba(16, 185, 129, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#10B981" }}>{c.sent_count}</Typography>
+            <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Sent</Typography>
           </Box>
         </Grid>
         <Grid size={{ xs: 6, sm: 2 }}>
-          <Box sx={{ p: 1.5, bgcolor: "#fef2f2", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#dc2626" }}>{c.failed_count}</Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Failed</Typography>
+          <Box sx={{ p: 1.5, bgcolor: "rgba(239, 68, 68, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#EF4444" }}>{c.failed_count}</Typography>
+            <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Failed</Typography>
           </Box>
         </Grid>
         <Grid size={{ xs: 6, sm: 2 }}>
-          <Box sx={{ p: 1.5, bgcolor: "#f5f5f5", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#737373" }}>{c.skipped_count}</Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Skipped</Typography>
+          <Box sx={{ p: 1.5, bgcolor: "rgba(139, 139, 158, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#8b8b9e" }}>{c.skipped_count}</Typography>
+            <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Skipped</Typography>
           </Box>
         </Grid>
       </Grid>
@@ -156,38 +156,38 @@ export default async function CampaignDetailPage({
       <SectionCard title="Campaign Details">
         <Stack spacing={1.5} sx={{ fontSize: "0.8125rem" }}>
           <Box sx={{ display: "flex", gap: 2 }}>
-            <Typography sx={{ fontSize: "0.8125rem", color: "#9ca3af", minWidth: 100 }}>Audience</Typography>
+            <Typography sx={{ fontSize: "0.8125rem", color: "#5c5c72", minWidth: 100 }}>Audience</Typography>
             <Typography sx={{ fontSize: "0.8125rem" }}>{c.audience_name_snapshot ?? "—"}</Typography>
           </Box>
           <Box sx={{ display: "flex", gap: 2 }}>
-            <Typography sx={{ fontSize: "0.8125rem", color: "#9ca3af", minWidth: 100 }}>Subject</Typography>
+            <Typography sx={{ fontSize: "0.8125rem", color: "#5c5c72", minWidth: 100 }}>Subject</Typography>
             <Typography sx={{ fontSize: "0.8125rem" }}>{c.subject ?? "—"}</Typography>
           </Box>
           <Box sx={{ display: "flex", gap: 2 }}>
-            <Typography sx={{ fontSize: "0.8125rem", color: "#9ca3af", minWidth: 100 }}>Content</Typography>
+            <Typography sx={{ fontSize: "0.8125rem", color: "#5c5c72", minWidth: 100 }}>Content</Typography>
             <Typography sx={{ fontSize: "0.8125rem", whiteSpace: "pre-wrap", maxWidth: 500 }}>{c.content ?? "—"}</Typography>
           </Box>
           {c.cta_text && (
             <Box sx={{ display: "flex", gap: 2 }}>
-              <Typography sx={{ fontSize: "0.8125rem", color: "#9ca3af", minWidth: 100 }}>CTA</Typography>
+              <Typography sx={{ fontSize: "0.8125rem", color: "#5c5c72", minWidth: 100 }}>CTA</Typography>
               <Typography sx={{ fontSize: "0.8125rem" }}>{c.cta_text} → {c.cta_url}</Typography>
             </Box>
           )}
           {c.scheduled_for && (
             <Box sx={{ display: "flex", gap: 2 }}>
-              <Typography sx={{ fontSize: "0.8125rem", color: "#9ca3af", minWidth: 100 }}>Scheduled</Typography>
+              <Typography sx={{ fontSize: "0.8125rem", color: "#5c5c72", minWidth: 100 }}>Scheduled</Typography>
               <Typography sx={{ fontSize: "0.8125rem" }}>{new Date(c.scheduled_for).toLocaleString()}</Typography>
             </Box>
           )}
           {c.started_at && (
             <Box sx={{ display: "flex", gap: 2 }}>
-              <Typography sx={{ fontSize: "0.8125rem", color: "#9ca3af", minWidth: 100 }}>Started</Typography>
+              <Typography sx={{ fontSize: "0.8125rem", color: "#5c5c72", minWidth: 100 }}>Started</Typography>
               <Typography sx={{ fontSize: "0.8125rem" }}>{new Date(c.started_at).toLocaleString()}</Typography>
             </Box>
           )}
           {c.completed_at && (
             <Box sx={{ display: "flex", gap: 2 }}>
-              <Typography sx={{ fontSize: "0.8125rem", color: "#9ca3af", minWidth: 100 }}>Completed</Typography>
+              <Typography sx={{ fontSize: "0.8125rem", color: "#5c5c72", minWidth: 100 }}>Completed</Typography>
               <Typography sx={{ fontSize: "0.8125rem" }}>{new Date(c.completed_at).toLocaleString()}</Typography>
             </Box>
           )}
@@ -216,10 +216,10 @@ export default async function CampaignDetailPage({
                     <TableCell>
                       <Chip label={r.status} size="small" color={getRecipientStatusColor(r.status)} />
                     </TableCell>
-                    <TableCell sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>
+                    <TableCell sx={{ fontSize: "0.75rem", color: "#5c5c72" }}>
                       {r.skip_reason?.replace(/_/g, " ") ?? r.error_code ?? "—"}
                     </TableCell>
-                    <TableCell sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>
+                    <TableCell sx={{ fontSize: "0.75rem", color: "#5c5c72" }}>
                       {r.sent_at ? new Date(r.sent_at).toLocaleString() : "—"}
                     </TableCell>
                   </TableRow>
@@ -234,7 +234,7 @@ export default async function CampaignDetailPage({
                     Previous
                   </Button>
                 )}
-                <Typography sx={{ fontSize: "0.8125rem", lineHeight: "32px", color: "#6b7280" }}>
+                <Typography sx={{ fontSize: "0.8125rem", lineHeight: "32px", color: "#8b8b9e" }}>
                   Page {currentPage} of {totalRecipientPages}
                 </Typography>
                 {currentPage < totalRecipientPages && (

@@ -22,7 +22,7 @@ export default function BusinessUrlPreview({ slug }: BusinessUrlPreviewProps) {
 
   // Build environment-aware URLs
   const protocol = appUrl.startsWith("https") ? "https" : "http";
-  const publicSiteUrl = `${protocol}://${displaySlug}.${rootDomain}`;
+  const publicSiteUrl = `${appUrl}/book/${displaySlug}`;
   const dashboardUrl = `${appUrl}/${displaySlug}/dashboard`;
 
   return (

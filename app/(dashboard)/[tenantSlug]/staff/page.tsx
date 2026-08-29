@@ -67,7 +67,7 @@ export default async function StaffPage({
                 sx={{
                   px: 2.5,
                   py: 1.5,
-                  borderBottom: "1px solid #f0f0f0",
+                  borderBottom: "1px solid rgba(255,255,255,0.06)",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -79,7 +79,7 @@ export default async function StaffPage({
                     {String(profile.display_name ?? "Unnamed")}
                   </Typography>
                   {profile.job_title ? (
-                    <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                    <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>
                       {String(profile.job_title)}
                     </Typography>
                   ) : null}

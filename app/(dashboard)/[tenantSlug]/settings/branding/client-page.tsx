@@ -110,7 +110,7 @@ export default function BrandingEditorClient({
           <Chip label="Unpublished changes" size="small" color="warning" variant="outlined" />
         )}
         {publishedAt && (
-          <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>
+          <Typography sx={{ fontSize: "0.75rem", color: "#5c5c72" }}>
             Last published: {new Date(publishedAt).toLocaleString()}
           </Typography>
         )}
@@ -170,13 +170,13 @@ export default function BrandingEditorClient({
           sx={{
             p: 3,
             borderRadius: 2,
-            border: "1px solid #e5e7eb",
+            border: "1px solid rgba(255,255,255,0.08)",
             bgcolor: config.backgroundColor,
             color: config.appearance === "dark" ? "#ffffff" : "#1f2937",
             minHeight: 300,
           }}
         >
-          <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af", mb: 2 }}>Preview</Typography>
+          <Typography sx={{ fontSize: "0.75rem", color: "#5c5c72", mb: 2 }}>Preview</Typography>
           <Box sx={{ mb: 2 }}>
             <Typography sx={{ fontSize: "1.125rem", fontWeight: 700, color: config.primaryColor }}>
               Business Name

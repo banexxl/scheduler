@@ -14,10 +14,10 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
 const LEGEND_ITEMS = [
-  { label: "Location open", color: "#f1f8e9", border: "#aed581" },
-  { label: "Resource working", color: "#e3f2fd", border: "#90caf9" },
-  { label: "Unavailable / Time off", color: "#fbe9e7", border: "#ef9a9a" },
-  { label: "Appointment", color: "#e3f2fd", border: "#1976d2" },
+  { label: "Location open", color: "rgba(16, 185, 129, 0.12)", border: "#10B981" },
+  { label: "Resource working", color: "rgba(59, 130, 246, 0.12)", border: "#3B82F6" },
+  { label: "Unavailable / Time off", color: "rgba(239, 68, 68, 0.12)", border: "#EF4444" },
+  { label: "Appointment", color: "rgba(59, 130, 246, 0.12)", border: "#3B82F6" },
 ];
 
 export default function CalendarLegend() {

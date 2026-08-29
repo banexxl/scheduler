@@ -77,12 +77,12 @@ export default async function SegmentsPage({
         <Grid container spacing={1.5}>
           {BUILT_IN_SEGMENTS.map((seg) => (
             <Grid key={seg.key} size={{ xs: 12, sm: 6 }}>
-              <Box sx={{ p: 1.5, border: "1px solid #e5e7eb", borderRadius: 1.5, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Box sx={{ p: 1.5, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 1.5, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Box>
                   <Typography sx={{ fontSize: "0.8125rem", fontWeight: 500 }}>{seg.name}</Typography>
-                  <Typography sx={{ fontSize: "0.7rem", color: "#9ca3af" }}>{seg.description}</Typography>
+                  <Typography sx={{ fontSize: "0.7rem", color: "#5c5c72" }}>{seg.description}</Typography>
                 </Box>
-                <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: "#2563eb" }}>
+                <Typography sx={{ fontSize: "1rem", fontWeight: 700, color: "#8B5CF6" }}>
                   {counts[seg.key] ?? 0}
                 </Typography>
               </Box>
@@ -110,12 +110,12 @@ export default async function SegmentsPage({
             {savedSegments.map((seg) => (
               <Box
                 key={seg.id}
-                sx={{ p: 1.5, border: "1px solid #e5e7eb", borderRadius: 1.5, display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                sx={{ p: 1.5, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 1.5, display: "flex", justifyContent: "space-between", alignItems: "center" }}
               >
                 <Box>
                   <Typography sx={{ fontSize: "0.8125rem", fontWeight: 500 }}>{seg.name}</Typography>
                   {seg.description && (
-                    <Typography sx={{ fontSize: "0.7rem", color: "#9ca3af" }}>{seg.description}</Typography>
+                    <Typography sx={{ fontSize: "0.7rem", color: "#5c5c72" }}>{seg.description}</Typography>
                   )}
                 </Box>
                 <Button href={`/${tenantSlug}/customers/segments/${seg.id}`} size="small" variant="text">

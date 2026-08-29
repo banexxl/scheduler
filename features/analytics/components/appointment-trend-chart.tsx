@@ -24,9 +24,9 @@ const CHART_HEIGHT = 180;
 const CHART_PADDING = 24;
 
 const COLORS = {
-  total: "#1976d2",
-  completed: "#2e7d32",
-  cancelled: "#d32f2f",
+  total: "#3B82F6",
+  completed: "#10B981",
+  cancelled: "#EF4444",
 };
 
 function buildPath(points: number[], maxValue: number, width: number): string {
@@ -90,7 +90,7 @@ export default function AppointmentTrendChart({ data }: Props) {
               y1={CHART_PADDING + frac * (CHART_HEIGHT - CHART_PADDING * 2)}
               x2={600 - CHART_PADDING}
               y2={CHART_PADDING + frac * (CHART_HEIGHT - CHART_PADDING * 2)}
-              stroke="#e0e0e0"
+              stroke="rgba(255,255,255,0.06)"
               strokeWidth={0.5}
             />
           ))}

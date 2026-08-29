@@ -44,9 +44,10 @@ export default function CalendarCurrentTimeIndicator({ timeZone, config }: Props
         left: 60, // After time axis
         right: 0,
         height: "2px",
-        bgcolor: "error.main",
+        bgcolor: "primary.main",
         zIndex: 10,
         pointerEvents: "none",
+        boxShadow: "0 0 8px rgba(124, 58, 237, 0.4)",
         "&::before": {
           content: '""',
           position: "absolute",
@@ -55,7 +56,8 @@ export default function CalendarCurrentTimeIndicator({ timeZone, config }: Props
           width: 8,
           height: 8,
           borderRadius: "50%",
-          bgcolor: "error.main",
+          bgcolor: "primary.main",
+          boxShadow: "0 0 6px rgba(124, 58, 237, 0.6)",
         },
       }}
     />

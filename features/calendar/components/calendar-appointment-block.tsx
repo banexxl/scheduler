@@ -1,9 +1,8 @@
 "use client";
 
 /**
- * Calendar appointment block — Milestone 6.10.
+ * Calendar appointment block — Premium Dark Theme.
  * Positioned absolutely within resource/day columns.
- * Stub: full implementation in Task #7.
  */
 
 import { useState, useRef } from "react";
@@ -13,23 +12,23 @@ import type { CalendarAppointment } from "../types/calendar";
 import type { AppointmentStatus } from "@/features/appointments/types/appointment";
 
 const STATUS_BG: Record<AppointmentStatus, string> = {
-  pending: "#fff3e0",
-  confirmed: "#e3f2fd",
-  checked_in: "#e0f7fa",
-  in_progress: "#f3e5f5",
-  completed: "#e8f5e9",
-  cancelled: "#fafafa",
-  no_show: "#f5f5f5",
+  pending: "rgba(245, 158, 11, 0.12)",
+  confirmed: "rgba(59, 130, 246, 0.12)",
+  checked_in: "rgba(6, 182, 212, 0.12)",
+  in_progress: "rgba(124, 58, 237, 0.15)",
+  completed: "rgba(16, 185, 129, 0.12)",
+  cancelled: "rgba(139, 139, 158, 0.08)",
+  no_show: "rgba(139, 139, 158, 0.08)",
 };
 
 const STATUS_BORDER: Record<AppointmentStatus, string> = {
-  pending: "#ff9800",
-  confirmed: "#1976d2",
-  checked_in: "#00acc1",
-  in_progress: "#9c27b0",
-  completed: "#4caf50",
-  cancelled: "#bdbdbd",
-  no_show: "#757575",
+  pending: "#F59E0B",
+  confirmed: "#3B82F6",
+  checked_in: "#06B6D4",
+  in_progress: "#7C3AED",
+  completed: "#10B981",
+  cancelled: "#5c5c72",
+  no_show: "#5c5c72",
 };
 
 type Props = {
@@ -72,7 +71,6 @@ export default function CalendarAppointmentBlock({
       setDragging(false);
 
       if (moved.current) {
-        // Snap to 15-min grid
         const pxPerMin = 1.2;
         const rawMinutes = dragOffset / pxPerMin;
         const snapped = Math.round(rawMinutes / 15) * 15;
@@ -107,24 +105,28 @@ export default function CalendarAppointmentBlock({
         height,
         bgcolor: STATUS_BG[appointment.status],
         borderLeft: `3px solid ${STATUS_BORDER[appointment.status]}`,
-        borderRadius: 0.5,
+        borderRadius: 1,
         overflow: "hidden",
         cursor: onDrop ? (dragging ? "grabbing" : "grab") : "pointer",
-        px: 0.5,
+        px: 0.75,
         py: compact ? 0 : 0.25,
         opacity: dragging ? 0.7 : 1,
-        transition: dragging ? "none" : "opacity 0.15s",
-        "&:hover": { opacity: 0.85, boxShadow: 1 },
+        transition: dragging ? "none" : "opacity 0.15s, background-color 0.15s",
+        "&:hover": {
+          bgcolor: STATUS_BG[appointment.status].replace(/0\.\d+\)$/, "0.2)"),
+          boxShadow: `0 0 12px ${STATUS_BORDER[appointment.status]}20`,
+        },
         "&:focus-visible": { outline: "2px solid", outlineColor: "primary.main" },
         zIndex: dragging ? 100 : 1,
         userSelect: "none",
+        backdropFilter: "blur(4px)",
       }}
     >
-      <Typography variant="caption" fontWeight={600} noWrap sx={{ fontSize: compact ? "0.6rem" : "0.7rem", lineHeight: 1.2 }}>
+      <Typography variant="caption" fontWeight={600} noWrap sx={{ fontSize: compact ? "0.6rem" : "0.7rem", lineHeight: 1.2, color: "#f0f0f5" }}>
         {appointment.customerName}
       </Typography>
       {!compact && (
-        <Typography variant="caption" noWrap sx={{ fontSize: "0.6rem", color: "text.secondary", display: "block", lineHeight: 1.2 }}>
+        <Typography variant="caption" noWrap sx={{ fontSize: "0.6rem", color: "#8b8b9e", display: "block", lineHeight: 1.2 }}>
           {appointment.serviceName}
         </Typography>
       )}

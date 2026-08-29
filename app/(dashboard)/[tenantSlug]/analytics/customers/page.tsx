@@ -36,7 +36,7 @@ export default async function CustomerAnalyticsPage({
   const chartData = customerTrend.slice(-30).map((p) => ({
     label: p.bucket.slice(-5),
     value: p.newCustomers + p.returningCustomers,
-    color: "#16a34a",
+    color: "#10B981",
   }));
 
   return (

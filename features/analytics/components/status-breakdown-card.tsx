@@ -20,13 +20,13 @@ type Props = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: "#ed6c02",
-  confirmed: "#1976d2",
-  checked_in: "#0288d1",
-  in_progress: "#9c27b0",
-  completed: "#2e7d32",
-  cancelled: "#d32f2f",
-  no_show: "#757575",
+  pending: "#F59E0B",
+  confirmed: "#3B82F6",
+  checked_in: "#06B6D4",
+  in_progress: "#7C3AED",
+  completed: "#10B981",
+  cancelled: "#EF4444",
+  no_show: "#5c5c72",
 };
 
 export default function StatusBreakdownCard({ items }: Props) {
@@ -55,7 +55,7 @@ export default function StatusBreakdownCard({ items }: Props) {
                   height: 6,
                   borderRadius: 1,
                   "& .MuiLinearProgress-bar": {
-                    backgroundColor: STATUS_COLORS[item.status] ?? "#bdbdbd",
+                    backgroundColor: STATUS_COLORS[item.status] ?? "#5c5c72",
                   },
                 }}
               />

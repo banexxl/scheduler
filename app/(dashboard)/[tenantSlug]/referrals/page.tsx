@@ -88,7 +88,7 @@ export default async function ReferralDashboardPage({
                 <Typography sx={{ fontSize: "0.8125rem" }}>
                   {r.referred_customer_email ?? "Guest"}
                 </Typography>
-                <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>
                   {r.status} — {new Date(r.attributed_at).toLocaleDateString()}
                 </Typography>
               </Stack>

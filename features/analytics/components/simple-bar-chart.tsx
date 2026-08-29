@@ -34,7 +34,7 @@ export default function SimpleBarChart({ title, data, maxBars = 20, height = 200
     return (
       <Box>
         <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, mb: 1 }}>{title}</Typography>
-        <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>No data</Typography>
+        <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>No data</Typography>
       </Box>
     );
   }
@@ -48,20 +48,20 @@ export default function SimpleBarChart({ title, data, maxBars = 20, height = 200
           return (
             <Tooltip key={idx} title={`${point.label}: ${point.value}`} arrow>
               <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 0.25 }}>
-                <Typography sx={{ fontSize: "0.5625rem", color: "#6b7280" }}>{point.value > 0 ? point.value : ""}</Typography>
+                <Typography sx={{ fontSize: "0.5625rem", color: "#8b8b9e" }}>{point.value > 0 ? point.value : ""}</Typography>
                 <Box
                   sx={{
                     width: "100%",
                     maxWidth: 32,
                     height: Math.max(2, barHeight),
-                    bgcolor: point.color ?? "#2563eb",
+                    bgcolor: point.color ?? "#7C3AED",
                     borderRadius: "2px 2px 0 0",
                     transition: "height 0.2s",
                   }}
                   role="img"
                   aria-label={`${point.label}: ${point.value}`}
                 />
-                <Typography sx={{ fontSize: "0.5rem", color: "#9ca3af", maxWidth: 40, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "center" }}>
+                <Typography sx={{ fontSize: "0.5rem", color: "#5c5c72", maxWidth: 40, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "center" }}>
                   {point.label}
                 </Typography>
               </Box>

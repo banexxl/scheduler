@@ -108,27 +108,27 @@ export default async function AutomationDetailPage({
       {/* Metrics */}
       <Grid container spacing={2}>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <Box sx={{ p: 1.5, bgcolor: "#f0f9ff", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#2563eb" }}>{enrollmentCount ?? 0}</Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Total Enrollments</Typography>
+          <Box sx={{ p: 1.5, bgcolor: "rgba(124, 58, 237, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#8B5CF6" }}>{enrollmentCount ?? 0}</Typography>
+            <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Total Enrollments</Typography>
           </Box>
         </Grid>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <Box sx={{ p: 1.5, bgcolor: "#f0fdf4", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#16a34a" }}>{steps.length}</Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Steps</Typography>
+          <Box sx={{ p: 1.5, bgcolor: "rgba(16, 185, 129, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#10B981" }}>{steps.length}</Typography>
+            <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Steps</Typography>
           </Box>
         </Grid>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <Box sx={{ p: 1.5, bgcolor: "#fefce8", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: "#ca8a04" }}>{a.trigger_type.replace(/_/g, " ")}</Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Trigger</Typography>
+          <Box sx={{ p: 1.5, bgcolor: "rgba(245, 158, 11, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: "#F59E0B" }}>{a.trigger_type.replace(/_/g, " ")}</Typography>
+            <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Trigger</Typography>
           </Box>
         </Grid>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <Box sx={{ p: 1.5, bgcolor: "#fdf4ff", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: "#9333ea" }}>{a.re_enrollment_policy.replace(/_/g, " ")}</Typography>
-            <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Re-enrollment</Typography>
+          <Box sx={{ p: 1.5, bgcolor: "rgba(124, 58, 237, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: "#8B5CF6" }}>{a.re_enrollment_policy.replace(/_/g, " ")}</Typography>
+            <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Re-enrollment</Typography>
           </Box>
         </Grid>
       </Grid>
@@ -136,14 +136,14 @@ export default async function AutomationDetailPage({
       {/* Flow */}
       <SectionCard title="Flow">
         {steps.length === 0 ? (
-          <Typography sx={{ fontSize: "0.8125rem", color: "#9ca3af" }}>No steps defined. Activate this automation to publish steps.</Typography>
+          <Typography sx={{ fontSize: "0.8125rem", color: "#5c5c72" }}>No steps defined. Activate this automation to publish steps.</Typography>
         ) : (
           <Stack spacing={1}>
-            <Box sx={{ p: 1, bgcolor: "#dbeafe", borderRadius: 1, fontSize: "0.8125rem", fontWeight: 600, color: "#1d4ed8" }}>
+            <Box sx={{ p: 1, bgcolor: "rgba(124, 58, 237, 0.12)", borderRadius: 1, fontSize: "0.8125rem", fontWeight: 600, color: "#a78bfa" }}>
               WHEN {a.trigger_type.replace(/_/g, " ")}
             </Box>
             {steps.map((step, idx) => (
-              <Box key={idx} sx={{ p: 1, border: "1px solid #e5e7eb", borderRadius: 1, fontSize: "0.8125rem" }}>
+              <Box key={idx} sx={{ p: 1, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 1, fontSize: "0.8125rem" }}>
                 {formatStep(step)}
               </Box>
             ))}
@@ -172,8 +172,8 @@ export default async function AutomationDetailPage({
                   <TableCell sx={{ fontSize: "0.8125rem" }}>{e.customer_id.slice(0, 8)}...</TableCell>
                   <TableCell><Chip label={e.status} size="small" color={e.status === "completed" ? "success" : e.status === "failed" ? "error" : "default"} /></TableCell>
                   <TableCell sx={{ fontSize: "0.8125rem" }}>{e.current_step_position}</TableCell>
-                  <TableCell sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>{new Date(e.triggered_at).toLocaleDateString()}</TableCell>
-                  <TableCell sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>{e.next_run_at ? new Date(e.next_run_at).toLocaleString() : "—"}</TableCell>
+                  <TableCell sx={{ fontSize: "0.75rem", color: "#5c5c72" }}>{new Date(e.triggered_at).toLocaleDateString()}</TableCell>
+                  <TableCell sx={{ fontSize: "0.75rem", color: "#5c5c72" }}>{e.next_run_at ? new Date(e.next_run_at).toLocaleString() : "—"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -48,7 +48,7 @@ export default async function GiftCardSettingsPage({
             Custom amount: {s.allow_custom_amount ? "Allowed" : "Predefined only"}
           </Typography>
           {s.allow_custom_amount ? (
-            <Typography sx={{ fontSize: "0.8125rem", color: "#6b7280" }}>
+            <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e" }}>
               Range: {String(s.minimum_custom_amount ?? 0)} – {String(s.maximum_custom_amount ?? 0)} (minor units)
             </Typography>
           ) : null}

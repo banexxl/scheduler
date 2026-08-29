@@ -93,40 +93,40 @@ export default async function SegmentDetailPage({
       {/* Metrics Row */}
       <Grid container spacing={2}>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <Box sx={{ p: 2, bgcolor: "#f0f9ff", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, color: "#2563eb" }}>{totalCount}</Typography>
-            <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>Matching Customers</Typography>
+          <Box sx={{ p: 2, bgcolor: "rgba(124, 58, 237, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, color: "#8B5CF6" }}>{totalCount}</Typography>
+            <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>Matching Customers</Typography>
           </Box>
         </Grid>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <Box sx={{ p: 2, bgcolor: "#f0fdf4", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, color: "#16a34a" }}>
+          <Box sx={{ p: 2, bgcolor: "rgba(16, 185, 129, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, color: "#10B981" }}>
               {segment.segment_type === "custom" ? "Custom" : "Built-in"}
             </Typography>
-            <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>Type</Typography>
+            <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>Type</Typography>
           </Box>
         </Grid>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <Box sx={{ p: 2, bgcolor: "#fefce8", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, color: "#ca8a04" }}>
+          <Box sx={{ p: 2, bgcolor: "rgba(245, 158, 11, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, color: "#F59E0B" }}>
               {rules.rules?.length ?? 0}
             </Typography>
-            <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>Rules</Typography>
+            <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>Rules</Typography>
           </Box>
         </Grid>
         <Grid size={{ xs: 6, sm: 3 }}>
-          <Box sx={{ p: 2, bgcolor: "#fdf4ff", borderRadius: 1.5, textAlign: "center" }}>
-            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: "#9333ea" }}>
+          <Box sx={{ p: 2, bgcolor: "rgba(124, 58, 237, 0.08)", borderRadius: 1.5, textAlign: "center" }}>
+            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: "#8B5CF6" }}>
               {new Date(segment.created_at).toLocaleDateString()}
             </Typography>
-            <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>Created</Typography>
+            <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>Created</Typography>
           </Box>
         </Grid>
       </Grid>
 
       {/* Rule Summary */}
       <SectionCard title="Rule Definition">
-        <Box sx={{ p: 2, bgcolor: "#f8fafc", borderRadius: 1, fontFamily: "monospace", fontSize: "0.8125rem", color: "#374151" }}>
+        <Box sx={{ p: 2, bgcolor: "rgba(255,255,255,0.03)", borderRadius: 1, fontFamily: "monospace", fontSize: "0.8125rem", color: "#8b8b9e" }}>
           {ruleSummary}
         </Box>
       </SectionCard>
@@ -151,12 +151,12 @@ export default async function SegmentDetailPage({
                       <Typography
                         component="a"
                         href={`/${tenantSlug}/customers/${c.id}`}
-                        sx={{ color: "#2563eb", textDecoration: "none", fontSize: "0.8125rem", "&:hover": { textDecoration: "underline" } }}
+                        sx={{ color: "#8B5CF6", textDecoration: "none", fontSize: "0.8125rem", "&:hover": { textDecoration: "underline" } }}
                       >
                         {c.name}
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ fontSize: "0.8125rem", color: "#6b7280" }}>{c.email ?? "—"}</TableCell>
+                    <TableCell sx={{ fontSize: "0.8125rem", color: "#8b8b9e" }}>{c.email ?? "—"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -170,7 +170,7 @@ export default async function SegmentDetailPage({
                     Previous
                   </Button>
                 )}
-                <Typography sx={{ fontSize: "0.8125rem", lineHeight: "32px", color: "#6b7280" }}>
+                <Typography sx={{ fontSize: "0.8125rem", lineHeight: "32px", color: "#8b8b9e" }}>
                   Page {currentPage} of {totalPages}
                 </Typography>
                 {currentPage < totalPages && (

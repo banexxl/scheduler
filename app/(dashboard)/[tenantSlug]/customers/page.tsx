@@ -74,7 +74,7 @@ export default async function CustomersPage({
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon fontSize="small" sx={{ color: "#9ca3af" }} />
+                  <SearchIcon fontSize="small" sx={{ color: "#8b8b9e" }} />
                 </InputAdornment>
               ),
             }}
@@ -125,12 +125,12 @@ export default async function CustomersPage({
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#6b7280" }}>Customer</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#6b7280" }}>Contact</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#6b7280" }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#6b7280" }}>Tags</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#6b7280" }}>Updated</TableCell>
-                  <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#6b7280" }}>Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#8b8b9e" }}>Customer</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#8b8b9e" }}>Contact</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#8b8b9e" }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#8b8b9e" }}>Tags</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#8b8b9e" }}>Updated</TableCell>
+                  <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#8b8b9e" }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -145,7 +145,7 @@ export default async function CustomersPage({
                       <Typography sx={{ fontSize: "0.8125rem" }}>
                         {customer.email ?? "—"}
                       </Typography>
-                      <Typography sx={{ fontSize: "0.7rem", color: "#9ca3af" }}>
+                      <Typography sx={{ fontSize: "0.7rem", color: "#5c5c72" }}>
                         {customer.phoneNumber ?? ""}
                       </Typography>
                     </TableCell>
@@ -167,7 +167,7 @@ export default async function CustomersPage({
                       }
                     </TableCell>
                     <TableCell>
-                      <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                      <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>
                         {new Date(customer.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                       </Typography>
                     </TableCell>

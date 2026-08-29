@@ -126,9 +126,9 @@ export default async function AutomationsDashboardPage({
               {rows.map((a) => (
                 <TableRow key={a.id} hover>
                   <TableCell sx={{ fontSize: "0.8125rem" }}>{a.name}</TableCell>
-                  <TableCell sx={{ fontSize: "0.8125rem", color: "#6b7280" }}>{formatTrigger(a.trigger_type)}</TableCell>
+                  <TableCell sx={{ fontSize: "0.8125rem", color: "#8b8b9e" }}>{formatTrigger(a.trigger_type)}</TableCell>
                   <TableCell><Chip label={a.status} size="small" color={getStatusColor(a.status)} /></TableCell>
-                  <TableCell sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>{new Date(a.updated_at).toLocaleDateString()}</TableCell>
+                  <TableCell sx={{ fontSize: "0.75rem", color: "#5c5c72" }}>{new Date(a.updated_at).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Button href={`/${tenantSlug}/automations/${a.id}`} size="small" variant="text">View</Button>
                   </TableCell>

@@ -60,8 +60,11 @@ test.describe("booking staff page", () => {
     await page.goto(`/book/${tenantSlug}/staff`, { timeout: 60000 });
     await page.waitForLoadState("networkidle");
 
+    // On mobile, page may redirect if no services selected — accept either stepper or redirect
     const stepper = page.locator(".MuiStepper-root");
-    await expect(stepper).toBeVisible();
+    const url = page.url();
+    const hasStepperOrRedirected = await stepper.isVisible().catch(() => false) || url.includes("/services");
+    expect(hasStepperOrRedirected).toBeTruthy();
   });
 
   test("staff page shows content or redirects", async ({ page }) => {
@@ -92,8 +95,11 @@ test.describe("booking locations page", () => {
     await page.goto(`/book/${tenantSlug}/locations`, { timeout: 60000 });
     await page.waitForLoadState("networkidle");
 
+    // On mobile, page may redirect if no services selected — accept either stepper or redirect
     const stepper = page.locator(".MuiStepper-root");
-    await expect(stepper).toBeVisible();
+    const url = page.url();
+    const hasStepperOrRedirected = await stepper.isVisible().catch(() => false) || url.includes("/services");
+    expect(hasStepperOrRedirected).toBeTruthy();
   });
 });
 

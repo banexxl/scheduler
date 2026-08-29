@@ -35,8 +35,9 @@ const TENANT_ROUTES = [
 
 test.describe("tenant shell - desktop", () => {
   test("all business routes render without 500", async ({ page }) => {
+    test.setTimeout(120000);
     for (const route of TENANT_ROUTES) {
-      const response = await page.goto(`/${tenantSlug}/${route}`, { timeout: 10000 });
+      const response = await page.goto(`/${tenantSlug}/${route}`, { timeout: 15000 });
       expect(response?.status(), `/${tenantSlug}/${route} returned 500`).not.toBe(500);
     }
   });

@@ -73,7 +73,7 @@ test.describe("homepage builder sidebar nav", () => {
       await page.waitForTimeout(500);
     }
 
-    const homepageLink = page.getByRole("link", { name: /homepage/i });
+    const homepageLink = page.getByLabel("Business navigation").getByRole("link", { name: /homepage/i });
     await expect(homepageLink).toBeVisible({ timeout: 10000 });
   });
 });

@@ -18,7 +18,6 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
-import Avatar from "@mui/material/Avatar";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import TodayIcon from "@mui/icons-material/Today";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -38,6 +37,9 @@ import GroupIcon from "@mui/icons-material/Group";
 import SettingsIcon from "@mui/icons-material/Settings";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import WebIcon from "@mui/icons-material/Web";
+import PaletteIcon from "@mui/icons-material/Palette";
+import ViewQuiltIcon from "@mui/icons-material/ViewQuilt";
+import TuneIcon from "@mui/icons-material/Tune";
 import {
   TENANT_SIDEBAR_WIDTH,
   tenantPalette,
@@ -90,6 +92,9 @@ function getNavGroups(slug: string): NavGroup[] {
       label: "Website",
       items: [
         { label: "Homepage", href: `/${slug}/site/homepage`, icon: <WebIcon fontSize="small" />, matchPrefix: `/${slug}/site` },
+        { label: "Branding", href: `/${slug}/settings/branding`, icon: <PaletteIcon fontSize="small" />, matchPrefix: `/${slug}/settings/branding` },
+        { label: "Templates", href: `/${slug}/settings/templates`, icon: <ViewQuiltIcon fontSize="small" />, matchPrefix: `/${slug}/settings/templates` },
+        { label: "Site Config", href: `/${slug}/settings/public-site`, icon: <TuneIcon fontSize="small" />, matchPrefix: `/${slug}/settings/public-site` },
       ],
     },
     {
@@ -162,18 +167,8 @@ function SidebarContent({
     >
       {/* Tenant Identity */}
       <Box sx={{ px: 2, py: 1.5, borderBottom: tenantSurface.border, display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Avatar
-          sx={{
-            width: 32,
-            height: 32,
-            fontSize: "0.8rem",
-            fontWeight: 700,
-            bgcolor: tenantPalette.accent.primaryLight,
-            color: tenantPalette.accent.primary,
-          }}
-        >
-          {tenantName.charAt(0).toUpperCase()}
-        </Avatar>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logos/getslot_icon.svg" alt="" width={32} height={32} style={{ filter: "drop-shadow(0 0 6px rgba(124,58,237,0.3))" }} />
         <Box sx={{ minWidth: 0 }}>
           <Typography
             sx={{
@@ -262,7 +257,7 @@ function SidebarContent({
           </Box>
         ))}
       </Box>
-    </Box>
+    </Box >
   );
 }
 

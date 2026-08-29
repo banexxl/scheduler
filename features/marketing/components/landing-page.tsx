@@ -139,9 +139,26 @@ function GlassCard({ children, delay = 0, glowColor = "rgba(124,58,237,0.15)" }:
   );
 }
 
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+type PlanData = {
+  id: string;
+  name: string;
+  description: string | null;
+  code: string;
+  priceAmount: number;
+  currency: string;
+  billingInterval: string | null;
+  isFree: boolean;
+};
+
+type Props = {
+  plans: PlanData[];
+};
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
-export default function MarketingLandingPage() {
+export default function MarketingLandingPage({ plans }: Props) {
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
@@ -156,6 +173,20 @@ export default function MarketingLandingPage() {
 
         <Container maxWidth="md" sx={{ position: "relative", zIndex: 1, textAlign: "center", pt: 10 }}>
           <motion.div style={{ opacity: heroOpacity, scale: heroScale }}>
+            {/* Logo icon */}
+            <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1, duration: 0.6, ease: "easeOut" }}>
+              <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/logos/getslot_icon.svg"
+                  alt="GetSlot"
+                  width={120}
+                  height={120}
+                  style={{ filter: "drop-shadow(0 0 40px rgba(124,58,237,0.6))" }}
+                />
+              </Box>
+            </motion.div>
+
             {/* Badge */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}>
               <Box
@@ -479,72 +510,69 @@ export default function MarketingLandingPage() {
             </motion.div>
 
             <Grid container spacing={3} justifyContent="center">
-              {PLANS.map((plan, i) => (
-                <Grid key={plan.name} size={{ xs: 12, sm: 6, md: 4 }}>
-                  <GlassCard delay={i + 3} glowColor={plan.featured ? "rgba(124,58,237,0.25)" : "rgba(124,58,237,0.1)"}>
-                    <Box sx={{ position: "relative" }}>
-                      {plan.featured && (
-                        <Box
+              {plans.map((plan, i) => {
+                const isFeatured = plans.length > 1 && i === 1;
+                return (
+                  <Grid key={plan.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                    <GlassCard delay={i + 3} glowColor={isFeatured ? "rgba(124,58,237,0.25)" : "rgba(124,58,237,0.1)"}>
+                      <Box sx={{ position: "relative" }}>
+                        {isFeatured && (
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              top: -4,
+                              right: -4,
+                              px: 1.5,
+                              py: 0.25,
+                              borderRadius: 1,
+                              bgcolor: "rgba(124,58,237,0.2)",
+                              border: "1px solid rgba(124,58,237,0.3)",
+                            }}
+                          >
+                            <Typography sx={{ fontSize: "0.6875rem", fontWeight: 600, color: "#a78bfa" }}>Popular</Typography>
+                          </Box>
+                        )}
+                        <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#f0f0f5", mb: 0.5 }}>{plan.name}</Typography>
+                        {plan.description && (
+                          <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e", mb: 2 }}>{plan.description}</Typography>
+                        )}
+                        <Typography sx={{ fontSize: "2.5rem", fontWeight: 800, color: "#f0f0f5" }}>
+                          {plan.isFree ? "Free" : formatPrice(plan.priceAmount, plan.currency)}
+                          {!plan.isFree && plan.billingInterval && (
+                            <Typography component="span" sx={{ fontSize: "1rem", color: "#5c5c72", fontWeight: 400 }}> /{plan.billingInterval}</Typography>
+                          )}
+                        </Typography>
+                        <Button
+                          href="/register"
+                          variant={isFeatured ? "contained" : "outlined"}
+                          fullWidth
+                          size="large"
                           sx={{
-                            position: "absolute",
-                            top: -4,
-                            right: -4,
-                            px: 1.5,
-                            py: 0.25,
-                            borderRadius: 1,
-                            bgcolor: "rgba(124,58,237,0.2)",
-                            border: "1px solid rgba(124,58,237,0.3)",
+                            mt: 3,
+                            fontWeight: 700,
+                            borderRadius: 2,
+                            py: 1.5,
+                            textTransform: "none",
+                            ...(isFeatured
+                              ? {
+                                background: "linear-gradient(135deg, #7C3AED, #a855f7)",
+                                boxShadow: "0 0 30px rgba(124,58,237,0.3)",
+                                "&:hover": { background: "linear-gradient(135deg, #6D28D9, #9333ea)", boxShadow: "0 0 40px rgba(124,58,237,0.5)" },
+                              }
+                              : {
+                                borderColor: "rgba(255,255,255,0.1)",
+                                color: "#a0a0b8",
+                                "&:hover": { borderColor: "rgba(124,58,237,0.4)", color: "#f0f0f5" },
+                              }),
                           }}
                         >
-                          <Typography sx={{ fontSize: "0.6875rem", fontWeight: 600, color: "#a78bfa" }}>Popular</Typography>
-                        </Box>
-                      )}
-                      <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: "#f0f0f5", mb: 0.5 }}>{plan.name}</Typography>
-                      <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e", mb: 2 }}>{plan.description}</Typography>
-                      <Typography sx={{ fontSize: "2.5rem", fontWeight: 800, color: "#f0f0f5" }}>
-                        {plan.price}
-                        {plan.interval && <Typography component="span" sx={{ fontSize: "1rem", color: "#5c5c72", fontWeight: 400 }}> /{plan.interval}</Typography>}
-                      </Typography>
-                      <Button
-                        href="/register"
-                        variant={plan.featured ? "contained" : "outlined"}
-                        fullWidth
-                        size="large"
-                        sx={{
-                          mt: 3,
-                          fontWeight: 700,
-                          borderRadius: 2,
-                          py: 1.5,
-                          textTransform: "none",
-                          ...(plan.featured
-                            ? {
-                              background: "linear-gradient(135deg, #7C3AED, #a855f7)",
-                              boxShadow: "0 0 30px rgba(124,58,237,0.3)",
-                              "&:hover": { background: "linear-gradient(135deg, #6D28D9, #9333ea)", boxShadow: "0 0 40px rgba(124,58,237,0.5)" },
-                            }
-                            : {
-                              borderColor: "rgba(255,255,255,0.1)",
-                              color: "#a0a0b8",
-                              "&:hover": { borderColor: "rgba(124,58,237,0.4)", color: "#f0f0f5" },
-                            }),
-                        }}
-                      >
-                        {plan.cta}
-                      </Button>
-                      <Stack spacing={1} sx={{ mt: 3 }}>
-                        {plan.features.map((f) => (
-                          <Stack key={f} direction="row" spacing={1} alignItems="center">
-                            <Box sx={{ width: 16, height: 16, borderRadius: "50%", bgcolor: "rgba(16,185,129,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                              <Typography sx={{ fontSize: "0.625rem", color: "#10B981" }}>✓</Typography>
-                            </Box>
-                            <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e" }}>{f}</Typography>
-                          </Stack>
-                        ))}
-                      </Stack>
-                    </Box>
-                  </GlassCard>
-                </Grid>
-              ))}
+                          {plan.isFree ? "Start Free" : "Start Free Trial"}
+                        </Button>
+                      </Box>
+                    </GlassCard>
+                  </Grid>
+                );
+              })}
             </Grid>
 
             <motion.div custom={7} variants={fadeUp}>
@@ -644,32 +672,18 @@ const STATS = [
   { value: 4, suffix: ".9★", prefix: "", label: "Customer rating" },
 ];
 
-const PLANS = [
-  {
-    name: "Starter",
-    description: "For solo professionals getting started",
-    price: "Free",
-    interval: null,
-    featured: false,
-    cta: "Start Free",
-    features: ["1 staff member", "Unlimited bookings", "Public booking page", "Email confirmations", "Basic analytics"],
-  },
-  {
-    name: "Professional",
-    description: "For growing teams and businesses",
-    price: "$29",
-    interval: "month",
-    featured: true,
-    cta: "Start Free Trial",
-    features: ["Up to 10 staff", "Gift cards & packages", "Custom branding", "SMS reminders", "Advanced analytics", "Priority support"],
-  },
-  {
-    name: "Business",
-    description: "For established multi-location operations",
-    price: "$79",
-    interval: "month",
-    featured: false,
-    cta: "Start Free Trial",
-    features: ["Unlimited staff", "Multiple locations", "API access", "Custom domain", "Dedicated support", "White-label option"],
-  },
-];
+// ─── Price Formatter ─────────────────────────────────────────────────────────
+
+function formatPrice(minorUnits: number, currency: string): string {
+  const major = minorUnits / 100;
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currency.toUpperCase(),
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(major);
+  } catch {
+    return `${major} ${currency.toUpperCase()}`;
+  }
+}

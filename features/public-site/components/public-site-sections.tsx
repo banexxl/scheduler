@@ -618,9 +618,13 @@ export function PublicSiteFooter({ tenant }: FooterProps) {
       <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
         &copy; {new Date().getFullYear()} {tenant.name}
       </Typography>
-      <Typography sx={{ fontSize: "0.6875rem", color: "text.disabled", mt: 0.5 }}>
-        Powered by get-slot.app
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.75, mt: 0.5 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logos/getslot_icon.svg" alt="" width={14} height={14} />
+        <Typography sx={{ fontSize: "0.6875rem", color: "text.disabled" }}>
+          Powered by get-slot.app
+        </Typography>
+      </Box>
     </Box>
   );
 }

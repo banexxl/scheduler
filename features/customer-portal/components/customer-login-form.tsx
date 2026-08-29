@@ -41,6 +41,10 @@ export default function CustomerLoginForm({ tenantSlug, tenantName }: Props) {
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center", p: 3 }}>
       <Paper elevation={2} sx={{ p: 4, maxWidth: 420, width: "100%", borderRadius: 3 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <Box sx={{ textAlign: "center", mb: 1.5 }}>
+          <img src="/logos/getslot_icon.svg" alt="" width={48} height={48} style={{ filter: "drop-shadow(0 0 12px rgba(124,58,237,0.3))" }} />
+        </Box>
         <Typography variant="h5" fontWeight={700} gutterBottom textAlign="center">
           {tenantName}
         </Typography>

@@ -106,24 +106,28 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       }}
     >
       {/* Logo/Identity */}
-      <Box sx={{ px: 2.5, py: 2, borderBottom: `1px solid ${platformPalette.sidebar.border}` }}>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            color: platformPalette.sidebar.textActive,
-            fontWeight: 700,
-            fontSize: "1rem",
-            letterSpacing: "-0.01em",
-          }}
-        >
-          get-slot
-        </Typography>
-        <Typography
-          variant="caption"
-          sx={{ color: platformPalette.sidebar.text, fontSize: "0.7rem" }}
-        >
-          Platform Admin
-        </Typography>
+      <Box sx={{ px: 2.5, py: 2, borderBottom: `1px solid ${platformPalette.sidebar.border}`, display: "flex", alignItems: "center", gap: 1.5 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logos/getslot_icon.svg" alt="" width={32} height={32} style={{ filter: "drop-shadow(0 0 8px rgba(124,58,237,0.4))" }} />
+        <Box>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              color: platformPalette.sidebar.textActive,
+              fontWeight: 700,
+              fontSize: "1rem",
+              letterSpacing: "-0.01em",
+            }}
+          >
+            get-slot
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{ color: platformPalette.sidebar.text, fontSize: "0.7rem" }}
+          >
+            Platform Admin
+          </Typography>
+        </Box>
       </Box>
 
       {/* Navigation */}

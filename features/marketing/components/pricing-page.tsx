@@ -29,6 +29,7 @@ type PlanData = {
 
 type Props = {
   plans: PlanData[];
+  currentPlanKey?: string | null;
 };
 
 const fadeUp = {
@@ -40,7 +41,7 @@ const fadeUp = {
   }),
 };
 
-export default function PricingPageClient({ plans }: Props) {
+export default function PricingPageClient({ plans, currentPlanKey }: Props) {
   const hasFeatured = plans.length > 1;
 
   return (
@@ -90,6 +91,7 @@ export default function PricingPageClient({ plans }: Props) {
           <Grid container spacing={3} justifyContent="center">
             {plans.map((plan, i) => {
               const isFeatured = hasFeatured && i === 1;
+              const isCurrentPlan = Boolean(currentPlanKey && plan.code === currentPlanKey);
               return (
                 <Grid key={plan.id} size={{ xs: 12, sm: 6, md: 4 }}>
                   <motion.div
@@ -105,16 +107,22 @@ export default function PricingPageClient({ plans }: Props) {
                         display: "flex",
                         flexDirection: "column",
                         bgcolor: "rgba(22, 22, 30, 0.6)",
-                        border: isFeatured ? "1px solid rgba(124,58,237,0.4)" : "1px solid rgba(255,255,255,0.06)",
+                        border: isCurrentPlan
+                          ? "2px solid rgba(16,185,129,0.5)"
+                          : isFeatured ? "1px solid rgba(124,58,237,0.4)" : "1px solid rgba(255,255,255,0.06)",
                         backdropFilter: "blur(12px)",
                         position: "relative",
                         overflow: "hidden",
                         transition: "border-color 0.3s, box-shadow 0.3s",
                         "&:hover": {
-                          borderColor: isFeatured ? "rgba(124,58,237,0.6)" : "rgba(124,58,237,0.25)",
-                          boxShadow: isFeatured
-                            ? "0 8px 60px rgba(124,58,237,0.3), inset 0 1px 0 rgba(255,255,255,0.06)"
-                            : "0 8px 40px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.04)",
+                          borderColor: isCurrentPlan
+                            ? "rgba(16,185,129,0.7)"
+                            : isFeatured ? "rgba(124,58,237,0.6)" : "rgba(124,58,237,0.25)",
+                          boxShadow: isCurrentPlan
+                            ? "0 8px 60px rgba(16,185,129,0.2), inset 0 1px 0 rgba(255,255,255,0.06)"
+                            : isFeatured
+                              ? "0 8px 60px rgba(124,58,237,0.3), inset 0 1px 0 rgba(255,255,255,0.06)"
+                              : "0 8px 40px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.04)",
                         },
                         "&::before": {
                           content: '""',
@@ -122,14 +130,34 @@ export default function PricingPageClient({ plans }: Props) {
                           top: 0,
                           left: 0,
                           right: 0,
-                          height: "1px",
-                          background: isFeatured
-                            ? "linear-gradient(90deg, transparent, rgba(124,58,237,0.5), transparent)"
-                            : "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                          height: isCurrentPlan ? "2px" : "1px",
+                          background: isCurrentPlan
+                            ? "linear-gradient(90deg, transparent, rgba(16,185,129,0.6), transparent)"
+                            : isFeatured
+                              ? "linear-gradient(90deg, transparent, rgba(124,58,237,0.5), transparent)"
+                              : "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
                         },
                       }}
                     >
-                      {isFeatured && (
+                      {isCurrentPlan && (
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 16,
+                            right: 16,
+                            px: 1.5,
+                            py: 0.25,
+                            borderRadius: 1,
+                            bgcolor: "rgba(16,185,129,0.15)",
+                            border: "1px solid rgba(16,185,129,0.3)",
+                          }}
+                        >
+                          <Typography sx={{ fontSize: "0.6875rem", fontWeight: 600, color: "#10B981" }}>
+                            Current Plan
+                          </Typography>
+                        </Box>
+                      )}
+                      {!isCurrentPlan && isFeatured && (
                         <Box
                           sx={{
                             position: "absolute",
@@ -175,30 +203,38 @@ export default function PricingPageClient({ plans }: Props) {
                       <Box sx={{ flex: 1 }} />
 
                       <Button
-                        href="/register"
-                        variant={isFeatured ? "contained" : "outlined"}
+                        href={isCurrentPlan ? "/api/home" : "/register"}
+                        variant={isCurrentPlan ? "outlined" : isFeatured ? "contained" : "outlined"}
                         fullWidth
                         size="large"
+                        disabled={isCurrentPlan}
                         sx={{
                           mt: 2,
                           fontWeight: 700,
                           borderRadius: 2,
                           py: 1.5,
                           textTransform: "none",
-                          ...(isFeatured
+                          ...(isCurrentPlan
                             ? {
-                              background: "linear-gradient(135deg, #7C3AED, #a855f7)",
-                              boxShadow: "0 0 30px rgba(124,58,237,0.3)",
-                              "&:hover": { background: "linear-gradient(135deg, #6D28D9, #9333ea)", boxShadow: "0 0 40px rgba(124,58,237,0.5)" },
+                              borderColor: "rgba(16,185,129,0.3)",
+                              color: "#10B981",
+                              "&:hover": { borderColor: "rgba(16,185,129,0.5)", bgcolor: "rgba(16,185,129,0.05)" },
+                              "&.Mui-disabled": { borderColor: "rgba(16,185,129,0.2)", color: "rgba(16,185,129,0.6)" },
                             }
-                            : {
-                              borderColor: "rgba(255,255,255,0.1)",
-                              color: "#a0a0b8",
-                              "&:hover": { borderColor: "rgba(124,58,237,0.4)", color: "#f0f0f5" },
-                            }),
+                            : isFeatured
+                              ? {
+                                background: "linear-gradient(135deg, #7C3AED, #a855f7)",
+                                boxShadow: "0 0 30px rgba(124,58,237,0.3)",
+                                "&:hover": { background: "linear-gradient(135deg, #6D28D9, #9333ea)", boxShadow: "0 0 40px rgba(124,58,237,0.5)" },
+                              }
+                              : {
+                                borderColor: "rgba(255,255,255,0.1)",
+                                color: "#a0a0b8",
+                                "&:hover": { borderColor: "rgba(124,58,237,0.4)", color: "#f0f0f5" },
+                              }),
                         }}
                       >
-                        {plan.isFree ? "Start Free" : "Start Free Trial"}
+                        {isCurrentPlan ? "Current Plan" : plan.isFree ? "Start Free" : "Start Free Trial"}
                       </Button>
                     </Box>
                   </motion.div>

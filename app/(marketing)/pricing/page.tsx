@@ -1,4 +1,6 @@
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { getUser } from "@/lib/auth/get-user";
+import { resolveUserIdentity } from "@/features/auth/services/resolve-user-identity";
 import PricingPageClient from "@/features/marketing/components/pricing-page";
 
 export const metadata = {
@@ -9,6 +11,7 @@ export const metadata = {
 export default async function PricingPage() {
   const supabase = createServiceRoleClient();
 
+  // Load plans
   const { data: plans } = await supabase
     .from("billing_plans" as never)
     .select("id, name, description, plan_key, is_free, is_active, is_public, polar_product_id, sort_order" as never)
@@ -55,5 +58,34 @@ export default async function PricingPage() {
     };
   });
 
-  return <PricingPageClient plans={planData} />;
+  // Resolve current user's active plan (if logged in)
+  let currentPlanKey: string | null = null;
+  try {
+    const user = await getUser();
+    if (user) {
+      const identity = await resolveUserIdentity(user);
+      const firstTenant = identity.tenantMemberships
+        .filter(m => m.tenantStatus === "active" || m.tenantStatus === "trialing")
+        .sort((a, b) => a.tenantName.localeCompare(b.tenantName))[0];
+
+      if (firstTenant) {
+        const { data: sub } = await supabase
+          .from("tenant_subscriptions" as never)
+          .select("billing_plans(plan_key)" as never)
+          .eq("tenant_id" as never, firstTenant.tenantId)
+          .in("access_state" as never, ["trial", "active", "grace_period"] as never)
+          .limit(1)
+          .single();
+
+        if (sub) {
+          const row = sub as unknown as { billing_plans: { plan_key: string } | null };
+          currentPlanKey = row.billing_plans?.plan_key ?? null;
+        }
+      }
+    }
+  } catch {
+    // Not logged in or no subscription — fine
+  }
+
+  return <PricingPageClient plans={planData} currentPlanKey={currentPlanKey} />;
 }

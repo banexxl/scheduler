@@ -85,7 +85,9 @@ export default function MarketingShell({ children, userEmail }: Props) {
       >
         <Container maxWidth="lg">
           <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ py: 1.5 }}>
-            <Link href="/" style={{ textDecoration: "none" }}>
+            <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logos/getslot_icon.svg" alt="" width={36} height={36} style={{ filter: "drop-shadow(0 0 8px rgba(124,58,237,0.4))" }} />
               <Typography
                 sx={{
                   fontSize: "1.25rem",
@@ -96,7 +98,7 @@ export default function MarketingShell({ children, userEmail }: Props) {
                   letterSpacing: "-0.02em",
                 }}
               >
-                get-slot
+                Get Slot
               </Typography>
             </Link>
 
@@ -224,7 +226,9 @@ export default function MarketingShell({ children, userEmail }: Props) {
       >
         <Container maxWidth="lg">
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2} justifyContent="space-between" alignItems="center">
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logos/getslot_icon.svg" alt="" width={28} height={28} style={{ filter: "drop-shadow(0 0 6px rgba(124,58,237,0.3))" }} />
               <Typography
                 sx={{
                   fontSize: "1rem",
@@ -234,7 +238,7 @@ export default function MarketingShell({ children, userEmail }: Props) {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                get-slot
+                Get Slot
               </Typography>
               <Typography component="span" sx={{ fontSize: "0.75rem", color: "#5c5c72" }}>
                 &copy; {new Date().getFullYear()} All rights reserved.

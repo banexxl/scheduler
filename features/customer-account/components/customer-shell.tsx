@@ -83,19 +83,19 @@ export default function CustomerShell({ accountName, children }: Props) {
             px: { xs: 2, sm: 3 },
           }}
         >
-          <Typography
-            component="a"
-            href="/customer"
-            sx={{
-              fontWeight: 700,
-              fontSize: "1rem",
-              color: customerPalette.topBar.text,
-              textDecoration: "none",
-              mr: "auto",
-            }}
-          >
-            My Account
-          </Typography>
+          <Box component="a" href="/customer" sx={{ display: "flex", alignItems: "center", gap: 1, textDecoration: "none", mr: "auto" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logos/getslot_icon.svg" alt="" width={28} height={28} />
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: "1rem",
+                color: customerPalette.topBar.text,
+              }}
+            >
+              My Account
+            </Typography>
+          </Box>
 
           <IconButton
             onClick={(e) => setAnchorEl(e.currentTarget)}

@@ -16,8 +16,11 @@ import PortalHeader from "@/features/customer-portal/components/Header/PortalHea
 import PortalHero from "@/features/customer-portal/components/Hero/PortalHero";
 import PortalCTA from "@/features/customer-portal/components/CTA/PortalCTA";
 import PortalFooter from "@/features/customer-portal/components/Footer/PortalFooter";
+import { useIsBookingStep } from "../use-is-booking-step";
 
 export default function MinimalShell({ children }: TemplateShellProps) {
+  const isStep = useIsBookingStep();
+
   return (
     <Box
       sx={{
@@ -29,7 +32,7 @@ export default function MinimalShell({ children }: TemplateShellProps) {
       }}
     >
       <PortalHeader />
-      <PortalHero />
+      {!isStep && <PortalHero />}
 
       <Box
         component="main"
@@ -45,7 +48,7 @@ export default function MinimalShell({ children }: TemplateShellProps) {
         {children}
       </Box>
 
-      <PortalCTA />
+      {!isStep && <PortalCTA />}
       <PortalFooter />
     </Box>
   );

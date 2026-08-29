@@ -20,12 +20,14 @@ test.describe("booking details page", () => {
   test("details page has stepper", async ({ page }) => {
     await page.goto(`/book/${tenantSlug}/details`, { timeout: 60000 });
     await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(2000);
 
+    // Wait for either the stepper to appear or a client-side redirect to complete
     const stepper = page.locator(".MuiStepper-root");
-    const stepperVisible = await stepper.isVisible().catch(() => false);
-    const stayedOnPage = page.url().includes("/details");
-    expect(stepperVisible || !stayedOnPage).toBeTruthy();
+    await expect(async () => {
+      const stepperVisible = await stepper.isVisible().catch(() => false);
+      const stayedOnPage = page.url().includes("/details");
+      expect(stepperVisible || !stayedOnPage).toBeTruthy();
+    }).toPass({ timeout: 10000 });
   });
 
   test("details page redirects when no slot selected", async ({ page }) => {

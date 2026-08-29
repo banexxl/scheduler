@@ -17,8 +17,11 @@ import PortalHeader from "@/features/customer-portal/components/Header/PortalHea
 import PortalHero from "@/features/customer-portal/components/Hero/PortalHero";
 import PortalCTA from "@/features/customer-portal/components/CTA/PortalCTA";
 import PortalFooter from "@/features/customer-portal/components/Footer/PortalFooter";
+import { useIsBookingStep } from "../use-is-booking-step";
 
 export default function ElegantShell({ children }: TemplateShellProps) {
+  const isStep = useIsBookingStep();
+
   return (
     <Box
       sx={{
@@ -30,7 +33,7 @@ export default function ElegantShell({ children }: TemplateShellProps) {
       }}
     >
       <PortalHeader />
-      <PortalHero />
+      {!isStep && <PortalHero />}
 
       {/* Centered content with elegant spacing */}
       <Box
@@ -44,14 +47,14 @@ export default function ElegantShell({ children }: TemplateShellProps) {
           flexGrow: 1,
         }}
       >
-        <Divider sx={{ mb: { xs: 3, sm: 5 }, borderColor: "divider" }} />
+        {!isStep && <Divider sx={{ mb: { xs: 3, sm: 5 }, borderColor: "divider" }} />}
 
         {children}
 
-        <Divider sx={{ mt: { xs: 4, sm: 6 }, borderColor: "divider" }} />
+        {!isStep && <Divider sx={{ mt: { xs: 4, sm: 6 }, borderColor: "divider" }} />}
       </Box>
 
-      <PortalCTA />
+      {!isStep && <PortalCTA />}
       <PortalFooter />
     </Box>
   );

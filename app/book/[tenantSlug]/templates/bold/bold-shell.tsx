@@ -16,8 +16,11 @@ import PortalHeader from "@/features/customer-portal/components/Header/PortalHea
 import PortalHero from "@/features/customer-portal/components/Hero/PortalHero";
 import PortalCTA from "@/features/customer-portal/components/CTA/PortalCTA";
 import PortalFooter from "@/features/customer-portal/components/Footer/PortalFooter";
+import { useIsBookingStep } from "../use-is-booking-step";
 
 export default function BoldShell({ children }: TemplateShellProps) {
+  const isStep = useIsBookingStep();
+
   return (
     <Box
       sx={{
@@ -29,7 +32,7 @@ export default function BoldShell({ children }: TemplateShellProps) {
       }}
     >
       <PortalHeader />
-      <PortalHero />
+      {!isStep && <PortalHero />}
 
       {/* Content in elevated card */}
       <Box
@@ -40,7 +43,7 @@ export default function BoldShell({ children }: TemplateShellProps) {
           mx: "auto",
           px: { xs: 2, sm: 3 },
           py: { xs: 3, sm: 4 },
-          mt: { xs: -2, sm: -3 },
+          mt: isStep ? 0 : { xs: -2, sm: -3 },
           position: "relative",
           flexGrow: 1,
         }}
@@ -49,7 +52,7 @@ export default function BoldShell({ children }: TemplateShellProps) {
           sx={{
             bgcolor: "background.paper",
             borderRadius: 2,
-            boxShadow: 2,
+            boxShadow: isStep ? 0 : 2,
             p: { xs: 2, sm: 4 },
           }}
         >
@@ -57,7 +60,7 @@ export default function BoldShell({ children }: TemplateShellProps) {
         </Box>
       </Box>
 
-      <PortalCTA />
+      {!isStep && <PortalCTA />}
       <PortalFooter />
     </Box>
   );

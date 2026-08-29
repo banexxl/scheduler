@@ -28,24 +28,60 @@ export default async function AuthErrorPage({
   const message = ERROR_MESSAGES[code] ?? ERROR_MESSAGES.unknown;
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "70vh", py: 4 }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "80vh",
+        py: 4,
+      }}
+    >
       <Container maxWidth="xs">
-        <Paper elevation={2} sx={{ p: 4, borderRadius: 3, textAlign: "center" }}>
-          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 4,
+            borderRadius: 3,
+            textAlign: "center",
+            bgcolor: "rgba(22, 22, 30, 0.7)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            backdropFilter: "blur(16px)",
+          }}
+        >
+          <Typography
+            variant="h4"
+            component="h1"
+            gutterBottom
+            sx={{ fontWeight: 700, color: "#f0f0f5" }}
+          >
             Authentication Error
           </Typography>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ mb: 3 }}
-          >
+          <Typography sx={{ mb: 3, color: "#8b8b9e" }}>
             {message}
           </Typography>
           <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
-            <Button href="/login" variant="contained">
+            <Button
+              href="/login"
+              variant="contained"
+              sx={{
+                textTransform: "none",
+                background: "linear-gradient(135deg, #7C3AED, #a855f7)",
+                "&:hover": { background: "linear-gradient(135deg, #6D28D9, #9333ea)" },
+              }}
+            >
               Sign In
             </Button>
-            <Button href="/forgot-password" variant="outlined">
+            <Button
+              href="/forgot-password"
+              variant="outlined"
+              sx={{
+                textTransform: "none",
+                borderColor: "rgba(255,255,255,0.12)",
+                color: "#a0a0b8",
+                "&:hover": { borderColor: "rgba(124,58,237,0.4)", color: "#f0f0f5" },
+              }}
+            >
               Reset Password
             </Button>
           </Box>

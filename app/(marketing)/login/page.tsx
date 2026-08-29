@@ -16,17 +16,39 @@ export default async function LoginPage() {
   }
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "70vh", py: 4 }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "80vh",
+        py: 4,
+      }}
+    >
       <Container maxWidth="xs">
-        <Paper elevation={2} sx={{ p: 4, borderRadius: 3 }}>
-          <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ fontWeight: 700 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 4,
+            borderRadius: 3,
+            bgcolor: "rgba(22, 22, 30, 0.7)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            backdropFilter: "blur(16px)",
+          }}
+        >
+          <Typography
+            variant="h4"
+            component="h1"
+            gutterBottom
+            align="center"
+            sx={{ fontWeight: 700, color: "#f0f0f5" }}
+          >
             Sign In
           </Typography>
           <Typography
             variant="body2"
-            color="text.secondary"
             align="center"
-            sx={{ mb: 3 }}
+            sx={{ mb: 3, color: "#8b8b9e" }}
           >
             Enter your credentials to access your account.
           </Typography>

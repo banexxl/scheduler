@@ -4,7 +4,7 @@ import { getBusinessDashboard } from "@/features/business/services/get-business-
 import { getDashboardAnalytics } from "@/features/analytics/services/get-dashboard-analytics";
 import { ANALYTICS_PERIODS } from "@/features/analytics/types/analytics";
 import type { AnalyticsPeriod } from "@/features/analytics/types/analytics";
-import PremiumTenantDashboard from "./premium-dashboard";
+import TenantDashboard from "./dashboard"
 
 /**
  * Tenant Dashboard — Premium Redesign.
@@ -57,7 +57,7 @@ export default async function DashboardPage({
   const upcomingAppointments = analytics?.summary?.todayUpcoming ?? 0;
 
   return (
-    <PremiumTenantDashboard
+    <TenantDashboard
       tenantSlug={tenantSlug}
       dashboard={{
         business: {

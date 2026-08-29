@@ -49,7 +49,7 @@ type Props = {
   analytics: DashboardAnalyticsDTO | null;
 };
 
-export default function PremiumTenantDashboard({ tenantSlug, dashboard, analytics }: Props) {
+export default function TenantDashboard({ tenantSlug, dashboard, analytics }: Props) {
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
   const occupancy = Math.min(100, Math.round((dashboard.counts.todayAppointments / Math.max(1, 8)) * 100));
 

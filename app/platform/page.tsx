@@ -1,6 +1,6 @@
 import { getPlatformBillingDashboardMetrics } from "@/features/platform/services/platform-billing-admin-queries";
 import { getPlatformFinancialCounters } from "@/features/platform/services/platform-billing-order-queries";
-import PremiumPlatformDashboard from "./premium-dashboard";
+import PlatformDashboard from "./dashboard";
 
 /**
  * Platform Admin Dashboard — Milestone 14.1 + Premium Redesign.
@@ -12,7 +12,7 @@ export default async function PlatformHomePage() {
   const financialMetrics = await getPlatformFinancialCounters();
 
   return (
-    <PremiumPlatformDashboard
+    <PlatformDashboard
       metrics={metrics}
       financialMetrics={financialMetrics}
     />

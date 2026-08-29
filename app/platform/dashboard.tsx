@@ -52,7 +52,7 @@ type Props = {
   financialMetrics: FinancialMetrics;
 };
 
-export default function PremiumPlatformDashboard({ metrics, financialMetrics }: Props) {
+export default function PlatformDashboard({ metrics, financialMetrics }: Props) {
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 
   const hasAttention = metrics.failedWebhookEvents > 0 || metrics.unmappedPolarProducts > 0 || metrics.subscriptionsRequiringMapping > 0;

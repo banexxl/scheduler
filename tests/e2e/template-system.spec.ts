@@ -60,7 +60,7 @@ test.describe("templates in settings nav", () => {
     await page.goto(`/${tenantSlug}/settings`, { timeout: 60000 });
     await page.waitForLoadState("networkidle");
 
-    const templatesLink = page.getByRole("link", { name: /templates/i });
+    const templatesLink = page.getByRole("main").getByRole("link", { name: /templates/i });
     await expect(templatesLink).toBeVisible();
   });
 });

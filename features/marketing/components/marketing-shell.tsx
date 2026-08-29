@@ -31,9 +31,9 @@ type Props = {
 };
 
 const NAV_LINKS = [
-  { label: "Features", href: "/#features" },
-  { label: "How It Works", href: "/#how-it-works" },
-  { label: "Pricing", href: "/#pricing" },
+  { label: "Features", href: "/#features", sectionId: "features" },
+  { label: "How It Works", href: "/#how-it-works", sectionId: "how-it-works" },
+  { label: "Pricing", href: "/#pricing", sectionId: "pricing" },
 ];
 
 export default function MarketingShell({ children, userEmail }: Props) {
@@ -41,6 +41,7 @@ export default function MarketingShell({ children, userEmail }: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
   const { scrollY } = useScroll();
   const headerBg = useTransform(
@@ -58,6 +59,43 @@ export default function MarketingShell({ children, userEmail }: Props) {
     const handler = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
+  }, []);
+
+  // Scroll-spy: track which section is currently in view
+  useEffect(() => {
+    const sectionIds = NAV_LINKS.map((l) => l.sectionId);
+    const elements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Find the topmost visible section
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (visible.length > 0) {
+          setActiveSection(visible[0]!.target.id);
+        } else {
+          // If nothing is intersecting, check if we scrolled past all sections
+          const allAbove = elements.every(
+            (el) => el.getBoundingClientRect().bottom < 0
+          );
+          if (allAbove) {
+            setActiveSection(sectionIds[sectionIds.length - 1] ?? null);
+          } else {
+            setActiveSection(null);
+          }
+        }
+      },
+      { rootMargin: "-20% 0px -60% 0px", threshold: 0 }
+    );
+
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, []);
 
   const initials = userEmail ? userEmail.charAt(0).toUpperCase() : "?";
@@ -105,22 +143,39 @@ export default function MarketingShell({ children, userEmail }: Props) {
             <Stack direction="row" spacing={{ xs: 0.5, sm: 1 }} alignItems="center">
               {/* Nav links — desktop */}
               <Box sx={{ display: { xs: "none", md: "flex" }, gap: 0.5 }}>
-                {NAV_LINKS.map((link) => (
-                  <Button
-                    key={link.href}
-                    href={link.href}
-                    size="small"
-                    sx={{
-                      fontWeight: 500,
-                      color: "#a0a0b8",
-                      fontSize: "0.875rem",
-                      textTransform: "none",
-                      "&:hover": { color: "#f0f0f5", bgcolor: "rgba(255,255,255,0.05)" },
-                    }}
-                  >
-                    {link.label}
-                  </Button>
-                ))}
+                {NAV_LINKS.map((link) => {
+                  const isActive = activeSection === link.sectionId;
+                  return (
+                    <Button
+                      key={link.href}
+                      href={link.href}
+                      size="small"
+                      sx={{
+                        fontWeight: isActive ? 700 : 500,
+                        color: isActive ? "#a78bfa" : "#a0a0b8",
+                        fontSize: "0.875rem",
+                        textTransform: "none",
+                        position: "relative",
+                        transition: "color 0.3s",
+                        "&:hover": { color: "#f0f0f5", bgcolor: "rgba(255,255,255,0.05)" },
+                        "&::after": {
+                          content: '""',
+                          position: "absolute",
+                          bottom: 2,
+                          left: "20%",
+                          right: "20%",
+                          height: 2,
+                          borderRadius: 1,
+                          bgcolor: "#7C3AED",
+                          transform: isActive ? "scaleX(1)" : "scaleX(0)",
+                          transition: "transform 0.3s ease",
+                        },
+                      }}
+                    >
+                      {link.label}
+                    </Button>
+                  );
+                })}
               </Box>
 
               {isLoggedIn ? (

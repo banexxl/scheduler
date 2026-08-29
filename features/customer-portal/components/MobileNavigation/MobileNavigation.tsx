@@ -17,6 +17,7 @@ import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import Avatar from "@mui/material/Avatar";
 import { useTenantTheme } from "@/providers/tenant-theme-provider";
+import { usePortalAuth } from "../portal-auth-provider";
 import { usePortalNavigation } from "../../hooks/usePortalNavigation";
 
 type Props = {
@@ -26,6 +27,7 @@ type Props = {
 
 export default function MobileNavigation({ open, onClose }: Props) {
   const { branding, tenant } = useTenantTheme();
+  const { isLoggedIn } = usePortalAuth();
   const { items, tenantSlug } = usePortalNavigation();
 
   const logoUrl = branding.logoUrl;
@@ -103,6 +105,38 @@ export default function MobileNavigation({ open, onClose }: Props) {
             <ListItemText primary={item.label} />
           </ListItemButton>
         ))}
+      </List>
+
+      <Divider />
+
+      {/* Auth link */}
+      <List>
+        {isLoggedIn ? (
+          <ListItemButton
+            component="a"
+            href={`/book/${tenantSlug}/portal`}
+            onClick={onClose}
+          >
+            <ListItemText primary="My Account" />
+          </ListItemButton>
+        ) : (
+          <>
+            <ListItemButton
+              component="a"
+              href={`/book/${tenantSlug}/login`}
+              onClick={onClose}
+            >
+              <ListItemText primary="Sign In" />
+            </ListItemButton>
+            <ListItemButton
+              component="a"
+              href={`/book/${tenantSlug}/register`}
+              onClick={onClose}
+            >
+              <ListItemText primary="Create Account" />
+            </ListItemButton>
+          </>
+        )}
       </List>
 
       <Divider />

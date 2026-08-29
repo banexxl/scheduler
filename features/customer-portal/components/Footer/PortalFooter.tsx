@@ -17,9 +17,11 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
 import PlaceIcon from "@mui/icons-material/Place";
 import { useTenantTheme } from "@/providers/tenant-theme-provider";
+import { usePortalAuth } from "../portal-auth-provider";
 
 export default function PortalFooter() {
   const { branding, tenant, portal } = useTenantTheme();
+  const { isLoggedIn } = usePortalAuth();
 
   const { address, contactPhone, contactEmail } = portal;
   const logoUrl = branding.logoUrl;
@@ -35,8 +37,8 @@ export default function PortalFooter() {
   // Build address string
   const addressParts = address
     ? [address.street, address.city, address.state, address.postalCode, address.country]
-        .filter(Boolean)
-        .join(", ")
+      .filter(Boolean)
+      .join(", ")
     : null;
 
   const hasContactInfo = addressParts || contactPhone || contactEmail;
@@ -138,9 +140,19 @@ export default function PortalFooter() {
         <Divider sx={{ mb: 2 }} />
 
         {/* Copyright */}
-        <Typography variant="caption" color="text.secondary">
-          &copy; {year} {tenant.name}. All rights reserved.
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={1}>
+          <Typography variant="caption" color="text.secondary">
+            &copy; {year} {tenant.name}. All rights reserved.
+          </Typography>
+          <Link
+            href={isLoggedIn ? `/book/${tenant.slug}/portal` : `/book/${tenant.slug}/login`}
+            variant="caption"
+            color="text.secondary"
+            underline="hover"
+          >
+            {isLoggedIn ? "My Account" : "Sign In"}
+          </Link>
+        </Stack>
       </Box>
     </Box>
   );

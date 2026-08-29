@@ -4,6 +4,8 @@ import { getFontEntry } from "@/lib/branding/font-loader";
 import { getTemplateDefinition } from "@/features/templates/registry";
 import TenantThemeProvider from "@/providers/tenant-theme-provider";
 import BookingProvider from "@/features/booking/context/BookingProvider";
+import PortalAuthProvider from "@/features/customer-portal/components/portal-auth-provider";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Public Booking Layout — Milestones 16.1, 16.2, 17.0.
@@ -14,9 +16,7 @@ import BookingProvider from "@/features/booking/context/BookingProvider";
  * 2. Google Font loading via CSS variable injection
  * 3. Active template shell (layout wrapper)
  * 4. BookingProvider for shared booking state across pages
- *
- * No page components are changed — all inherit the theme and
- * template automatically.
+ * 5. PortalAuthProvider for customer auth state
  */
 export default async function PublicBookingLayout({
   children,
@@ -27,7 +27,7 @@ export default async function PublicBookingLayout({
 }) {
   const { tenantSlug } = await params;
 
-  // 1. Load branding + template (resolves tenant, published config, font, template)
+  // 1. Load branding + template
   const result = await getTenantBranding(tenantSlug);
 
   if (!result.ok) {
@@ -44,14 +44,26 @@ export default async function PublicBookingLayout({
   const templateDef = getTemplateDefinition(branding.templateId);
   const TemplateShell = templateDef.component;
 
+  // 4. Check auth state (non-blocking)
+  let userEmail: string | null = null;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    userEmail = user?.email ?? null;
+  } catch {
+    // Not authenticated — fine
+  }
+
   return (
     <div className={fontClassName || undefined}>
       <TenantThemeProvider branding={branding}>
-        <BookingProvider>
-          <TemplateShell>
-            {children}
-          </TemplateShell>
-        </BookingProvider>
+        <PortalAuthProvider userEmail={userEmail}>
+          <BookingProvider>
+            <TemplateShell>
+              {children}
+            </TemplateShell>
+          </BookingProvider>
+        </PortalAuthProvider>
       </TenantThemeProvider>
     </div>
   );

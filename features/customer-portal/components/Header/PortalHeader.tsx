@@ -17,12 +17,14 @@ import IconButton from "@mui/material/IconButton";
 import Avatar from "@mui/material/Avatar";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useTenantTheme } from "@/providers/tenant-theme-provider";
+import { usePortalAuth } from "../portal-auth-provider";
 import { usePortalNavigation } from "../../hooks/usePortalNavigation";
 import MobileNavigation from "../MobileNavigation/MobileNavigation";
 
 export default function PortalHeader() {
   const { branding, tenant } = useTenantTheme();
   const { items, tenantSlug } = usePortalNavigation();
+  const { isLoggedIn } = usePortalAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -141,20 +143,46 @@ export default function PortalHeader() {
             ))}
           </Box>
 
-          {/* Book button */}
-          <Button
-            href={`/book/${tenantSlug}#booking`}
-            variant="contained"
-            size="small"
-            sx={{
-              ml: "auto",
-              textTransform: "none",
-              fontWeight: 600,
-              display: { xs: "none", sm: "inline-flex" },
-            }}
-          >
-            Book
-          </Button>
+          {/* Auth + Book buttons */}
+          <Box sx={{ ml: "auto", display: "flex", alignItems: "center", gap: 1 }}>
+            {isLoggedIn ? (
+              <Button
+                href={`/book/${tenantSlug}/portal`}
+                size="small"
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 500,
+                  display: { xs: "none", sm: "inline-flex" },
+                }}
+              >
+                My Account
+              </Button>
+            ) : (
+              <Button
+                href={`/book/${tenantSlug}/login`}
+                size="small"
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 500,
+                  display: { xs: "none", sm: "inline-flex" },
+                }}
+              >
+                Sign In
+              </Button>
+            )}
+            <Button
+              href={`/book/${tenantSlug}#booking`}
+              variant="contained"
+              size="small"
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                display: { xs: "none", sm: "inline-flex" },
+              }}
+            >
+              Book
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
 

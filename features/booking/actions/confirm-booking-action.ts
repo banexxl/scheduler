@@ -11,6 +11,7 @@
  */
 
 import { createAppointment } from "@/features/appointments/services/create-appointment";
+import { sendBookingConfirmationEmail } from "@/features/email/actions/email-actions";
 import type { BookingConfirmation, CustomerInfo, SelectedService, BookingTimeSlot } from "../types";
 
 export type ConfirmBookingInput = {
@@ -73,6 +74,9 @@ export async function confirmBookingAction(
   }
 
   const appt = result.appointment;
+
+  // Send confirmation email (non-blocking)
+  sendBookingConfirmationEmail(tenantId, input.tenantSlug, appt).catch(() => { });
 
   return {
     success: true,

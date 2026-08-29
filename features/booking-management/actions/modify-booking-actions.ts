@@ -8,6 +8,7 @@
 
 import { rescheduleAppointment, cancelAppointment } from "@/features/appointments/services/update-appointment";
 import { getResolvedBookingRules } from "@/features/booking-rules/services/get-booking-rules";
+import { sendCancellationEmail, sendRescheduleEmail } from "@/features/email/actions/email-actions";
 import type { BookingPolicies, ModificationPermissions, BookingDetails } from "../types";
 import { DEFAULT_BOOKING_POLICIES } from "../types";
 
@@ -126,6 +127,13 @@ export async function cancelBookingAction(
     return { success: false, error: result.error };
   }
 
+  // Send cancellation email (non-blocking)
+  const supabase = (await import("@/lib/supabase/server")).createServiceRoleClient();
+  const { data: tenant } = await supabase.from("tenants").select("slug").eq("id", booking.tenantId).single();
+  if (tenant && result.appointment) {
+    sendCancellationEmail(booking.tenantId, tenant.slug, result.appointment, reason.trim() || null).catch(() => { });
+  }
+
   return { success: true };
 }
 
@@ -160,6 +168,14 @@ export async function rescheduleBookingAction(
       return { success: false, error: "That time was just booked. Please choose another." };
     }
     return { success: false, error: result.error };
+  }
+
+  // Send reschedule email (non-blocking)
+  const previousStartsAt = booking.startsAt;
+  const supabase2 = (await import("@/lib/supabase/server")).createServiceRoleClient();
+  const { data: tenant2 } = await supabase2.from("tenants").select("slug").eq("id", booking.tenantId).single();
+  if (tenant2 && result.appointment) {
+    sendRescheduleEmail(booking.tenantId, tenant2.slug, result.appointment, previousStartsAt).catch(() => { });
   }
 
   return { success: true };

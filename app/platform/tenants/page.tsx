@@ -75,7 +75,7 @@ export default async function TenantsPage({
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon fontSize="small" sx={{ color: "#9ca3af" }} />
+                    <SearchIcon fontSize="small" sx={{ color: "#5c5c72" }} />
                   </InputAdornment>
                 ),
               }}
@@ -127,12 +127,12 @@ export default async function TenantsPage({
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#6b7280" }}>Business</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#6b7280" }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#6b7280" }}>Subscription</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#6b7280" }}>Members</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#6b7280" }}>Created</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#6b7280" }}>Actions</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#8b8b9e" }}>Business</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#8b8b9e" }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#8b8b9e" }}>Subscription</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#8b8b9e" }}>Members</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#8b8b9e" }}>Created</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "0.75rem", color: "#8b8b9e" }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -146,7 +146,7 @@ export default async function TenantsPage({
                         <Typography sx={{ fontSize: "0.8125rem", fontWeight: 500 }}>
                           {tenant.name}
                         </Typography>
-                        <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>
+                        <Typography sx={{ fontSize: "0.75rem", color: "#5c5c72" }}>
                           /{tenant.slug}
                         </Typography>
                       </TableCell>
@@ -157,7 +157,7 @@ export default async function TenantsPage({
                         {tenant.subscriptionStatus ? (
                           <StatusChip label={tenant.subscriptionStatus} size="small" />
                         ) : (
-                          <Typography sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>
+                          <Typography sx={{ fontSize: "0.75rem", color: "#5c5c72" }}>
                             None
                           </Typography>
                         )}
@@ -168,7 +168,7 @@ export default async function TenantsPage({
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                        <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>
                           {formatDate(tenant.createdAt)}
                         </Typography>
                       </TableCell>
@@ -191,8 +191,8 @@ export default async function TenantsPage({
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <Box sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #e5e7eb" }}>
-                <Typography sx={{ fontSize: "0.75rem", color: "#6b7280" }}>
+              <Box sx={{ p: 2, display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+                <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>
                   Page {page} of {totalPages} ({total} total)
                 </Typography>
                 <Stack direction="row" spacing={1}>

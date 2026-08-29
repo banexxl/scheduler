@@ -15,13 +15,11 @@ type BusinessUrlPreviewProps = {
  */
 export default function BusinessUrlPreview({ slug }: BusinessUrlPreviewProps) {
   const appUrl = clientEnvironment.appUrl;
-  const rootDomain = clientEnvironment.rootDomain;
 
   const displaySlug = slug || "your-business";
   const isPlaceholder = !slug;
 
   // Build environment-aware URLs
-  const protocol = appUrl.startsWith("https") ? "https" : "http";
   const publicSiteUrl = `${appUrl}/book/${displaySlug}`;
   const dashboardUrl = `${appUrl}/${displaySlug}/dashboard`;
 

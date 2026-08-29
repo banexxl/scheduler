@@ -27,7 +27,7 @@ export default function PlatformEmptyState({
         borderRadius: 2,
       }}
     >
-      <Typography sx={{ ...platformTypography.sectionTitle, color: "#374151" }}>
+      <Typography sx={{ ...platformTypography.sectionTitle, color: "#f0f0f5" }}>
         {title}
       </Typography>
       {description && (

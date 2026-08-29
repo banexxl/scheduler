@@ -84,8 +84,8 @@ export default async function AuditLogsPage() {
                 {deletions.map((event) => (
                   <TableRow key={String(event.id)} hover>
                     <TableCell sx={{ fontSize: "0.8125rem" }}>{String(event.tenant_name ?? "")}</TableCell>
-                    <TableCell sx={{ fontSize: "0.75rem", color: "#6b7280" }}>/{String(event.tenant_slug ?? "")}</TableCell>
-                    <TableCell sx={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                    <TableCell sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>/{String(event.tenant_slug ?? "")}</TableCell>
+                    <TableCell sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>
                       {String(event.actor_user_id ?? "").slice(0, 8)}...
                     </TableCell>
                     <TableCell sx={{ fontSize: "0.75rem" }}>{formatDate(String(event.deleted_at ?? ""))}</TableCell>
@@ -121,17 +121,17 @@ export default async function AuditLogsPage() {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography sx={{ fontSize: "0.75rem", color: "#ef4444" }}>
+                      <Typography sx={{ fontSize: "0.75rem", color: "#EF4444" }}>
                         {String(err.error_code ?? "")}
                       </Typography>
-                      <Typography sx={{ fontSize: "0.7rem", color: "#6b7280", maxWidth: 300 }} noWrap>
+                      <Typography sx={{ fontSize: "0.7rem", color: "#8b8b9e", maxWidth: 300 }} noWrap>
                         {String(err.error_message ?? "")}
                       </Typography>
                     </TableCell>
                     <TableCell sx={{ fontSize: "0.75rem" }}>
                       {err.duration_ms ? `${err.duration_ms}ms` : "-"}
                     </TableCell>
-                    <TableCell sx={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                    <TableCell sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>
                       {formatDate(String(err.created_at ?? ""))}
                     </TableCell>
                   </TableRow>

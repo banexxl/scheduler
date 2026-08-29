@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import { dashboardTypography, dashboardColors, dashboardMotion } from "@/styles/theme/dashboard-tokens";
+import { dashboardTypography } from "@/styles/theme/dashboard-tokens";
 import type { ReactNode } from "react";
 
 type Props = {

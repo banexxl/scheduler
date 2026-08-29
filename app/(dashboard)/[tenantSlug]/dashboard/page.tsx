@@ -53,8 +53,8 @@ export default async function DashboardPage({
   }
 
   // Derive today/upcoming counts from analytics
-  const todayAppointments = analytics?.today?.total ?? 0;
-  const upcomingAppointments = analytics?.today?.upcoming ?? 0;
+  const todayAppointments = analytics?.summary?.todayTotal ?? 0;
+  const upcomingAppointments = analytics?.summary?.todayUpcoming ?? 0;
 
   return (
     <PremiumTenantDashboard

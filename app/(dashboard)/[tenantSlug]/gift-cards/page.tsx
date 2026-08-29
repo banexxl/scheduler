@@ -80,7 +80,7 @@ export default async function GiftCardsPage({
                     <TableCell>
                       <StatusChip label={String(card.status)} size="small" />
                     </TableCell>
-                    <TableCell sx={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                    <TableCell sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>
                       {new Date(String(card.issued_at)).toLocaleDateString()}
                     </TableCell>
                   </TableRow>

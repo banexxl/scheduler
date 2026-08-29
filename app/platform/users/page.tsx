@@ -28,7 +28,7 @@ export default async function UsersPage() {
       </SectionCard>
 
       <SectionCard title="Platform Admins">
-        <Typography sx={{ fontSize: "0.8125rem", color: "#6b7280" }}>
+        <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e" }}>
           Platform admin accounts are managed via the <code>platform_admins</code> table.
           Changes require direct database access for security.
         </Typography>

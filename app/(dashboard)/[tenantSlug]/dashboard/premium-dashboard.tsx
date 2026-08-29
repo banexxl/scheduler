@@ -9,10 +9,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import Avatar from "@mui/material/Avatar";
-import Chip from "@mui/material/Chip";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PeopleIcon from "@mui/icons-material/People";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
@@ -141,8 +138,8 @@ export default function PremiumTenantDashboard({ tenantSlug, dashboard, analytic
               <GlassCard delay={0.4}>
                 <Typography sx={{ fontSize: "0.75rem", color: dashboardColors.text.muted }}>Revenue</Typography>
                 <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, mt: 0.5 }}>
-                  {analytics.summary.completedRevenue
-                    ? `${dashboard.business.defaultCurrency} ${analytics.summary.completedRevenue}`
+                  {analytics.summary.periodCompletedValue
+                    ? `${dashboard.business.defaultCurrency} ${analytics.summary.periodCompletedValue}`
                     : "—"}
                 </Typography>
               </GlassCard>
@@ -150,7 +147,7 @@ export default function PremiumTenantDashboard({ tenantSlug, dashboard, analytic
             <Grid size={{ xs: 6, md: 3 }}>
               <GlassCard delay={0.45}>
                 <Typography sx={{ fontSize: "0.75rem", color: dashboardColors.text.muted }}>Completed</Typography>
-                <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, mt: 0.5 }}>{analytics.summary.completed}</Typography>
+                <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, mt: 0.5 }}>{analytics.summary.periodCompleted}</Typography>
               </GlassCard>
             </Grid>
             <Grid size={{ xs: 6, md: 3 }}>
@@ -164,7 +161,7 @@ export default function PremiumTenantDashboard({ tenantSlug, dashboard, analytic
             <Grid size={{ xs: 6, md: 3 }}>
               <GlassCard delay={0.55}>
                 <Typography sx={{ fontSize: "0.75rem", color: dashboardColors.text.muted }}>New Customers</Typography>
-                <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, mt: 0.5 }}>{analytics.summary.newCustomers}</Typography>
+                <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, mt: 0.5 }}>{analytics.summary.periodNewCustomers}</Typography>
               </GlassCard>
             </Grid>
           </Grid>

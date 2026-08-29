@@ -58,38 +58,38 @@ export default async function OperationsPage() {
         <Grid container spacing={2}>
           <Grid size={{ xs: 6, sm: 4 }}>
             <Box sx={{ textAlign: "center" }}>
-              <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: backlog.pendingNotifications > 0 ? "#ca8a04" : "#16a34a" }}>{backlog.pendingNotifications}</Typography>
-              <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Pending Notifications</Typography>
+              <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: backlog.pendingNotifications > 0 ? "#F59E0B" : "#10B981" }}>{backlog.pendingNotifications}</Typography>
+              <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Pending Notifications</Typography>
             </Box>
           </Grid>
           <Grid size={{ xs: 6, sm: 4 }}>
             <Box sx={{ textAlign: "center" }}>
-              <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: backlog.scheduledCampaignsPastDue > 0 ? "#dc2626" : "#16a34a" }}>{backlog.scheduledCampaignsPastDue}</Typography>
-              <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Campaigns Past Due</Typography>
+              <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: backlog.scheduledCampaignsPastDue > 0 ? "#EF4444" : "#10B981" }}>{backlog.scheduledCampaignsPastDue}</Typography>
+              <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Campaigns Past Due</Typography>
             </Box>
           </Grid>
           <Grid size={{ xs: 6, sm: 4 }}>
             <Box sx={{ textAlign: "center" }}>
-              <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: backlog.failedWebhooks > 0 ? "#dc2626" : "#16a34a" }}>{backlog.failedWebhooks}</Typography>
-              <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Failed Webhooks</Typography>
+              <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: backlog.failedWebhooks > 0 ? "#EF4444" : "#10B981" }}>{backlog.failedWebhooks}</Typography>
+              <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Failed Webhooks</Typography>
             </Box>
           </Grid>
           <Grid size={{ xs: 6, sm: 4 }}>
             <Box sx={{ textAlign: "center" }}>
               <Typography sx={{ fontSize: "1.25rem", fontWeight: 700 }}>{backlog.dueAutomationEnrollments}</Typography>
-              <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Due Automations</Typography>
+              <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Due Automations</Typography>
             </Box>
           </Grid>
           <Grid size={{ xs: 6, sm: 4 }}>
             <Box sx={{ textAlign: "center" }}>
               <Typography sx={{ fontSize: "1.25rem", fontWeight: 700 }}>{backlog.pendingImportRows}</Typography>
-              <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Pending Imports</Typography>
+              <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Pending Imports</Typography>
             </Box>
           </Grid>
           <Grid size={{ xs: 6, sm: 4 }}>
             <Box sx={{ textAlign: "center" }}>
-              <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: backlog.stalePaymentIntents > 0 ? "#ca8a04" : "#16a34a" }}>{backlog.stalePaymentIntents}</Typography>
-              <Typography sx={{ fontSize: "0.6875rem", color: "#6b7280" }}>Stale Payments</Typography>
+              <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, color: backlog.stalePaymentIntents > 0 ? "#F59E0B" : "#10B981" }}>{backlog.stalePaymentIntents}</Typography>
+              <Typography sx={{ fontSize: "0.6875rem", color: "#8b8b9e" }}>Stale Payments</Typography>
             </Box>
           </Grid>
         </Grid>
@@ -112,7 +112,7 @@ export default async function OperationsPage() {
               <TableRow key={p.name} hover>
                 <TableCell sx={{ fontSize: "0.8125rem" }}>{p.label}</TableCell>
                 <TableCell><Chip label={p.status} size="small" color={getStatusColor(p.status)} /></TableCell>
-                <TableCell sx={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                <TableCell sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>
                   {p.lastSuccessAt ? new Date(p.lastSuccessAt).toLocaleString() : "Never"}
                 </TableCell>
                 <TableCell sx={{ fontSize: "0.75rem" }}>{p.lastDurationMs ? `${p.lastDurationMs}ms` : "—"}</TableCell>

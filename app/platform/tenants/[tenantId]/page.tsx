@@ -83,11 +83,11 @@ export default async function TenantDetailPage({
 
       {/* Support Session Banner */}
       {activeSession && (
-        <Box sx={{ p: 2, bgcolor: "#fef3c7", border: "2px solid #f59e0b", borderRadius: 1.5 }}>
-          <Typography sx={{ fontSize: "0.875rem", fontWeight: 700, color: "#92400e" }}>
+        <Box sx={{ p: 2, bgcolor: "rgba(245, 158, 11, 0.12)", border: "2px solid #f59e0b", borderRadius: 1.5 }}>
+          <Typography sx={{ fontSize: "0.875rem", fontWeight: 700, color: "#F59E0B" }}>
             SUPPORT MODE — Session active until {new Date(activeSession.expiresAt).toLocaleTimeString()}
           </Typography>
-          <Typography sx={{ fontSize: "0.75rem", color: "#78350f" }}>Reason: {activeSession.reason}</Typography>
+          <Typography sx={{ fontSize: "0.75rem", color: "rgba(245, 158, 11, 0.7)" }}>Reason: {activeSession.reason}</Typography>
         </Box>
       )}
 
@@ -108,7 +108,7 @@ export default async function TenantDetailPage({
       {/* Feature Overrides */}
       <SectionCard title="Feature Overrides (Kill Switches)">
         {overrides.length === 0 ? (
-          <Typography sx={{ fontSize: "0.8125rem", color: "#9ca3af" }}>No active platform overrides. Tenant settings are in effect.</Typography>
+          <Typography sx={{ fontSize: "0.8125rem", color: "#5c5c72" }}>No active platform overrides. Tenant settings are in effect.</Typography>
         ) : (
           <Table size="small">
             <TableHead>
@@ -124,8 +124,8 @@ export default async function TenantDetailPage({
                 <TableRow key={o.feature}>
                   <TableCell sx={{ fontSize: "0.8125rem" }}>{o.feature.replace(/_/g, " ")}</TableCell>
                   <TableCell><Chip label={o.enabled ? "Enabled" : "Disabled"} size="small" color={o.enabled ? "success" : "error"} /></TableCell>
-                  <TableCell sx={{ fontSize: "0.75rem", color: "#6b7280" }}>{o.reason}</TableCell>
-                  <TableCell sx={{ fontSize: "0.75rem", color: "#9ca3af" }}>{o.expiresAt ? new Date(o.expiresAt).toLocaleString() : "Never"}</TableCell>
+                  <TableCell sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>{o.reason}</TableCell>
+                  <TableCell sx={{ fontSize: "0.75rem", color: "#5c5c72" }}>{o.expiresAt ? new Date(o.expiresAt).toLocaleString() : "Never"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -136,7 +136,7 @@ export default async function TenantDetailPage({
       {/* Recent Activity */}
       <SectionCard title="Recent Operational Events">
         {logs.length === 0 ? (
-          <Typography sx={{ fontSize: "0.8125rem", color: "#9ca3af" }}>No recent activity.</Typography>
+          <Typography sx={{ fontSize: "0.8125rem", color: "#5c5c72" }}>No recent activity.</Typography>
         ) : (
           <Table size="small">
             <TableHead>
@@ -150,7 +150,7 @@ export default async function TenantDetailPage({
             <TableBody>
               {logs.map((l) => (
                 <TableRow key={l.id}>
-                  <TableCell sx={{ fontSize: "0.75rem", color: "#6b7280" }}>{new Date(l.created_at).toLocaleTimeString()}</TableCell>
+                  <TableCell sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>{new Date(l.created_at).toLocaleTimeString()}</TableCell>
                   <TableCell sx={{ fontSize: "0.8125rem" }}>{l.action}</TableCell>
                   <TableCell><Chip label={l.status} size="small" color={l.status === "success" ? "success" : l.status === "failure" ? "error" : "default"} /></TableCell>
                   <TableCell sx={{ fontSize: "0.75rem" }}>{l.duration_ms ? `${l.duration_ms}ms` : "—"}</TableCell>

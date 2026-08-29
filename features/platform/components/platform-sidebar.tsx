@@ -119,7 +119,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
               letterSpacing: "-0.01em",
             }}
           >
-            get-slot
+            Get Slot
           </Typography>
           <Typography
             variant="caption"

@@ -17,6 +17,8 @@ export type ResolvedUserIdentity = {
     tenantStatus: string;
   }>;
   tenantCustomerCount: number;
+  /** The slug of the first linked tenant (for customer-only routing) */
+  firstCustomerTenantSlug: string | null;
 };
 
 /**
@@ -55,8 +57,9 @@ export async function resolveUserIdentity(
       // Count tenant customer relationships
       supabase
         .from("tenant_customers")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id),
+        .select("id, tenant_id", { count: "exact" })
+        .eq("user_id", user.id)
+        .limit(1),
     ]);
 
   const tenantMemberships = (membershipsResult.data ?? [])
@@ -78,6 +81,20 @@ export async function resolveUserIdentity(
       };
     });
 
+  // Resolve first customer tenant slug
+  let firstCustomerTenantSlug: string | null = null;
+  const customerRows = (customerCountResult.data ?? []) as unknown as Array<{ id: string; tenant_id: string }>;
+  if (customerRows.length > 0) {
+    const { data: tenantRow } = await supabase
+      .from("tenants")
+      .select("slug")
+      .eq("id", customerRows[0]!.tenant_id)
+      .single();
+    if (tenantRow) {
+      firstCustomerTenantSlug = tenantRow.slug;
+    }
+  }
+
   return {
     user,
     platformAdmin: adminResult.data
@@ -85,5 +102,6 @@ export async function resolveUserIdentity(
       : null,
     tenantMemberships,
     tenantCustomerCount: customerCountResult.count ?? 0,
+    firstCustomerTenantSlug,
   };
 }

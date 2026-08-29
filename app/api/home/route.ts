@@ -3,16 +3,17 @@ import { createClient } from "@/lib/supabase/server";
 import { resolveLoginDestination } from "@/features/auth/services/resolve-login-destination";
 
 /**
- * Home Route Resolver — Milestone 15.13.
+ * Home Route Resolver.
  *
- * Redirects the current user to their appropriate home page:
+ * Redirects the current user to their appropriate home page based on role:
  * - Platform admin → /platform/dashboard
  * - Tenant owner/member → /{tenantSlug}/dashboard
- * - Customer → /account
+ * - Customer-only → /book/{tenantSlug}/portal
+ * - New user (no role) → /create-business
  * - Unauthenticated → /login
  *
- * Uses the request origin for redirects (works correctly on both
- * preview deployments and production).
+ * Uses resolveLoginDestination which queries platform_admins,
+ * tenant_members, and tenant_customers to determine the user's role.
  */
 export async function GET(request: NextRequest) {
   const origin = request.nextUrl.origin;

@@ -11,7 +11,7 @@ import {
  * Precedence:
  * 1. Active platform administrator → /platform/dashboard
  * 2. Active tenant member → /${tenantSlug}/dashboard
- * 3. Customer-only user (has tenant_customers but no membership) → /account
+ * 3. Customer-only user → /book/${tenantSlug}/portal
  * 4. New user (no platform, tenant, or customer relationship) → /create-business
  *
  * One owner = one business. When multiple tenant memberships exist,
@@ -45,6 +45,11 @@ export function resolveDestinationFromIdentity(
     return `/${accessible[0]!.tenantSlug}/dashboard`;
   }
 
-  // 3. Customer-only user — send to create-business (no customer portal at /customer)
+  // 3. Customer-only user — redirect to their tenant's portal
+  if (identity.tenantCustomerCount > 0 && identity.firstCustomerTenantSlug) {
+    return `/book/${identity.firstCustomerTenantSlug}/portal`;
+  }
+
+  // 4. New user (no platform, tenant, or customer relationship) → /create-business
   return "/create-business";
 }

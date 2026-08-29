@@ -91,9 +91,8 @@ export default function PremiumTenantDashboard({ tenantSlug, dashboard, analytic
           <Grid container spacing={2}>
             <Grid size={{ xs: 6, md: 3 }}>
               <AnimatedMetricCard
-                label="Today"
+                label="Bookings"
                 value={dashboard.counts.todayAppointments}
-                suffix=" bookings"
                 icon={<CalendarTodayIcon />}
                 accentColor={dashboardColors.accent.primary}
                 delay={0.15}

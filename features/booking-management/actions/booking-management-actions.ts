@@ -105,6 +105,7 @@ export async function getBookingDetails(
     .from("appointments")
     .select(
       "id, appointment_number, status, customer_name, customer_email, customer_phone, " +
+      "service_id, location_id, resource_id, " +
       "starts_at, ends_at, duration_minutes, price, currency, " +
       "service_name_snapshot, location_name_snapshot, resource_name_snapshot, " +
       "customer_notes, created_at, checked_in_at, completed_at, cancelled_at, " +
@@ -125,6 +126,9 @@ export async function getBookingDetails(
     customer_name: string;
     customer_email: string | null;
     customer_phone: string | null;
+    service_id: string;
+    location_id: string;
+    resource_id: string;
     starts_at: string;
     ends_at: string;
     duration_minutes: number;
@@ -156,9 +160,11 @@ export async function getBookingDetails(
       email: row.customer_email,
       phone: row.customer_phone,
     },
-    service: { name: row.service_name_snapshot },
+    service: { id: row.service_id, name: row.service_name_snapshot },
     staff: row.resource_name_snapshot ? { name: row.resource_name_snapshot } : null,
-    location: { name: row.location_name_snapshot },
+    location: { id: row.location_id, name: row.location_name_snapshot },
+    resourceId: row.resource_id,
+    tenantId: tenant.id,
     startsAt: row.starts_at,
     endsAt: row.ends_at,
     durationMinutes: row.duration_minutes,

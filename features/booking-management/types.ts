@@ -1,5 +1,5 @@
 /**
- * Booking Management Types — Milestone 18.0.
+ * Booking Management Types — Milestones 18.0 + 18.1.
  *
  * Types for the customer self-service booking portal.
  */
@@ -22,6 +22,7 @@ export type BookingDetails = {
   };
 
   service: {
+    id: string;
     name: string;
   };
 
@@ -30,8 +31,12 @@ export type BookingDetails = {
   } | null;
 
   location: {
+    id: string;
     name: string;
   };
+
+  resourceId: string;
+  tenantId: string;
 
   startsAt: string;
   endsAt: string;
@@ -50,6 +55,33 @@ export type BookingDetails = {
   cancelledAt: string | null;
   cancellationReason: string | null;
   noShowAt: string | null;
+};
+
+// ─── Booking Policies (Milestone 18.1) ───────────────────────────────────────
+
+export type BookingPolicies = {
+  allowCancellation: boolean;
+  allowReschedule: boolean;
+  cancellationNoticeMinutes: number;
+  rescheduleNoticeMinutes: number;
+  maxRescheduleDays: number;
+};
+
+export const DEFAULT_BOOKING_POLICIES: BookingPolicies = {
+  allowCancellation: true,
+  allowReschedule: true,
+  cancellationNoticeMinutes: 1440, // 24 hours
+  rescheduleNoticeMinutes: 1440,
+  maxRescheduleDays: 90,
+};
+
+// ─── Modification Permissions ────────────────────────────────────────────────
+
+export type ModificationPermissions = {
+  canCancel: boolean;
+  canReschedule: boolean;
+  cancelReason: string | null;
+  rescheduleReason: string | null;
 };
 
 // ─── Status Timeline Entry ───────────────────────────────────────────────────

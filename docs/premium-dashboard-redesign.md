@@ -7,8 +7,8 @@
 - ✅ Global MUI dark theme (`styles/theme/theme.ts`)
 - ✅ Tenant token files updated to dark (`tenant-tokens.ts`, `platform-admin-tokens.ts`)
 - ✅ 9 reusable dashboard components (`components/dashboard/`)
-- ✅ Platform Admin Dashboard redesigned (`app/platform/premium-dashboard.tsx`)
-- ✅ Tenant Dashboard redesigned (`app/(dashboard)/[tenantSlug]/dashboard/premium-dashboard.tsx`)
+- ✅ Platform Admin Dashboard redesigned (`app/platform/dashboard.tsx`)
+- ✅ Tenant Dashboard redesigned (`app/(dashboard)/[tenantSlug]/dashboard/dashboard.tsx`)
 - ✅ Shared components updated (PageHeader, SectionCard, MetricCard, EmptyState, ConfirmDialog)
 
 ### What Remains

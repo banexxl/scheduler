@@ -1,16 +1,15 @@
 "use client";
 
 /**
- * Empty State — Milestone 10.4.
+ * Empty State — Premium Dark Theme.
  *
- * Consistent empty state display for list surfaces.
- * Shows message with optional action CTA.
+ * Beautiful empty state with centered icon, title, description, and CTA.
  */
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
+import InboxIcon from "@mui/icons-material/InboxOutlined";
 
 export type EmptyStateProps = {
   title: string;
@@ -28,29 +27,38 @@ export default function EmptyState({
   onAction,
 }: EmptyStateProps) {
   return (
-    <Paper
-      variant="outlined"
-      sx={{ p: { xs: 3, sm: 4 }, textAlign: "center", borderStyle: "dashed" }}
+    <Box
+      sx={{
+        p: { xs: 4, sm: 6 },
+        textAlign: "center",
+        borderRadius: "16px",
+        border: "1px dashed rgba(255, 255, 255, 0.08)",
+        bgcolor: "rgba(22, 22, 30, 0.5)",
+      }}
     >
-      <Typography variant="h6" color="text.secondary" gutterBottom>
+      <InboxIcon sx={{ fontSize: 48, color: "rgba(139, 139, 158, 0.4)", mb: 2 }} />
+      <Typography variant="h6" sx={{ color: "#f0f0f5", fontWeight: 600, mb: 0.5 }}>
         {title}
       </Typography>
       {description && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography sx={{ fontSize: "0.875rem", color: "#8b8b9e", mb: 3, maxWidth: 360, mx: "auto" }}>
           {description}
         </Typography>
       )}
       {actionLabel && (actionHref || onAction) && (
-        <Box>
-          <Button
-            variant="outlined"
-            {...(actionHref ? { component: "a", href: actionHref } : {})}
-            {...(onAction && !actionHref ? { onClick: onAction } : {})}
-          >
-            {actionLabel}
-          </Button>
-        </Box>
+        <Button
+          variant="outlined"
+          sx={{
+            borderColor: "rgba(124, 58, 237, 0.3)",
+            color: "#8B5CF6",
+            "&:hover": { borderColor: "#7C3AED", bgcolor: "rgba(124, 58, 237, 0.08)" },
+          }}
+          {...(actionHref ? { component: "a", href: actionHref } : {})}
+          {...(onAction && !actionHref ? { onClick: onAction } : {})}
+        >
+          {actionLabel}
+        </Button>
       )}
-    </Paper>
+    </Box>
   );
 }

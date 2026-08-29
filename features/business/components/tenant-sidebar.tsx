@@ -5,7 +5,7 @@
  *
  * Desktop: persistent left sidebar with grouped navigation.
  * Mobile: temporary drawer.
- * Light theme, warm professional aesthetic.
+ * Premium dark theme, purple accent.
  */
 
 import { usePathname } from "next/navigation";
@@ -179,7 +179,7 @@ function SidebarContent({
             sx={{
               fontSize: "0.8125rem",
               fontWeight: 600,
-              color: "#111827",
+              color: tenantPalette.sidebar.textActive,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",

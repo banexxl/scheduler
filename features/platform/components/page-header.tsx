@@ -6,9 +6,7 @@ import Link from "@mui/material/Link";
 import { platformTypography } from "@/styles/theme/platform-admin-tokens";
 
 /**
- * Platform Page Header — Milestone 14.1.
- *
- * Consistent page header with title, optional description, breadcrumbs, and action slot.
+ * Platform Page Header — Premium Dark Theme.
  */
 
 type Breadcrumb = { label: string; href?: string };
@@ -33,7 +31,7 @@ export default function PageHeader({
       {breadcrumbs && breadcrumbs.length > 0 && (
         <Breadcrumbs
           separator="/"
-          sx={{ mb: 1, "& .MuiBreadcrumbs-separator": { mx: 0.5, color: "#9ca3af" } }}
+          sx={{ mb: 1, "& .MuiBreadcrumbs-separator": { mx: 0.5, color: "#5c5c72" } }}
         >
           {breadcrumbs.map((crumb, idx) =>
             crumb.href && idx < breadcrumbs.length - 1 ? (
@@ -42,14 +40,14 @@ export default function PageHeader({
                 component="a"
                 href={crumb.href}
                 underline="hover"
-                sx={{ fontSize: "0.8125rem", color: "#6b7280" }}
+                sx={{ fontSize: "0.8125rem", color: "#8b8b9e" }}
               >
                 {crumb.label}
               </Link>
             ) : (
               <Typography
                 key={crumb.label}
-                sx={{ fontSize: "0.8125rem", color: "#374151" }}
+                sx={{ fontSize: "0.8125rem", color: "#f0f0f5" }}
               >
                 {crumb.label}
               </Typography>

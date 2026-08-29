@@ -4,9 +4,7 @@ import Stack from "@mui/material/Stack";
 import { platformTypography, platformPalette, platformSurface } from "@/styles/theme/platform-admin-tokens";
 
 /**
- * Section Card — Milestone 14.1.
- *
- * Groups related content in a bordered surface with optional title and action.
+ * Section Card — Premium Dark Theme.
  */
 
 type SectionCardProps = {
@@ -28,7 +26,7 @@ export default function SectionCard({
     <Box
       sx={{
         border: platformSurface.border,
-        borderRadius: platformSurface.borderRadiusSm,
+        borderRadius: `16px`,
         bgcolor: platformPalette.page.surface,
         overflow: "hidden",
       }}

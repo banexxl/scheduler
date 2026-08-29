@@ -1,8 +1,7 @@
 /**
- * Tenant Business App Design Tokens — Milestone 14.2.
+ * Tenant Business App Design Tokens — Premium Dark Theme.
  *
- * Design direction: Modern, warm, professional, operational.
- * Calmer than a generic admin template. Suitable for daily use.
+ * Dark-first, purple accent, Linear-quality SaaS aesthetic.
  */
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
@@ -14,45 +13,45 @@ export const TENANT_TOP_BAR_HEIGHT = 52;
 
 export const tenantPalette = {
   sidebar: {
-    bg: "#ffffff",
-    bgHover: "#f3f4f6",
-    bgActive: "#eff6ff",
-    text: "#4b5563",
-    textActive: "#1d4ed8",
-    border: "#e5e7eb",
-    iconDefault: "#9ca3af",
-    iconActive: "#2563eb",
-    groupLabel: "#9ca3af",
+    bg: "#0e0e14",
+    bgHover: "#1a1a24",
+    bgActive: "#1e1a2e",
+    text: "#8b8b9e",
+    textActive: "#f0f0f5",
+    border: "rgba(255, 255, 255, 0.06)",
+    iconDefault: "#5c5c72",
+    iconActive: "#8B5CF6",
+    groupLabel: "#5c5c72",
   },
   topBar: {
-    bg: "#ffffff",
-    border: "#e5e7eb",
-    text: "#1f2937",
-    textSecondary: "#6b7280",
+    bg: "#111118",
+    border: "rgba(255, 255, 255, 0.06)",
+    text: "#f0f0f5",
+    textSecondary: "#8b8b9e",
   },
   page: {
-    bg: "#f9fafb",
-    surface: "#ffffff",
-    surfaceBorder: "#e5e7eb",
-    surfaceHover: "#f9fafb",
+    bg: "#0a0a0f",
+    surface: "#16161e",
+    surfaceBorder: "rgba(255, 255, 255, 0.08)",
+    surfaceHover: "#1c1c26",
   },
   accent: {
-    primary: "#2563eb",
-    primaryLight: "#eff6ff",
-    warm: "#f59e0b",
-    warmLight: "#fffbeb",
+    primary: "#7C3AED",
+    primaryLight: "#1e1a2e",
+    warm: "#F59E0B",
+    warmLight: "rgba(245, 158, 11, 0.1)",
   },
   status: {
-    success: "#10b981",
-    successBg: "#ecfdf5",
-    warning: "#f59e0b",
-    warningBg: "#fffbeb",
-    error: "#ef4444",
-    errorBg: "#fef2f2",
-    info: "#3b82f6",
-    infoBg: "#eff6ff",
-    neutral: "#6b7280",
-    neutralBg: "#f3f4f6",
+    success: "#10B981",
+    successBg: "rgba(16, 185, 129, 0.1)",
+    warning: "#F59E0B",
+    warningBg: "rgba(245, 158, 11, 0.1)",
+    error: "#EF4444",
+    errorBg: "rgba(239, 68, 68, 0.1)",
+    info: "#3B82F6",
+    infoBg: "rgba(59, 130, 246, 0.1)",
+    neutral: "#8b8b9e",
+    neutralBg: "rgba(139, 139, 158, 0.1)",
   },
 } as const;
 
@@ -64,37 +63,37 @@ export const tenantTypography = {
     fontWeight: 700,
     lineHeight: 1.3,
     letterSpacing: "-0.01em",
-    color: "#111827",
+    color: "#f0f0f5",
   },
   sectionTitle: {
     fontSize: "1rem",
     fontWeight: 600,
     lineHeight: 1.4,
-    color: "#1f2937",
+    color: "#f0f0f5",
   },
   cardTitle: {
     fontSize: "0.875rem",
     fontWeight: 600,
     lineHeight: 1.4,
-    color: "#1f2937",
+    color: "#f0f0f5",
   },
   body: {
     fontSize: "0.875rem",
     fontWeight: 400,
     lineHeight: 1.5,
-    color: "#374151",
+    color: "#8b8b9e",
   },
   secondary: {
     fontSize: "0.8125rem",
     fontWeight: 400,
     lineHeight: 1.5,
-    color: "#6b7280",
+    color: "#8b8b9e",
   },
   caption: {
     fontSize: "0.75rem",
     fontWeight: 400,
     lineHeight: 1.4,
-    color: "#9ca3af",
+    color: "#5c5c72",
   },
   navItem: {
     fontSize: "0.8125rem",
@@ -113,7 +112,7 @@ export const tenantTypography = {
 // ─── Surfaces ────────────────────────────────────────────────────────────────
 
 export const tenantSurface = {
-  border: "1px solid #e5e7eb",
+  border: "1px solid rgba(255, 255, 255, 0.08)",
   borderRadius: 2,
   borderRadiusSm: 1.5,
 } as const;

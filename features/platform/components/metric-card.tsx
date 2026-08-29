@@ -3,10 +3,7 @@ import Typography from "@mui/material/Typography";
 import { platformTypography, platformPalette, platformSurface } from "@/styles/theme/platform-admin-tokens";
 
 /**
- * Metric Card — Milestone 14.1.
- *
- * Compact metric display for dashboard.
- * Accessible: always includes text label, not color-only.
+ * Metric Card — Premium Dark Theme.
  */
 
 type MetricCardProps = {
@@ -17,7 +14,7 @@ type MetricCardProps = {
 };
 
 const VARIANT_COLORS: Record<string, { border: string; accent: string }> = {
-  default: { border: platformPalette.page.surfaceBorder, accent: platformPalette.metric.primary },
+  default: { border: "rgba(255, 255, 255, 0.08)", accent: platformPalette.metric.primary },
   success: { border: platformPalette.status.success, accent: platformPalette.status.success },
   warning: { border: platformPalette.status.warning, accent: platformPalette.status.warning },
   error: { border: platformPalette.status.error, accent: platformPalette.status.error },
@@ -37,7 +34,7 @@ export default function MetricCard({
       sx={{
         p: 2,
         border: platformSurface.border,
-        borderRadius: platformSurface.borderRadiusSm,
+        borderRadius: `12px`,
         borderLeft: `3px solid ${colors.border}`,
         bgcolor: platformPalette.page.surface,
         minWidth: 0,
@@ -48,7 +45,7 @@ export default function MetricCard({
         {String(value)}
       </Typography>
       {secondary && (
-        <Typography sx={{ ...platformTypography.caption, mt: 0.25 }}>
+        <Typography sx={{ ...platformTypography.caption, mt: 0.5 }}>
           {secondary}
         </Typography>
       )}

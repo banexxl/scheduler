@@ -1,15 +1,7 @@
 /**
- * Platform Admin Design Tokens — Milestone 14.1.
+ * Platform Admin Design Tokens — Premium Dark Theme.
  *
- * Extends the base MUI theme with platform-specific visual tokens.
- * Used exclusively by the Platform Admin shell and its pages.
- *
- * Design principles:
- * - Restrained neutral surfaces
- * - Clear typography hierarchy
- * - Subtle borders, limited elevation
- * - Information-dense but not crowded
- * - Consistent spacing via theme increments
+ * Dark-first, purple accent, information-dense command center aesthetic.
  */
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
@@ -22,41 +14,41 @@ export const TOP_BAR_HEIGHT = 56;
 
 export const platformPalette = {
   sidebar: {
-    bg: "#1a1f2e",
-    bgHover: "#252b3b",
-    bgActive: "#2d3548",
-    text: "#b4bcd0",
-    textActive: "#ffffff",
-    border: "#2d3548",
-    accent: "#5b8def",
+    bg: "#0e0e14",
+    bgHover: "#1a1a24",
+    bgActive: "#1e1a2e",
+    text: "#8b8b9e",
+    textActive: "#f0f0f5",
+    border: "rgba(255, 255, 255, 0.06)",
+    accent: "#8B5CF6",
   },
   topBar: {
-    bg: "#ffffff",
-    border: "#e5e7eb",
-    text: "#1f2937",
-    textSecondary: "#6b7280",
+    bg: "#111118",
+    border: "rgba(255, 255, 255, 0.06)",
+    text: "#f0f0f5",
+    textSecondary: "#8b8b9e",
   },
   page: {
-    bg: "#f8f9fb",
-    surface: "#ffffff",
-    surfaceBorder: "#e5e7eb",
-    surfaceHover: "#f9fafb",
+    bg: "#0a0a0f",
+    surface: "#16161e",
+    surfaceBorder: "rgba(255, 255, 255, 0.08)",
+    surfaceHover: "#1c1c26",
   },
   status: {
-    success: "#10b981",
-    successBg: "#ecfdf5",
-    warning: "#f59e0b",
-    warningBg: "#fffbeb",
-    error: "#ef4444",
-    errorBg: "#fef2f2",
-    info: "#3b82f6",
-    infoBg: "#eff6ff",
-    neutral: "#6b7280",
-    neutralBg: "#f3f4f6",
+    success: "#10B981",
+    successBg: "rgba(16, 185, 129, 0.1)",
+    warning: "#F59E0B",
+    warningBg: "rgba(245, 158, 11, 0.1)",
+    error: "#EF4444",
+    errorBg: "rgba(239, 68, 68, 0.1)",
+    info: "#3B82F6",
+    infoBg: "rgba(59, 130, 246, 0.1)",
+    neutral: "#8b8b9e",
+    neutralBg: "rgba(139, 139, 158, 0.1)",
   },
   metric: {
-    primary: "#1e40af",
-    secondary: "#6b7280",
+    primary: "#8B5CF6",
+    secondary: "#8b8b9e",
   },
 } as const;
 
@@ -68,45 +60,50 @@ export const platformTypography = {
     fontWeight: 700,
     lineHeight: 1.3,
     letterSpacing: "-0.02em",
+    color: "#f0f0f5",
   },
   sectionTitle: {
     fontSize: "1.125rem",
     fontWeight: 600,
     lineHeight: 1.4,
+    color: "#f0f0f5",
   },
   cardTitle: {
     fontSize: "0.875rem",
     fontWeight: 600,
     lineHeight: 1.4,
+    color: "#f0f0f5",
   },
   body: {
     fontSize: "0.875rem",
     fontWeight: 400,
     lineHeight: 1.5,
+    color: "#8b8b9e",
   },
   secondary: {
     fontSize: "0.8125rem",
     fontWeight: 400,
     lineHeight: 1.5,
-    color: "#6b7280",
+    color: "#8b8b9e",
   },
   caption: {
     fontSize: "0.75rem",
     fontWeight: 400,
     lineHeight: 1.4,
-    color: "#9ca3af",
+    color: "#5c5c72",
   },
   metricValue: {
     fontSize: "1.75rem",
     fontWeight: 700,
     lineHeight: 1.2,
     letterSpacing: "-0.02em",
+    color: "#f0f0f5",
   },
   metricLabel: {
     fontSize: "0.75rem",
     fontWeight: 500,
     lineHeight: 1.4,
-    color: "#6b7280",
+    color: "#8b8b9e",
     textTransform: "uppercase" as const,
     letterSpacing: "0.04em",
   },
@@ -124,9 +121,9 @@ export const platformSpacing = {
 // ─── Borders & Shadows ───────────────────────────────────────────────────────
 
 export const platformSurface = {
-  border: "1px solid #e5e7eb",
-  borderRadius: 2, // theme units (8px × 2 = 16px)
+  border: "1px solid rgba(255, 255, 255, 0.08)",
+  borderRadius: 2,
   borderRadiusSm: 1.5,
   shadow: "none",
-  elevatedShadow: "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+  elevatedShadow: "0 4px 16px rgba(0, 0, 0, 0.3)",
 } as const;

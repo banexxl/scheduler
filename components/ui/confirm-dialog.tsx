@@ -1,11 +1,9 @@
 "use client";
 
 /**
- * Confirm Dialog — Milestone 10.4.
+ * Confirm Dialog — Premium Dark Theme.
  *
- * Reusable confirmation dialog for destructive or important actions.
- * Accessible: focus trap, escape close, aria-labelledby, aria-describedby.
- * Responsive: fullScreen on mobile for important confirmations.
+ * Glassmorphic confirmation dialog with backdrop blur.
  */
 
 import Button from "@mui/material/Button";
@@ -54,15 +52,20 @@ export default function ConfirmDialog({
       aria-describedby="confirm-dialog-description"
       maxWidth="xs"
       fullWidth
+      slotProps={{
+        backdrop: {
+          sx: { backdropFilter: "blur(8px)", bgcolor: "rgba(0, 0, 0, 0.6)" },
+        },
+      }}
     >
       <DialogTitle id="confirm-dialog-title">{title}</DialogTitle>
       <DialogContent>
-        <DialogContentText id="confirm-dialog-description">
+        <DialogContentText id="confirm-dialog-description" sx={{ color: "#8b8b9e" }}>
           {description}
         </DialogContentText>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onCancel} disabled={loading}>
+        <Button onClick={onCancel} disabled={loading} sx={{ color: "#8b8b9e" }}>
           {cancelLabel}
         </Button>
         <Button

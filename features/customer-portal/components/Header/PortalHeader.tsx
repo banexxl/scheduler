@@ -1,11 +1,10 @@
 "use client";
 
 /**
- * Portal Header — Milestone 16.3.
+ * Portal Header — Premium dark glassmorphism.
  *
- * Sticky responsive header with logo, navigation links (desktop),
- * and hamburger menu trigger (mobile).
- * Gains elevation on scroll.
+ * Sticky header that transitions from transparent to frosted glass on scroll.
+ * Uses tenant branding for primary color accents.
  */
 
 import { useState, useEffect } from "react";
@@ -28,9 +27,8 @@ export default function PortalHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Elevation on scroll
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 8);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -43,17 +41,20 @@ export default function PortalHeader() {
     .slice(0, 2)
     .toUpperCase();
 
+  const primaryColor = branding.primaryColor;
+
   return (
     <>
       <AppBar
         position="sticky"
-        elevation={scrolled ? 2 : 0}
+        elevation={0}
         sx={{
-          bgcolor: "background.paper",
-          color: "text.primary",
-          borderBottom: scrolled ? "none" : 1,
-          borderColor: "divider",
-          transition: "box-shadow 0.2s, border-color 0.2s",
+          bgcolor: scrolled ? "rgba(10, 10, 15, 0.85)" : "transparent",
+          backdropFilter: scrolled ? "blur(20px) saturate(180%)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(20px) saturate(180%)" : "none",
+          borderBottom: scrolled ? `1px solid rgba(255,255,255,0.06)` : "1px solid transparent",
+          transition: "background-color 0.3s, border-color 0.3s, backdrop-filter 0.3s",
+          color: "#f0f0f5",
         }}
       >
         <Toolbar
@@ -61,7 +62,7 @@ export default function PortalHeader() {
             maxWidth: 1200,
             width: "100%",
             mx: "auto",
-            px: { xs: 1, sm: 2 },
+            px: { xs: 1.5, sm: 2 },
           }}
         >
           {/* Mobile hamburger */}
@@ -69,7 +70,7 @@ export default function PortalHeader() {
             edge="start"
             aria-label="Open navigation menu"
             onClick={() => setMobileOpen(true)}
-            sx={{ display: { xs: "flex", md: "none" }, mr: 1 }}
+            sx={{ display: { xs: "flex", md: "none" }, mr: 1, color: "#a0a0b8" }}
           >
             <MenuIcon />
           </IconButton>
@@ -82,9 +83,10 @@ export default function PortalHeader() {
               display: "flex",
               alignItems: "center",
               textDecoration: "none",
-              color: "inherit",
+              color: "#f0f0f5",
               mr: 3,
               flexShrink: 0,
+              gap: 1,
             }}
           >
             {logoUrl ? (
@@ -92,17 +94,18 @@ export default function PortalHeader() {
                 component="img"
                 src={logoUrl}
                 alt={`${tenant.name} logo`}
-                sx={{ height: 36, maxWidth: 120, objectFit: "contain" }}
+                sx={{ height: 36, maxWidth: 120, objectFit: "contain", filter: "drop-shadow(0 0 8px rgba(255,255,255,0.1))" }}
               />
             ) : (
               <Avatar
                 sx={{
                   width: 36,
                   height: 36,
-                  bgcolor: branding.primaryColor,
+                  bgcolor: primaryColor,
                   color: "#fff",
                   fontSize: "0.875rem",
                   fontWeight: 700,
+                  boxShadow: `0 0 12px ${primaryColor}40`,
                 }}
                 aria-hidden="true"
               >
@@ -128,14 +131,15 @@ export default function PortalHeader() {
                 href={item.href}
                 size="small"
                 sx={{
-                  color: item.active ? "primary.main" : "text.primary",
+                  color: item.active ? "#f0f0f5" : "#8b8b9e",
                   fontWeight: item.active ? 700 : 500,
                   textTransform: "none",
                   minWidth: "auto",
                   px: 1.5,
-                  borderBottom: item.active ? 2 : 0,
-                  borderColor: "primary.main",
+                  fontSize: "0.875rem",
+                  borderBottom: item.active ? `2px solid ${primaryColor}` : "2px solid transparent",
                   borderRadius: 0,
+                  "&:hover": { color: "#f0f0f5", bgcolor: "rgba(255,255,255,0.04)" },
                 }}
               >
                 {item.label}
@@ -152,7 +156,9 @@ export default function PortalHeader() {
                 sx={{
                   textTransform: "none",
                   fontWeight: 500,
+                  color: "#a0a0b8",
                   display: { xs: "none", sm: "inline-flex" },
+                  "&:hover": { color: "#f0f0f5" },
                 }}
               >
                 My Account
@@ -164,7 +170,9 @@ export default function PortalHeader() {
                 sx={{
                   textTransform: "none",
                   fontWeight: 500,
+                  color: "#a0a0b8",
                   display: { xs: "none", sm: "inline-flex" },
+                  "&:hover": { color: "#f0f0f5" },
                 }}
               >
                 Sign In
@@ -178,6 +186,11 @@ export default function PortalHeader() {
                 textTransform: "none",
                 fontWeight: 600,
                 display: { xs: "none", sm: "inline-flex" },
+                background: `linear-gradient(135deg, ${primaryColor}, ${branding.accentColor})`,
+                boxShadow: `0 0 20px ${primaryColor}30`,
+                "&:hover": {
+                  boxShadow: `0 0 30px ${primaryColor}50`,
+                },
               }}
             >
               Book
@@ -186,7 +199,6 @@ export default function PortalHeader() {
         </Toolbar>
       </AppBar>
 
-      {/* Mobile drawer */}
       <MobileNavigation
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}

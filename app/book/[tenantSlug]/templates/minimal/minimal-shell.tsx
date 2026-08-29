@@ -1,13 +1,11 @@
 "use client";
 
 /**
- * Minimal Template Shell — Milestones 16.2 + 16.3.
+ * Minimal Template Shell — Premium dark redesign.
  *
- * Clean, distraction-free layout with portal shell components.
- * Content centered with comfortable max-width.
- *
- * Composition:
- *   Header → Hero → main (centered 960px) → CTA → Footer
+ * Dark background with smooth scroll behavior.
+ * Composition: Header → Hero → main → CTA → Footer
+ * Hero and CTA hidden on booking step sub-routes.
  */
 
 import Box from "@mui/material/Box";
@@ -25,12 +23,14 @@ export default function MinimalShell({ children }: TemplateShellProps) {
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: "background.default",
-        color: "text.primary",
+        bgcolor: "#0a0a0f",
+        color: "#f0f0f5",
         display: "flex",
         flexDirection: "column",
       }}
     >
+      <style>{`html { scroll-behavior: smooth; }`}</style>
+
       <PortalHeader />
       {!isStep && <PortalHero />}
 

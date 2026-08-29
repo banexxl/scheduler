@@ -1,36 +1,33 @@
 "use client";
 
 /**
- * useIsBookingStep — Milestone 17.0.
+ * useIsBookingStep — determines if hero/CTA should be hidden.
  *
- * Returns true when the current pathname is a booking step sub-route
- * (e.g. /book/{slug}/services, /book/{slug}/staff, etc.) rather than
- * the root tenant landing page (/book/{slug}).
- *
- * Used by template shells to hide the Hero and CTA sections on
- * step pages where they crowd out the booking flow content,
- * especially on mobile viewports.
+ * Returns true for sub-routes where the hero and CTA sections
+ * would crowd out the content (portal, auth, manage pages).
+ * The main storefront page (/) shows them.
  */
 
 import { usePathname } from "next/navigation";
 
-const BOOKING_STEP_SEGMENTS = [
-  "services",
-  "staff",
-  "locations",
-  "date-time",
-  "details",
-  "review",
+const HIDE_HERO_SEGMENTS = [
+  "portal",
+  "login",
+  "register",
+  "manage",
   "confirm",
+  "payment",
+  "communications",
+  "waitlist",
+  "gift-cards",
 ];
 
 export function useIsBookingStep(): boolean {
   const pathname = usePathname();
 
-  // pathname looks like /book/{slug}/services, /book/{slug}/staff, etc.
-  // Split and check the third segment (index 3: ["", "book", slug, step])
+  // pathname: /book/{slug}/portal, /book/{slug}/login, etc.
   const segments = pathname.split("/");
   const stepSegment = segments[3];
 
-  return !!stepSegment && BOOKING_STEP_SEGMENTS.includes(stepSegment);
+  return !!stepSegment && HIDE_HERO_SEGMENTS.includes(stepSegment);
 }

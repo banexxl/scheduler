@@ -1,10 +1,9 @@
 "use client";
 
 /**
- * Mobile Navigation Drawer — Milestone 16.3.
+ * Mobile Navigation Drawer — Premium dark theme.
  *
- * Slide-in drawer for mobile navigation.
- * Shows all portal nav items with active state.
+ * Slide-in drawer with dark glass styling, auth links, and CTA.
  */
 
 import Drawer from "@mui/material/Drawer";
@@ -31,6 +30,7 @@ export default function MobileNavigation({ open, onClose }: Props) {
   const { items, tenantSlug } = usePortalNavigation();
 
   const logoUrl = branding.logoUrl;
+  const primaryColor = branding.primaryColor;
   const initials = tenant.name
     .split(" ")
     .map((w) => w[0])
@@ -44,7 +44,14 @@ export default function MobileNavigation({ open, onClose }: Props) {
       open={open}
       onClose={onClose}
       aria-label="Navigation menu"
-      PaperProps={{ sx: { width: 280 } }}
+      PaperProps={{
+        sx: {
+          width: 280,
+          bgcolor: "#16161e",
+          color: "#f0f0f5",
+          borderRight: "1px solid rgba(255,255,255,0.06)",
+        },
+      }}
     >
       {/* Brand header */}
       <Box
@@ -54,6 +61,7 @@ export default function MobileNavigation({ open, onClose }: Props) {
           display: "flex",
           alignItems: "center",
           gap: 1.5,
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
         {logoUrl ? (
@@ -68,8 +76,9 @@ export default function MobileNavigation({ open, onClose }: Props) {
             sx={{
               width: 32,
               height: 32,
-              bgcolor: branding.primaryColor,
-              color: "#fff",
+              bgcolor: `${primaryColor}20`,
+              border: `1px solid ${primaryColor}40`,
+              color: primaryColor,
               fontSize: "0.75rem",
               fontWeight: 700,
             }}
@@ -78,15 +87,13 @@ export default function MobileNavigation({ open, onClose }: Props) {
             {initials}
           </Avatar>
         )}
-        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+        <Typography sx={{ fontWeight: 700, fontSize: "0.9375rem" }}>
           {tenant.name}
         </Typography>
       </Box>
 
-      <Divider />
-
       {/* Nav items */}
-      <List component="nav" aria-label="Portal navigation">
+      <List component="nav" aria-label="Portal navigation" sx={{ py: 1 }}>
         {items.map((item) => (
           <ListItemButton
             key={item.href}
@@ -95,29 +102,35 @@ export default function MobileNavigation({ open, onClose }: Props) {
             selected={item.active}
             onClick={onClose}
             sx={{
+              py: 1.25,
               "&.Mui-selected": {
-                bgcolor: "primary.main",
-                color: "primary.contrastText",
-                "&:hover": { bgcolor: "primary.dark" },
+                bgcolor: `${primaryColor}15`,
+                color: primaryColor,
+                "&:hover": { bgcolor: `${primaryColor}20` },
               },
+              "&:hover": { bgcolor: "rgba(255,255,255,0.04)" },
             }}
           >
-            <ListItemText primary={item.label} />
+            <ListItemText
+              primary={item.label}
+              primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: item.active ? 600 : 400 }}
+            />
           </ListItemButton>
         ))}
       </List>
 
-      <Divider />
+      <Divider sx={{ borderColor: "rgba(255,255,255,0.06)" }} />
 
-      {/* Auth link */}
-      <List>
+      {/* Auth links */}
+      <List sx={{ py: 1 }}>
         {isLoggedIn ? (
           <ListItemButton
             component="a"
             href={`/book/${tenantSlug}/portal`}
             onClick={onClose}
+            sx={{ "&:hover": { bgcolor: "rgba(255,255,255,0.04)" } }}
           >
-            <ListItemText primary="My Account" />
+            <ListItemText primary="My Account" primaryTypographyProps={{ fontSize: "0.875rem" }} />
           </ListItemButton>
         ) : (
           <>
@@ -125,21 +138,23 @@ export default function MobileNavigation({ open, onClose }: Props) {
               component="a"
               href={`/book/${tenantSlug}/login`}
               onClick={onClose}
+              sx={{ "&:hover": { bgcolor: "rgba(255,255,255,0.04)" } }}
             >
-              <ListItemText primary="Sign In" />
+              <ListItemText primary="Sign In" primaryTypographyProps={{ fontSize: "0.875rem" }} />
             </ListItemButton>
             <ListItemButton
               component="a"
               href={`/book/${tenantSlug}/register`}
               onClick={onClose}
+              sx={{ "&:hover": { bgcolor: "rgba(255,255,255,0.04)" } }}
             >
-              <ListItemText primary="Create Account" />
+              <ListItemText primary="Create Account" primaryTypographyProps={{ fontSize: "0.875rem" }} />
             </ListItemButton>
           </>
         )}
       </List>
 
-      <Divider />
+      <Divider sx={{ borderColor: "rgba(255,255,255,0.06)" }} />
 
       {/* CTA */}
       <Box sx={{ p: 2 }}>
@@ -148,7 +163,13 @@ export default function MobileNavigation({ open, onClose }: Props) {
           variant="contained"
           fullWidth
           onClick={onClose}
-          sx={{ textTransform: "none", fontWeight: 600 }}
+          sx={{
+            textTransform: "none",
+            fontWeight: 600,
+            background: `linear-gradient(135deg, ${primaryColor}, ${branding.accentColor})`,
+            boxShadow: `0 0 20px ${primaryColor}30`,
+            "&:hover": { boxShadow: `0 0 30px ${primaryColor}50` },
+          }}
         >
           Book Appointment
         </Button>

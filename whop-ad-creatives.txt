@@ -2,8 +2,9 @@
 GET SLOT — WHOP AD CREATIVE GENERATION SCRIPTS
 ================================================================================
 40 total creatives: 20 service businesses + 20 equipment/resource scheduling
-Run each command in your terminal. Each returns a file_ ID when finished.
-Save all file IDs — you'll need them when creating ads.
+All commands include --account_id biz_MLK9EZ6ezy78WA so files can be
+attached to ads.
+Save all file_ IDs — you'll need them when creating ads.
 ================================================================================
 
 
@@ -14,72 +15,72 @@ PART 1: SERVICE BUSINESS CREATIVES (1–20)
 --- Pain Point Hooks (1–5) ---
 
 REM 1. Salon receptionist overwhelmed
-whop media generate --type image --wait --prompt "Salon receptionist overwhelmed by phone calls next to a messy paper appointment book, dark moody cinematic lighting, purple neon accent highlights on edges, modern SaaS advertisement style, photorealistic"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Salon receptionist overwhelmed by phone calls next to a messy paper appointment book, dark moody cinematic lighting, purple neon accent highlights on edges, modern SaaS advertisement style, photorealistic"
 
 REM 2. Clinic double-booked
-whop media generate --type image --wait --prompt "Medical clinic waiting room with frustrated patients checking watches, a sticky note reading double booked on the desk, dark tones with soft purple neon glow accents, professional photography style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Medical clinic waiting room with frustrated patients checking watches, a sticky note reading double booked on the desk, dark tones with soft purple neon glow accents, professional photography style"
 
 REM 3. Studio owner spreadsheet chaos
-whop media generate --type image --wait --prompt "Small business owner staring at a chaotic spreadsheet on laptop, missed call notifications on phone beside it, dark background with soft purple ambient lighting, editorial ad photography"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Small business owner staring at a chaotic spreadsheet on laptop, missed call notifications on phone beside it, dark background with soft purple ambient lighting, editorial ad photography"
 
 REM 4. Barber shop empty chairs
-whop media generate --type image --wait --prompt "Empty barber chairs with a ringing phone nobody is answering, dark cinematic atmosphere, purple gradient light overlay, sense of lost revenue, advertising photography style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Empty barber chairs with a ringing phone nobody is answering, dark cinematic atmosphere, purple gradient light overlay, sense of lost revenue, advertising photography style"
 
 REM 5. Spa sticky note chaos
-whop media generate --type image --wait --prompt "Spa front desk covered in sticky notes and overlapping paper calendars, dim overhead lighting with a purple LED accent strip on the counter, premium ad photography"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Spa front desk covered in sticky notes and overlapping paper calendars, dim overhead lighting with a purple LED accent strip on the counter, premium ad photography"
 
 --- Feature Highlights (6–10) ---
 
 REM 6. Dashboard UI
-whop media generate --type image --wait --prompt "Sleek dark SaaS dashboard UI showing an appointment calendar with purple accent cards and glassmorphism panels, clean modern product screenshot style, dark background with subtle grid"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Sleek dark SaaS dashboard UI showing an appointment calendar with purple accent cards and glassmorphism panels, clean modern product screenshot style, dark background with subtle grid"
 
 REM 7. Mobile booking page
-whop media generate --type image --wait --prompt "Hand holding a smartphone showing a beautiful dark-themed booking page with service cards and available time slots, purple gradient glow behind the phone, dark background, product ad style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Hand holding a smartphone showing a beautiful dark-themed booking page with service cards and available time slots, purple gradient glow behind the phone, dark background, product ad style"
 
 REM 8. Analytics + customer split screen
-whop media generate --type image --wait --prompt "Split screen composition: left side shows business analytics dashboard with purple charts, right side shows happy customer booking on phone, dark theme throughout, premium SaaS ad layout"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Split screen composition: left side shows business analytics dashboard with purple charts, right side shows happy customer booking on phone, dark theme throughout, premium SaaS ad layout"
 
 REM 9. Automated reminders
-whop media generate --type image --wait --prompt "Glowing notification bell icon surrounded by floating automated reminder message bubbles, dark premium background, purple and white color scheme, clean vector-meets-3D illustration style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Glowing notification bell icon surrounded by floating automated reminder message bubbles, dark premium background, purple and white color scheme, clean vector-meets-3D illustration style"
 
 REM 10. Gift cards and loyalty
-whop media generate --type image --wait --prompt "Tablet screen showing gift card and loyalty rewards interface, elegant dark UI with purple accent buttons, professional product shot on dark surface with subtle reflections"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Tablet screen showing gift card and loyalty rewards interface, elegant dark UI with purple accent buttons, professional product shot on dark surface with subtle reflections"
 
 --- Industry-Specific (11–15) ---
 
 REM 11. Hair salon
-whop media generate --type image --wait --prompt "Modern hair salon interior with glowing tablet on reception desk showing online booking interface, purple ambient LED lighting, premium interior photography style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Modern hair salon interior with glowing tablet on reception desk showing online booking interface, purple ambient LED lighting, premium interior photography style"
 
 REM 12. Dental clinic
-whop media generate --type image --wait --prompt "Dental clinic reception area with a sleek dark check-in screen showing appointment confirmation, moody professional atmosphere, purple UI elements glowing on screen, advertising photography"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Dental clinic reception area with a sleek dark check-in screen showing appointment confirmation, moody professional atmosphere, purple UI elements glowing on screen, advertising photography"
 
 REM 13. Yoga studio
-whop media generate --type image --wait --prompt "Yoga studio with soft natural light, instructor in background, smartphone in foreground showing booking app with purple accents, zen atmosphere with subtle purple accent lighting"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Yoga studio with soft natural light, instructor in background, smartphone in foreground showing booking app with purple accents, zen atmosphere with subtle purple accent lighting"
 
 REM 14. Personal trainer
-whop media generate --type image --wait --prompt "Personal trainer in modern gym holding phone showing scheduling app, dark athletic aesthetic, purple gradient highlights on screen and environment, fitness ad photography style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Personal trainer in modern gym holding phone showing scheduling app, dark athletic aesthetic, purple gradient highlights on screen and environment, fitness ad photography style"
 
 REM 15. Pet grooming
-whop media generate --type image --wait --prompt "Pet grooming salon with happy golden retriever and tablet showing booking confirmation screen with purple checkmark, warm but dark-toned environment, purple accent branding elements"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Pet grooming salon with happy golden retriever and tablet showing booking confirmation screen with purple checkmark, warm but dark-toned environment, purple accent branding elements"
 
 --- Social Proof (16–18) ---
 
 REM 16. 50,000+ appointments
-whop media generate --type image --wait --prompt "Large glowing purple number 50,000 plus with text appointments booked beneath it, dark background with floating particle effects, premium bold typography, SaaS social proof ad style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Large glowing purple number 50,000 plus with text appointments booked beneath it, dark background with floating particle effects, premium bold typography, SaaS social proof ad style"
 
 REM 17. Before vs after
-whop media generate --type image --wait --prompt "Dramatic before and after split: left side shows messy paper calendar in warm yellow tones, right side shows clean dark digital dashboard with purple UI and organized appointments, sharp dividing line"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Dramatic before and after split: left side shows messy paper calendar in warm yellow tones, right side shows clean dark digital dashboard with purple UI and organized appointments, sharp dividing line"
 
 REM 18. Five star reviews
-whop media generate --type image --wait --prompt "Five star review cards floating in dark space with purple glassmorphism glow effects, testimonial style layout, premium dark background with depth, SaaS trust-building ad style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Five star review cards floating in dark space with purple glassmorphism glow effects, testimonial style layout, premium dark background with depth, SaaS trust-building ad style"
 
 --- Brand CTA (19–20) ---
 
 REM 19. Logo hero
-whop media generate --type image --wait --prompt "Purple rounded square app icon with calendar checkmark motif centered on dark gradient background with purple light rays emanating outward, tagline Schedule Anything Anytime in clean white text below"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Purple rounded square app icon with calendar checkmark motif centered on dark gradient background with purple light rays emanating outward, tagline Schedule Anything Anytime in clean white text below"
 
 REM 20. Free trial CTA
-whop media generate --type image --wait --prompt "Glowing purple Start Your Free Trial button centered on dark background, surrounded by floating translucent feature icons including calendar bell chart gift card and star, premium SaaS conversion ad style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Glowing purple Start Your Free Trial button centered on dark background, surrounded by floating translucent feature icons including calendar bell chart gift card and star, premium SaaS conversion ad style"
 
 
 ================================================================================
@@ -89,79 +90,89 @@ PART 2: EQUIPMENT & RESOURCE SCHEDULING CREATIVES (21–40)
 --- Equipment Pain Points (21–25) ---
 
 REM 21. Construction equipment chaos
-whop media generate --type image --wait --prompt "Construction site office with a whiteboard full of conflicting equipment reservation schedules, hard hats and radios on desk, dark moody industrial lighting, purple neon accent highlights, modern SaaS ad style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Construction site office with a whiteboard full of conflicting equipment reservation schedules, hard hats and radios on desk, dark moody industrial lighting, purple neon accent highlights, modern SaaS ad style"
 
 REM 22. Photography studio gear idle
-whop media generate --type image --wait --prompt "Photography studio with expensive camera gear and lighting equipment sitting idle, phone ringing unanswered, rental calendar chaos on clipboard, dark cinematic atmosphere with purple gradient overlay"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Photography studio with expensive camera gear and lighting equipment sitting idle, phone ringing unanswered, rental calendar chaos on clipboard, dark cinematic atmosphere with purple gradient overlay"
 
 REM 23. Hospital medical equipment
-whop media generate --type image --wait --prompt "Hospital medical equipment room with MRI machine and ultrasound devices, paper sign-up sheet taped to wall with crossed out names, dark clinical atmosphere with purple accent lighting, professional ad photography"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Hospital medical equipment room with MRI machine and ultrasound devices, paper sign-up sheet taped to wall with crossed out names, dark clinical atmosphere with purple accent lighting, professional ad photography"
 
 REM 24. Warehouse machinery
-whop media generate --type image --wait --prompt "Warehouse with forklifts and heavy machinery, frustrated manager looking at double-booked equipment spreadsheet on tablet, dark industrial environment with purple LED strip accents, advertising photography"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Warehouse with forklifts and heavy machinery, frustrated manager looking at double-booked equipment spreadsheet on tablet, dark industrial environment with purple LED strip accents, advertising photography"
 
 REM 25. University lab equipment
-whop media generate --type image --wait --prompt "University science lab with expensive microscopes and centrifuges, students waiting because equipment is overbooked, dark academic atmosphere with purple glow on screens, SaaS advertisement style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "University science lab with expensive microscopes and centrifuges, students waiting because equipment is overbooked, dark academic atmosphere with purple glow on screens, SaaS advertisement style"
 
 --- Equipment Feature Highlights (26–30) ---
 
 REM 26. Equipment dashboard
-whop media generate --type image --wait --prompt "Dark SaaS dashboard showing equipment reservation calendar with color-coded resource types including cameras forklifts and projectors, purple accent cards with availability status, glassmorphism UI, product screenshot style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Dark SaaS dashboard showing equipment reservation calendar with color-coded resource types including cameras forklifts and projectors, purple accent cards with availability status, glassmorphism UI, product screenshot style"
 
 REM 27. Equipment booking app
-whop media generate --type image --wait --prompt "Smartphone showing equipment booking app with categories for vehicles rooms and tools, real-time availability indicators in green and purple, dark background with purple gradient glow behind phone"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Smartphone showing equipment booking app with categories for vehicles rooms and tools, real-time availability indicators in green and purple, dark background with purple gradient glow behind phone"
 
 REM 28. Utilization analytics
-whop media generate --type image --wait --prompt "Tablet displaying equipment utilization analytics dashboard with usage charts and idle-time metrics in purple data visualizations, dark premium background, professional product shot"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Tablet displaying equipment utilization analytics dashboard with usage charts and idle-time metrics in purple data visualizations, dark premium background, professional product shot"
 
 REM 29. QR code booking
-whop media generate --type image --wait --prompt "Split screen showing QR code on equipment tag on left and instant booking confirmation on phone screen on right, dark theme with purple accents throughout, clean modern ad layout"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Split screen showing QR code on equipment tag on left and instant booking confirmation on phone screen on right, dark theme with purple accents throughout, clean modern ad layout"
 
 REM 30. Maintenance reminders
-whop media generate --type image --wait --prompt "Dark UI showing automated maintenance reminders and equipment return notifications with purple bell icons, floating message bubbles around construction tools, premium SaaS illustration style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Dark UI showing automated maintenance reminders and equipment return notifications with purple bell icons, floating message bubbles around construction tools, premium SaaS illustration style"
 
 --- Industry-Specific Equipment (31–37) ---
 
 REM 31. Co-working spaces
-whop media generate --type image --wait --prompt "Co-working space with meeting rooms and podcast studios visible through glass walls, booking screen on wall tablet showing room availability in purple UI, dark modern interior photography with purple ambient lighting"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Co-working space with meeting rooms and podcast studios visible through glass walls, booking screen on wall tablet showing room availability in purple UI, dark modern interior photography with purple ambient lighting"
 
 REM 32. Car rental fleet
-whop media generate --type image --wait --prompt "Car rental lot with vehicles in rows, manager using dark-themed scheduling app on tablet showing vehicle fleet availability with purple status indicators, twilight atmosphere with purple sky tones"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Car rental lot with vehicles in rows, manager using dark-themed scheduling app on tablet showing vehicle fleet availability with purple status indicators, twilight atmosphere with purple sky tones"
 
 REM 33. Music rehearsal studio
-whop media generate --type image --wait --prompt "Music rehearsal studio with drum kits guitars and amps, room booking display on wall showing hourly slots in dark UI with purple highlights, moody rock-and-roll atmosphere with purple stage lighting"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Music rehearsal studio with drum kits guitars and amps, room booking display on wall showing hourly slots in dark UI with purple highlights, moody rock-and-roll atmosphere with purple stage lighting"
 
 REM 34. Commercial kitchen
-whop media generate --type image --wait --prompt "Professional kitchen with commercial cooking equipment, chef looking at equipment reservation screen showing oven and mixer availability in purple-accented dark UI, industrial kitchen lighting with purple accents"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Professional kitchen with commercial cooking equipment, chef looking at equipment reservation screen showing oven and mixer availability in purple-accented dark UI, industrial kitchen lighting with purple accents"
 
 REM 35. Makerspace workshop
-whop media generate --type image --wait --prompt "Makerspace workshop with 3D printers laser cutters and CNC machines, dark tech environment, glowing tablet showing machine booking queue with purple progress bars, futuristic maker atmosphere"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Makerspace workshop with 3D printers laser cutters and CNC machines, dark tech environment, glowing tablet showing machine booking queue with purple progress bars, futuristic maker atmosphere"
 
 REM 36. Sports facility
-whop media generate --type image --wait --prompt "Sports facility equipment room with rowing machines treadmills and weights, booking kiosk screen showing equipment reservation slots in dark purple UI, athletic environment with purple accent lighting"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Sports facility equipment room with rowing machines treadmills and weights, booking kiosk screen showing equipment reservation slots in dark purple UI, athletic environment with purple accent lighting"
 
 REM 37. Film production warehouse
-whop media generate --type image --wait --prompt "Film production equipment warehouse with camera dollies drones and lighting rigs on shelves, dark cinematic environment, tablet showing gear checkout calendar in purple-accented dark UI, Hollywood production style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Film production equipment warehouse with camera dollies drones and lighting rigs on shelves, dark cinematic environment, tablet showing gear checkout calendar in purple-accented dark UI, Hollywood production style"
 
 --- Equipment Social Proof & CTA (38–40) ---
 
 REM 38. Any Resource Any Schedule
-whop media generate --type image --wait --prompt "Large glowing purple text reading Any Resource Any Schedule with icons of vehicles rooms equipment and people orbiting around it, dark background with particle effects, bold SaaS ad typography"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Large glowing purple text reading Any Resource Any Schedule with icons of vehicles rooms equipment and people orbiting around it, dark background with particle effects, bold SaaS ad typography"
 
 REM 39. Equipment before vs after
-whop media generate --type image --wait --prompt "Before and after split: left side shows tagged-out equipment with paper sign-up sheets in warm yellow tones, right side shows clean dark digital equipment dashboard with purple real-time availability, dramatic comparison"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Before and after split: left side shows tagged-out equipment with paper sign-up sheets in warm yellow tones, right side shows clean dark digital equipment dashboard with purple real-time availability, dramatic comparison"
 
 REM 40. Schedule Everything grid
-whop media generate --type image --wait --prompt "Grid of six resource type icons including person room camera vehicle tools and computer, each in a purple glassmorphism card floating on dark background, text reading Schedule Everything in One Place below, premium SaaS ad style"
+whop media generate --type image --wait --account_id biz_MLK9EZ6ezy78WA --prompt "Grid of six resource type icons including person room camera vehicle tools and computer, each in a purple glassmorphism card floating on dark background, text reading Schedule Everything in One Place below, premium SaaS ad style"
 
 
 ================================================================================
-NEXT STEPS
+AFTER GENERATING — CREATE ADS
 ================================================================================
-1. Run one command first to test quality and confirm billing works
-2. Run the remaining 39 commands (they can run in parallel)
-3. Save all file_ IDs returned by each command
-4. Create a Facebook Page at facebook.com/pages/create
-5. Connect it: whop social-accounts connect
-6. Then we create ads, ad groups, and campaigns using the file IDs
+Replace <file_id> with the file_ ID from each generation.
+All ads go into ad group: adgrp_jds6b4ZqGRCr
+
+Template command:
+whop ads create --ad_group_id adgrp_jds6b4ZqGRCr --title "<ad title>" --url "https://get-slot.app" --call_to_action learn_more --creatives "[{\"id\":\"<file_id>\"}]" --headlines "[\"<headline>\"]" --descriptions "[\"<description>\"]" --primary_texts "[\"<body copy>\"]" --social_accounts "[{\"id\":\"sacc_Dnqs51fiSSD4w\"}]" --format json
+
+================================================================================
+CAMPAIGN INFO
+================================================================================
+Account:       biz_MLK9EZ6ezy78WA
+Campaign:      adcamp_MHhxQB6enAx (traffic, $5/day, draft)
+Ad Group:      adgrp_jds6b4ZqGRCr (paused)
+Social Acct:   sacc_Dnqs51fiSSD4w (Facebook)
+
+To go live:    whop ad-groups update adgrp_jds6b4ZqGRCr --status active
+To check stats: whop stats
 ================================================================================

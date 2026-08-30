@@ -124,9 +124,27 @@ export default function AppointmentCreateForm({
         setSlots(allSlots);
 
         if (allSlots.length === 0) {
-            setSlotsError(result.data.reasonCode
-                ? `No available times (${result.data.reasonCode})`
-                : "No available times for this date");
+            const reasonMessages: Record<string, string> = {
+                NO_RESOURCE_WORKING_HOURS: "No staff/resource working hours configured for this day and location. Set up working hours in the resource settings.",
+                LOCATION_CLOSED: "This location is closed on the selected date.",
+                SERVICE_NOT_AT_LOCATION: "This service is not offered at the selected location.",
+                NO_ELIGIBLE_RESOURCES: "No staff or resources are assigned to this service at this location.",
+                RESOURCE_NOT_AT_LOCATION: "The selected resource is not assigned to this location.",
+                FULLY_BLOCKED_BY_TIME_OFF: "All resources are on time off for this date.",
+                FULLY_BLOCKED_BY_APPOINTMENTS: "All resources are fully booked on this date.",
+                PERIOD_TOO_SHORT: "The available time window is too short for this service duration.",
+                SERVICE_INACTIVE: "This service is currently inactive.",
+                LOCATION_INACTIVE: "This location is currently inactive.",
+                DATE_IN_PAST: "Cannot book appointments in the past.",
+                SAME_DAY_BOOKING_DISABLED: "Same-day booking is not allowed for this service.",
+                MINIMUM_NOTICE_NOT_MET: "The minimum advance notice requirement is not met.",
+                MAXIMUM_ADVANCE_EXCEEDED: "This date is too far in advance to book.",
+            };
+            const code = result.data.reasonCode;
+            const message = code && reasonMessages[code]
+                ? reasonMessages[code]
+                : "No available times for this date";
+            setSlotsError(message);
         }
     }
 

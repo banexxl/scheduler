@@ -288,6 +288,12 @@ export async function calculateAvailability(
       topReasonCode = "MINIMUM_NOTICE_NOT_MET";
     } else if (resourceResults.every((r) => r.reasonCode === "FULLY_BLOCKED_BY_APPOINTMENTS")) {
       topReasonCode = "FULLY_BLOCKED_BY_APPOINTMENTS";
+    } else if (resourceResults.every((r) => r.reasonCode === "NO_RESOURCE_WORKING_HOURS")) {
+      topReasonCode = "NO_RESOURCE_WORKING_HOURS";
+    } else if (resourceResults.every((r) => r.reasonCode === "FULLY_BLOCKED_BY_TIME_OFF")) {
+      topReasonCode = "FULLY_BLOCKED_BY_TIME_OFF";
+    } else if (resourceResults.every((r) => r.reasonCode === "PERIOD_TOO_SHORT")) {
+      topReasonCode = "PERIOD_TOO_SHORT";
     } else {
       topReasonCode = "NO_SLOTS";
     }

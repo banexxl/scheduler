@@ -9,6 +9,8 @@ import { createServiceRoleClient } from "@/lib/supabase/server";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { logger } from "@/lib/logging";
 import { createServerActionLogger } from "@/lib/logging/server-action-logger";
+import { revalidatePath } from "next/cache";
+import { getEmailProvider } from "@/features/notifications/services/providers";
 import type { TenantRole } from "../types/team";
 
 type ActionResult = { success: true } | { success: false; error: string };
@@ -102,15 +104,62 @@ export async function inviteTenantMemberAction(
       return { success: false, error: "Failed to create invitation." };
     }
 
-    // Enqueue invitation email (best effort)
-    // TODO: Enqueue via notification outbox with template 'tenant_member_invitation'
-    // const appUrl = process.env.PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    // const inviteUrl = `${appUrl}/invite/${rawToken}`;
+    // ─── Send invitation email (best effort — never blocks invitation creation) ──
+    const appUrl = process.env.PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const inviteUrl = `${appUrl}/invite/${rawToken}`;
+
+    console.log("[team.invite] Email env vars:", {
+      EMAIL_PROVIDER: process.env.EMAIL_PROVIDER ?? "(not set)",
+      SMTP_HOST: process.env.SMTP_HOST ?? "(not set)",
+      SMTP_PORT: process.env.SMTP_PORT ?? "(not set)",
+      SMTP_USER: process.env.SMTP_USER ?? "(not set)",
+      SMTP_PASS: process.env.SMTP_PASS ? "***set***" : "(not set)",
+      NOTIFICATION_FROM_EMAIL: process.env.NOTIFICATION_FROM_EMAIL ?? "(not set)",
+      PUBLIC_APP_URL: process.env.PUBLIC_APP_URL ?? "(not set)",
+      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? "(not set)",
+    });
+    console.log("[team.invite] Sending invitation email to:", normalizedEmail, "inviteUrl:", inviteUrl);
+
+    try {
+      const emailProvider = getEmailProvider();
+      const tenantName = tenant.name || tenantSlug;
+
+      const emailResult = await emailProvider.send({
+        to: normalizedEmail,
+        subject: `You've been invited to join ${tenantName}`,
+        html: `
+          <div style="font-family:sans-serif;background:#0a0a0f;padding:40px 16px;">
+            <div style="max-width:480px;margin:0 auto;background:#16161e;border:1px solid rgba(124,58,237,0.15);border-radius:16px;padding:40px 32px;text-align:center;">
+              <div style="width:60px;height:3px;background:linear-gradient(90deg,#7C3AED,#a855f7);border-radius:2px;margin:0 auto 24px;"></div>
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#f0f0f5;">You've been invited</h1>
+              <p style="margin:0 0 28px;font-size:15px;color:#8b8b9e;line-height:1.6;">
+                You've been invited to join <strong style="color:#f0f0f5;">${tenantName}</strong> as a <strong style="color:#f0f0f5;">${input.role}</strong>. Click below to accept the invitation.
+              </p>
+              <a href="${inviteUrl}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#7C3AED,#a855f7);border-radius:10px;padding:14px 36px;color:#fff;font-size:15px;font-weight:700;text-decoration:none;">
+                Accept Invitation
+              </a>
+              <p style="margin:28px 0 0;font-size:12px;color:#5c5c72;line-height:1.5;">
+                This invitation expires in ${INVITATION_TTL_DAYS} days. If you weren't expecting this, you can safely ignore this email.
+              </p>
+            </div>
+          </div>
+        `,
+        text: `You've been invited to join ${tenantName} as a ${input.role}. Accept the invitation: ${inviteUrl}`,
+        fromName: tenantName,
+        idempotencyKey: `invite_${tokenHash}`,
+      });
+
+      console.log("[team.invite] Email provider response:", JSON.stringify(emailResult));
+    } catch (emailError) {
+      console.error("[team.invite] Email send failed:", emailError instanceof Error ? emailError.message : emailError);
+    }
+
     logger.info("team.invitation.created", {
       tenantId: tenant.id,
       operation: "invite_member",
     });
 
+    revalidatePath(`/${tenantSlug}/team`);
     return { success: true };
   } catch {
     return { success: false, error: "Failed to send invitation." };
@@ -137,6 +186,7 @@ export async function revokeTenantInvitationAction(
     if (error) return { success: false, error: "Failed to revoke invitation." };
 
     logger.info("team.invitation.revoked", { tenantId: tenant.id, operation: "revoke_invitation" });
+    revalidatePath(`/${tenantSlug}/team`);
     return { success: true };
   } catch {
     return { success: false, error: "Failed to revoke invitation." };
@@ -205,6 +255,7 @@ export async function changeTenantMemberRoleAction(
     if (error) return { success: false, error: "Failed to update role." };
 
     logger.info("team.member.role_changed", { tenantId: tenant.id, operation: "change_role" });
+    revalidatePath(`/${tenantSlug}/team`);
     return { success: true };
   } catch {
     return { success: false, error: "Failed to change role." };
@@ -233,6 +284,7 @@ export async function removeTenantMemberAction(
 
     if (status === "removed") {
       logger.info("team.member.removed", { tenantId: tenant.id, operation: "remove_member" });
+      revalidatePath(`/${tenantSlug}/team`);
       return { success: true };
     }
     if (status === "last_owner") return { success: false, error: "Cannot remove the last owner." };

@@ -96,6 +96,11 @@ const theme = createTheme({
               borderColor: "#7C3AED",
             },
           },
+          "& .MuiInputLabel-shrink": {
+            backgroundColor: "#16161e",
+            paddingLeft: "6px",
+            paddingRight: "6px",
+          },
         },
       },
     },

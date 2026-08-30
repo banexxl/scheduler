@@ -11,6 +11,8 @@ import IconButton from "@mui/material/IconButton";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
+import type { SxProps, Theme } from "@mui/material/styles";
+
 type Props = {
   name: string;
   value: string;
@@ -23,6 +25,7 @@ type Props = {
   disabled?: boolean;
   fullWidth?: boolean;
   margin?: "none" | "dense" | "normal";
+  sx?: SxProps<Theme>;
 };
 
 export default function PasswordField({
@@ -37,6 +40,7 @@ export default function PasswordField({
   disabled,
   fullWidth = true,
   margin = "normal",
+  sx,
 }: Props) {
   const [visible, setVisible] = useState(false);
 
@@ -54,6 +58,7 @@ export default function PasswordField({
       disabled={disabled}
       fullWidth={fullWidth}
       margin={margin}
+      sx={sx}
       slotProps={{
         input: {
           endAdornment: (

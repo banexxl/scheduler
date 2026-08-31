@@ -95,7 +95,7 @@ export default function CalendarWeekView({
         </Typography>
       </Box>
 
-      <Box sx={{ display: "flex", minWidth: 800 }}>
+      <Box sx={{ display: "flex", minWidth: 800, pt: "12px" }}>
         {/* Time axis */}
         <Box sx={{ width: 60, flexShrink: 0, position: "relative", height: totalHeight, borderRight: "1px solid", borderColor: "divider" }}>
           {timeLabels.map((label) => (

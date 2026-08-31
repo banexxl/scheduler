@@ -71,7 +71,7 @@ export default function CalendarDayView({
 
   return (
     <Paper elevation={1} sx={{ overflow: "auto" }}>
-      <Box sx={{ display: "flex", minWidth: visibleResources.length * 160 }}>
+      <Box sx={{ display: "flex", minWidth: visibleResources.length * 160, pt: "12px" }}>
         {/* Time axis */}
         <Box sx={{ width: 60, flexShrink: 0, position: "relative", height: totalHeight, borderRight: "1px solid", borderColor: "divider" }}>
           {timeLabels.map((label) => (

@@ -37,9 +37,6 @@ import GroupIcon from "@mui/icons-material/Group";
 import SettingsIcon from "@mui/icons-material/Settings";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import WebIcon from "@mui/icons-material/Web";
-import PaletteIcon from "@mui/icons-material/Palette";
-import ViewQuiltIcon from "@mui/icons-material/ViewQuilt";
-import TuneIcon from "@mui/icons-material/Tune";
 import {
   TENANT_SIDEBAR_WIDTH,
   tenantPalette,
@@ -91,10 +88,7 @@ function getNavGroups(slug: string): NavGroup[] {
     {
       label: "Website",
       items: [
-        { label: "Homepage", href: `/${slug}/site/homepage`, icon: <WebIcon fontSize="small" />, matchPrefix: `/${slug}/site` },
-        { label: "Branding", href: `/${slug}/settings/branding`, icon: <PaletteIcon fontSize="small" />, matchPrefix: `/${slug}/settings/branding` },
-        { label: "Templates", href: `/${slug}/settings/templates`, icon: <ViewQuiltIcon fontSize="small" />, matchPrefix: `/${slug}/settings/templates` },
-        { label: "Site Config", href: `/${slug}/settings/public-site`, icon: <TuneIcon fontSize="small" />, matchPrefix: `/${slug}/settings/public-site` },
+        { label: "Website", href: `/${slug}/settings/public-site`, icon: <WebIcon fontSize="small" />, matchPrefix: `/${slug}/settings/public-site` },
       ],
     },
     {

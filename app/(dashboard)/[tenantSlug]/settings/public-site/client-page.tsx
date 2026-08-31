@@ -48,6 +48,13 @@ import type {
   SiteSectionType,
 } from "@/features/public-site/types/site-config";
 import { ALLOWED_SOCIAL_PLATFORMS, SITE_CONFIG_LIMITS } from "@/features/public-site/types/site-config";
+import GalleryEditor from "@/features/homepage-builder/components/GalleryEditor";
+import TestimonialEditor from "@/features/homepage-builder/components/TestimonialEditor";
+import type { GalleryImage, Testimonial } from "@/features/homepage-builder/types";
+import MediaUploader from "@/features/media/components/media-uploader";
+import MediaGallery from "@/features/media/components/media-gallery";
+import type { MediaAsset } from "@/features/media/types/media";
+import { getLogoAssetsAction } from "@/features/media/actions/get-logo-assets";
 
 // ─── Props ───────────────────────────────────────────────────────────────────
 
@@ -59,6 +66,9 @@ type Props = {
   publishedAt: string | null;
   hasUnpublishedChanges: boolean;
   availableServices: Array<{ id: string; name: string }>;
+  gallery: GalleryImage[];
+  testimonials: Testimonial[];
+  logoAssets: MediaAsset[];
 };
 
 // ─── Section Labels ──────────────────────────────────────────────────────────
@@ -86,6 +96,9 @@ export default function PublicSiteEditorClient({
   publishedAt,
   hasUnpublishedChanges: initialHasChanges,
   availableServices,
+  gallery: initialGallery,
+  testimonials: initialTestimonials,
+  logoAssets: initialLogoAssets,
 }: Props) {
   const [config, setConfig] = useState<TenantPublicSiteConfig>(initialConfig);
   const [, setDraftVersion] = useState(initialDraftVersion);
@@ -93,6 +106,16 @@ export default function PublicSiteEditorClient({
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [gallery, setGallery] = useState<GalleryImage[]>(initialGallery);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(initialTestimonials);
+  const [logoAssets, setLogoAssets] = useState<MediaAsset[]>(initialLogoAssets);
+
+  // ─── Refresh Logo ──────────────────────────────────────────────────────
+
+  const refreshLogo = useCallback(async () => {
+    const result = await getLogoAssetsAction(tenantSlug);
+    if (result.success) setLogoAssets(result.assets);
+  }, [tenantSlug]);
 
   // ─── Update Helpers ──────────────────────────────────────────────────
 
@@ -241,6 +264,34 @@ export default function PublicSiteEditorClient({
           {message.text}
         </Alert>
       )}
+
+      {/* Logo */}
+      <Accordion defaultExpanded>
+        <AccordionSummary aria-controls="logo-content" id="logo-header">
+          <Typography fontWeight={600}>Logo</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Stack spacing={2}>
+            <Typography variant="body2" color="text.secondary">
+              Upload a small logo image (recommended: max 200×200 px, max 2 MB). The logo appears in the header of your public booking page.
+            </Typography>
+            <MediaGallery
+              assets={logoAssets}
+              tenantSlug={tenantSlug}
+              canEdit={true}
+              onMutate={() => refreshLogo()}
+            />
+            <MediaUploader
+              tenantSlug={tenantSlug}
+              target="business"
+              targetId={null}
+              mediaRole="logo"
+              label="Upload Logo"
+              onUploadComplete={() => refreshLogo()}
+            />
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
 
       {/* Hero Section */}
       <Accordion defaultExpanded>
@@ -439,6 +490,44 @@ export default function PublicSiteEditorClient({
               Add FAQ Entry
             </Button>
           </Stack>
+        </AccordionDetails>
+      </Accordion>
+
+      {/* Gallery */}
+      <Accordion>
+        <AccordionSummary aria-controls="gallery-content" id="gallery-header">
+          <Typography fontWeight={600}>Gallery ({gallery.length})</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <GalleryEditor
+            tenantSlug={tenantSlug}
+            images={gallery}
+            onChanged={async () => {
+              // Refetch gallery data after changes
+              const { getGalleryImages } = await import("@/features/homepage-builder/actions/homepage-actions");
+              const result = await getGalleryImages(tenantSlug);
+              if (result.success) setGallery(result.data);
+            }}
+          />
+        </AccordionDetails>
+      </Accordion>
+
+      {/* Testimonials */}
+      <Accordion>
+        <AccordionSummary aria-controls="testimonials-content" id="testimonials-header">
+          <Typography fontWeight={600}>Testimonials ({testimonials.length})</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <TestimonialEditor
+            tenantSlug={tenantSlug}
+            testimonials={testimonials}
+            onChanged={async () => {
+              // Refetch testimonials data after changes
+              const { getTestimonials } = await import("@/features/homepage-builder/actions/homepage-actions");
+              const result = await getTestimonials(tenantSlug);
+              if (result.success) setTestimonials(result.data);
+            }}
+          />
         </AccordionDetails>
       </Accordion>
 

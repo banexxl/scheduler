@@ -435,3 +435,62 @@ export async function getPublicHomepageData(
 
   return { content, gallery, testimonials };
 }
+
+// ─── Gallery/Testimonials loaders (for merged site editor) ───────────────────
+
+export async function getGalleryImages(
+  tenantSlug: string
+): Promise<{ success: true; data: GalleryImage[] } | { success: false }> {
+  try {
+    const { tenant } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
+    const supabase = createServiceRoleClient();
+
+    const { data } = await supabase
+      .from("tenant_gallery_images" as never)
+      .select("id, image_url, alt_text, caption, sort_order" as never)
+      .eq("tenant_id" as never, tenant.id)
+      .order("sort_order" as never, { ascending: true })
+      .limit(HOMEPAGE_LIMITS.maxGalleryImages);
+
+    const images: GalleryImage[] = ((data ?? []) as unknown as Array<Record<string, unknown>>).map((r) => ({
+      id: r.id as string,
+      imageUrl: r.image_url as string,
+      altText: (r.alt_text as string) ?? null,
+      caption: (r.caption as string) ?? null,
+      sortOrder: r.sort_order as number,
+    }));
+
+    return { success: true, data: images };
+  } catch {
+    return { success: false };
+  }
+}
+
+export async function getTestimonials(
+  tenantSlug: string
+): Promise<{ success: true; data: Testimonial[] } | { success: false }> {
+  try {
+    const { tenant } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
+    const supabase = createServiceRoleClient();
+
+    const { data } = await supabase
+      .from("tenant_testimonials" as never)
+      .select("id, author_name, rating, body, avatar_url, sort_order" as never)
+      .eq("tenant_id" as never, tenant.id)
+      .order("sort_order" as never, { ascending: true })
+      .limit(HOMEPAGE_LIMITS.maxTestimonials);
+
+    const testimonials: Testimonial[] = ((data ?? []) as unknown as Array<Record<string, unknown>>).map((r) => ({
+      id: r.id as string,
+      authorName: r.author_name as string,
+      rating: r.rating as number,
+      body: r.body as string,
+      avatarUrl: (r.avatar_url as string) ?? null,
+      sortOrder: r.sort_order as number,
+    }));
+
+    return { success: true, data: testimonials };
+  } catch {
+    return { success: false };
+  }
+}

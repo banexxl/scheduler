@@ -69,22 +69,25 @@ export async function resolveDraftTenantTheme(
  * Derives text/border colors from background for accessibility.
  */
 function configToTheme(config: TenantBrandingConfig): ResolvedTenantTheme {
-  const bg = config.appearance === "dark" ? "#1a1a2e" : config.backgroundColor;
-  const surface = config.appearance === "dark" ? "#2d2d44" : config.surfaceColor;
+  // Always use dark mode — branding customization is disabled.
+  const bg = "#0a0a0f";
+  const surface = "#16161e";
+  const primaryColor = "#7C3AED";
+  const accentColor = "#06B6D4";
 
   return {
-    primaryColor: config.primaryColor,
-    accentColor: config.accentColor,
+    primaryColor,
+    accentColor,
     backgroundColor: bg,
     surfaceColor: surface,
-    textColor: resolveForeground(bg),
-    mutedTextColor: resolveMutedText(bg),
-    borderColor: resolveBorderColor(bg),
-    appearance: config.appearance,
-    fontFamily: FONT_FAMILY_MAP[config.fontPreset],
-    borderRadius: RADIUS_MAP[config.radiusPreset],
+    textColor: "#f0f0f5",
+    mutedTextColor: "#8b8b9e",
+    borderColor: "rgba(255, 255, 255, 0.06)",
+    appearance: "dark",
+    fontFamily: '"Inter", "Helvetica Neue", Arial, sans-serif',
+    borderRadius: 12,
     heroLayout: config.heroLayout,
-    logoUrl: null, // Resolved by caller using media service if logoMediaId is set
+    logoUrl: null,
     coverUrl: null,
     tagline: config.tagline,
   };

@@ -58,6 +58,22 @@ export default function MediaUploader({
       return;
     }
 
+    // For logos, validate dimensions (max 200×200)
+    if (mediaRole === "logo") {
+      readImageDimensions(file).then((dims) => {
+        if (dims && (dims.width > 200 || dims.height > 200)) {
+          setError(`Logo must be 200×200 pixels or smaller. Your image is ${dims.width}×${dims.height}.`);
+          setSelectedFile(null);
+          setPreviewUrl(null);
+          if (inputRef.current) inputRef.current.value = "";
+          return;
+        }
+        setSelectedFile(file);
+        setPreviewUrl(URL.createObjectURL(file));
+      });
+      return;
+    }
+
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };

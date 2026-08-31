@@ -18,7 +18,6 @@ import "server-only";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { resolvePublishedTenantTheme } from "@/features/branding/services/resolve-tenant-theme";
 import { detectSupportedFont } from "./font-loader";
-import { isValidTemplateId } from "@/features/templates/registry";
 import { DEFAULT_TEMPLATE_ID } from "@/features/templates/types";
 import type { TenantBranding } from "@/types/branding";
 import type { PortalData, PortalAddress, PortalHeroConfig } from "@/features/customer-portal/types";
@@ -56,18 +55,25 @@ export async function getTenantBranding(
   // 2. Resolve published theme (falls back to defaults internally)
   const theme = await resolvePublishedTenantTheme(tenant.id);
 
-  // 3. Load branding settings (template)
-  const { data: brandingRow } = await supabase
-    .from("tenant_branding_settings")
-    .select("template")
+  // 2b. Resolve logo from media_assets
+  const { data: logoAsset } = await supabase
+    .from("media_assets")
+    .select("storage_bucket, storage_path")
     .eq("tenant_id", tenant.id)
+    .eq("media_role", "logo")
+    .is("location_id", null)
+    .is("resource_id", null)
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
-  const rawTemplate = (brandingRow as { template?: string } | null)?.template;
-  const templateId =
-    rawTemplate && isValidTemplateId(rawTemplate)
-      ? rawTemplate
-      : DEFAULT_TEMPLATE_ID;
+  if (logoAsset) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+    theme.logoUrl = `${supabaseUrl}/storage/v1/object/public/${logoAsset.storage_bucket}/${logoAsset.storage_path}`;
+  }
+
+  // 3. Template is always the default — template customization is disabled.
+  const templateId = DEFAULT_TEMPLATE_ID;
 
   // 4. Load primary location for address
   const address = await loadPrimaryAddress(supabase, tenant.id);

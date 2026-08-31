@@ -3,14 +3,15 @@
 /**
  * Main appointment calendar orchestrator — Milestone 6.10.
  *
- * Coordinates the toolbar, day/week views, appointment drawer,
- * and drag-and-drop rescheduling interactions.
+ * All view/date/filter state is managed client-side. The server provides
+ * a full month of appointments on initial load. When the user navigates
+ * outside the loaded range, new data is fetched via server action.
  */
 
-import { useState, useTransition } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import Box from "@mui/material/Box";
-import { useRouter } from "next/navigation";
-import type { CalendarAppointment, CalendarFilters } from "../types/calendar";
+import type { CalendarAppointment } from "../types/calendar";
+import type { CalendarView } from "../types/calendar";
 import CalendarToolbar from "./calendar-toolbar";
 import CalendarDayView from "./calendar-day-view";
 import CalendarWeekView from "./calendar-week-view";
@@ -20,6 +21,13 @@ import CalendarLegend from "./calendar-legend";
 import CalendarMobileAgenda from "./calendar-mobile-agenda";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
+import {
+  getTenantDayRange,
+  getTenantWeekRange,
+  getTenantMonthRange,
+  addTenantLocalDays,
+} from "@/lib/scheduling/calendar-utils";
+import { fetchCalendarAppointmentsAction } from "../actions/fetch-calendar-appointments";
 
 type EntityOption = { id: string; name: string };
 
@@ -27,10 +35,11 @@ type Props = {
   tenantSlug: string;
   timeZone: string;
   today: string;
-  appointments: CalendarAppointment[];
+  initialAppointments: CalendarAppointment[];
+  initialRangeStart: string;
+  initialRangeEnd: string;
   locations: EntityOption[];
   resources: EntityOption[];
-  filters: CalendarFilters;
   canEdit: boolean;
 };
 
@@ -38,20 +47,36 @@ export default function AppointmentCalendar({
   tenantSlug,
   timeZone,
   today,
-  appointments,
+  initialAppointments,
+  initialRangeStart,
+  initialRangeEnd,
   locations,
   resources,
-  filters,
   canEdit,
 }: Props) {
-  const router = useRouter();
-  const [, startTransition] = useTransition();
-  const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // Reschedule dialog state
+  // ─── Client-side state (no URL query params) ──────────────────────────────
+  const [view, setView] = useState<CalendarView>("day");
+  const [date, setDate] = useState(today);
+  const [locationId, setLocationId] = useState<string | null>(null);
+  const [resourceId, setResourceId] = useState<string | null>(null);
+
+  // ─── Appointment data cache ────────────────────────────────────────────────
+  const [allAppointments, setAllAppointments] = useState(initialAppointments);
+  const [loadedRangeStart, setLoadedRangeStart] = useState(initialRangeStart);
+  const [loadedRangeEnd, setLoadedRangeEnd] = useState(initialRangeEnd);
+  const [isFetching, setIsFetching] = useState(false);
+
+  // Track the current loaded month key to know when we need to refetch
+  const loadedMonthRef = useRef(today.slice(0, 7)); // "YYYY-MM"
+
+  // ─── Drawer state ──────────────────────────────────────────────────────────
+  const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // ─── Reschedule dialog state ───────────────────────────────────────────────
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [rescheduleTarget, setRescheduleTarget] = useState<{
     appointment: CalendarAppointment;
@@ -60,6 +85,95 @@ export default function AppointmentCalendar({
     newResourceId: string;
   } | null>(null);
 
+  // ─── Fetch new month data when navigating outside loaded range ─────────────
+  const fetchMonthData = useCallback(
+    async (targetDate: string) => {
+      const targetMonth = targetDate.slice(0, 7);
+      if (targetMonth === loadedMonthRef.current && !isFetching) return;
+
+      setIsFetching(true);
+      const monthRange = getTenantMonthRange(targetDate, timeZone);
+
+      const result = await fetchCalendarAppointmentsAction(tenantSlug, {
+        rangeStart: monthRange.start,
+        rangeEnd: monthRange.end,
+      });
+
+      if (result.success) {
+        setAllAppointments(result.appointments);
+        setLoadedRangeStart(monthRange.start);
+        setLoadedRangeEnd(monthRange.end);
+        loadedMonthRef.current = targetMonth;
+      }
+      setIsFetching(false);
+    },
+    [tenantSlug, timeZone, isFetching]
+  );
+
+  // Check if we need to fetch when date changes
+  useEffect(() => {
+    const currentMonth = date.slice(0, 7);
+    if (currentMonth !== loadedMonthRef.current) {
+      fetchMonthData(date);
+    }
+  }, [date, fetchMonthData]);
+
+  // ─── Filter appointments for the visible range ─────────────────────────────
+  const visibleAppointments = useMemo(() => {
+    let rangeStart: string;
+    let rangeEnd: string;
+
+    if (view === "week") {
+      const weekRange = getTenantWeekRange(date, timeZone);
+      rangeStart = weekRange.start;
+      rangeEnd = weekRange.end;
+    } else {
+      const dayRange = getTenantDayRange(date, timeZone);
+      rangeStart = dayRange.start;
+      rangeEnd = dayRange.end;
+    }
+
+    return allAppointments.filter((appt) => {
+      // Overlap check: starts_at < rangeEnd AND ends_at > rangeStart
+      if (appt.startsAt >= rangeEnd) return false;
+      if (appt.endsAt <= rangeStart) return false;
+
+      // Apply location filter
+      if (locationId && appt.locationId !== locationId) return false;
+
+      // Apply resource filter
+      if (resourceId && appt.resourceId !== resourceId) return false;
+
+      return true;
+    });
+  }, [allAppointments, view, date, timeZone, locationId, resourceId]);
+
+  // Filter resources by selected location
+  const filteredResources = useMemo(() => {
+    // For now show all resources — location-based filtering was done server-side before.
+    // Since we load all appointments, just show all resources.
+    return resources;
+  }, [resources]);
+
+  // ─── Navigation callbacks ──────────────────────────────────────────────────
+  const handleViewChange = useCallback((newView: CalendarView) => {
+    setView(newView);
+  }, []);
+
+  const handleDateChange = useCallback((newDate: string) => {
+    setDate(newDate);
+  }, []);
+
+  const handleLocationChange = useCallback((newLocationId: string | null) => {
+    setLocationId(newLocationId);
+    setResourceId(null); // Reset resource when location changes
+  }, []);
+
+  const handleResourceChange = useCallback((newResourceId: string | null) => {
+    setResourceId(newResourceId);
+  }, []);
+
+  // ─── Appointment interactions ──────────────────────────────────────────────
   function handleAppointmentClick(appointment: CalendarAppointment) {
     setSelectedAppointment(appointment);
     setDrawerOpen(true);
@@ -83,8 +197,9 @@ export default function AppointmentCalendar({
   function handleRescheduleSuccess() {
     setRescheduleOpen(false);
     setRescheduleTarget(null);
-    // Refresh the page to reload appointments
-    startTransition(() => router.refresh());
+    // Refetch current month to get updated data
+    loadedMonthRef.current = ""; // Force refetch
+    fetchMonthData(date);
   }
 
   function handleRescheduleClose() {
@@ -100,26 +215,33 @@ export default function AppointmentCalendar({
   return (
     <Box>
       <CalendarToolbar
-        tenantSlug={tenantSlug}
-        filters={filters}
+        view={view}
+        date={date}
         today={today}
+        locationId={locationId}
+        resourceId={resourceId}
         locations={locations}
-        resources={resources}
+        resources={filteredResources}
+        onViewChange={handleViewChange}
+        onDateChange={handleDateChange}
+        onLocationChange={handleLocationChange}
+        onResourceChange={handleResourceChange}
+        isFetching={isFetching}
       />
 
       <Box sx={{ mt: 2 }}>
         {isMobile ? (
           <CalendarMobileAgenda
-            appointments={appointments}
+            appointments={visibleAppointments}
             timeZone={timeZone}
-            localDate={filters.date}
+            localDate={date}
             onAppointmentClick={handleAppointmentClick}
           />
-        ) : filters.view === "day" ? (
+        ) : view === "day" ? (
           <CalendarDayView
-            appointments={appointments}
-            resources={resources}
-            localDate={filters.date}
+            appointments={visibleAppointments}
+            resources={filteredResources}
+            localDate={date}
             timeZone={timeZone}
             today={today}
             onAppointmentClick={handleAppointmentClick}
@@ -129,12 +251,12 @@ export default function AppointmentCalendar({
           />
         ) : (
           <CalendarWeekView
-            appointments={appointments}
-            localDate={filters.date}
+            appointments={visibleAppointments}
+            localDate={date}
             timeZone={timeZone}
             today={today}
-            resourceId={filters.resourceId}
-            resources={resources}
+            resourceId={resourceId}
+            resources={filteredResources}
             onAppointmentClick={handleAppointmentClick}
             canEdit={canEdit}
             tenantSlug={tenantSlug}

@@ -2,8 +2,8 @@
 
 /**
  * Calendar toolbar — Milestone 6.10.
- * View switcher, date navigation, location/resource/status filters.
- * Implementation in Task #4.
+ * View switcher, date navigation, location/resource filters.
+ * Uses callbacks instead of URL navigation for instant client-side state updates.
  */
 
 import Box from "@mui/material/Box";
@@ -13,76 +13,74 @@ import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { useRouter } from "next/navigation";
-import type { CalendarFilters } from "../types/calendar";
+import CircularProgress from "@mui/material/CircularProgress";
+import type { CalendarView } from "../types/calendar";
 import { addTenantLocalDays } from "@/lib/scheduling/calendar-utils";
 
 type EntityOption = { id: string; name: string };
 
 type Props = {
-  tenantSlug: string;
-  filters: CalendarFilters;
+  view: CalendarView;
+  date: string;
   today: string;
+  locationId: string | null;
+  resourceId: string | null;
   locations: EntityOption[];
   resources: EntityOption[];
+  onViewChange: (view: CalendarView) => void;
+  onDateChange: (date: string) => void;
+  onLocationChange: (locationId: string | null) => void;
+  onResourceChange: (resourceId: string | null) => void;
+  isFetching?: boolean;
 };
 
 export default function CalendarToolbar({
-  tenantSlug,
-  filters,
+  view,
+  date,
   today,
+  locationId,
+  resourceId,
   locations,
   resources,
+  onViewChange,
+  onDateChange,
+  onLocationChange,
+  onResourceChange,
+  isFetching,
 }: Props) {
-  const router = useRouter();
-
-  function buildUrl(overrides: Partial<CalendarFilters>): string {
-    const merged = { ...filters, ...overrides };
-    const params = new URLSearchParams();
-    params.set("view", merged.view);
-    params.set("date", merged.date);
-    if (merged.locationId) params.set("location", merged.locationId);
-    if (merged.resourceId) params.set("resource", merged.resourceId);
-    if (merged.status) params.set("status", merged.status);
-    return `/${tenantSlug}/calendar?${params.toString()}`;
-  }
-
-  function navigate(overrides: Partial<CalendarFilters>) {
-    router.push(buildUrl(overrides));
-  }
-
-  const prevDate = addTenantLocalDays(filters.date, filters.view === "week" ? -7 : -1);
-  const nextDate = addTenantLocalDays(filters.date, filters.view === "week" ? 7 : 1);
+  const prevDate = addTenantLocalDays(date, view === "week" ? -7 : -1);
+  const nextDate = addTenantLocalDays(date, view === "week" ? 7 : 1);
 
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center", justifyContent: "space-between" }}>
       {/* Left: Navigation */}
       <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-        <Button variant="outlined" size="small" onClick={() => navigate({ date: today })}>
+        <Button variant="outlined" size="small" onClick={() => onDateChange(today)}>
           Today
         </Button>
-        <IconButton size="small" onClick={() => navigate({ date: prevDate })} aria-label="Previous">
+        <IconButton size="small" onClick={() => onDateChange(prevDate)} aria-label="Previous">
           ◀
         </IconButton>
         <Typography variant="subtitle1" sx={{ fontWeight: 600, minWidth: 120, textAlign: "center" }}>
-          {filters.date}
+          {date}
         </Typography>
-        <IconButton size="small" onClick={() => navigate({ date: nextDate })} aria-label="Next">
+        <IconButton size="small" onClick={() => onDateChange(nextDate)} aria-label="Next">
           ▶
         </IconButton>
+        {isFetching && <CircularProgress size={18} sx={{ ml: 0.5 }} />}
       </Box>
 
       {/* Center: View toggle */}
       <ButtonGroup size="small" variant="outlined">
         <Button
-          onClick={() => navigate({ view: "day" })}
-          variant={filters.view === "day" ? "contained" : "outlined"}
+          onClick={() => onViewChange("day")}
+          variant={view === "day" ? "contained" : "outlined"}
         >
           Day
         </Button>
         <Button
-          onClick={() => navigate({ view: "week" })}
-          variant={filters.view === "week" ? "contained" : "outlined"}
+          onClick={() => onViewChange("week")}
+          variant={view === "week" ? "contained" : "outlined"}
         >
           Week
         </Button>
@@ -93,8 +91,8 @@ export default function CalendarToolbar({
         <TextField
           select
           size="small"
-          value={filters.locationId ?? ""}
-          onChange={(e) => navigate({ locationId: e.target.value || null, resourceId: null })}
+          value={locationId ?? ""}
+          onChange={(e) => onLocationChange(e.target.value || null)}
           sx={{ minWidth: 140 }}
           label="Location"
         >
@@ -107,8 +105,8 @@ export default function CalendarToolbar({
         <TextField
           select
           size="small"
-          value={filters.resourceId ?? ""}
-          onChange={(e) => navigate({ resourceId: e.target.value || null })}
+          value={resourceId ?? ""}
+          onChange={(e) => onResourceChange(e.target.value || null)}
           sx={{ minWidth: 140 }}
           label="Resource"
         >

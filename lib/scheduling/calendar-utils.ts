@@ -14,7 +14,7 @@
  */
 
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
-import { format, addDays, startOfWeek } from "date-fns";
+import { format, addDays, startOfWeek, startOfMonth, endOfMonth } from "date-fns";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -116,6 +116,47 @@ export function getTenantWeekRange(localDate: string, timeZone: string): Instant
   return {
     start: start.toISOString(),
     end: end.toISOString(),
+  };
+}
+
+// ─── Month Range ─────────────────────────────────────────────────────────────
+
+/**
+ * Returns the exact UTC instant range covering a full calendar month,
+ * including partial weeks at the start and end (Monday-based).
+ *
+ * This gives a generous range so the client can navigate freely within
+ * the month without server round-trips.
+ */
+export function getTenantMonthRange(
+  localDate: string,
+  timeZone: string
+): { start: string; end: string; monthStart: string; monthEnd: string } {
+  const [year, month, day] = localDate.split("-").map(Number) as [number, number, number];
+  const dateObj = new Date(year, month - 1, day);
+
+  // First and last day of the month
+  const firstOfMonth = startOfMonth(dateObj);
+  const lastOfMonth = endOfMonth(dateObj);
+
+  // Extend to the Monday of the first week and Sunday of the last week
+  const weekStart = startOfWeek(firstOfMonth, { weekStartsOn: 1 });
+  const lastWeekStart = startOfWeek(lastOfMonth, { weekStartsOn: 1 });
+  const weekEnd = addDays(lastWeekStart, 7);
+
+  const rangeStartDate = format(weekStart, "yyyy-MM-dd");
+  const rangeEndDate = format(weekEnd, "yyyy-MM-dd");
+  const monthStartDate = format(firstOfMonth, "yyyy-MM-dd");
+  const monthEndDate = format(lastOfMonth, "yyyy-MM-dd");
+
+  const start = fromZonedTime(new Date(`${rangeStartDate}T00:00:00`), timeZone);
+  const end = fromZonedTime(new Date(`${rangeEndDate}T00:00:00`), timeZone);
+
+  return {
+    start: start.toISOString(),
+    end: end.toISOString(),
+    monthStart: monthStartDate,
+    monthEnd: monthEndDate,
   };
 }
 

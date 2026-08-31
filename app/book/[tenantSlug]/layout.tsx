@@ -55,7 +55,7 @@ export default async function PublicBookingLayout({
   }
 
   return (
-    <div className={fontClassName || undefined}>
+    <div className={fontClassName || undefined} style={{ minHeight: "100vh" }}>
       <TenantThemeProvider branding={branding}>
         <PortalAuthProvider userEmail={userEmail}>
           <BookingProvider>

@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { resolvePublicTenant } from "@/features/public-booking/services/public-tenant-resolver";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import CustomerLoginForm from "@/features/customer-portal/components/customer-login-form";

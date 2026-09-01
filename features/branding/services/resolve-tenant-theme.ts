@@ -10,13 +10,10 @@ import "server-only";
 
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { resolveBrandingConfig } from "../utils/validate-branding-config";
-import { resolveForeground, resolveMutedText, resolveBorderColor } from "../utils/color-utils";
 import {
   type ResolvedTenantTheme,
   type TenantBrandingConfig,
   DEFAULT_BRANDING_CONFIG,
-  FONT_FAMILY_MAP,
-  RADIUS_MAP,
 } from "../types/branding-config";
 
 /**

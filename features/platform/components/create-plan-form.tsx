@@ -1,15 +1,25 @@
 "use client";
 
 /**
- * Create Plan Form — Milestone 15.13.
+ * Plan Form — Milestone 15.13.
  *
- * Client component for creating billing plans with:
+ * Dual-mode client component for creating AND editing billing plans:
+ *
+ * CREATE mode (no `selectedPlan`):
  * - Currency autocomplete with search (all Polar-supported currencies)
  * - Price entered in whole units (dollars/euros/dinars), converted to cents on submit
  * - Billing type selector (recurring/one-time)
  * - Interval selector (monthly/yearly)
  * - Trial days
  * - Free plan toggle (hides pricing fields)
+ *
+ * EDIT mode (`selectedPlan` provided):
+ * - Fields are prefilled from the selected plan.
+ * - Plan Key is locked (immutable after creation).
+ * - Pricing is read-only: Polar price values are managed via Polar sync, so the
+ *   update path only edits metadata + state (name, description, sort, free,
+ *   active, public). A note explains this.
+ * - Submit button becomes "Update Plan"; a "Cancel" button clears the selection.
  */
 
 import { useState } from "react";
@@ -31,27 +41,49 @@ import CircularProgress from "@mui/material/CircularProgress";
 import toast from "react-hot-toast";
 import { SUPPORTED_CURRENCIES, ZERO_DECIMAL_CURRENCIES } from "@/features/business/utils/supported-currencies";
 
-type Props = {
-  action: (formData: FormData) => Promise<string | null>;
+/** Minimal shape needed to prefill the form when editing. */
+export type EditablePlan = {
+  id: string;
+  planKey: string;
+  name: string;
+  description: string | null;
+  isFree: boolean;
+  isActive: boolean;
+  isPublic: boolean;
+  sortOrder: number;
 };
 
-export default function CreatePlanForm({ action }: Props) {
-  const [isFree, setIsFree] = useState(false);
+type Props = {
+  /** Create action — returns an error message string, or null on success. */
+  action: (formData: FormData) => Promise<string | null>;
+  /** Update action — returns an error message string, or null on success. */
+  updateAction?: (formData: FormData) => Promise<string | null>;
+  /** When set, the form renders in edit mode prefilled with this plan. */
+  selectedPlan?: EditablePlan | null;
+  /** Called after a successful create/update or when the user cancels editing. */
+  onDone?: () => void;
+};
+
+export default function CreatePlanForm({ action, updateAction, selectedPlan, onDone }: Props) {
+  const isEditing = Boolean(selectedPlan);
+
+  // State is initialized directly from `selectedPlan`. The parent remounts this
+  // component (via a React `key` tied to the selection) whenever the selected
+  // plan changes, so these initializers re-run with the right values — no effect
+  // needed to sync props into state.
+  const [isFree, setIsFree] = useState(selectedPlan?.isFree ?? false);
+  const [isActive, setIsActive] = useState(selectedPlan?.isActive ?? true);
+  const [isPublic, setIsPublic] = useState(selectedPlan?.isPublic ?? true);
   const [currency, setCurrency] = useState<{ code: string; name: string }>(SUPPORTED_CURRENCIES[0]!);
   const [billingType, setBillingType] = useState<"recurring" | "one_time">("recurring");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(formData: FormData) {
-    setSubmitting(true);
-    setError(null);
-
+  async function handleCreate(formData: FormData) {
     const priceWhole = Number(formData.get("priceWhole") ?? "0");
     const currencyCode = currency.code;
     const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(currencyCode.toUpperCase());
     const priceAmount = isZeroDecimal ? priceWhole : Math.round(priceWhole * 100);
-
-    console.log("[create-plan-form] Price:", { priceWhole, priceAmount, currencyCode, isFree });
 
     const submissionData = new FormData();
     submissionData.set("planKey", formData.get("planKey") as string);
@@ -66,16 +98,49 @@ export default function CreatePlanForm({ action }: Props) {
     submissionData.set("recurringIntervalCount", String(formData.get("recurringIntervalCount") || "1"));
     submissionData.set("trialDays", String(formData.get("trialDays") || "0"));
 
+    const errorMessage = await action(submissionData);
+    if (errorMessage) {
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return;
+    }
+    toast.success("Plan created successfully!");
+    onDone?.();
+  }
+
+  async function handleUpdate(formData: FormData) {
+    if (!updateAction || !selectedPlan) return;
+
+    const submissionData = new FormData();
+    submissionData.set("id", selectedPlan.id);
+    submissionData.set("name", formData.get("name") as string);
+    submissionData.set("description", formData.get("description") as string);
+    submissionData.set("sortOrder", formData.get("sortOrder") as string);
+    submissionData.set("isFree", isFree ? "on" : "");
+    submissionData.set("isActive", isActive ? "on" : "");
+    submissionData.set("isPublic", isPublic ? "on" : "");
+
+    const errorMessage = await updateAction(submissionData);
+    if (errorMessage) {
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return;
+    }
+    toast.success("Plan updated successfully!");
+    onDone?.();
+  }
+
+  async function handleSubmit(formData: FormData) {
+    setSubmitting(true);
+    setError(null);
     try {
-      const errorMessage = await action(submissionData);
-      if (errorMessage) {
-        setError(errorMessage);
-        toast.error(errorMessage);
+      if (isEditing) {
+        await handleUpdate(formData);
       } else {
-        toast.success("Plan created successfully!");
+        await handleCreate(formData);
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to create plan";
+      const msg = err instanceof Error ? err.message : isEditing ? "Failed to update plan" : "Failed to create plan";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -88,15 +153,24 @@ export default function CreatePlanForm({ action }: Props) {
       <Stack spacing={2.5}>
         {error && <Alert severity="error">{error}</Alert>}
 
+        {isEditing && (
+          <Alert severity="info">
+            Editing <strong>{selectedPlan!.planKey}</strong>. Plan key and pricing are locked here — pricing
+            is managed through Polar and updated via sync.
+          </Alert>
+        )}
+
         {/* Row 1: Plan key + Name */}
         <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
-          <Tooltip title="Unique identifier used in code (e.g. free, pro, business). Cannot be changed later." arrow>
+          <Tooltip title="Unique identifier used in code (e.g. free, pro, business). Cannot be changed after creation." arrow>
             <TextField
               size="small"
               name="planKey"
               label="Plan Key"
-              required
+              required={!isEditing}
+              disabled={isEditing}
               placeholder="e.g. pro"
+              defaultValue={selectedPlan?.planKey ?? ""}
               sx={{ minWidth: 180 }}
             />
           </Tooltip>
@@ -108,6 +182,7 @@ export default function CreatePlanForm({ action }: Props) {
               required
               fullWidth
               placeholder="e.g. Pro Plan"
+              defaultValue={selectedPlan?.name ?? ""}
             />
           </Tooltip>
         </Stack>
@@ -121,6 +196,7 @@ export default function CreatePlanForm({ action }: Props) {
               label="Description"
               fullWidth
               placeholder="e.g. For growing businesses"
+              defaultValue={selectedPlan?.description ?? ""}
             />
           </Tooltip>
           <Tooltip title="Display order on the pricing page. Lower numbers appear first." arrow>
@@ -129,7 +205,7 @@ export default function CreatePlanForm({ action }: Props) {
               name="sortOrder"
               label="Sort Order"
               type="number"
-              defaultValue="100"
+              defaultValue={selectedPlan ? String(selectedPlan.sortOrder) : "100"}
               sx={{ width: 120 }}
             />
           </Tooltip>
@@ -144,8 +220,22 @@ export default function CreatePlanForm({ action }: Props) {
           />
         </Tooltip>
 
-        {/* Pricing — hidden when free */}
-        {!isFree && (
+        {/* State toggles — edit mode only (create defaults both to true) */}
+        {isEditing && (
+          <Stack direction="row" spacing={2}>
+            <FormControlLabel
+              control={<Switch checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />}
+              label="Active"
+            />
+            <FormControlLabel
+              control={<Switch checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />}
+              label="Public"
+            />
+          </Stack>
+        )}
+
+        {/* Pricing — create mode only, hidden when free. In edit mode pricing is read-only. */}
+        {!isEditing && !isFree && (
           <>
             <Divider />
             <Typography variant="subtitle2" color="text.secondary">Pricing</Typography>
@@ -247,14 +337,26 @@ export default function CreatePlanForm({ action }: Props) {
           </>
         )}
 
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={submitting}
-          sx={{ alignSelf: "flex-start", mt: 1 }}
-        >
-          {submitting ? <CircularProgress size={20} /> : "Create Plan"}
-        </Button>
+        <Stack direction="row" spacing={1.5} sx={{ mt: 1 }}>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={submitting}
+            sx={{ alignSelf: "flex-start" }}
+          >
+            {submitting ? <CircularProgress size={20} /> : isEditing ? "Update Plan" : "Create Plan"}
+          </Button>
+          {isEditing && (
+            <Button
+              type="button"
+              variant="outlined"
+              disabled={submitting}
+              onClick={() => onDone?.()}
+            >
+              Cancel
+            </Button>
+          )}
+        </Stack>
       </Stack>
     </form>
   );

@@ -25,7 +25,6 @@ import {
   getTenantDayRange,
   getTenantWeekRange,
   getTenantMonthRange,
-  addTenantLocalDays,
 } from "@/lib/scheduling/calendar-utils";
 import { fetchCalendarAppointmentsAction } from "../actions/fetch-calendar-appointments";
 
@@ -48,8 +47,6 @@ export default function AppointmentCalendar({
   timeZone,
   today,
   initialAppointments,
-  initialRangeStart,
-  initialRangeEnd,
   locations,
   resources,
   canEdit,
@@ -65,8 +62,6 @@ export default function AppointmentCalendar({
 
   // ─── Appointment data cache ────────────────────────────────────────────────
   const [allAppointments, setAllAppointments] = useState(initialAppointments);
-  const [loadedRangeStart, setLoadedRangeStart] = useState(initialRangeStart);
-  const [loadedRangeEnd, setLoadedRangeEnd] = useState(initialRangeEnd);
   const [isFetching, setIsFetching] = useState(false);
 
   // Track the current loaded month key to know when we need to refetch
@@ -101,8 +96,6 @@ export default function AppointmentCalendar({
 
       if (result.success) {
         setAllAppointments(result.appointments);
-        setLoadedRangeStart(monthRange.start);
-        setLoadedRangeEnd(monthRange.end);
         loadedMonthRef.current = targetMonth;
       }
       setIsFetching(false);

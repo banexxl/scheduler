@@ -22,7 +22,10 @@ export default async function LoginPage() {
         alignItems: "center",
         justifyContent: "center",
         minHeight: "80vh",
-        py: 4,
+        // Offset the fixed marketing header (~64px) so the form's top
+        // isn't clipped when the content is vertically centered on mobile.
+        pt: { xs: "88px", sm: 4 },
+        pb: 4,
       }}
     >
       <Container maxWidth="xs">

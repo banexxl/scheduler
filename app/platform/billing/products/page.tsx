@@ -53,6 +53,25 @@ async function refreshSingleAction(formData: FormData) {
 export default async function PlatformBillingProductsPage() {
      await requirePlatformAdmin();
 
+     // ─── Env var diagnostics for this page ─────────────────────────────────
+     // This page calls the Polar API (discoverPolarProductsForMapping →
+     // listPolarProducts → polarFetch), which throws if POLAR_ACCESS_TOKEN is
+     // missing. Log the presence/absence of every Polar env var it depends on.
+     console.log("[billing-products-page] Polar env var status:", {
+          POLAR_ACCESS_TOKEN: process.env.POLAR_ACCESS_TOKEN ? "***set***" : "(MISSING — required)",
+          POLAR_ORGANIZATION_ID: process.env.POLAR_ORGANIZATION_ID ? "***set***" : "(not set)",
+          POLAR_API_BASE_URL: process.env.POLAR_API_BASE_URL ?? "(not set — will use default)",
+          POLAR_SERVER: process.env.POLAR_SERVER ?? "(not set — defaults to production)",
+          POLAR_RECONCILIATION_SECRET: process.env.POLAR_RECONCILIATION_SECRET ? "***set***" : "(not set)",
+          POLAR_ORDER_WEBHOOK_SECRET: process.env.POLAR_ORDER_WEBHOOK_SECRET ? "***set***" : "(not set)",
+          POLAR_CHECKOUT_WEBHOOK_SECRET: process.env.POLAR_CHECKOUT_WEBHOOK_SECRET ? "***set***" : "(not set)",
+          POLAR_SUBSCRIPTION_WEBHOOK_SECRET: process.env.POLAR_SUBSCRIPTION_WEBHOOK_SECRET ? "***set***" : "(not set)",
+          POLAR_REFUND_WEBHOOK_SECRET: process.env.POLAR_REFUND_WEBHOOK_SECRET ? "***set***" : "(not set)",
+          POLAR_DISCOUNT_WEBHOOK_SECRET: process.env.POLAR_DISCOUNT_WEBHOOK_SECRET ? "***set***" : "(not set)",
+          SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ? "***set***" : "(MISSING — required for DB queries)",
+          NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? "***set***" : "(MISSING — required)",
+     });
+
      const [plans, recentEvents, recentRuns, discovered, metrics] = await Promise.all([
           listBillingPlansWithPrices(),
           listBillingWebhookDiagnostics(20),

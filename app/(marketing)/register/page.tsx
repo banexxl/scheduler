@@ -24,7 +24,7 @@ export default async function RegisterPage() {
         minHeight: "80vh",
         // Offset the fixed marketing header (~64px) so the form's top
         // isn't clipped when the content is vertically centered on mobile.
-        pt: { xs: "88px", sm: 4 },
+        pt: { xs: "88px", sm: 4, md: 10 },
         pb: 4,
       }}
     >

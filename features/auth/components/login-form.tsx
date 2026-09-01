@@ -24,6 +24,13 @@ const authInputSx = {
     paddingRight: "6px",
   },
   "& .MuiOutlinedInput-input": { color: "#f0f0f5" },
+  // Prevent browser autofill from masking the custom background until edited
+  "& input:-webkit-autofill": {
+    WebkitBoxShadow: "0 0 0 1000px #7C3AED inset",
+    WebkitTextFillColor: "#f0f0f5",
+    caretColor: "#f0f0f5",
+    transition: "background-color 5000s ease-in-out 0s",
+  },
 };
 
 export default function LoginForm() {

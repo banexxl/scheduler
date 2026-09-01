@@ -26,6 +26,34 @@ function hashToken(raw: string): string {
   return createHash("sha256").update(raw, "utf8").digest("hex");
 }
 
+const PASSWORD_CHARSETS = [
+  "ABCDEFGHJKLMNPQRSTUVWXYZ",
+  "abcdefghijkmnpqrstuvwxyz",
+  "23456789",
+  "!@#$%^&*-_=+",
+];
+const PASSWORD_LENGTH = 16;
+
+/** Generates a random password guaranteed to contain each required character class. */
+function generateStrongPassword(): string {
+  const allChars = PASSWORD_CHARSETS.join("");
+  const randomByte = () => randomBytes(1)[0] as number;
+  const pick = (charset: string) => charset[randomByte() % charset.length] as string;
+
+  const required = PASSWORD_CHARSETS.map(pick);
+  const rest = Array.from({ length: PASSWORD_LENGTH - required.length }, () => pick(allChars));
+
+  const combined = [...required, ...rest];
+  // Fisher-Yates shuffle using CSPRNG bytes so required chars aren't always in fixed positions.
+  for (let i = combined.length - 1; i > 0; i -= 1) {
+    const j = randomByte() % (i + 1);
+    const temp = combined[i] as string;
+    combined[i] = combined[j] as string;
+    combined[j] = temp;
+  }
+  return combined.join("");
+}
+
 function canInviteRole(actorRole: TenantRole, targetRole: TenantRole): boolean {
   if (actorRole === "owner") return true;
   if (actorRole === "admin") return ["admin", "manager", "staff"].includes(targetRole);
@@ -77,6 +105,23 @@ export async function inviteTenantMemberAction(
       }
     }
 
+    // Create an auth account with a temporary password when the invitee has none yet.
+    let temporaryPassword: string | null = null;
+    let newAuthUserId: string | null = null;
+    if (!existingUser) {
+      temporaryPassword = generateStrongPassword();
+      const { data: createdUser, error: createUserError } = await supabase.auth.admin.createUser({
+        email: normalizedEmail,
+        password: temporaryPassword,
+        email_confirm: true,
+      });
+
+      if (createUserError) {
+        return { success: false, error: "Failed to create an account for this email." };
+      }
+      newAuthUserId = createdUser.user.id;
+    }
+
     // Generate token
     const rawToken = generateToken();
     const tokenHash = hashToken(rawToken);
@@ -98,6 +143,11 @@ export async function inviteTenantMemberAction(
       } as never);
 
     if (insertError) {
+      // Roll back the freshly created auth account so we don't leave a dangling
+      // credential that was never delivered to anyone.
+      if (newAuthUserId) {
+        await supabase.auth.admin.deleteUser(newAuthUserId);
+      }
       if ((insertError as { code?: string }).code === "23505") {
         return { success: false, error: "An active invitation already exists for this email." };
       }
@@ -124,6 +174,19 @@ export async function inviteTenantMemberAction(
       const emailProvider = getEmailProvider();
       const tenantName = tenant.name || tenantSlug;
 
+      const credentialsHtml = temporaryPassword
+        ? `
+              <div style="margin:0 0 28px;padding:16px 20px;background:#0a0a0f;border:1px solid rgba(124,58,237,0.25);border-radius:10px;text-align:left;">
+                <p style="margin:0 0 8px;font-size:12px;color:#8b8b9e;text-transform:uppercase;letter-spacing:0.05em;">Your login credentials</p>
+                <p style="margin:0 0 4px;font-size:14px;color:#f0f0f5;">Email: <strong>${normalizedEmail}</strong></p>
+                <p style="margin:0;font-size:14px;color:#f0f0f5;">Temporary password: <strong>${temporaryPassword}</strong></p>
+              </div>
+            `
+        : "";
+      const credentialsText = temporaryPassword
+        ? ` Your login credentials — Email: ${normalizedEmail}, Temporary password: ${temporaryPassword}. Please sign in and change your password afterwards.`
+        : "";
+
       const emailResult = await emailProvider.send({
         to: normalizedEmail,
         subject: `You've been invited to join ${tenantName}`,
@@ -135,6 +198,7 @@ export async function inviteTenantMemberAction(
               <p style="margin:0 0 28px;font-size:15px;color:#8b8b9e;line-height:1.6;">
                 You've been invited to join <strong style="color:#f0f0f5;">${tenantName}</strong> as a <strong style="color:#f0f0f5;">${input.role}</strong>. Click below to accept the invitation.
               </p>
+              ${credentialsHtml}
               <a href="${inviteUrl}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#7C3AED,#a855f7);border-radius:10px;padding:14px 36px;color:#fff;font-size:15px;font-weight:700;text-decoration:none;">
                 Accept Invitation
               </a>
@@ -144,7 +208,7 @@ export async function inviteTenantMemberAction(
             </div>
           </div>
         `,
-        text: `You've been invited to join ${tenantName} as a ${input.role}. Accept the invitation: ${inviteUrl}`,
+        text: `You've been invited to join ${tenantName} as a ${input.role}.${credentialsText} Accept the invitation: ${inviteUrl}`,
         fromName: tenantName,
         idempotencyKey: `invite_${tokenHash}`,
       });

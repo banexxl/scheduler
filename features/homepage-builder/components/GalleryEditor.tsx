@@ -99,7 +99,7 @@ export default function GalleryEditor({ tenantSlug, images, onChanged }: Props) 
         console.error("[GalleryEditor] Supabase storage upload error:", {
           message: uploadError.message,
           name: uploadError.name,
-          statusCode: (uploadError as Record<string, unknown>).statusCode,
+          statusCode: (uploadError as unknown as Record<string, unknown>).statusCode,
           error: uploadError,
           uploadPath: prepare.uploadPath,
           fileType: selectedFile.type,

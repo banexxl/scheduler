@@ -32,6 +32,14 @@ export async function sendBookingEmail(
   const provider = getEmailProvider();
   let lastResult: SendEmailResult | null = null;
 
+  console.log("[send-booking-email] Starting send:", {
+    to: input.to,
+    subject: input.subject,
+    provider: provider.constructor.name,
+    emailProviderEnv: process.env.EMAIL_PROVIDER ?? "(not set, defaults to console)",
+    idempotencyKey: input.idempotencyKey,
+  });
+
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       lastResult = await provider.send({
@@ -42,6 +50,12 @@ export async function sendBookingEmail(
         fromName: input.fromName,
         replyTo: input.replyTo ?? undefined,
         idempotencyKey: input.idempotencyKey,
+      });
+
+      console.log("[send-booking-email] Provider response:", {
+        to: input.to,
+        attempt,
+        result: lastResult,
       });
 
       if (lastResult.success) {

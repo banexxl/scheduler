@@ -91,6 +91,17 @@ export class NodemailerEmailProvider implements EmailProvider {
 
       const messageId = info.messageId ?? null;
 
+      console.log("[NodemailerEmailProvider] Send success:", {
+        to: input.to,
+        subject: input.subject,
+        from,
+        messageId,
+        accepted: info.accepted,
+        rejected: info.rejected,
+        response: info.response,
+        envelope: info.envelope,
+      });
+
       return {
         success: true,
         providerMessageId: messageId,
@@ -108,6 +119,19 @@ export class NodemailerEmailProvider implements EmailProvider {
         : isTimeout
           ? "timeout"
           : "smtp_error";
+
+      console.error("[NodemailerEmailProvider] Send failed:", {
+        to: input.to,
+        subject: input.subject,
+        from,
+        errorMessage,
+        errorCode,
+        retryable,
+        responseCode,
+        response: (error as { response?: string })?.response,
+        command: (error as { command?: string })?.command,
+        code: (error as { code?: string })?.code,
+      });
 
       return {
         success: false,

@@ -37,6 +37,8 @@ export default function TeamClientPage({ tenantSlug, data }: Props) {
   const [role, setRole] = useState<TenantRole>("staff");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [revokeTarget, setRevokeTarget] = useState<{ id: string; email: string } | null>(null);
+  const [revoking, setRevoking] = useState(false);
 
   async function handleInvite() {
     setSaving(true);
@@ -52,8 +54,12 @@ export default function TeamClientPage({ tenantSlug, data }: Props) {
     }
   }
 
-  async function handleRevoke(id: string) {
-    await revokeTenantInvitationAction(tenantSlug, id);
+  async function handleRevoke() {
+    if (!revokeTarget) return;
+    setRevoking(true);
+    await revokeTenantInvitationAction(tenantSlug, revokeTarget.id);
+    setRevoking(false);
+    setRevokeTarget(null);
   }
 
   async function handleRemove(id: string) {
@@ -127,7 +133,7 @@ export default function TeamClientPage({ tenantSlug, data }: Props) {
                     <TableCell><Chip label={inv.role} size="small" variant="outlined" /></TableCell>
                     <TableCell>{new Date(inv.expiresAt).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <Button size="small" color="error" onClick={() => handleRevoke(inv.id)}>Revoke</Button>
+                      <Button size="small" color="error" onClick={() => setRevokeTarget({ id: inv.id, email: inv.email })}>Revoke</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -154,6 +160,22 @@ export default function TeamClientPage({ tenantSlug, data }: Props) {
           <Button onClick={() => setInviteOpen(false)}>Cancel</Button>
           <Button onClick={handleInvite} variant="contained" disabled={saving || !email}>
             {saving ? "Sending..." : "Send Invitation"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Revoke Confirmation Dialog */}
+      <Dialog open={!!revokeTarget} onClose={() => setRevokeTarget(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Revoke Invitation</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            Are you sure you want to revoke the invitation for <strong>{revokeTarget?.email}</strong>? This cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRevokeTarget(null)} disabled={revoking}>Cancel</Button>
+          <Button onClick={handleRevoke} color="error" variant="contained" disabled={revoking}>
+            {revoking ? "Revoking..." : "Revoke"}
           </Button>
         </DialogActions>
       </Dialog>

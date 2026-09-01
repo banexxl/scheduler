@@ -17,6 +17,12 @@ export const metadata: Metadata = {
     icon: "/logos/getslot_icon.svg",
     apple: "/logos/getslot_192.png",
   },
+  verification: {
+    // Google Search Console HTML tag verification.
+    // Replace the value below with the exact token from your Search Console
+    // verification wizard (the "content" value of the google-site-verification meta tag).
+    google: "Je05aA9fNkk_kZp2DodFPqc2fJY5N9ldgLovt4JNbZ8",
+  },
 };
 
 export const viewport: Viewport = {

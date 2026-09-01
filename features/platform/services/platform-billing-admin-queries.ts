@@ -66,6 +66,9 @@ export async function listPlatformBillingPlanSummaries(): Promise<
                isActive: Boolean(row.is_active),
                isPublic: Boolean(row.is_public),
                sortOrder: Number(row.sort_order ?? 0),
+               features: Array.isArray(row.features)
+                    ? (row.features as unknown[]).filter((f): f is string => typeof f === "string")
+                    : [],
                polarProductId:
                     typeof row.polar_product_id === "string" ? row.polar_product_id : null,
                activePriceCount: 0,

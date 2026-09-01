@@ -18,6 +18,10 @@ export const billingPlanUpsertSchema = yup.object({
      isActive: yup.boolean().required(),
      isPublic: yup.boolean().required(),
      sortOrder: yup.number().integer().min(0).max(100000).required(),
+     features: yup
+          .array(yup.string().trim().min(1).max(200).required())
+          .max(30)
+          .default([]),
 });
 
 export const billingPlanReorderSchema = yup.object({

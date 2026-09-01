@@ -21,6 +21,8 @@ export async function googleLoginAction(): Promise<never> {
   const supabase = await createClient();
   const callbackUrl = new URL("/api/auth/callback", getAppUrl()).toString();
 
+  console.log("[google-login] Initiating OAuth", { provider: "google", callbackUrl });
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
@@ -33,9 +35,10 @@ export async function googleLoginAction(): Promise<never> {
   });
 
   if (error || !data.url) {
-    console.error("[google-login] OAuth initiation failed:", error?.message);
+    console.error("[google-login] OAuth initiation failed:", { callbackUrl, message: error?.message, status: error?.status });
     redirect("/auth-error?code=oauth_failed");
   }
 
+  console.log("[google-login] OAuth initiated, redirecting to provider", { hasUrl: Boolean(data.url) });
   redirect(data.url);
 }

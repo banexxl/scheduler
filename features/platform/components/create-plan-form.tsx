@@ -50,6 +50,7 @@ export type EditablePlan = {
   isActive: boolean;
   isPublic: boolean;
   sortOrder: number;
+  features: string[];
   /** Current pricing (from the first active price), for prefill. */
   priceAmount: number | null; // minor units (cents)
   priceCurrency: string | null;
@@ -115,6 +116,7 @@ export default function CreatePlanForm({ action, updateAction, selectedPlan, onD
     submissionData.set("name", formData.get("name") as string);
     submissionData.set("description", formData.get("description") as string);
     submissionData.set("sortOrder", formData.get("sortOrder") as string);
+    submissionData.set("features", String(formData.get("features") ?? ""));
     submissionData.set("priceAmount", String(buildPriceAmount(formData)));
     submissionData.set("priceCurrency", currency.code.toLowerCase());
     submissionData.set("billingType", billingType);
@@ -140,6 +142,7 @@ export default function CreatePlanForm({ action, updateAction, selectedPlan, onD
     submissionData.set("name", formData.get("name") as string);
     submissionData.set("description", formData.get("description") as string);
     submissionData.set("sortOrder", formData.get("sortOrder") as string);
+    submissionData.set("features", String(formData.get("features") ?? ""));
     submissionData.set("isActive", isActive ? "on" : "");
     submissionData.set("isPublic", isPublic ? "on" : "");
     // Pricing — only for paid plans. Type + interval are locked, so we send the
@@ -257,6 +260,20 @@ export default function CreatePlanForm({ action, updateAction, selectedPlan, onD
             />
           </Tooltip>
         </Stack>
+
+        {/* Feature bullets — one per line, shown on the marketing pricing card. */}
+        <Tooltip title="One feature per line. These render as the checklist on the marketing pricing card." arrow>
+          <TextField
+            size="small"
+            name="features"
+            label="Features (one per line)"
+            fullWidth
+            multiline
+            minRows={3}
+            placeholder={"Unlimited bookings\nEmail & SMS reminders\nCustom branding"}
+            defaultValue={selectedPlan ? selectedPlan.features.join("\n") : ""}
+          />
+        </Tooltip>
 
         {/* State toggles — edit mode only (create defaults both to true) */}
         {isEditing && (

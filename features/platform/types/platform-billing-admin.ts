@@ -16,6 +16,7 @@ export type PlatformBillingPlanSummary = {
      isActive: boolean;
      isPublic: boolean;
      sortOrder: number;
+     features: string[];
      polarProductId: string | null;
      activePriceCount: number;
      archivedPriceCount: number;

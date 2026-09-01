@@ -63,6 +63,7 @@ export async function createBillingPlanAction(input: {
      isActive: boolean;
      isPublic: boolean;
      sortOrder: number;
+     features?: string[];
      /** Pricing — required for paid plans */
      priceAmount?: number; // minor units (cents)
      priceCurrency?: string; // e.g. "usd"
@@ -129,6 +130,7 @@ export async function createBillingPlanAction(input: {
                          is_active: validated.isActive,
                          is_public: validated.isPublic,
                          sort_order: validated.sortOrder,
+                         features: validated.features ?? [],
                          polar_product_id: polarProductId,
                          polar_product_name: validated.name,
                          polar_product_description: validated.description ?? null,
@@ -195,6 +197,7 @@ export async function updateBillingPlanAction(input: {
      isActive: boolean;
      isPublic: boolean;
      sortOrder: number;
+     features?: string[];
      /**
       * Optional pricing update — only applied to paid, Polar-mapped plans.
       * Polar locks the pricing model (recurring/one-time + interval) at creation,
@@ -254,6 +257,7 @@ export async function updateBillingPlanAction(input: {
                          is_active: validated.isActive,
                          is_public: validated.isPublic,
                          sort_order: validated.sortOrder,
+                         features: validated.features ?? [],
                          polar_product_name: validated.name,
                          polar_product_description: validated.description ?? null,
                          ...(input.trialDays !== undefined

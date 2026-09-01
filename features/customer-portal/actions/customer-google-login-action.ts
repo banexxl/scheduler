@@ -21,6 +21,8 @@ export async function customerGoogleLoginAction(
   // Callback URL with next param pointing to the tenant portal
   const callbackUrl = `${getAppUrl()}/api/auth/callback?next=/book/${tenantSlug}/portal`;
 
+  console.log("[customer-google-login] Initiating OAuth", { tenantSlug, callbackUrl });
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
@@ -33,9 +35,10 @@ export async function customerGoogleLoginAction(
   });
 
   if (error || !data.url) {
-    console.error("[customer-google-login] OAuth initiation failed:", error?.message);
+    console.error("[customer-google-login] OAuth initiation failed:", { tenantSlug, callbackUrl, message: error?.message, status: error?.status });
     redirect(`/book/${tenantSlug}/login`);
   }
 
+  console.log("[customer-google-login] OAuth initiated, redirecting to provider", { tenantSlug, hasUrl: Boolean(data.url) });
   redirect(data.url);
 }

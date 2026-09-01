@@ -21,6 +21,8 @@ export async function registerAction(
 
     const callbackUrl = new URL("/api/auth/callback", getAppUrl()).toString();
 
+    console.log("[register] Signing up user", { email: validated.email, emailRedirectTo: callbackUrl });
+
     const { error } = await supabase.auth.signUp({
       email: validated.email,
       password: validated.password,
@@ -43,6 +45,7 @@ export async function registerAction(
       };
     }
 
+    console.log("[register] Sign up succeeded, confirmation email sent", { email: validated.email });
     return {
       success: true,
       message: "Check your email to confirm your account.",

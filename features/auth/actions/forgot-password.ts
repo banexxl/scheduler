@@ -24,9 +24,19 @@ export async function forgotPasswordAction(
       getAppUrl()
     ).toString();
 
-    await supabase.auth.resetPasswordForEmail(validated.email, {
+    console.log("[forgot-password] Sending reset email", { email: validated.email, redirectTo: redirectUrl });
+
+    const { error } = await supabase.auth.resetPasswordForEmail(validated.email, {
       redirectTo: redirectUrl,
     });
+
+    // Log the real outcome server-side, but keep the response neutral to avoid
+    // revealing whether the email exists.
+    if (error) {
+      console.error("[forgot-password] resetPasswordForEmail error:", { status: error.status, message: error.message, code: error.code });
+    } else {
+      console.log("[forgot-password] Reset email request accepted", { email: validated.email });
+    }
 
     // Always return success to avoid revealing email existence
     return {

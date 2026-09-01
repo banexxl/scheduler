@@ -24,13 +24,41 @@ type PlanData = {
   priceAmount: number;
   currency: string;
   billingInterval: string | null;
+  billingIntervalCount: number;
   isFree: boolean;
+  features: string[];
 };
 
 type Props = {
   plans: PlanData[];
   currentPlanKey?: string | null;
 };
+
+/** Number of months a plan's billing term covers (e.g. year=12, month×6=6). */
+function termMonths(billingInterval: string | null, count: number): number {
+  const c = count > 0 ? count : 1;
+  if (billingInterval === "year") return 12 * c;
+  if (billingInterval === "month") return c;
+  // one-time / unknown → treat as a single month so per-month math is defined
+  return c;
+}
+
+/** Effective per-month cost in minor units for a paid plan. */
+function perMonthMinor(plan: PlanData): number {
+  return plan.priceAmount / termMonths(plan.billingInterval, plan.billingIntervalCount);
+}
+
+/** Human label for the billing term, e.g. "billed monthly" / "billed every 6 months" / "billed annually". */
+function billingTermLabel(billingInterval: string | null, count: number): string | null {
+  const c = count > 0 ? count : 1;
+  if (billingInterval === "year") return c === 1 ? "billed annually" : `billed every ${c} years`;
+  if (billingInterval === "month") {
+    if (c === 1) return "billed monthly";
+    if (c === 12) return "billed annually";
+    return `billed every ${c} months`;
+  }
+  return null;
+}
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -43,6 +71,11 @@ const fadeUp = {
 
 export default function PricingPageClient({ plans, currentPlanKey }: Props) {
   const hasFeatured = plans.length > 1;
+
+  // Baseline = the highest per-month rate among paid plans (typically the
+  // monthly plan). Savings on longer terms are measured against this.
+  const paidPerMonth = plans.filter((p) => !p.isFree).map(perMonthMinor);
+  const baselinePerMonth = paidPerMonth.length > 0 ? Math.max(...paidPerMonth) : 0;
 
   return (
     <Box sx={{ minHeight: "100vh", pt: { xs: 14, md: 18 }, pb: 10, bgcolor: "#0a0a0f", position: "relative" }}>
@@ -189,16 +222,95 @@ export default function PricingPageClient({ plans, currentPlanKey }: Props) {
                         {plan.isFree ? (
                           <Typography sx={{ fontSize: "2.5rem", fontWeight: 800, color: "#f0f0f5" }}>Free</Typography>
                         ) : (
-                          <Stack direction="row" alignItems="baseline" spacing={0.5}>
-                            <Typography sx={{ fontSize: "2.5rem", fontWeight: 800, color: "#f0f0f5" }}>
-                              {formatPrice(plan.priceAmount, plan.currency)}
-                            </Typography>
-                            {plan.billingInterval && (
-                              <Typography sx={{ color: "#5c5c72" }}>/ {plan.billingInterval}</Typography>
-                            )}
-                          </Stack>
+                          (() => {
+                            const months = termMonths(plan.billingInterval, plan.billingIntervalCount);
+                            const savePct = baselinePerMonth > 0
+                              ? Math.round((1 - perMonthMinor(plan) / baselinePerMonth) * 100)
+                              : 0;
+                            const termLabel = billingTermLabel(plan.billingInterval, plan.billingIntervalCount);
+                            return (
+                              <>
+                                <Stack direction="row" alignItems="baseline" spacing={0.5} flexWrap="wrap">
+                                  <Typography sx={{ fontSize: "2.5rem", fontWeight: 800, color: "#f0f0f5" }}>
+                                    {formatPrice(plan.priceAmount, plan.currency)}
+                                  </Typography>
+                                  {plan.billingInterval && (
+                                    <Typography sx={{ color: "#5c5c72" }}>
+                                      / {plan.billingIntervalCount > 1 ? `${plan.billingIntervalCount} ` : ""}
+                                      {plan.billingInterval}
+                                      {plan.billingIntervalCount > 1 ? "s" : ""}
+                                    </Typography>
+                                  )}
+                                  {savePct > 0 && (
+                                    <Box
+                                      sx={{
+                                        ml: 1,
+                                        px: 1,
+                                        py: 0.25,
+                                        borderRadius: 1,
+                                        bgcolor: "rgba(16,185,129,0.15)",
+                                        border: "1px solid rgba(16,185,129,0.3)",
+                                      }}
+                                    >
+                                      <Typography sx={{ fontSize: "0.6875rem", fontWeight: 700, color: "#10B981" }}>
+                                        Save {savePct}%
+                                      </Typography>
+                                    </Box>
+                                  )}
+                                </Stack>
+                                {months > 1 && (
+                                  <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e", mt: 0.5 }}>
+                                    {formatPrice(Math.round(perMonthMinor(plan)), plan.currency)}/mo
+                                    {termLabel ? ` · ${termLabel}` : ""}
+                                  </Typography>
+                                )}
+                                {months <= 1 && termLabel && (
+                                  <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e", mt: 0.5 }}>
+                                    {termLabel}
+                                  </Typography>
+                                )}
+                              </>
+                            );
+                          })()
                         )}
                       </Box>
+
+                      {plan.features.length > 0 && (
+                        <Stack component="ul" spacing={1} sx={{ listStyle: "none", p: 0, m: 0, mb: 2 }}>
+                          {plan.features.map((feature, fi) => (
+                            <Stack
+                              key={fi}
+                              component="li"
+                              direction="row"
+                              spacing={1}
+                              alignItems="flex-start"
+                            >
+                              <Box
+                                aria-hidden
+                                sx={{
+                                  mt: "3px",
+                                  flexShrink: 0,
+                                  width: 16,
+                                  height: 16,
+                                  borderRadius: "50%",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  bgcolor: "rgba(124,58,237,0.15)",
+                                  color: "#a78bfa",
+                                  fontSize: "0.6875rem",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                ✓
+                              </Box>
+                              <Typography sx={{ fontSize: "0.875rem", color: "#c4c4d4" }}>
+                                {feature}
+                              </Typography>
+                            </Stack>
+                          ))}
+                        </Stack>
+                      )}
 
                       <Box sx={{ flex: 1 }} />
 

@@ -49,6 +49,7 @@ function toEditablePlan(plan: PlatformBillingPlanSummary): EditablePlan {
     isActive: plan.isActive,
     isPublic: plan.isPublic,
     sortOrder: plan.sortOrder,
+    features: plan.features,
     priceAmount: price?.amount ?? null,
     priceCurrency: price?.currency ?? null,
     isRecurring: price?.isRecurring ?? true,

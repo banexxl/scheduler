@@ -60,6 +60,8 @@ export async function customerRegisterAction(
     const supabase = await createClient();
     const callbackUrl = `${getAppUrl()}/api/auth/callback?next=/book/${tenantSlug}/portal`;
 
+    console.log("[customer-register] Signing up customer", { tenantSlug, email: validated.email, emailRedirectTo: callbackUrl });
+
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: validated.email,
       password: validated.password,
@@ -70,6 +72,7 @@ export async function customerRegisterAction(
     });
 
     if (authError) {
+      console.error("[customer-register] Supabase signUp error:", { tenantSlug, status: authError.status, message: authError.message, code: authError.code });
       if (authError.status === 429) {
         return { success: false, message: "Too many attempts. Please try again later." };
       }
@@ -94,6 +97,7 @@ export async function customerRegisterAction(
       });
     }
 
+    console.log("[customer-register] Sign up succeeded", { tenantSlug, email: normalizedEmail, userLinked: Boolean(userId), postSignupRedirect: `/book/${tenantSlug}/login` });
     return {
       success: true,
       message: "Account created! Check your email to confirm, then sign in.",

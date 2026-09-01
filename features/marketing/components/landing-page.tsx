@@ -149,12 +149,36 @@ type PlanData = {
   priceAmount: number;
   currency: string;
   billingInterval: string | null;
+  billingIntervalCount: number;
   isFree: boolean;
+  features: string[];
 };
 
 type Props = {
   plans: PlanData[];
 };
+
+/** Number of months a plan's billing term covers (year=12, month×6=6). */
+function planTermMonths(billingInterval: string | null, count: number): number {
+  const c = count > 0 ? count : 1;
+  if (billingInterval === "year") return 12 * c;
+  return c;
+}
+
+function planPerMonthMinor(plan: PlanData): number {
+  return plan.priceAmount / planTermMonths(plan.billingInterval, plan.billingIntervalCount);
+}
+
+function planBillingTermLabel(billingInterval: string | null, count: number): string | null {
+  const c = count > 0 ? count : 1;
+  if (billingInterval === "year") return c === 1 ? "billed annually" : `billed every ${c} years`;
+  if (billingInterval === "month") {
+    if (c === 1) return "billed monthly";
+    if (c === 12) return "billed annually";
+    return `billed every ${c} months`;
+  }
+  return null;
+}
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
@@ -163,6 +187,10 @@ export default function MarketingLandingPage({ plans }: Props) {
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.8], [1, 0.95]);
+
+  // Baseline = highest per-month rate among paid plans; longer terms save vs this.
+  const paidPerMonth = plans.filter((p) => !p.isFree).map(planPerMonthMinor);
+  const baselinePerMonth = paidPerMonth.length > 0 ? Math.max(...paidPerMonth) : 0;
 
   return (
     <Box sx={{ overflow: "hidden", bgcolor: "#0a0a0f" }}>
@@ -539,9 +567,42 @@ export default function MarketingLandingPage({ plans }: Props) {
                         <Typography sx={{ fontSize: "2.5rem", fontWeight: 800, color: "#f0f0f5" }}>
                           {plan.isFree ? "Free" : formatPrice(plan.priceAmount, plan.currency)}
                           {!plan.isFree && plan.billingInterval && (
-                            <Typography component="span" sx={{ fontSize: "1rem", color: "#5c5c72", fontWeight: 400 }}> /{plan.billingInterval}</Typography>
+                            <Typography component="span" sx={{ fontSize: "1rem", color: "#5c5c72", fontWeight: 400 }}>
+                              {" "}/{plan.billingIntervalCount > 1 ? `${plan.billingIntervalCount} ` : ""}{plan.billingInterval}{plan.billingIntervalCount > 1 ? "s" : ""}
+                            </Typography>
                           )}
                         </Typography>
+                        {!plan.isFree && (() => {
+                          const months = planTermMonths(plan.billingInterval, plan.billingIntervalCount);
+                          const savePct = baselinePerMonth > 0
+                            ? Math.round((1 - planPerMonthMinor(plan) / baselinePerMonth) * 100)
+                            : 0;
+                          const termLabel = planBillingTermLabel(plan.billingInterval, plan.billingIntervalCount);
+                          return (
+                            <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5, flexWrap: "wrap" }}>
+                              <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e" }}>
+                                {months > 1 ? `${formatPrice(Math.round(planPerMonthMinor(plan)), plan.currency)}/mo` : ""}
+                                {months > 1 && termLabel ? " · " : ""}
+                                {termLabel ?? ""}
+                              </Typography>
+                              {savePct > 0 && (
+                                <Box sx={{ px: 1, py: 0.25, borderRadius: 1, bgcolor: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)" }}>
+                                  <Typography sx={{ fontSize: "0.6875rem", fontWeight: 700, color: "#10B981" }}>Save {savePct}%</Typography>
+                                </Box>
+                              )}
+                            </Stack>
+                          );
+                        })()}
+                        {plan.features.length > 0 && (
+                          <Stack component="ul" spacing={0.75} sx={{ listStyle: "none", p: 0, m: 0, mt: 2 }}>
+                            {plan.features.map((feature, fi) => (
+                              <Stack key={fi} component="li" direction="row" spacing={1} alignItems="flex-start">
+                                <Box aria-hidden sx={{ mt: "3px", flexShrink: 0, width: 15, height: 15, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "rgba(124,58,237,0.15)", color: "#a78bfa", fontSize: "0.625rem", fontWeight: 700 }}>✓</Box>
+                                <Typography sx={{ fontSize: "0.8125rem", color: "#c4c4d4" }}>{feature}</Typography>
+                              </Stack>
+                            ))}
+                          </Stack>
+                        )}
                         <Button
                           href="/register"
                           variant={isFeatured ? "contained" : "outlined"}

@@ -90,6 +90,8 @@ export async function requestPortalAccessAction(
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
     const redirectTo = `${appUrl}/api/auth/callback?next=/book/${tenantSlug}/portal`;
 
+    console.log("[request-portal-access] Sending magic link", { tenantSlug, email: normalized, emailRedirectTo: redirectTo });
+
     const supabase = await createClient();
     const { error } = await supabase.auth.signInWithOtp({
       email: normalized,
@@ -100,8 +102,10 @@ export async function requestPortalAccessAction(
     });
 
     if (error) {
-      console.error("[request-portal-access] signInWithOtp error:", error.message);
+      console.error("[request-portal-access] signInWithOtp error:", { tenantSlug, status: error.status, message: error.message, code: error.code });
       // Still return generic message to prevent enumeration
+    } else {
+      console.log("[request-portal-access] Magic link request accepted", { tenantSlug, email: normalized });
     }
 
     // 6. Same public response

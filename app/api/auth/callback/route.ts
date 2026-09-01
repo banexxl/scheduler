@@ -17,6 +17,12 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const next = searchParams.get("next");
 
+  console.log("[auth/callback] Received callback", {
+    hasCode: Boolean(code),
+    next: next ?? "(none)",
+    origin: request.nextUrl.origin,
+  });
+
   if (!code) {
     console.error("[auth/callback] No code parameter in callback URL");
     redirect("/auth-error?code=callback_failed");
@@ -31,6 +37,8 @@ export async function GET(request: NextRequest) {
     redirect("/auth-error?code=callback_failed");
   }
 
+  console.log("[auth/callback] Code exchange succeeded");
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -42,9 +50,12 @@ export async function GET(request: NextRequest) {
 
   // Redirect to validated next or resolve destination
   if (next) {
-    redirect(getSafeRedirectPath(next));
+    const safeNext = getSafeRedirectPath(next);
+    console.log("[auth/callback] Redirecting to validated next", { userId: user.id, requestedNext: next, safeNext });
+    redirect(safeNext);
   }
 
   const destination = await resolveLoginDestination(user);
+  console.log("[auth/callback] Redirecting to resolved destination", { userId: user.id, destination });
   redirect(destination);
 }

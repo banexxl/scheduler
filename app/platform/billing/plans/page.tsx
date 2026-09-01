@@ -19,6 +19,15 @@ import PolarConfigAlert from "@/features/platform/components/polar-config-alert"
 import PlanManager from "@/features/platform/components/plan-manager";
 import ServerActionForm from "@/features/platform/components/server-action-form";
 
+/** Parse the newline-separated features textarea into a trimmed string array. */
+function parseFeatures(raw: FormDataEntryValue | null): string[] {
+     return String(raw ?? "")
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .slice(0, 30);
+}
+
 async function createPlanFormAction(formData: FormData): Promise<string | null> {
      "use server";
 
@@ -32,6 +41,7 @@ async function createPlanFormAction(formData: FormData): Promise<string | null> 
           isActive: true,
           isPublic: true,
           sortOrder: Number(formData.get("sortOrder") ?? "0"),
+          features: parseFeatures(formData.get("features")),
           // Pricing (only for paid plans)
           ...(!isFree && {
                priceAmount: Number(formData.get("priceAmount") ?? "0"),
@@ -67,6 +77,7 @@ async function updatePlanFormAction(formData: FormData): Promise<string | null> 
           isActive: String(formData.get("isActive") ?? "") === "on",
           isPublic: String(formData.get("isPublic") ?? "") === "on",
           sortOrder: Number(formData.get("sortOrder") ?? "0"),
+          features: parseFeatures(formData.get("features")),
           ...(hasPricing && {
                priceAmount: Number(formData.get("priceAmount") ?? "0"),
                priceCurrency: String(formData.get("priceCurrency") ?? "usd").toLowerCase(),

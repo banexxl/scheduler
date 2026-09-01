@@ -308,6 +308,12 @@ export default function MarketingShell({ children, userEmail }: Props) {
               <Link href="/login" style={{ fontSize: "0.75rem", color: "#5c5c72", textDecoration: "none" }}>
                 Sign In
               </Link>
+              <Link href="/privacy-policy" style={{ fontSize: "0.75rem", color: "#5c5c72", textDecoration: "none" }}>
+                Privacy Policy
+              </Link>
+              <Link href="/terms-of-service" style={{ fontSize: "0.75rem", color: "#5c5c72", textDecoration: "none" }}>
+                Terms of Service
+              </Link>
             </Stack>
           </Stack>
         </Container>

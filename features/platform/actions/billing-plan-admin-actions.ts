@@ -312,9 +312,31 @@ export async function updateBillingPlanAction(input: {
                          const refreshed = await getPolarProduct(plan.polar_product_id);
                          await syncPolarProduct(refreshed, "manual");
                     } catch (pricingError) {
+                         // Log the full error server-side (status + body) so prod
+                         // failures are diagnosable beyond the user-facing toast.
+                         const status =
+                              pricingError && typeof pricingError === "object" && "status" in pricingError
+                                   ? (pricingError as { status?: number }).status
+                                   : undefined;
+                         console.error("[billing-plan] Price update failed on Polar", {
+                              planId: input.id,
+                              polarProductId: plan.polar_product_id,
+                              status,
+                              message: pricingError instanceof Error ? pricingError.message : "unknown",
+                         });
+
+                         const detail =
+                              status === 404
+                                   ? "the product was not found on Polar (it may have been created in a different environment — e.g. sandbox vs production)"
+                                   : status === 401 || status === 403
+                                        ? "Polar rejected the request (check the access token and its permissions for this environment)"
+                                        : pricingError instanceof Error
+                                             ? pricingError.message
+                                             : "unknown error";
+
                          return {
                               success: false,
-                              message: `Plan details saved, but the price update failed on Polar: ${pricingError instanceof Error ? pricingError.message : "unknown error"}`,
+                              message: `Plan details saved, but the price update failed on Polar: ${detail}`,
                          };
                     }
                }

@@ -229,8 +229,12 @@ export async function syncPolarProduct(
      source: BillingSyncSource
 ): Promise<SyncProductResult> {
      const adminClient = createAdminClient();
+     // Distinguish an already-normalized product from a raw Polar payload.
+     // Raw payloads also have a `prices` key, so we key off a camelCase field
+     // that only exists after normalization (`isRecurring`). Raw payloads use
+     // snake_case (`is_recurring`) and must be normalized before use.
      const product =
-          "prices" in productLike
+          "isRecurring" in productLike
                ? (productLike as NormalizedPolarProduct)
                : normalizePolarProduct(productLike as UnknownRecord);
 

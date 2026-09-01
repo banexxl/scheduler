@@ -2,7 +2,6 @@ import "server-only";
 
 import { getPolarEnvironment } from "./polar-config";
 import {
-     normalizePolarPrice,
      normalizePolarProduct,
      type UnknownRecord,
 } from "./polar-normalize";
@@ -112,11 +111,12 @@ export async function listPolarProducts(): Promise<NormalizedPolarProduct[]> {
 export async function listPolarProductPrices(
      productId: string
 ): Promise<NormalizedPolarPrice[]> {
-     const payload = await polarFetch<PolarListResponse<UnknownRecord>>(
-          `/v1/products/${productId}/prices`
-     );
-     const rows = extractList(payload);
-     return rows.map((row) => normalizePolarPrice(row, productId));
+     // Polar no longer exposes a standalone `/v1/products/{id}/prices` endpoint
+     // (it returns 404); prices are embedded in the product resource. Fetch the
+     // product and normalize its embedded price list.
+     const payload = await polarFetch<UnknownRecord>(`/v1/products/${productId}`);
+     const product = normalizePolarProduct(payload);
+     return product.prices;
 }
 
 export async function listPolarDiscounts(): Promise<Array<Record<string, unknown>>> {

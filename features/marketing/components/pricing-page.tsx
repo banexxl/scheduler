@@ -371,12 +371,15 @@ export default function PricingPageClient({ plans, currentPlanKey }: Props) {
 
 function formatPrice(minorUnits: number, currency: string): string {
   const major = minorUnits / 100;
+  // Show cents only when the amount isn't a whole unit, so "$29" stays clean
+  // while "$147.90" and per-month figures like "$24.65" keep their decimals.
+  const hasFraction = Math.round(major * 100) % 100 !== 0;
   try {
     return new Intl.NumberFormat(undefined, {
       style: "currency",
       currency: currency.toUpperCase(),
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      minimumFractionDigits: hasFraction ? 2 : 0,
+      maximumFractionDigits: 2,
     }).format(major);
   } catch {
     return `${major} ${currency.toUpperCase()}`;

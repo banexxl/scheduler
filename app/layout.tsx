@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import ThemeRegistry from "@/components/layout/ThemeRegistry";
 import { Toaster } from "react-hot-toast";
 import "@/styles/globals.css";
@@ -6,6 +6,21 @@ import "@/styles/globals.css";
 export const metadata: Metadata = {
   title: "Scheduler Platform",
   description: "SaaS Scheduling Platform",
+  // Ensures the manifest is linked and iOS treats the app as installable.
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "GetSlot",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: "/logos/getslot_icon.svg",
+    apple: "/logos/getslot_192.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#8B5CF6",
 };
 
 export default function RootLayout({

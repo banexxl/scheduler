@@ -12,12 +12,12 @@
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import InstallAppButton from "@/components/dashboard/InstallAppButton";
+import UserMenu from "@/components/dashboard/UserMenu";
 import {
   TENANT_SIDEBAR_WIDTH,
   TENANT_TOP_BAR_HEIGHT,
@@ -72,44 +72,23 @@ export default function TenantTopBar({
 
         <Box sx={{ flex: 1 }} />
 
-        {/* Notifications shortcut */}
-        <IconButton
-          component="a"
-          href={`/${tenantSlug}/notifications`}
-          size="small"
-          aria-label="Notifications"
-          sx={{ color: tenantPalette.topBar.textSecondary, mr: 1 }}
-        >
-          <NotificationsNoneIcon fontSize="small" />
-        </IconButton>
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          {/* Install app shortcut (Chrome-style) */}
+          <InstallAppButton color={tenantPalette.topBar.textSecondary} />
 
-        {/* User identity */}
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Typography
-            sx={{
-              fontSize: "0.8125rem",
-              color: tenantPalette.topBar.textSecondary,
-              display: { xs: "none", sm: "block" },
-            }}
+          {/* Notifications shortcut */}
+          <IconButton
+            component="a"
+            href={`/${tenantSlug}/notifications`}
+            size="small"
+            aria-label="Notifications"
+            sx={{ color: tenantPalette.topBar.textSecondary }}
           >
-            {userEmail}
-          </Typography>
-          <form action={logoutAction}>
-            <Button
-              type="submit"
-              size="small"
-              variant="text"
-              sx={{
-                fontSize: "0.75rem",
-                color: tenantPalette.topBar.textSecondary,
-                textTransform: "none",
-                minWidth: "auto",
-                "&:hover": { color: tenantPalette.topBar.text },
-              }}
-            >
-              Sign out
-            </Button>
-          </form>
+            <NotificationsNoneIcon fontSize="small" />
+          </IconButton>
+
+          {/* Account dropdown: email + logout */}
+          <UserMenu email={userEmail} logoutAction={logoutAction} />
         </Stack>
       </Toolbar>
     </AppBar>

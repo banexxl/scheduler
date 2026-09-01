@@ -19,12 +19,19 @@ export async function getPlatformAdmin(
 ): Promise<PlatformAdminRow | null> {
   const supabase = await createClient();
 
+  // NOTE: use ordering + limit(1) + maybeSingle() rather than .single().
+  // .single() throws a PostgREST error when the result is not EXACTLY one row,
+  // i.e. it fails both for zero rows AND for duplicate active admin rows for the
+  // same user_id. Duplicates (or an OAuth-created auth user with more than one
+  // matching admin row) would otherwise crash any page guarded by this helper.
   const { data } = await supabase
     .from("platform_admins")
     .select("id, role, is_active, user_id")
     .eq("user_id", user.id)
     .eq("is_active", true)
-    .single();
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
 
   return data;
 }

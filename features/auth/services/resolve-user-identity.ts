@@ -42,12 +42,17 @@ export async function resolveUserIdentity(
 
   const [adminResult, membershipsResult, customerAccountResult] =
     await Promise.all([
-      // 1. Check platform admin status
+      // 1. Check platform admin status.
+      // order + limit(1) + maybeSingle() so a duplicate active admin row for the
+      // same user_id resolves to a single row instead of throwing a PostgREST
+      // "multiple rows returned" error (which .maybeSingle() alone does NOT tolerate).
       supabase
         .from("platform_admins")
         .select("id, role")
         .eq("user_id", user.id)
         .eq("is_active", true)
+        .order("created_at", { ascending: true })
+        .limit(1)
         .maybeSingle(),
 
       // 2. Load active tenant memberships with tenant info

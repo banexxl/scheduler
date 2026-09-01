@@ -55,7 +55,24 @@ export async function GET(request: NextRequest) {
     redirect(safeNext);
   }
 
-  const destination = await resolveLoginDestination(user);
+  // Resolve the destination inside a try/catch so a failure while looking up the
+  // user's identity (e.g. a PostgREST error from platform_admins) surfaces as a
+  // clean /auth-error redirect instead of an unhandled server error on the OAuth
+  // return URL. The password login action (loginAction) has equivalent containment;
+  // without this, the OAuth path was the only flow that crashed on such errors.
+  // NOTE: resolveLoginDestination must NOT call redirect() internally — the
+  // NEXT_REDIRECT control-flow error would be caught here. It only returns a string.
+  let destination: string;
+  try {
+    destination = await resolveLoginDestination(user);
+  } catch (resolveError) {
+    console.error("[auth/callback] Failed to resolve login destination:", {
+      userId: user.id,
+      message: resolveError instanceof Error ? resolveError.message : String(resolveError),
+    });
+    redirect("/auth-error?code=callback_failed");
+  }
+
   console.log("[auth/callback] Redirecting to resolved destination", { userId: user.id, destination });
   redirect(destination);
 }

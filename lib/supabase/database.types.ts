@@ -1436,6 +1436,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          features: string[]
           id: string
           is_active: boolean
           is_free: boolean
@@ -1456,6 +1457,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          features?: string[]
           id?: string
           is_active?: boolean
           is_free?: boolean
@@ -1476,6 +1478,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          features?: string[]
           id?: string
           is_active?: boolean
           is_free?: boolean

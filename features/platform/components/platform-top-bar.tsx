@@ -12,12 +12,11 @@
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import MenuIcon from "@mui/icons-material/Menu";
+import InstallAppButton from "@/components/dashboard/InstallAppButton";
+import UserMenu from "@/components/dashboard/UserMenu";
 import {
   SIDEBAR_WIDTH,
   TOP_BAR_HEIGHT,
@@ -74,39 +73,12 @@ export default function PlatformTopBar({
         <Box sx={{ flex: 1 }} />
 
         {/* Admin identity */}
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <Chip
-            label={role}
-            size="small"
-            variant="outlined"
-            sx={{ fontSize: "0.7rem", height: 24 }}
-          />
-          <Typography
-            variant="body2"
-            sx={{
-              color: platformPalette.topBar.textSecondary,
-              fontSize: "0.8125rem",
-              display: { xs: "none", sm: "block" },
-            }}
-          >
-            {email}
-          </Typography>
-          <form action={logoutAction}>
-            <Button
-              type="submit"
-              size="small"
-              variant="text"
-              sx={{
-                fontSize: "0.75rem",
-                color: platformPalette.topBar.textSecondary,
-                textTransform: "none",
-                minWidth: "auto",
-                "&:hover": { color: platformPalette.topBar.text },
-              }}
-            >
-              Sign out
-            </Button>
-          </form>
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          {/* Install app shortcut (Chrome-style) */}
+          <InstallAppButton color={platformPalette.topBar.textSecondary} />
+
+          {/* Account dropdown: email + role + logout */}
+          <UserMenu email={email} role={role} logoutAction={logoutAction} />
         </Stack>
       </Toolbar>
     </AppBar>

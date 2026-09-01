@@ -238,6 +238,71 @@ export async function updatePolarProduct(
      });
 }
 
+export type UpdatePolarPricingInput = {
+     /** New price in minor units (cents). */
+     priceAmount: number;
+     /** Currency, e.g. "usd". */
+     priceCurrency: string;
+     /** Whether the product is recurring — locked at creation, passed through as-is. */
+     isRecurring: boolean;
+     /** Recurring interval — locked at creation, passed through as-is. */
+     recurringInterval?: "month" | "year" | null;
+     recurringIntervalCount?: number;
+     /** Trial days (product-level). 0/undefined clears the trial. */
+     trialDays?: number | null;
+};
+
+/**
+ * Update a product's pricing on Polar.
+ *
+ * Polar prices are immutable and the pricing *model* (recurring vs one-time,
+ * interval) is locked at creation. Sending a new `prices` array on the product
+ * PATCH archives the old price(s) and creates the new one; existing subscribers
+ * are grandfathered onto their original price, so this only affects new
+ * purchases. The billing type/interval are passed through unchanged.
+ */
+export async function updatePolarProductPricing(
+     polarProductId: string,
+     input: UpdatePolarPricingInput
+): Promise<void> {
+     const buildPrice = (currency: string): Record<string, unknown> => {
+          const price: Record<string, unknown> = {
+               type: input.isRecurring ? "recurring" : "one_time",
+               amount_type: "fixed",
+               price_amount: input.priceAmount,
+               price_currency: currency,
+          };
+          if (input.isRecurring && input.recurringInterval) {
+               price.recurring_interval = input.recurringInterval;
+               price.recurring_interval_count = input.recurringIntervalCount ?? 1;
+          }
+          return price;
+     };
+
+     // Mirror createPolarProduct: Polar requires a USD price to be present.
+     const prices: Array<Record<string, unknown>> = [buildPrice(input.priceCurrency)];
+     if (input.priceCurrency.toLowerCase() !== "usd") {
+          prices.push(buildPrice("usd"));
+     }
+
+     const payload: Record<string, unknown> = { prices };
+
+     // Trial is a product-level field. Send it so it can be set or cleared.
+     if (input.trialDays && input.trialDays > 0) {
+          payload.trial_interval = "day";
+          payload.trial_interval_count = input.trialDays;
+     } else {
+          payload.trial_interval = null;
+          payload.trial_interval_count = null;
+     }
+
+     await polarFetch<unknown>(`/v1/products/${polarProductId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+     });
+}
+
 export async function archivePolarProduct(polarProductId: string): Promise<void> {
      await polarFetch<unknown>(`/v1/products/${polarProductId}`, {
           method: "PATCH",

@@ -3,22 +3,21 @@
 /**
  * Plan Form — Milestone 15.13.
  *
- * Dual-mode client component for creating AND editing billing plans:
+ * Dual-mode client component for creating AND editing billing plans. These
+ * admin forms manage paid, Polar-mapped plans only (there is no "free" toggle —
+ * free plans are managed outside these forms).
  *
  * CREATE mode (no `selectedPlan`):
- * - Currency autocomplete with search (all Polar-supported currencies)
- * - Price entered in whole units (dollars/euros/dinars), converted to cents on submit
- * - Billing type selector (recurring/one-time)
- * - Interval selector (monthly/yearly)
- * - Trial days
- * - Free plan toggle (hides pricing fields)
+ * - Price (whole units, converted to cents), currency, billing type, interval, trial.
  *
  * EDIT mode (`selectedPlan` provided):
- * - Fields are prefilled from the selected plan.
+ * - Fields prefilled from the selected plan.
  * - Plan Key is locked (immutable after creation).
- * - Pricing is read-only: Polar price values are managed via Polar sync, so the
- *   update path only edits metadata + state (name, description, sort, free,
- *   active, public). A note explains this.
+ * - Billing type + interval are locked (Polar locks the pricing model at
+ *   creation), shown disabled for context.
+ * - Price amount, currency, and trial ARE editable. Saving archives the old
+ *   Polar price and creates a new one — existing subscribers keep their price,
+ *   only new purchases use the new amount.
  * - Submit button becomes "Update Plan"; a "Cancel" button clears the selection.
  */
 
@@ -41,7 +40,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import toast from "react-hot-toast";
 import { SUPPORTED_CURRENCIES, ZERO_DECIMAL_CURRENCIES } from "@/features/business/utils/supported-currencies";
 
-/** Minimal shape needed to prefill the form when editing. */
+/** Shape needed to prefill the form when editing. */
 export type EditablePlan = {
   id: string;
   planKey: string;
@@ -51,7 +50,16 @@ export type EditablePlan = {
   isActive: boolean;
   isPublic: boolean;
   sortOrder: number;
+  /** Current pricing (from the first active price), for prefill. */
+  priceAmount: number | null; // minor units (cents)
+  priceCurrency: string | null;
+  isRecurring: boolean;
+  recurringInterval: "month" | "year" | null;
+  recurringIntervalCount: number | null;
+  trialDays: number | null;
 };
+
+type CurrencyOption = { code: string; name: string };
 
 type Props = {
   /** Create action — returns an error message string, or null on success. */
@@ -64,35 +72,51 @@ type Props = {
   onDone?: () => void;
 };
 
+/** Convert stored minor units (cents) to a whole-unit string for the input. */
+function centsToWhole(amount: number | null, currencyCode: string): string {
+  if (amount == null) return "";
+  const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(currencyCode.toUpperCase());
+  return String(isZeroDecimal ? amount : amount / 100);
+}
+
+function findCurrency(code: string | null): CurrencyOption {
+  const match = code
+    ? SUPPORTED_CURRENCIES.find((c) => c.code.toLowerCase() === code.toLowerCase())
+    : undefined;
+  return match ?? SUPPORTED_CURRENCIES[0]!;
+}
+
 export default function CreatePlanForm({ action, updateAction, selectedPlan, onDone }: Props) {
   const isEditing = Boolean(selectedPlan);
 
   // State is initialized directly from `selectedPlan`. The parent remounts this
   // component (via a React `key` tied to the selection) whenever the selected
-  // plan changes, so these initializers re-run with the right values — no effect
-  // needed to sync props into state.
-  const [isFree, setIsFree] = useState(selectedPlan?.isFree ?? false);
+  // plan changes, so these initializers re-run with the right values.
   const [isActive, setIsActive] = useState(selectedPlan?.isActive ?? true);
   const [isPublic, setIsPublic] = useState(selectedPlan?.isPublic ?? true);
-  const [currency, setCurrency] = useState<{ code: string; name: string }>(SUPPORTED_CURRENCIES[0]!);
-  const [billingType, setBillingType] = useState<"recurring" | "one_time">("recurring");
+  const [currency, setCurrency] = useState<CurrencyOption>(
+    isEditing ? findCurrency(selectedPlan!.priceCurrency) : SUPPORTED_CURRENCIES[0]!
+  );
+  const [billingType, setBillingType] = useState<"recurring" | "one_time">(
+    isEditing ? (selectedPlan!.isRecurring ? "recurring" : "one_time") : "recurring"
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleCreate(formData: FormData) {
+  function buildPriceAmount(formData: FormData): number {
     const priceWhole = Number(formData.get("priceWhole") ?? "0");
-    const currencyCode = currency.code;
-    const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(currencyCode.toUpperCase());
-    const priceAmount = isZeroDecimal ? priceWhole : Math.round(priceWhole * 100);
+    const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(currency.code.toUpperCase());
+    return isZeroDecimal ? priceWhole : Math.round(priceWhole * 100);
+  }
 
+  async function handleCreate(formData: FormData) {
     const submissionData = new FormData();
     submissionData.set("planKey", formData.get("planKey") as string);
     submissionData.set("name", formData.get("name") as string);
     submissionData.set("description", formData.get("description") as string);
     submissionData.set("sortOrder", formData.get("sortOrder") as string);
-    submissionData.set("isFree", isFree ? "on" : "");
-    submissionData.set("priceAmount", String(priceAmount));
-    submissionData.set("priceCurrency", currencyCode.toLowerCase());
+    submissionData.set("priceAmount", String(buildPriceAmount(formData)));
+    submissionData.set("priceCurrency", currency.code.toLowerCase());
     submissionData.set("billingType", billingType);
     submissionData.set("recurringInterval", String(formData.get("recurringInterval") || "month"));
     submissionData.set("recurringIntervalCount", String(formData.get("recurringIntervalCount") || "1"));
@@ -116,9 +140,19 @@ export default function CreatePlanForm({ action, updateAction, selectedPlan, onD
     submissionData.set("name", formData.get("name") as string);
     submissionData.set("description", formData.get("description") as string);
     submissionData.set("sortOrder", formData.get("sortOrder") as string);
-    submissionData.set("isFree", isFree ? "on" : "");
     submissionData.set("isActive", isActive ? "on" : "");
     submissionData.set("isPublic", isPublic ? "on" : "");
+    // Pricing — only for paid plans. Type + interval are locked, so we send the
+    // plan's existing model unchanged alongside the (editable) amount, currency,
+    // and trial. Free plans have no price section, so we skip these entirely.
+    if (!selectedPlan.isFree) {
+      submissionData.set("priceAmount", String(buildPriceAmount(formData)));
+      submissionData.set("priceCurrency", currency.code.toLowerCase());
+      submissionData.set("billingType", selectedPlan.isRecurring ? "recurring" : "one_time");
+      submissionData.set("recurringInterval", selectedPlan.recurringInterval ?? "month");
+      submissionData.set("recurringIntervalCount", String(selectedPlan.recurringIntervalCount ?? 1));
+      submissionData.set("trialDays", String(formData.get("trialDays") || "0"));
+    }
 
     const errorMessage = await updateAction(submissionData);
     if (errorMessage) {
@@ -148,21 +182,34 @@ export default function CreatePlanForm({ action, updateAction, selectedPlan, onD
     }
   }
 
+  // In edit mode the billing model is locked; interval controls are shown disabled.
+  const isRecurring = isEditing ? selectedPlan!.isRecurring : billingType === "recurring";
+  // Free plans have no Polar price to edit — creating is always paid, and when
+  // editing an (already) free plan we only expose metadata/state fields.
+  const editingFreePlan = isEditing && selectedPlan!.isFree;
+  const showPricing = !editingFreePlan;
+
   return (
     <form action={handleSubmit}>
       <Stack spacing={2.5}>
         {error && <Alert severity="error">{error}</Alert>}
 
-        {isEditing && (
+        {isEditing && !editingFreePlan && (
           <Alert severity="info">
-            Editing <strong>{selectedPlan!.planKey}</strong>. Plan key and pricing are locked here — pricing
-            is managed through Polar and updated via sync.
+            Editing <strong>{selectedPlan!.planKey}</strong>. Plan key and billing model (type/interval) are
+            locked. Changing the price affects new purchases only — existing subscribers keep their current price.
+          </Alert>
+        )}
+        {editingFreePlan && (
+          <Alert severity="info">
+            Editing free plan <strong>{selectedPlan!.planKey}</strong>. Free plans have no price — you can edit
+            the name, description, order, and visibility here.
           </Alert>
         )}
 
         {/* Row 1: Plan key + Name */}
         <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
-          <Tooltip title="Unique identifier used in code (e.g. free, pro, business). Cannot be changed after creation." arrow>
+          <Tooltip title="Unique identifier used in code (e.g. pro, business). Cannot be changed after creation." arrow>
             <TextField
               size="small"
               name="planKey"
@@ -211,15 +258,6 @@ export default function CreatePlanForm({ action, updateAction, selectedPlan, onD
           </Tooltip>
         </Stack>
 
-        {/* Free toggle */}
-        <Tooltip title="Free plans have no price and are not synced to Polar. Tenants get them by default." arrow placement="right">
-          <FormControlLabel
-            control={<Switch checked={isFree} onChange={(e) => setIsFree(e.target.checked)} />}
-            label="Free plan (no payment required)"
-            sx={{ width: "fit-content" }}
-          />
-        </Tooltip>
-
         {/* State toggles — edit mode only (create defaults both to true) */}
         {isEditing && (
           <Stack direction="row" spacing={2}>
@@ -234,8 +272,7 @@ export default function CreatePlanForm({ action, updateAction, selectedPlan, onD
           </Stack>
         )}
 
-        {/* Pricing — create mode only, hidden when free. In edit mode pricing is read-only. */}
-        {!isEditing && !isFree && (
+        {showPricing && (
           <>
             <Divider />
             <Typography variant="subtitle2" color="text.secondary">Pricing</Typography>
@@ -248,9 +285,10 @@ export default function CreatePlanForm({ action, updateAction, selectedPlan, onD
                   name="priceWhole"
                   label={`Price (${currency.code})`}
                   type="number"
-                  required={!isFree}
+                  required
                   placeholder="e.g. 29"
                   inputProps={{ min: 0, step: "0.01" }}
+                  defaultValue={selectedPlan ? centsToWhole(selectedPlan.priceAmount, currency.code) : ""}
                   sx={{ width: 160 }}
                 />
               </Tooltip>
@@ -269,12 +307,20 @@ export default function CreatePlanForm({ action, updateAction, selectedPlan, onD
                 />
               </Tooltip>
 
-              <Tooltip title="Recurring charges the customer periodically. One-time charges once." arrow>
+              <Tooltip
+                title={
+                  isEditing
+                    ? "Billing type is locked at creation and cannot be changed."
+                    : "Recurring charges the customer periodically. One-time charges once."
+                }
+                arrow
+              >
                 <FormControl size="small" sx={{ minWidth: 150 }}>
                   <InputLabel>Billing Type</InputLabel>
                   <Select
                     value={billingType}
                     label="Billing Type"
+                    disabled={isEditing}
                     onChange={(e) => setBillingType(e.target.value as "recurring" | "one_time")}
                   >
                     <MenuItem value="recurring">Recurring</MenuItem>
@@ -285,24 +331,36 @@ export default function CreatePlanForm({ action, updateAction, selectedPlan, onD
             </Stack>
 
             {/* Row 4: Interval + Interval count (recurring only) */}
-            {billingType === "recurring" && (
+            {isRecurring && (
               <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
-                <Tooltip title="How often the customer is billed (monthly or yearly)." arrow>
+                <Tooltip
+                  title={isEditing ? "Interval is locked at creation." : "How often the customer is billed (monthly or yearly)."}
+                  arrow
+                >
                   <FormControl size="small" sx={{ minWidth: 140 }}>
                     <InputLabel>Interval</InputLabel>
-                    <Select name="recurringInterval" defaultValue="month" label="Interval">
+                    <Select
+                      name="recurringInterval"
+                      defaultValue={selectedPlan?.recurringInterval ?? "month"}
+                      label="Interval"
+                      disabled={isEditing}
+                    >
                       <MenuItem value="month">Monthly</MenuItem>
                       <MenuItem value="year">Yearly</MenuItem>
                     </Select>
                   </FormControl>
                 </Tooltip>
-                <Tooltip title="Bill every N intervals. E.g. 3 months = quarterly billing." arrow>
+                <Tooltip
+                  title={isEditing ? "Interval count is locked at creation." : "Bill every N intervals. E.g. 3 months = quarterly billing."}
+                  arrow
+                >
                   <TextField
                     size="small"
                     name="recurringIntervalCount"
                     label="Every N intervals"
                     type="number"
-                    defaultValue="1"
+                    defaultValue={selectedPlan ? String(selectedPlan.recurringIntervalCount ?? 1) : "1"}
+                    disabled={isEditing}
                     inputProps={{ min: 1, max: 12 }}
                     sx={{ width: 150 }}
                   />
@@ -310,15 +368,15 @@ export default function CreatePlanForm({ action, updateAction, selectedPlan, onD
               </Stack>
             )}
 
-            {/* Row 5: Trial days (separate row for clarity) */}
-            {billingType === "recurring" && (
+            {/* Row 5: Trial days — editable in both modes (recurring only) */}
+            {isRecurring && (
               <Tooltip title="Number of free trial days before the first charge. Set to 0 for no trial." arrow>
                 <TextField
                   size="small"
                   name="trialDays"
                   label="Free Trial Days"
                   type="number"
-                  defaultValue="0"
+                  defaultValue={selectedPlan ? String(selectedPlan.trialDays ?? 0) : "0"}
                   inputProps={{ min: 0, max: 365 }}
                   helperText="How many days before the first charge"
                   sx={{ width: 200 }}
@@ -327,7 +385,7 @@ export default function CreatePlanForm({ action, updateAction, selectedPlan, onD
             )}
 
             {/* Hidden fields for one-time billing */}
-            {billingType === "one_time" && (
+            {!isRecurring && (
               <>
                 <input type="hidden" name="recurringInterval" value="month" />
                 <input type="hidden" name="recurringIntervalCount" value="1" />

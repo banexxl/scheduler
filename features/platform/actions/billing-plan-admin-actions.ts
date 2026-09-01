@@ -195,6 +195,18 @@ export async function updateBillingPlanAction(input: {
      isActive: boolean;
      isPublic: boolean;
      sortOrder: number;
+     /**
+      * Optional pricing update — only applied to paid, Polar-mapped plans.
+      * Polar locks the pricing model (recurring/one-time + interval) at creation,
+      * so only the amount, currency, and trial are editable. Changes affect new
+      * purchases only; existing subscribers keep their original price.
+      */
+     priceAmount?: number; // minor units (cents)
+     priceCurrency?: string; // e.g. "usd"
+     isRecurring?: boolean;
+     recurringInterval?: "month" | "year";
+     recurringIntervalCount?: number;
+     trialDays?: number;
 }): Promise<AdminActionResult> {
      await requirePlatformAdmin();
 
@@ -206,7 +218,7 @@ export async function updateBillingPlanAction(input: {
      try {
           const { data: existingPlan } = await adminClient
                .from("billing_plans" as never)
-               .select("id, plan_key, polar_product_id, is_active")
+               .select("id, plan_key, polar_product_id, is_active, is_free")
                .eq("id" as never, input.id)
                .single();
 
@@ -214,12 +226,16 @@ export async function updateBillingPlanAction(input: {
                return { success: false, message: "Billing plan was not found." };
           }
 
-          const plan = existingPlan as unknown as { id: string; plan_key: string; polar_product_id: string | null; is_active: boolean };
+          const plan = existingPlan as unknown as { id: string; plan_key: string; polar_product_id: string | null; is_active: boolean; is_free: boolean };
 
           const validated = await billingPlanUpsertSchema.validate(
                {
                     ...input,
                     planKey: plan.plan_key,
+                    // The admin forms are paid-only; `is_free` is not editable there.
+                    // Preserve whatever is already stored so we never flip a plan's
+                    // free/paid nature through this path.
+                    isFree: plan.is_free,
                },
                {
                     abortEarly: false,
@@ -240,6 +256,9 @@ export async function updateBillingPlanAction(input: {
                          sort_order: validated.sortOrder,
                          polar_product_name: validated.name,
                          polar_product_description: validated.description ?? null,
+                         ...(input.trialDays !== undefined
+                              ? { trial_days: input.trialDays && input.trialDays > 0 ? input.trialDays : null }
+                              : {}),
                          last_synced_at: plan.polar_product_id ? new Date().toISOString() : null,
                     } as never
                )
@@ -262,6 +281,42 @@ export async function updateBillingPlanAction(input: {
                     // Local update succeeded but Polar sync failed — not fatal
                     // Next webhook or manual refresh will reconcile
                     console.error("[billing-plan] Polar sync failed:", polarError instanceof Error ? polarError.message : "unknown");
+               }
+
+               // Apply pricing changes (amount / currency / trial) when supplied.
+               // Polar prices are immutable, so this archives the old price and
+               // creates a new one; existing subscribers keep their original price.
+               // Billing type + interval are locked at creation and passed through
+               // unchanged.
+               const hasPricingUpdate =
+                    !plan.is_free &&
+                    typeof input.priceAmount === "number" &&
+                    Boolean(input.priceCurrency);
+
+               if (hasPricingUpdate) {
+                    try {
+                         const { updatePolarProductPricing } = await import("../services/polar-client");
+                         await updatePolarProductPricing(plan.polar_product_id, {
+                              priceAmount: input.priceAmount!,
+                              priceCurrency: input.priceCurrency!,
+                              isRecurring: input.isRecurring ?? true,
+                              recurringInterval: input.recurringInterval ?? "month",
+                              recurringIntervalCount: input.recurringIntervalCount ?? 1,
+                              trialDays: input.trialDays,
+                         });
+
+                         // Reconcile local billing_plan_prices with Polar (archive old
+                         // price row, insert the new one, refresh trial_days).
+                         const { getPolarProduct } = await import("../services/polar-client");
+                         const { syncPolarProduct } = await import("../services/sync-polar-product");
+                         const refreshed = await getPolarProduct(plan.polar_product_id);
+                         await syncPolarProduct(refreshed, "manual");
+                    } catch (pricingError) {
+                         return {
+                              success: false,
+                              message: `Plan details saved, but the price update failed on Polar: ${pricingError instanceof Error ? pricingError.message : "unknown error"}`,
+                         };
+                    }
                }
           }
 

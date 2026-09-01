@@ -53,14 +53,28 @@ async function createPlanFormAction(formData: FormData): Promise<string | null> 
 async function updatePlanFormAction(formData: FormData): Promise<string | null> {
      "use server";
 
+     // Pricing fields are only present for paid plans (the client omits them for
+     // free plans). When present, the action applies the price change on Polar.
+     const hasPricing = formData.has("priceAmount");
+
      const result = await updateBillingPlanAction({
           id: String(formData.get("id") ?? ""),
           name: String(formData.get("name") ?? ""),
           description: String(formData.get("description") ?? "") || null,
-          isFree: String(formData.get("isFree") ?? "") === "on",
+          // `isFree` is not editable in these paid-only forms — the action preserves
+          // the stored value regardless of what is sent here.
+          isFree: false,
           isActive: String(formData.get("isActive") ?? "") === "on",
           isPublic: String(formData.get("isPublic") ?? "") === "on",
           sortOrder: Number(formData.get("sortOrder") ?? "0"),
+          ...(hasPricing && {
+               priceAmount: Number(formData.get("priceAmount") ?? "0"),
+               priceCurrency: String(formData.get("priceCurrency") ?? "usd").toLowerCase(),
+               isRecurring: String(formData.get("billingType") ?? "recurring") === "recurring",
+               recurringInterval: (String(formData.get("recurringInterval") ?? "month") as "month" | "year"),
+               recurringIntervalCount: Number(formData.get("recurringIntervalCount") ?? "1"),
+               trialDays: Number(formData.get("trialDays") ?? "0"),
+          }),
      });
 
      if (!result.success) {

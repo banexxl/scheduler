@@ -37,6 +37,9 @@ type Props = {
 };
 
 function toEditablePlan(plan: PlatformBillingPlanSummary): EditablePlan {
+  // Prefill pricing from the first active price, if any.
+  const price = plan.prices[0] ?? null;
+  const interval = price?.billingInterval;
   return {
     id: plan.id,
     planKey: plan.planKey,
@@ -46,6 +49,12 @@ function toEditablePlan(plan: PlatformBillingPlanSummary): EditablePlan {
     isActive: plan.isActive,
     isPublic: plan.isPublic,
     sortOrder: plan.sortOrder,
+    priceAmount: price?.amount ?? null,
+    priceCurrency: price?.currency ?? null,
+    isRecurring: price?.isRecurring ?? true,
+    recurringInterval: interval === "year" ? "year" : interval === "month" ? "month" : null,
+    recurringIntervalCount: price?.billingIntervalCount ?? 1,
+    trialDays: plan.trialDays,
   };
 }
 

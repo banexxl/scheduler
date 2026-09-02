@@ -3,6 +3,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
+import Link from "@mui/material/Link";
 import { clientEnvironment } from "@/lib/environment/client";
 
 type BusinessUrlPreviewProps = {
@@ -45,36 +46,46 @@ export default function BusinessUrlPreview({ slug }: BusinessUrlPreviewProps) {
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.75rem" }}>
           Public site
         </Typography>
-        <Typography
+        <Link
+          href={publicSiteUrl}
+          target="_blank"
+          rel="noopener noreferrer"
           variant="body2"
           sx={{
+            display: "block",
             fontFamily: "monospace",
             fontSize: "0.85rem",
             color: "primary.main",
             wordBreak: "break-all",
+            textDecoration: "underline",
           }}
           aria-label={`Public site URL: ${publicSiteUrl}`}
         >
           {publicSiteUrl}
-        </Typography>
+        </Link>
       </Box>
 
       <Box>
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.75rem" }}>
           Dashboard
         </Typography>
-        <Typography
+        <Link
+          href={dashboardUrl}
+          target="_blank"
+          rel="noopener noreferrer"
           variant="body2"
           sx={{
+            display: "block",
             fontFamily: "monospace",
             fontSize: "0.85rem",
             color: "primary.main",
             wordBreak: "break-all",
+            textDecoration: "underline",
           }}
           aria-label={`Dashboard URL: ${dashboardUrl}`}
         >
           {dashboardUrl}
-        </Typography>
+        </Link>
       </Box>
 
       <Typography

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getUser } from "@/lib/auth/get-user";
 import { getTenantBySlug } from "@/lib/tenants/get-tenant-by-slug";
+import { getScheduleChangeConflicts } from "@/features/staff/services/staff-schedule-queries";
 import { setResourceWorkingHoursSchema } from "../schemas/resource-working-hour-schema";
 import type { ResourceWorkingHourInput } from "../types/resource-working-hour";
 
@@ -11,6 +12,8 @@ export type ResourceScheduleActionResult = {
   success: boolean;
   message?: string;
   fieldErrors?: Record<string, string>;
+  /** Count of existing appointments that may now fall outside the saved hours. */
+  conflictCount?: number;
 };
 
 /**
@@ -26,7 +29,7 @@ export async function setResourceWorkingHoursAction(
   if (!user) return { success: false, message: "Authentication required." };
 
   const tenant = await getTenantBySlug(tenantSlug);
-  if (!tenant || !["active","trialing"].includes(tenant.status))
+  if (!tenant || !["active", "trialing"].includes(tenant.status))
     return { success: false, message: "Business not found." };
 
   const supabase = await createClient();
@@ -109,5 +112,11 @@ export async function setResourceWorkingHoursAction(
 
   revalidatePath(`/${tenantSlug}/resources/${resourceId}/edit`);
   revalidatePath(`/${tenantSlug}/resources`);
-  return { success: true, message: "Working hours saved." };
+
+  const { conflictCount } = await getScheduleChangeConflicts(tenant.id, resourceId);
+  return {
+    success: true,
+    message: "Working hours saved.",
+    conflictCount: conflictCount > 0 ? conflictCount : undefined,
+  };
 }

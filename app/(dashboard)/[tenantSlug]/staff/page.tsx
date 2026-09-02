@@ -1,13 +1,16 @@
 import Stack from "@mui/material/Stack";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { requireTenantMember } from "@/lib/tenants/require-tenant-member";
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { getStaffProfiles } from "@/features/staff/services/staff-queries";
+import { getStaffScheduleOverview } from "@/features/staff/services/staff-schedule-queries";
+import { getBusinessResources } from "@/features/resources/services/get-business-resources";
+import { getTeamMembers } from "@/features/team/services/team-queries";
 import PageHeader from "@/features/platform/components/page-header";
-import SectionCard from "@/features/platform/components/section-card";
-import PlatformEmptyState from "@/features/platform/components/platform-empty-state";
-import StatusChip from "@/components/ui/status-chip";
+import StaffClientPage from "./client-page";
+import type { StaffPageData, StaffPageRow } from "@/features/staff/types/staff";
+
+const MANAGE_ROLES = ["owner", "admin"];
+const SCHEDULE_VIEW_ROLES = ["owner", "admin", "manager"];
 
 /**
  * Staff Page — Milestone 15.4.
@@ -21,17 +24,43 @@ export default async function StaffPage({
 }) {
   const { tenantSlug } = await params;
   const { tenant, membership } = await requireTenantMember(tenantSlug);
-  const canManage = ["owner", "admin"].includes(membership.role);
+  const canManage = MANAGE_ROLES.includes(membership.role);
+  const canViewSchedule = SCHEDULE_VIEW_ROLES.includes(membership.role);
 
-  const supabase = createServiceRoleClient();
+  const [profiles, scheduleOverview, resources, members] = await Promise.all([
+    getStaffProfiles(tenant.id),
+    canViewSchedule ? getStaffScheduleOverview(tenant.id, 50, 0) : Promise.resolve([]),
+    canManage ? getBusinessResources(tenant.id) : Promise.resolve([]),
+    canManage ? getTeamMembers(tenant.id) : Promise.resolve([]),
+  ]);
 
-  const { data: profiles } = await supabase
-    .from("staff_profiles")
-    .select("id, display_name, job_title, resource_id, is_active, created_at")
-    .eq("tenant_id", tenant.id)
-    .order("display_name", { ascending: true });
+  const scheduleByResource = new Map(scheduleOverview.map((s) => [s.resourceId, s]));
+  const emailByMemberId = new Map(members.map((m) => [m.id, m.email]));
 
-  const rows = (profiles ?? []) as Array<Record<string, unknown>>;
+  const rows: StaffPageRow[] = profiles.map((profile) => {
+    const schedule = scheduleByResource.get(profile.resourceId);
+    return {
+      ...profile,
+      memberEmail: profile.account?.memberId ? emailByMemberId.get(profile.account.memberId) ?? null : null,
+      todayAppointmentCount: canViewSchedule ? schedule?.todayAppointmentCount ?? 0 : null,
+      upcomingTimeOff: schedule?.upcomingTimeOff ?? [],
+    };
+  });
+
+  const linkedResourceIds = new Set(profiles.map((p) => p.resourceId));
+  const linkedMemberIds = new Set(profiles.map((p) => p.account?.memberId).filter((id): id is string => Boolean(id)));
+
+  const pageData: StaffPageData = {
+    rows,
+    canManage,
+    canViewSchedule,
+    unlinkedResources: resources
+      .filter((r) => r.isActive && !linkedResourceIds.has(r.id))
+      .map((r) => ({ id: r.id, name: r.name })),
+    linkableMembers: members
+      .filter((m) => !linkedMemberIds.has(m.id))
+      .map((m) => ({ id: m.id, email: m.email, role: m.role })),
+  };
 
   return (
     <Stack spacing={2}>
@@ -51,49 +80,7 @@ export default async function StaffPage({
         }
       />
 
-      <SectionCard noPadding>
-        {rows.length === 0 ? (
-          <Box sx={{ p: 3 }}>
-            <PlatformEmptyState
-              title="No staff profiles"
-              description="Link team members to resources to create bookable staff profiles."
-            />
-          </Box>
-        ) : (
-          <Stack spacing={0}>
-            {rows.map((profile) => (
-              <Box
-                key={String(profile.id)}
-                sx={{
-                  px: 2.5,
-                  py: 1.5,
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  "&:last-child": { borderBottom: "none" },
-                }}
-              >
-                <Box>
-                  <Typography sx={{ fontSize: "0.875rem", fontWeight: 500 }}>
-                    {String(profile.display_name ?? "Unnamed")}
-                  </Typography>
-                  {profile.job_title ? (
-                    <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>
-                      {String(profile.job_title)}
-                    </Typography>
-                  ) : null}
-                </Box>
-                <StatusChip
-                  label={profile.is_active ? "Active" : "Inactive"}
-                  color={profile.is_active ? "success" : "default"}
-                  size="small"
-                />
-              </Box>
-            ))}
-          </Stack>
-        )}
-      </SectionCard>
+      <StaffClientPage tenantSlug={tenantSlug} data={pageData} />
     </Stack>
   );
 }

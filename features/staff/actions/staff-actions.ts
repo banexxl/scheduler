@@ -7,6 +7,7 @@
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logging";
+import { revalidatePath } from "next/cache";
 import type { UpdateStaffInput } from "../types/staff";
 
 type ActionResult = { success: true; id?: string } | { success: false; error: string };
@@ -68,6 +69,7 @@ export async function createStaffProfileAction(
     }
 
     logger.info("staff.profile.created", { tenantId: tenant.id, operation: "create_staff" });
+    revalidatePath(`/${tenantSlug}/staff`);
     return { success: true, id: (data as unknown as { id: string }).id };
   } catch {
     return { success: false, error: "Failed to create staff profile." };
@@ -101,6 +103,7 @@ export async function updateStaffProfileAction(
       .eq("tenant_id" as never, tenant.id);
 
     if (error) return { success: false, error: "Failed to update staff profile." };
+    revalidatePath(`/${tenantSlug}/staff`);
     return { success: true };
   } catch {
     return { success: false, error: "Failed to update staff profile." };
@@ -145,6 +148,7 @@ export async function linkStaffAccountAction(
 
     const op = tenantMemberId ? "staff.member.linked" : "staff.member.unlinked";
     logger.info(op, { tenantId: tenant.id, operation: op });
+    revalidatePath(`/${tenantSlug}/staff`);
     return { success: true };
   } catch {
     return { success: false, error: "Failed to update account link." };

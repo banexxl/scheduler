@@ -10,6 +10,7 @@ import { getBusinessLocations } from "@/features/locations/services/get-business
 import { getServicesForResource } from "@/features/services/services/get-service-resources";
 import { getResourceWorkingHours } from "@/features/resources/services/get-resource-working-hours";
 import { getFutureResourceTimeOff } from "@/features/resources/services/get-resource-time-off";
+import { resolveOwnResourceId } from "@/features/staff/services/staff-schedule-queries";
 import ResourceForm from "@/features/resources/components/resource-form";
 import ResourceAssignedServices from "@/features/services/components/resource-assigned-services";
 import ResourceWeeklyScheduleEditor from "@/features/resources/components/resource-weekly-schedule-editor";
@@ -20,11 +21,19 @@ import type { ResourceFormValues } from "@/features/resources/schemas/resource-s
 import type { ResourceWorkingHourInput } from "@/features/resources/types/resource-working-hour";
 
 const EDITABLE_ROLES = ["owner", "admin"];
+const SCHEDULE_VIEW_ROLES = ["owner", "admin", "manager"];
 
 export default async function EditResourcePage({ params }: { params: Promise<{ tenantSlug: string; resourceId: string }> }) {
   const { tenantSlug, resourceId } = await params;
   const { tenant, membership } = await requireTenantMember(tenantSlug);
   const canEdit = EDITABLE_ROLES.includes(membership.role);
+
+  // Staff members can only view their own linked resource, never another
+  // staff member's schedule or private configuration.
+  if (!SCHEDULE_VIEW_ROLES.includes(membership.role)) {
+    const ownResourceId = await resolveOwnResourceId(tenant.id, membership.id);
+    if (ownResourceId !== resourceId) notFound();
+  }
 
   const [resource, types, locations, assignedServices, workingHours, timeOff] = await Promise.all([
     getResource(tenant.id, resourceId),

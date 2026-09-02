@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAppUrl } from "@/lib/helpers/get-app-url";
+import { getSafeRedirectPath } from "@/lib/auth/get-safe-redirect-path";
 
 /**
  * Google OAuth Login Action.
@@ -17,16 +18,17 @@ import { getAppUrl } from "@/lib/helpers/get-app-url";
  * - Google Cloud Console OAuth credentials configured
  * - Redirect URL added to Supabase: {APP_URL}/api/auth/callback
  */
-export async function googleLoginAction(): Promise<never> {
+export async function googleLoginAction(next?: string): Promise<never> {
   const supabase = await createClient();
-  const callbackUrl = new URL("/api/auth/callback", getAppUrl()).toString();
+  const callbackUrl = new URL("/api/auth/callback", getAppUrl());
+  if (next) callbackUrl.searchParams.set("next", getSafeRedirectPath(next));
 
   console.log("[google-login] Initiating OAuth", { provider: "google", callbackUrl });
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: callbackUrl,
+      redirectTo: callbackUrl.toString(),
       queryParams: {
         access_type: "offline",
         prompt: "consent",

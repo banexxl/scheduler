@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getAppUrl } from "@/lib/helpers/get-app-url";
+import { getSafeRedirectPath } from "@/lib/auth/get-safe-redirect-path";
 import { registerSchema } from "../schemas/register-schema";
 import type { AuthActionResult } from "../types/auth-action-result";
 
@@ -13,13 +14,17 @@ export async function registerAction(
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
   };
+  const next = formData.get("next");
 
   try {
     const validated = registerSchema.validateSync(raw, { abortEarly: false });
 
     const supabase = await createClient();
 
-    const callbackUrl = new URL("/api/auth/callback", getAppUrl()).toString();
+    const callbackUrl = new URL("/api/auth/callback", getAppUrl());
+    if (typeof next === "string" && next) {
+      callbackUrl.searchParams.set("next", getSafeRedirectPath(next));
+    }
 
     console.log("[register] Signing up user", { email: validated.email, emailRedirectTo: callbackUrl });
 
@@ -27,7 +32,7 @@ export async function registerAction(
       email: validated.email,
       password: validated.password,
       options: {
-        emailRedirectTo: callbackUrl,
+        emailRedirectTo: callbackUrl.toString(),
       },
     });
 

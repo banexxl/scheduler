@@ -35,7 +35,7 @@ const authInputSx = {
   },
 };
 
-export default function RegisterForm() {
+export default function RegisterForm({ next }: { next?: string }) {
   const [isPending, startTransition] = useTransition();
   const [actionResult, setActionResult] = useState<AuthActionResult | null>(
     null
@@ -50,6 +50,7 @@ export default function RegisterForm() {
     formData.set("email", values.email);
     formData.set("password", values.password);
     formData.set("confirmPassword", values.confirmPassword);
+    if (next) formData.set("next", next);
 
     startTransition(async () => {
       const result = await registerAction(formData);
@@ -162,7 +163,7 @@ export default function RegisterForm() {
             onClick={() => {
               startTransition(async () => {
                 const { googleLoginAction } = await import("../actions/google-login");
-                await googleLoginAction();
+                await googleLoginAction(next);
               });
             }}
             sx={{
@@ -188,7 +189,11 @@ export default function RegisterForm() {
           </Button>
 
           <Box sx={{ textAlign: "center" }}>
-            <Link component="a" href="/login" variant="body2">
+            <Link
+              component="a"
+              href={next ? `/login?next=${encodeURIComponent(next)}` : "/login"}
+              variant="body2"
+            >
               Already have an account? Sign in
             </Link>
           </Box>

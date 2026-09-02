@@ -43,3 +43,22 @@ export type UpdateStaffInput = {
   isActive?: boolean;
   isPublic?: boolean;
 };
+
+/** Staff profile row enriched with account email and today's schedule summary. */
+export type StaffPageRow = StaffProfileDTO & {
+  memberEmail: string | null;
+  /** null when the viewer's role cannot see schedule data. */
+  todayAppointmentCount: number | null;
+  upcomingTimeOff: Array<{ startsAt: string; endsAt: string }>;
+};
+
+export type UnlinkedResourceOption = { id: string; name: string };
+export type LinkableMemberOption = { id: string; email: string; role: string };
+
+export type StaffPageData = {
+  rows: StaffPageRow[];
+  canManage: boolean;
+  canViewSchedule: boolean;
+  unlinkedResources: UnlinkedResourceOption[];
+  linkableMembers: LinkableMemberOption[];
+};

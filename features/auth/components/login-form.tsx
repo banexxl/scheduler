@@ -33,7 +33,7 @@ const authInputSx = {
   },
 };
 
-export default function LoginForm() {
+export default function LoginForm({ next }: { next?: string }) {
   const [isPending, startTransition] = useTransition();
   const [actionResult, setActionResult] = useState<AuthActionResult | null>(
     null
@@ -47,6 +47,7 @@ export default function LoginForm() {
     const formData = new FormData();
     formData.set("email", values.email);
     formData.set("password", values.password);
+    if (next) formData.set("next", next);
 
     startTransition(async () => {
       const result = await loginAction(formData);
@@ -133,7 +134,7 @@ export default function LoginForm() {
             disabled={isPending}
             onClick={() => {
               startTransition(async () => {
-                await googleLoginAction();
+                await googleLoginAction(next);
               });
             }}
             sx={{
@@ -162,7 +163,11 @@ export default function LoginForm() {
             <Link component="a" href="/forgot-password" variant="body2">
               Forgot password?
             </Link>
-            <Link component="a" href="/register" variant="body2">
+            <Link
+              component="a"
+              href={next ? `/register?next=${encodeURIComponent(next)}` : "/register"}
+              variant="body2"
+            >
               Create an account
             </Link>
           </Box>

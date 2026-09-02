@@ -4,14 +4,22 @@ import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { getUser } from "@/lib/auth/get-user";
+import { getSafeRedirectPath } from "@/lib/auth/get-safe-redirect-path";
 import { resolveLoginDestination } from "@/features/auth/services/resolve-login-destination";
 import RegisterForm from "@/features/auth/components/register-form";
 
-export default async function RegisterPage() {
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
   const user = await getUser();
 
   if (user) {
-    const destination = await resolveLoginDestination(user);
+    const destination = next
+      ? getSafeRedirectPath(next)
+      : await resolveLoginDestination(user);
     redirect(destination);
   }
 
@@ -55,7 +63,7 @@ export default async function RegisterPage() {
           >
             Sign up for a new account to get started.
           </Typography>
-          <RegisterForm />
+          <RegisterForm next={next} />
         </Paper>
       </Container>
     </Box>

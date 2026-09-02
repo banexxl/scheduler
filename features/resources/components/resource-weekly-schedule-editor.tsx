@@ -26,7 +26,7 @@ type ResourceWeeklyScheduleEditorProps = {
   /** Available locations */
   locations: LocationOption[];
   /** Save callback */
-  onSave: (periods: ResourceWorkingHourInput[]) => Promise<{ success: boolean; message?: string }>;
+  onSave: (periods: ResourceWorkingHourInput[]) => Promise<{ success: boolean; message?: string; conflictCount?: number }>;
   /** Whether the user can edit */
   canEdit: boolean;
 };
@@ -64,7 +64,7 @@ export default function ResourceWeeklyScheduleEditor({
 }: ResourceWeeklyScheduleEditorProps) {
   const [periods, setPeriods] = useState<PeriodState[]>(() => initPeriods(initialSchedule));
   const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<{ success: boolean; message?: string } | null>(null);
+  const [result, setResult] = useState<{ success: boolean; message?: string; conflictCount?: number } | null>(null);
 
   const addPeriod = (day: DayOfWeek) => {
     setPeriods((prev) => [
@@ -124,6 +124,11 @@ export default function ResourceWeeklyScheduleEditor({
       {result?.success && (
         <Alert severity="success" sx={{ mb: 2 }} onClose={() => setResult(null)}>
           {result.message}
+        </Alert>
+      )}
+      {result?.success && Boolean(result.conflictCount) && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          {result.conflictCount} existing appointment{result.conflictCount !== 1 ? "s" : ""} may now fall outside these working hours. They were not changed or cancelled.
         </Alert>
       )}
       {result && !result.success && result.message && (

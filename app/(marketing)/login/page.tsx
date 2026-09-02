@@ -4,14 +4,22 @@ import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { getUser } from "@/lib/auth/get-user";
+import { getSafeRedirectPath } from "@/lib/auth/get-safe-redirect-path";
 import { resolveLoginDestination } from "@/features/auth/services/resolve-login-destination";
 import LoginForm from "@/features/auth/components/login-form";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
   const user = await getUser();
 
   if (user) {
-    const destination = await resolveLoginDestination(user);
+    const destination = next
+      ? getSafeRedirectPath(next)
+      : await resolveLoginDestination(user);
     redirect(destination);
   }
 
@@ -55,7 +63,7 @@ export default async function LoginPage() {
           >
             Enter your credentials to access your account.
           </Typography>
-          <LoginForm />
+          <LoginForm next={next} />
         </Paper>
       </Container>
     </Box>

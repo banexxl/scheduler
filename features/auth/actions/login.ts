@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSafeRedirectPath } from "@/lib/auth/get-safe-redirect-path";
 import { loginSchema } from "../schemas/login-schema";
 import { resolveLoginDestination } from "../services/resolve-login-destination";
 import type { AuthActionResult } from "../types/auth-action-result";
@@ -13,6 +14,7 @@ export async function loginAction(
     email: formData.get("email"),
     password: formData.get("password"),
   };
+  const next = formData.get("next");
 
   try {
     const validated = loginSchema.validateSync(raw, { abortEarly: false });
@@ -42,7 +44,10 @@ export async function loginAction(
       };
     }
 
-    const destination = await resolveLoginDestination(user);
+    const destination =
+      typeof next === "string" && next
+        ? getSafeRedirectPath(next)
+        : await resolveLoginDestination(user);
     redirect(destination);
   } catch (error) {
     // Next.js redirect throws a special error — rethrow it

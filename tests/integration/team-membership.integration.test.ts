@@ -164,24 +164,34 @@ describeIntegration("team membership integrity (live DB)", () => {
   });
 
   // ─── Invitation Integrity ──────────────────────────────────────────────────
+  // Invitations now use Supabase Auth native invites; the invited role is
+  // applied to tenant_members via the accept_pending_tenant_invite RPC. The
+  // membership row is the source of truth, so integrity is enforced there.
 
   describe("invitation integrity", () => {
-    it("cannot create invitation for non-existent tenant", async () => {
+    it("cannot create a membership for a non-existent tenant", async () => {
       const { error } = await admin()
-        .from("tenant_member_invitations")
+        .from("tenant_members")
         .insert({
           tenant_id: "00000000-0000-0000-0000-000000000000",
-          email: "test@test.localhost",
+          user_id: ownerUserId,
           role: "staff",
-          token_hash: "fake_hash_" + Date.now(),
-          token_prefix: "fakepre",
-          status: "pending",
-          invited_by: ownerUserId,
-          expires_at: new Date(Date.now() + 86400000).toISOString(),
+          status: "active",
         });
 
-      // Should fail on FK constraint
+      // Should fail on FK constraint to tenants
       expect(error).not.toBeNull();
+    });
+
+    it("rejects an invalid role via accept_pending_tenant_invite", async () => {
+      const { data } = await admin().rpc("accept_pending_tenant_invite" as never, {
+        p_user_id: ownerUserId,
+        p_tenant_id: "00000000-0000-0000-0000-000000000000",
+        p_role: "superuser",
+      } as never);
+
+      const status = String((data as Record<string, unknown> | null)?.status ?? "");
+      expect(status).toBe("invalid_role");
     });
   });
 });

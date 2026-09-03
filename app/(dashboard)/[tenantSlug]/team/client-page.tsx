@@ -122,7 +122,7 @@ export default function TeamClientPage({ tenantSlug, data }: Props) {
                 <TableRow>
                   <TableCell>Email</TableCell>
                   <TableCell>Role</TableCell>
-                  <TableCell>Expires</TableCell>
+                  <TableCell>Invited</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -131,7 +131,7 @@ export default function TeamClientPage({ tenantSlug, data }: Props) {
                   <TableRow key={inv.id}>
                     <TableCell>{inv.email}</TableCell>
                     <TableCell><Chip label={inv.role} size="small" variant="outlined" /></TableCell>
-                    <TableCell>{new Date(inv.expiresAt).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(inv.invitedAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <Button size="small" color="error" onClick={() => setRevokeTarget({ id: inv.id, email: inv.email })}>Revoke</Button>
                     </TableCell>

@@ -45,7 +45,6 @@ export default function robots(): MetadataRoute.Robots {
           "/register",
           "/forgot-password",
           "/update-password",
-          "/invite/",
 
           // Token-based routes (sensitive)
           "/book/*/portal/session/",

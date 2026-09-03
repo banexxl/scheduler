@@ -1,57 +1,28 @@
 "use server";
 
 /**
- * Team Management Actions — Milestone 12.1.
+ * Team Management Actions.
+ *
+ * Invitations use Supabase Auth's native invite flow
+ * (`auth.admin.inviteUserByEmail`). Supabase generates and emails the invite
+ * token/magic-link; we only carry the invited tenant + role in the user's
+ * `app_metadata.pending_tenant_invite`. Acceptance happens in the custom
+ * redirect route `/api/auth/accept-invite`, which applies the role via the
+ * `accept_pending_tenant_invite` RPC. There is no custom token table.
  */
 
-import { createHash, randomBytes } from "crypto";
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { logger } from "@/lib/logging";
 import { createServerActionLogger } from "@/lib/logging/server-action-logger";
 import { revalidatePath } from "next/cache";
-import { getEmailProvider } from "@/features/notifications/services/providers";
-import type { TenantRole } from "../types/team";
+import type { TenantRole, PendingTenantInvite } from "../types/team";
+import { PENDING_INVITE_KEY } from "../types/team";
 
 type ActionResult = { success: true } | { success: false; error: string };
 
-const INVITATION_TTL_DAYS = 7;
-const TOKEN_BYTES = 32;
-
-function generateToken(): string {
-  return randomBytes(TOKEN_BYTES).toString("base64url");
-}
-
-function hashToken(raw: string): string {
-  return createHash("sha256").update(raw, "utf8").digest("hex");
-}
-
-const PASSWORD_CHARSETS = [
-  "ABCDEFGHJKLMNPQRSTUVWXYZ",
-  "abcdefghijkmnpqrstuvwxyz",
-  "23456789",
-  "!@#$%^&*-_=+",
-];
-const PASSWORD_LENGTH = 16;
-
-/** Generates a random password guaranteed to contain each required character class. */
-function generateStrongPassword(): string {
-  const allChars = PASSWORD_CHARSETS.join("");
-  const randomByte = () => randomBytes(1)[0] as number;
-  const pick = (charset: string) => charset[randomByte() % charset.length] as string;
-
-  const required = PASSWORD_CHARSETS.map(pick);
-  const rest = Array.from({ length: PASSWORD_LENGTH - required.length }, () => pick(allChars));
-
-  const combined = [...required, ...rest];
-  // Fisher-Yates shuffle using CSPRNG bytes so required chars aren't always in fixed positions.
-  for (let i = combined.length - 1; i > 0; i -= 1) {
-    const j = randomByte() % (i + 1);
-    const temp = combined[i] as string;
-    combined[i] = combined[j] as string;
-    combined[j] = temp;
-  }
-  return combined.join("");
+function appUrl(): string {
+  return process.env.PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 }
 
 function canInviteRole(actorRole: TenantRole, targetRole: TenantRole): boolean {
@@ -87,11 +58,22 @@ export async function inviteTenantMemberAction(
 
     const supabase = createServiceRoleClient();
 
-    // Check existing member
+    const pendingInvite: PendingTenantInvite = {
+      tenant_id: tenant.id,
+      tenant_slug: tenantSlug,
+      role: input.role,
+      invited_by: user.id,
+      invited_at: new Date().toISOString(),
+    };
+
+    // Find an existing auth account for this email.
     const { data: { users } } = await supabase.auth.admin.listUsers();
     const existingUser = (users ?? []).find(u => u.email?.toLowerCase() === normalizedEmail);
 
+    const redirectTo = `${appUrl()}/api/auth/accept-invite`;
+
     if (existingUser) {
+      // Already an active member of THIS tenant?
       const { data: existingMember } = await supabase
         .from("tenant_members")
         .select("id")
@@ -103,147 +85,56 @@ export async function inviteTenantMemberAction(
       if (existingMember) {
         return { success: false, error: "This person is already a member of this business." };
       }
-    }
 
-    // Create an auth account with a temporary password when the invitee has none yet.
-    let temporaryPassword: string | null = null;
-    let newAuthUserId: string | null = null;
-    let targetUserId: string;
-    if (existingUser) {
-      targetUserId = existingUser.id;
+      // Existing account (belongs to another business or is a customer):
+      // stamp the pending invite and email a native magic-link that routes
+      // through the accept-invite handler so they can join with the chosen role.
+      const { error: updateError } = await supabase.auth.admin.updateUserById(existingUser.id, {
+        app_metadata: {
+          ...(existingUser.app_metadata ?? {}),
+          [PENDING_INVITE_KEY]: pendingInvite,
+        },
+      });
+
+      if (updateError) {
+        return { success: false, error: "Failed to prepare the invitation." };
+      }
+
+      const { error: linkError } = await supabase.auth.admin.generateLink({
+        type: "magiclink",
+        email: normalizedEmail,
+        options: { redirectTo },
+      });
+
+      if (linkError) {
+        return { success: false, error: "Failed to send the invitation email." };
+      }
     } else {
-      temporaryPassword = generateStrongPassword();
-      const { data: createdUser, error: createUserError } = await supabase.auth.admin.createUser({
-        email: normalizedEmail,
-        password: temporaryPassword,
-        email_confirm: true,
+      // Brand-new invitee: Supabase creates a confirmed-pending user, stores
+      // our metadata, and emails the native invite link.
+      const { error: inviteError } = await supabase.auth.admin.inviteUserByEmail(normalizedEmail, {
+        redirectTo,
+        data: { [PENDING_INVITE_KEY]: pendingInvite },
       });
 
-      if (createUserError) {
-        return { success: false, error: "Failed to create an account for this email." };
+      if (inviteError) {
+        // 422 => user already exists (race with listUsers); surface a friendly error.
+        return { success: false, error: "Failed to send the invitation email." };
       }
-      newAuthUserId = createdUser.user.id;
-      targetUserId = createdUser.user.id;
-    }
 
-    // Grant tenant access immediately — the invitation email is a
-    // confirmation/notification step, not a gate on membership.
-    const { error: memberInsertError } = await (supabase as never as ReturnType<typeof createServiceRoleClient>)
-      .from("tenant_members" as never)
-      .insert({
-        tenant_id: tenant.id,
-        user_id: targetUserId,
-        role: input.role,
-        status: "active",
-      } as never);
-
-    if (memberInsertError) {
-      if (newAuthUserId) {
-        await supabase.auth.admin.deleteUser(newAuthUserId);
+      // inviteUserByEmail's `data` populates user_metadata; mirror the invite
+      // into app_metadata (server-controlled, not user-editable) for the
+      // acceptance handler to trust.
+      const { data: { users: refreshed } } = await supabase.auth.admin.listUsers();
+      const created = (refreshed ?? []).find(u => u.email?.toLowerCase() === normalizedEmail);
+      if (created) {
+        await supabase.auth.admin.updateUserById(created.id, {
+          app_metadata: {
+            ...(created.app_metadata ?? {}),
+            [PENDING_INVITE_KEY]: pendingInvite,
+          },
+        });
       }
-      if ((memberInsertError as { code?: string }).code === "23505") {
-        return { success: false, error: "This person is already a member of this business." };
-      }
-      return { success: false, error: "Failed to add team member." };
-    }
-
-    // Clear any stale pending invitation for this email so re-inviting doesn't
-    // collide with the unique partial index below.
-    await (supabase as never as ReturnType<typeof createServiceRoleClient>)
-      .from("tenant_member_invitations" as never)
-      .update({ status: "revoked", revoked_at: new Date().toISOString() } as never)
-      .eq("tenant_id" as never, tenant.id)
-      .eq("email" as never, normalizedEmail)
-      .eq("status" as never, "pending");
-
-    // Generate token
-    const rawToken = generateToken();
-    const tokenHash = hashToken(rawToken);
-    const tokenPrefix = rawToken.slice(0, 10);
-    const expiresAt = new Date(Date.now() + INVITATION_TTL_DAYS * 24 * 60 * 60_000).toISOString();
-
-    // Invitation record is now only an audit trail + confirmation-email
-    // token source. Membership was already granted above, so a failure here
-    // never blocks or revokes access — only the confirmation email is affected.
-    const { error: insertError } = await (supabase as never as ReturnType<typeof createServiceRoleClient>)
-      .from("tenant_member_invitations" as never)
-      .insert({
-        tenant_id: tenant.id,
-        email: normalizedEmail,
-        role: input.role,
-        token_hash: tokenHash,
-        token_prefix: tokenPrefix,
-        status: "pending",
-        invited_by: user.id,
-        expires_at: expiresAt,
-      } as never);
-
-    if (insertError) {
-      logger.error("team.invitation.record_failed", { tenantId: tenant.id, operation: "invite_member" });
-    }
-
-    // ─── Send invitation email (best effort — never blocks invitation creation) ──
-    const appUrl = process.env.PUBLIC_APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const inviteUrl = `${appUrl}/invite/${rawToken}`;
-
-    console.log("[team.invite] Email env vars:", {
-      EMAIL_PROVIDER: process.env.EMAIL_PROVIDER ?? "(not set)",
-      SMTP_HOST: process.env.SMTP_HOST ?? "(not set)",
-      SMTP_PORT: process.env.SMTP_PORT ?? "(not set)",
-      SMTP_USER: process.env.SMTP_USER ?? "(not set)",
-      SMTP_PASS: process.env.SMTP_PASS ? "***set***" : "(not set)",
-      NOTIFICATION_FROM_EMAIL: process.env.NOTIFICATION_FROM_EMAIL ?? "(not set)",
-      PUBLIC_APP_URL: process.env.PUBLIC_APP_URL ?? "(not set)",
-      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? "(not set)",
-    });
-    console.log("[team.invite] Sending invitation email to:", normalizedEmail, "inviteUrl:", inviteUrl);
-
-    try {
-      const emailProvider = getEmailProvider();
-      const tenantName = tenant.name || tenantSlug;
-
-      const credentialsHtml = temporaryPassword
-        ? `
-              <div style="margin:0 0 28px;padding:16px 20px;background:#0a0a0f;border:1px solid rgba(124,58,237,0.25);border-radius:10px;text-align:left;">
-                <p style="margin:0 0 8px;font-size:12px;color:#8b8b9e;text-transform:uppercase;letter-spacing:0.05em;">Your login credentials</p>
-                <p style="margin:0 0 4px;font-size:14px;color:#f0f0f5;">Email: <strong>${normalizedEmail}</strong></p>
-                <p style="margin:0;font-size:14px;color:#f0f0f5;">Temporary password: <strong>${temporaryPassword}</strong></p>
-              </div>
-            `
-        : "";
-      const credentialsText = temporaryPassword
-        ? ` Your login credentials — Email: ${normalizedEmail}, Temporary password: ${temporaryPassword}. Please sign in and change your password afterwards.`
-        : "";
-
-      const emailResult = await emailProvider.send({
-        to: normalizedEmail,
-        subject: `You've joined ${tenantName} — confirm your email`,
-        html: `
-          <div style="font-family:sans-serif;background:#0a0a0f;padding:40px 16px;">
-            <div style="max-width:480px;margin:0 auto;background:#16161e;border:1px solid rgba(124,58,237,0.15);border-radius:16px;padding:40px 32px;text-align:center;">
-              <div style="width:60px;height:3px;background:linear-gradient(90deg,#7C3AED,#a855f7);border-radius:2px;margin:0 auto 24px;"></div>
-              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#f0f0f5;">You're in</h1>
-              <p style="margin:0 0 28px;font-size:15px;color:#8b8b9e;line-height:1.6;">
-                Your account has been added to <strong style="color:#f0f0f5;">${tenantName}</strong> as a <strong style="color:#f0f0f5;">${input.role}</strong>. Confirm your email below to finish setting up access.
-              </p>
-              ${credentialsHtml}
-              <a href="${inviteUrl}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#7C3AED,#a855f7);border-radius:10px;padding:14px 36px;color:#fff;font-size:15px;font-weight:700;text-decoration:none;">
-                Confirm Email
-              </a>
-              <p style="margin:28px 0 0;font-size:12px;color:#5c5c72;line-height:1.5;">
-                This link expires in ${INVITATION_TTL_DAYS} days. If you weren't expecting this, you can safely ignore this email.
-              </p>
-            </div>
-          </div>
-        `,
-        text: `Your account has been added to ${tenantName} as a ${input.role}.${credentialsText} Confirm your email: ${inviteUrl}`,
-        fromName: tenantName,
-        idempotencyKey: `invite_${tokenHash}`,
-      });
-
-      console.log("[team.invite] Email provider response:", JSON.stringify(emailResult));
-    } catch (emailError) {
-      console.error("[team.invite] Email send failed:", emailError instanceof Error ? emailError.message : emailError);
     }
 
     logger.info("team.invitation.created", {
@@ -261,56 +152,46 @@ export async function inviteTenantMemberAction(
 // ─── Revoke Invitation ───────────────────────────────────────────────────────
 
 /**
- * Revokes a pending invitation record AND removes the membership access that
- * was granted at invite time (since access is no longer gated on acceptance).
+ * Revokes a pending invitation. The `invitationId` is the invited auth user's
+ * id. Clears the pending-invite metadata for this tenant. If the account was
+ * created solely for this (never-accepted) invitation and has no membership
+ * anywhere, it is deleted.
  */
 export async function revokeTenantInvitationAction(
   tenantSlug: string,
   invitationId: string
 ): Promise<ActionResult> {
   try {
-    const { user, tenant } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
+    const { tenant } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
     const supabase = createServiceRoleClient();
 
-    const { data: invitation } = await (supabase as never as ReturnType<typeof createServiceRoleClient>)
-      .from("tenant_member_invitations" as never)
-      .select("id, email" as never)
-      .eq("id" as never, invitationId)
-      .eq("tenant_id" as never, tenant.id)
-      .eq("status" as never, "pending")
-      .maybeSingle();
+    const { data: invitedUserResult } = await supabase.auth.admin.getUserById(invitationId);
+    const invitedUser = invitedUserResult?.user;
+    if (!invitedUser) return { success: false, error: "Invitation not found." };
 
-    const inv = invitation as unknown as { id: string; email: string } | null;
-    if (!inv) return { success: false, error: "Invitation not found." };
+    const pending = (invitedUser.app_metadata?.[PENDING_INVITE_KEY] ?? null) as PendingTenantInvite | null;
+    if (!pending || pending.tenant_id !== tenant.id) {
+      return { success: false, error: "Invitation not found." };
+    }
 
-    const { error } = await (supabase as never as ReturnType<typeof createServiceRoleClient>)
-      .from("tenant_member_invitations" as never)
-      .update({ status: "revoked", revoked_at: new Date().toISOString() } as never)
-      .eq("id" as never, invitationId)
-      .eq("tenant_id" as never, tenant.id)
-      .eq("status" as never, "pending");
+    // Clear the pending invite for this tenant.
+    const nextAppMetadata = { ...(invitedUser.app_metadata ?? {}) };
+    delete (nextAppMetadata as Record<string, unknown>)[PENDING_INVITE_KEY];
 
-    if (error) return { success: false, error: "Failed to revoke invitation." };
+    await supabase.auth.admin.updateUserById(invitedUser.id, {
+      app_metadata: nextAppMetadata,
+    });
 
-    // Remove the membership granted at invite time, if still present.
-    const { data: { users } } = await supabase.auth.admin.listUsers();
-    const invitedUser = (users ?? []).find(u => u.email?.toLowerCase() === inv.email.toLowerCase());
-    if (invitedUser) {
-      const { data: targetMembership } = await supabase
-        .from("tenant_members")
-        .select("id")
-        .eq("tenant_id", tenant.id)
-        .eq("user_id", invitedUser.id)
-        .eq("status", "active")
-        .maybeSingle();
+    // If this account has never been confirmed (invite never accepted) and has
+    // no tenant membership at all, delete it so it doesn't linger.
+    const { count } = await supabase
+      .from("tenant_members")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", invitedUser.id);
 
-      if (targetMembership) {
-        await (supabase as never as ReturnType<typeof createServiceRoleClient>).rpc("safe_remove_tenant_member" as never, {
-          p_tenant_id: tenant.id,
-          p_membership_id: targetMembership.id,
-          p_actor_user_id: user.id,
-        } as never);
-      }
+    const neverAccepted = !invitedUser.email_confirmed_at && !invitedUser.last_sign_in_at;
+    if (neverAccepted && (count ?? 0) === 0) {
+      await supabase.auth.admin.deleteUser(invitedUser.id);
     }
 
     logger.info("team.invitation.revoked", { tenantId: tenant.id, operation: "revoke_invitation" });

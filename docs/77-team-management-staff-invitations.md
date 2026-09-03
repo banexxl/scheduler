@@ -72,12 +72,18 @@ the `safe_remove_tenant_member` RPC enforce the change/remove columns.
 
 ---
 
-## 5. Member Removal
+## 5. Member Removal & Invitation Revocation
 
-- Sets `status = 'inactive'` (not delete).
-- Historical attribution preserved.
-- `requireTenantMember()` filters on `status = 'active'`.
-- Immediate authorization revocation.
+Both "Remove member" and "Revoke invitation" hard-delete access:
+
+- `safe_remove_tenant_member` RPC first enforces authorization + last-owner
+  protection (and admin-cannot-remove-owner).
+- On approval, the `tenant_members` row is hard-deleted (not soft-deactivated).
+- The `auth.users` account is deleted entirely when the user has no membership
+  in any OTHER tenant. If the account belongs to other businesses, it is kept
+  and only removed from the current tenant, so shared accounts are never wiped.
+- Revocation additionally clears the `pending_tenant_invite` metadata and
+  applies the same last-owner guard inline.
 
 ---
 

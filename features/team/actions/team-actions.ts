@@ -153,9 +153,17 @@ export async function inviteTenantMemberAction(
 
 /**
  * Revokes a pending invitation. The `invitationId` is the invited auth user's
- * id. Clears the pending-invite metadata for this tenant. If the account was
- * created solely for this (never-accepted) invitation and has no membership
- * anywhere, it is deleted.
+ * id.
+ *
+ * Behavior:
+ *  - Clears the pending-invite metadata for this tenant.
+ *  - Hard-deletes the user's `tenant_members` row(s) for THIS tenant.
+ *  - Deletes the `auth.users` account entirely when the user has no membership
+ *    in any OTHER tenant (i.e. the account exists only for this business).
+ *    If the account belongs to other tenants, it is kept and only removed from
+ *    this tenant, so a shared account is never destroyed.
+ *
+ * Last-owner protection: refuses to revoke the final owner of the tenant.
  */
 export async function revokeTenantInvitationAction(
   tenantSlug: string,
@@ -169,29 +177,67 @@ export async function revokeTenantInvitationAction(
     const invitedUser = invitedUserResult?.user;
     if (!invitedUser) return { success: false, error: "Invitation not found." };
 
-    const pending = (invitedUser.app_metadata?.[PENDING_INVITE_KEY] ?? null) as PendingTenantInvite | null;
-    if (!pending || pending.tenant_id !== tenant.id) {
-      return { success: false, error: "Invitation not found." };
-    }
-
-    // Clear the pending invite for this tenant.
-    const nextAppMetadata = { ...(invitedUser.app_metadata ?? {}) };
-    delete (nextAppMetadata as Record<string, unknown>)[PENDING_INVITE_KEY];
-
-    await supabase.auth.admin.updateUserById(invitedUser.id, {
-      app_metadata: nextAppMetadata,
-    });
-
-    // If this account has never been confirmed (invite never accepted) and has
-    // no tenant membership at all, delete it so it doesn't linger.
-    const { count } = await supabase
+    // Last-owner protection: never revoke the final active owner of this tenant.
+    const { data: thisTenantRows } = await supabase
       .from("tenant_members")
-      .select("id", { count: "exact", head: true })
+      .select("id, role, status")
+      .eq("tenant_id", tenant.id)
       .eq("user_id", invitedUser.id);
 
-    const neverAccepted = !invitedUser.email_confirmed_at && !invitedUser.last_sign_in_at;
-    if (neverAccepted && (count ?? 0) === 0) {
-      await supabase.auth.admin.deleteUser(invitedUser.id);
+    const isActiveOwner = (thisTenantRows ?? []).some(
+      (r) => r.role === "owner" && r.status === "active"
+    );
+    if (isActiveOwner) {
+      const { count: ownerCount } = await supabase
+        .from("tenant_members")
+        .select("id", { count: "exact", head: true })
+        .eq("tenant_id", tenant.id)
+        .eq("role", "owner")
+        .eq("status", "active");
+
+      if ((ownerCount ?? 0) <= 1) {
+        return { success: false, error: "Cannot revoke the last owner of this business." };
+      }
+    }
+
+    // Clear the pending invite for this tenant (if present).
+    const nextAppMetadata = { ...(invitedUser.app_metadata ?? {}) };
+    if (PENDING_INVITE_KEY in nextAppMetadata) {
+      delete (nextAppMetadata as Record<string, unknown>)[PENDING_INVITE_KEY];
+      await supabase.auth.admin.updateUserById(invitedUser.id, {
+        app_metadata: nextAppMetadata,
+      });
+    }
+
+    // Hard-delete this tenant's membership row(s) for the user.
+    const { error: deleteMemberError } = await supabase
+      .from("tenant_members")
+      .delete()
+      .eq("tenant_id", tenant.id)
+      .eq("user_id", invitedUser.id);
+
+    if (deleteMemberError) {
+      return { success: false, error: "Failed to remove the team member." };
+    }
+
+    // If the account has no membership in any OTHER tenant, delete the auth
+    // user entirely. Otherwise keep the shared account intact.
+    const { count: otherMemberships } = await supabase
+      .from("tenant_members")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", invitedUser.id)
+      .neq("tenant_id", tenant.id);
+
+    if ((otherMemberships ?? 0) === 0) {
+      const { error: deleteUserError } = await supabase.auth.admin.deleteUser(invitedUser.id);
+      if (deleteUserError) {
+        // Membership is already gone (access revoked); surface a soft warning
+        // but treat the revoke as successful.
+        logger.error("team.invitation.user_delete_failed", {
+          tenantId: tenant.id,
+          operation: "revoke_invitation",
+        });
+      }
     }
 
     logger.info("team.invitation.revoked", { tenantId: tenant.id, operation: "revoke_invitation" });
@@ -273,6 +319,12 @@ export async function changeTenantMemberRoleAction(
 
 // ─── Remove Member ───────────────────────────────────────────────────────────
 
+/**
+ * Removes a team member. The `safe_remove_tenant_member` RPC handles
+ * authorization + last-owner protection; on approval this HARD-deletes the
+ * `tenant_members` row and, when the account has no membership in any OTHER
+ * tenant, deletes the `auth.users` account entirely (shared accounts are kept).
+ */
 export async function removeTenantMemberAction(
   tenantSlug: string,
   membershipId: string
@@ -281,6 +333,15 @@ export async function removeTenantMemberAction(
     const { user, tenant } = await requireTenantRole(tenantSlug, ["owner", "admin"]);
     const supabase = createServiceRoleClient();
 
+    // Resolve the target user id up front (needed for the auth-user cleanup).
+    const { data: target } = await supabase
+      .from("tenant_members")
+      .select("user_id")
+      .eq("id", membershipId)
+      .eq("tenant_id", tenant.id)
+      .maybeSingle();
+
+    // Authorization + last-owner protection (also soft-deactivates the row).
     const { data: result } = await (supabase as never as ReturnType<typeof createServiceRoleClient>)
       .rpc("safe_remove_tenant_member" as never, {
         p_tenant_id: tenant.id,
@@ -291,14 +352,44 @@ export async function removeTenantMemberAction(
     const rpcResult = (result as unknown as Record<string, unknown>) ?? {};
     const status = String(rpcResult.status ?? "failed");
 
-    if (status === "removed") {
-      logger.info("team.member.removed", { tenantId: tenant.id, operation: "remove_member" });
-      revalidatePath(`/${tenantSlug}/team`);
-      return { success: true };
+    if (status !== "removed") {
+      if (status === "last_owner") return { success: false, error: "Cannot remove the last owner." };
+      if (status === "unauthorized") return { success: false, error: "You cannot remove this member." };
+      return { success: false, error: "Failed to remove member." };
     }
-    if (status === "last_owner") return { success: false, error: "Cannot remove the last owner." };
-    if (status === "unauthorized") return { success: false, error: "You cannot remove this member." };
-    return { success: false, error: "Failed to remove member." };
+
+    // Hard-delete the membership row now that the RPC approved the removal.
+    const { error: deleteMemberError } = await supabase
+      .from("tenant_members")
+      .delete()
+      .eq("id", membershipId)
+      .eq("tenant_id", tenant.id);
+
+    if (deleteMemberError) {
+      // The RPC already deactivated the row, so access is revoked either way.
+      logger.error("team.member.hard_delete_failed", { tenantId: tenant.id, operation: "remove_member" });
+    }
+
+    // Delete the auth account when it belongs to no other tenant.
+    const targetUserId = (target as { user_id?: string } | null)?.user_id;
+    if (targetUserId) {
+      const { count: otherMemberships } = await supabase
+        .from("tenant_members")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", targetUserId)
+        .neq("tenant_id", tenant.id);
+
+      if ((otherMemberships ?? 0) === 0) {
+        const { error: deleteUserError } = await supabase.auth.admin.deleteUser(targetUserId);
+        if (deleteUserError) {
+          logger.error("team.member.user_delete_failed", { tenantId: tenant.id, operation: "remove_member" });
+        }
+      }
+    }
+
+    logger.info("team.member.removed", { tenantId: tenant.id, operation: "remove_member" });
+    revalidatePath(`/${tenantSlug}/team`);
+    return { success: true };
   } catch {
     return { success: false, error: "Failed to remove member." };
   }

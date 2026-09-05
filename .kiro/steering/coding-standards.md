@@ -1,3 +1,7 @@
+---
+inclusion: always
+---
+
 # Coding Standards
 
 - TypeScript strict
@@ -6,3 +10,7 @@
 - Server Components first
 - Feature-first organization
 - Small focused files
+
+## Development Workflow
+
+Database migration → Feature implementation → Testing → Review → Commit

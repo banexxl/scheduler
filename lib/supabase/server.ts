@@ -21,6 +21,14 @@ export async function createClient() {
         clientEnvironment.supabaseUrl,
         clientEnvironment.supabasePublishableKey,
         {
+            // auth-js defaults to the implicit flow, which delivers recovery/
+            // OAuth tokens in the URL hash (#access_token=...). Our callback is
+            // a server route that can only read `?code=` from the query string,
+            // so we must opt into PKCE. This makes resetPasswordForEmail and
+            // OAuth generate `?code=` links that exchangeCodeForSession handles.
+            auth: {
+                flowType: "pkce",
+            },
             cookies: {
                 getAll() {
                     return cookieStore.getAll();

@@ -193,7 +193,7 @@ export default function MarketingLandingPage({ plans }: Props) {
   const baselinePerMonth = paidPerMonth.length > 0 ? Math.max(...paidPerMonth) : 0;
 
   return (
-    <Box sx={{ overflow: "hidden", bgcolor: "#0a0a0f" }}>
+    <Box sx={{ overflow: "hidden", bgcolor: "#0a0a0f", position: "relative" }}>
 
       {/* ═══════ 1. HERO ═══════ */}
       <Box ref={heroRef} sx={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center" }}>

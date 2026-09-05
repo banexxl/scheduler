@@ -9,11 +9,19 @@
 }
 
 html {
+  /* Non-static so framer-motion's scroll container measurement (useScroll with
+     a target) doesn't warn. The document scroller resolves to <html> in most
+     browsers. */
+  position: relative;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
+  /* position: relative so framer-motion's useScroll({ target }) can measure
+     target offsets against the document scroll container without warning that
+     the container is position: static. */
+  position: relative;
   max-width: 100vw;
   overflow-x: hidden;
   font-family: var(--font-family);

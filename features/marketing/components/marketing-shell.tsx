@@ -101,7 +101,7 @@ export default function MarketingShell({ children, userEmail }: Props) {
   const initials = userEmail ? userEmail.charAt(0).toUpperCase() : "?";
 
   return (
-    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", bgcolor: "#0a0a0f", color: "#f0f0f5" }}>
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", bgcolor: "#0a0a0f", color: "#f0f0f5", position: "relative" }}>
       {/* Smooth scroll */}
       <style>{`html { scroll-behavior: smooth; }`}</style>
 

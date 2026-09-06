@@ -320,28 +320,6 @@ export default async function PublicBookingPage({
         </GlassSection>
       )}
 
-      {/* Locations */}
-      {locations.length > 0 && (
-        <GlassSection id="locations">
-          <SectionHeading>{locations.length === 1 ? "Our Location" : "Our Locations"}</SectionHeading>
-          <Grid container spacing={2}>
-            {locations.map((loc) => (
-              <Grid key={loc.id} size={{ xs: 12, sm: locations.length === 1 ? 12 : 6 }}>
-                <Paper sx={{ p: 2.5, bgcolor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 2 }} elevation={0}>
-                  <Typography sx={{ fontSize: "1rem", fontWeight: 600, mb: 0.5, color: "#f0f0f5" }}>{loc.name}</Typography>
-                  {loc.streetAddress && (
-                    <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e" }}>
-                      {[loc.streetAddress, loc.city, loc.provinceState].filter(Boolean).join(", ")}
-                    </Typography>
-                  )}
-                  {loc.phoneNumber && <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e", mt: 0.5 }}>{loc.phoneNumber}</Typography>}
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </GlassSection>
-      )}
-
       {/* FAQ */}
       {config && config.faq.length > 0 && (
         <GlassSection id="faq">
@@ -377,7 +355,24 @@ export default async function PublicBookingPage({
         </GlassSection>
       )}
 
-      {/* Contact */}
+      {/* ═══ Booking Wizard — white "Book an Appointment" surface ═══ */}
+      {features.publicBookingEnabled && bookableServices.length > 0 && (
+        <Box id="booking" sx={{ maxWidth: 640, mx: "auto", py: 5 }}>
+          <Typography component="h2" sx={{ fontSize: "1.5rem", fontWeight: 700, mb: 3, textAlign: "center", color: "#f0f0f5" }}>
+            Book an Appointment
+          </Typography>
+          <PublicBookingFlow
+            tenantSlug={tenantSlug}
+            tenant={bookingTenant}
+            timeZone={bookingTenant.defaultTimeZone}
+            settings={settings}
+            services={bookableServices}
+            giftCardsEnabled={features.giftCardsEnabled}
+          />
+        </Box>
+      )}
+
+      {/* Contact (near the bottom) */}
       {tenant && (
         <GlassSection id="contact">
           <SectionHeading>Contact Us</SectionHeading>
@@ -424,21 +419,26 @@ export default async function PublicBookingPage({
         </GlassSection>
       )}
 
-      {/* ═══ Booking Wizard ═══ */}
-      {features.publicBookingEnabled && bookableServices.length > 0 && (
-        <Box id="booking" sx={{ maxWidth: 600, mx: "auto", py: 5 }}>
-          <Typography component="h2" sx={{ fontSize: "1.5rem", fontWeight: 700, mb: 3, textAlign: "center", color: "#f0f0f5" }}>
-            Book an Appointment
-          </Typography>
-          <PublicBookingFlow
-            tenantSlug={tenantSlug}
-            tenant={bookingTenant}
-            timeZone={bookingTenant.defaultTimeZone}
-            settings={settings}
-            services={bookableServices}
-            giftCardsEnabled={features.giftCardsEnabled}
-          />
-        </Box>
+      {/* Locations — moved to last */}
+      {locations.length > 0 && (
+        <GlassSection id="locations">
+          <SectionHeading>{locations.length === 1 ? "Our Location" : "Our Locations"}</SectionHeading>
+          <Grid container spacing={2}>
+            {locations.map((loc) => (
+              <Grid key={loc.id} size={{ xs: 12, sm: locations.length === 1 ? 12 : 6 }}>
+                <Paper sx={{ p: 2.5, bgcolor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 2 }} elevation={0}>
+                  <Typography sx={{ fontSize: "1rem", fontWeight: 600, mb: 0.5, color: "#f0f0f5" }}>{loc.name}</Typography>
+                  {loc.streetAddress && (
+                    <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e" }}>
+                      {[loc.streetAddress, loc.city, loc.provinceState].filter(Boolean).join(", ")}
+                    </Typography>
+                  )}
+                  {loc.phoneNumber && <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e", mt: 0.5 }}>{loc.phoneNumber}</Typography>}
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </GlassSection>
       )}
 
       {/* JSON-LD */}

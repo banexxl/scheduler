@@ -1,17 +1,18 @@
 "use client";
 
 /**
- * Public booking multi-step flow — Milestones 6.11, 8.5, 15.12.
+ * Public booking multi-step flow — redesigned, calendar-first.
  *
  * Steps:
  * 1. Service selection
- * 2. Location selection
- * 3. Date & time selection
- * 4. Recurrence (optional — skipped if not available)
- * 5. Customer details
- * 6. Payment / credits / gift card (conditional — skipped for free/recurring)
- * 7. Review
- * 8. Confirmation (after successful creation)
+ * 2. Date selection (fancy calendar)
+ * 3. Location selection
+ * 4. Time selection
+ * 5. Recurrence (optional — skipped if not available)
+ * 6. Customer details
+ * 7. Payment / credits / gift card (conditional — skipped for free/recurring)
+ * 8. Review
+ * 9. Confirmation (after successful creation)
  *
  * Recurrence restriction (Milestone 15.1 policies):
  * - Recurring series are pay-at-business ONLY
@@ -19,6 +20,8 @@
  */
 
 import { useState, useCallback, useMemo, useEffect } from "react";
+import Fade from "@mui/material/Fade";
+import Box from "@mui/material/Box";
 import type {
   PublicBookableService,
   PublicBookingSettings,
@@ -30,7 +33,8 @@ import type {
 import PublicBookingShell from "./public-booking-shell";
 import PublicBookingConfirmationView from "./public-booking-confirmation";
 import PublicServiceStep from "./public-service-step";
-import PublicDateTimeStep from "./public-date-time-step";
+import PublicCalendarStep from "./public-calendar-step";
+import PublicTimeStep from "./public-time-step";
 import PublicLocationStep from "./public-location-step";
 import PublicCustomerStep from "./public-customer-step";
 import PublicBookingReview from "./public-booking-review";
@@ -72,11 +76,14 @@ export default function PublicBookingFlow({
 }: Props) {
   const [step, setStep] = useState(0);
 
+  // Tenant-local "today" (avoids browser timezone drift for the calendar).
+  const [todayLocalDate] = useState(() => new Date().toISOString().slice(0, 10));
+
   // Selections
   const [selectedService, setSelectedService] = useState<PublicBookableService | null>(null);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
-  const [, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedOption, setSelectedOption] = useState<PublicAvailabilityOption | null>(null);
   const [selectedResourceForSlot, setSelectedResourceForSlot] = useState<string | null>(null);
 
@@ -140,12 +147,13 @@ export default function PublicBookingFlow({
 
   // ─── Step Configuration ──────────────────────────────────────────────────
 
-  // Build step sequence dynamically
+  // Build step sequence dynamically (calendar-first ordering)
   const stepConfig = useMemo(() => {
     const steps: Array<{ key: string; label: string }> = [
       { key: "service", label: "Service" },
+      { key: "date", label: "Date" },
       { key: "location", label: "Location" },
-      { key: "datetime", label: "Date & Time" },
+      { key: "time", label: "Time" },
     ];
 
     if (recurringEnabled) {
@@ -170,6 +178,9 @@ export default function PublicBookingFlow({
     return stepConfig.findIndex((s) => s.key === key);
   }, [stepConfig]);
 
+  const dateStepIndex = getStepIndex("date");
+  const locationStepIndex = getStepIndex("location");
+  const timeStepIndex = getStepIndex("time");
   const recurrenceStepIndex = getStepIndex("recurrence");
   const customerStepIndex = getStepIndex("customer");
   const paymentStepIndex = getStepIndex("payment");
@@ -189,20 +200,31 @@ export default function PublicBookingFlow({
     setGiftCardReservation(null);
     setSelectedPackageOption(null);
     setDynamicPackageOptions([]);
-    setStep(1);
-  }, []);
+    setStep(getStepIndex("date"));
+  }, [getStepIndex]);
+
+  // Calendar date chosen → open location selection (calendar-first flow).
+  const handleDateSelect = useCallback((localDate: string) => {
+    setSelectedDate(localDate);
+    setSelectedOption(null);
+    setSelectedResourceForSlot(null);
+    setStep(getStepIndex("location"));
+  }, [getStepIndex]);
 
   const handleLocationSelect = useCallback((locationId: string) => {
     setSelectedLocationId(locationId);
     setSelectedResourceId(null);
-    setSelectedDate(null);
     setSelectedOption(null);
     setSelectedResourceForSlot(null);
-    setRecurrenceSelection(null);
-    setStep(2);
+    setStep(getStepIndex("time"));
+  }, [getStepIndex]);
+
+  // Allow the time step to jump to a different date ("next available").
+  const handleTimeDateChange = useCallback((localDate: string) => {
+    setSelectedDate(localDate);
   }, []);
 
-  const handleDateTimeSelect = useCallback((option: PublicAvailabilityOption, resourceId: string) => {
+  const handleTimeSelect = useCallback((option: PublicAvailabilityOption, resourceId: string) => {
     setSelectedOption(option);
     setSelectedResourceForSlot(resourceId);
     // Next step: recurrence (if enabled) or customer details
@@ -261,6 +283,7 @@ export default function PublicBookingFlow({
         settings={settings}
         currentStep={totalSteps - 1}
         totalSteps={totalSteps}
+        stepLabels={stepLabels}
         isConfirmed={true}
       >
         <PublicBookingConfirmationView
@@ -277,110 +300,126 @@ export default function PublicBookingFlow({
       settings={settings}
       currentStep={step}
       totalSteps={totalSteps}
+      stepLabels={stepLabels}
       isConfirmed={false}
     >
-      {/* Service */}
-      {step === 0 && (
-        <PublicServiceStep
-          services={services}
-          showPrices={settings.showServicePrices}
-          showDuration={settings.showServiceDuration}
-          onSelect={handleServiceSelect}
-        />
-      )}
+      {/* Each step is keyed so the Fade remounts and animates on step change. */}
+      <Fade key={step} in timeout={280} appear>
+        <Box>
+          {/* Service */}
+          {step === 0 && (
+            <PublicServiceStep
+              services={services}
+              showPrices={settings.showServicePrices}
+              showDuration={settings.showServiceDuration}
+              onSelect={handleServiceSelect}
+            />
+          )}
 
-      {/* Location */}
-      {step === 1 && selectedService && (
-        <PublicLocationStep
-          tenantSlug={tenantSlug}
-          tenantId={tenant.id}
-          serviceId={selectedService.id}
-          onSelect={handleLocationSelect}
-          onBack={handleBack}
-        />
-      )}
+          {/* Date (fancy calendar) */}
+          {step === dateStepIndex && selectedService && (
+            <PublicCalendarStep
+              todayLocalDate={todayLocalDate}
+              timeZone={timeZone}
+              selectedDate={selectedDate}
+              onSelect={handleDateSelect}
+            />
+          )}
 
-      {/* Date & Time */}
-      {step === 2 && selectedService && selectedLocationId && (
-        <PublicDateTimeStep
-          tenantSlug={tenantSlug}
-          tenantId={tenant.id}
-          serviceId={selectedService.id}
-          locationId={selectedLocationId}
-          resourceId={selectedResourceId}
-          settings={settings}
-          timeZone={timeZone}
-          onSelect={handleDateTimeSelect}
-          onBack={handleBack}
-        />
-      )}
+          {/* Location */}
+          {step === locationStepIndex && selectedService && (
+            <PublicLocationStep
+              tenantSlug={tenantSlug}
+              tenantId={tenant.id}
+              serviceId={selectedService.id}
+              onSelect={handleLocationSelect}
+              onBack={handleBack}
+            />
+          )}
 
-      {/* Recurrence */}
-      {step === recurrenceStepIndex && selectedOption && selectedService && (
-        <PublicRecurrenceStep
-          selectedDate={selectedOption.startsAt.slice(0, 10)}
-          selectedTime={selectedOption.localStartTime}
-          timeZone={timeZone}
-          durationMinutes={selectedService.durationMinutes}
-          onSelect={handleRecurrenceSelect}
-          onBack={handleBack}
-        />
-      )}
+          {/* Time */}
+          {step === timeStepIndex && selectedService && selectedLocationId && selectedDate && (
+            <PublicTimeStep
+              tenantSlug={tenantSlug}
+              serviceId={selectedService.id}
+              locationId={selectedLocationId}
+              resourceId={selectedResourceId}
+              selectedDate={selectedDate}
+              timeZone={timeZone}
+              onSelect={handleTimeSelect}
+              onDateChange={handleTimeDateChange}
+              onBack={handleBack}
+            />
+          )}
 
-      {/* Customer Details */}
-      {step === customerStepIndex && (
-        <PublicCustomerStep
-          customerName={customerName}
-          customerEmail={customerEmail}
-          customerPhone={customerPhone}
-          customerNotes={customerNotes}
-          onChangeName={setCustomerName}
-          onChangeEmail={setCustomerEmail}
-          onChangePhone={setCustomerPhone}
-          onChangeNotes={setCustomerNotes}
-          onSubmit={handleCustomerSubmit}
-          onBack={handleBack}
-        />
-      )}
+          {/* Recurrence */}
+          {step === recurrenceStepIndex && selectedOption && selectedService && (
+            <PublicRecurrenceStep
+              selectedDate={selectedOption.startsAt.slice(0, 10)}
+              selectedTime={selectedOption.localStartTime}
+              timeZone={timeZone}
+              durationMinutes={selectedService.durationMinutes}
+              onSelect={handleRecurrenceSelect}
+              onBack={handleBack}
+            />
+          )}
 
-      {/* Payment (conditional — not shown for recurring) */}
-      {step === paymentStepIndex && paymentStepIndex >= 0 && selectedService && (
-        <PublicPaymentStep
-          tenantSlug={tenantSlug}
-          servicePrice={Math.round(parseFloat(selectedService.price) * 100)}
-          serviceCurrency={selectedService.currency}
-          giftCardsEnabled={giftCardsEnabled}
-          onlinePaymentEnabled={onlinePaymentEnabled}
-          paymentRequired={paymentRequired}
-          packageOptions={effectivePackageOptions}
-          onSelect={handlePaymentSelect}
-          onBack={handleBack}
-        />
-      )}
+          {/* Customer Details */}
+          {step === customerStepIndex && (
+            <PublicCustomerStep
+              customerName={customerName}
+              customerEmail={customerEmail}
+              customerPhone={customerPhone}
+              customerNotes={customerNotes}
+              onChangeName={setCustomerName}
+              onChangeEmail={setCustomerEmail}
+              onChangePhone={setCustomerPhone}
+              onChangeNotes={setCustomerNotes}
+              onSubmit={handleCustomerSubmit}
+              onBack={handleBack}
+            />
+          )}
 
-      {/* Review */}
-      {step === reviewStepIndex && selectedService && selectedOption && selectedResourceForSlot && (
-        <PublicBookingReview
-          tenantSlug={tenantSlug}
-          tenantName={tenant.name}
-          service={selectedService}
-          locationId={selectedLocationId!}
-          resourceId={selectedResourceForSlot}
-          option={selectedOption}
-          timeZone={timeZone}
-          customerName={customerName}
-          customerEmail={customerEmail}
-          customerPhone={customerPhone}
-          customerNotes={customerNotes}
-          settings={settings}
-          paymentMethod={(isRecurring ? "pay_at_business" : paymentMethod) as PublicPaymentMethod}
-          giftCardReservation={isRecurring ? null : giftCardReservation}
-          packageOption={isRecurring ? null : selectedPackageOption}
-          recurrence={recurrenceSelection}
-          onConfirm={handleConfirmation}
-          onBack={handleBack}
-        />
-      )}
+          {/* Payment (conditional — not shown for recurring) */}
+          {step === paymentStepIndex && paymentStepIndex >= 0 && selectedService && (
+            <PublicPaymentStep
+              tenantSlug={tenantSlug}
+              servicePrice={Math.round(parseFloat(selectedService.price) * 100)}
+              serviceCurrency={selectedService.currency}
+              giftCardsEnabled={giftCardsEnabled}
+              onlinePaymentEnabled={onlinePaymentEnabled}
+              paymentRequired={paymentRequired}
+              packageOptions={effectivePackageOptions}
+              onSelect={handlePaymentSelect}
+              onBack={handleBack}
+            />
+          )}
+
+          {/* Review */}
+          {step === reviewStepIndex && selectedService && selectedOption && selectedResourceForSlot && (
+            <PublicBookingReview
+              tenantSlug={tenantSlug}
+              tenantName={tenant.name}
+              service={selectedService}
+              locationId={selectedLocationId!}
+              resourceId={selectedResourceForSlot}
+              option={selectedOption}
+              timeZone={timeZone}
+              customerName={customerName}
+              customerEmail={customerEmail}
+              customerPhone={customerPhone}
+              customerNotes={customerNotes}
+              settings={settings}
+              paymentMethod={(isRecurring ? "pay_at_business" : paymentMethod) as PublicPaymentMethod}
+              giftCardReservation={isRecurring ? null : giftCardReservation}
+              packageOption={isRecurring ? null : selectedPackageOption}
+              recurrence={recurrenceSelection}
+              onConfirm={handleConfirmation}
+              onBack={handleBack}
+            />
+          )}
+        </Box>
+      </Fade>
     </PublicBookingShell>
   );
 }

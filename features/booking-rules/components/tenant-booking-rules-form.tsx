@@ -18,8 +18,11 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import { tenantBookingRulesSchema, type TenantBookingRulesFormValues } from "../schemas/booking-rules-schema";
+import MenuItem from "@mui/material/MenuItem";
+import Stack from "@mui/material/Stack";
+import type { TenantBookingRulesFormValues } from "../schemas/booking-rules-schema";
 import { BOOKING_RULE_DEFAULTS, BOOKING_RULE_BOUNDS } from "../types/booking-rules";
+import { fromMinutes, type DurationUnit } from "../utils/duration-unit";
 import {
   saveTenantBookingRulesAction,
   type SaveTenantBookingRulesResult,
@@ -32,16 +35,40 @@ type Props = {
   canEdit: boolean;
 };
 
+/**
+ * Form values used by this component. Notice fields (minimum, cancellation,
+ * reschedule) carry a display value plus a unit selector; they are converted
+ * back to minutes on submit. All other fields match the schema directly.
+ */
+type FormValues = Omit<
+  TenantBookingRulesFormValues,
+  "minimumNoticeMinutes" | "cancellationNoticeMinutes" | "rescheduleNoticeMinutes"
+> & {
+  minimumNoticeMinutes: number;
+  minimumNoticeMinutesUnit: DurationUnit;
+  cancellationNoticeMinutes: number;
+  cancellationNoticeMinutesUnit: DurationUnit;
+  rescheduleNoticeMinutes: number;
+  rescheduleNoticeMinutesUnit: DurationUnit;
+};
+
 export default function TenantBookingRulesForm({ tenantSlug, existingRules, canEdit }: Props) {
   const [isPending, startTransition] = useTransition();
   const [actionResult, setActionResult] = useState<SaveTenantBookingRulesResult | null>(null);
 
-  const initialValues: TenantBookingRulesFormValues = {
-    minimumNoticeMinutes: existingRules?.minimumNoticeMinutes ?? BOOKING_RULE_DEFAULTS.minimumNoticeMinutes,
+  const minimumNotice = fromMinutes(existingRules?.minimumNoticeMinutes ?? BOOKING_RULE_DEFAULTS.minimumNoticeMinutes);
+  const cancellationNotice = fromMinutes(existingRules?.cancellationNoticeMinutes ?? BOOKING_RULE_DEFAULTS.cancellationNoticeMinutes);
+  const rescheduleNotice = fromMinutes(existingRules?.rescheduleNoticeMinutes ?? BOOKING_RULE_DEFAULTS.rescheduleNoticeMinutes);
+
+  const initialValues: FormValues = {
+    minimumNoticeMinutes: minimumNotice.value,
+    minimumNoticeMinutesUnit: minimumNotice.unit,
     maximumAdvanceDays: existingRules?.maximumAdvanceDays ?? BOOKING_RULE_DEFAULTS.maximumAdvanceDays,
     slotIntervalMinutes: existingRules?.slotIntervalMinutes ?? BOOKING_RULE_DEFAULTS.slotIntervalMinutes,
-    cancellationNoticeMinutes: existingRules?.cancellationNoticeMinutes ?? BOOKING_RULE_DEFAULTS.cancellationNoticeMinutes,
-    rescheduleNoticeMinutes: existingRules?.rescheduleNoticeMinutes ?? BOOKING_RULE_DEFAULTS.rescheduleNoticeMinutes,
+    cancellationNoticeMinutes: cancellationNotice.value,
+    cancellationNoticeMinutesUnit: cancellationNotice.unit,
+    rescheduleNoticeMinutes: rescheduleNotice.value,
+    rescheduleNoticeMinutesUnit: rescheduleNotice.unit,
     allowSameDayBooking: existingRules?.allowSameDayBooking ?? BOOKING_RULE_DEFAULTS.allowSameDayBooking,
     allowCustomerCancellation: existingRules?.allowCustomerCancellation ?? BOOKING_RULE_DEFAULTS.allowCustomerCancellation,
     allowCustomerRescheduling: existingRules?.allowCustomerRescheduling ?? BOOKING_RULE_DEFAULTS.allowCustomerRescheduling,
@@ -50,14 +77,25 @@ export default function TenantBookingRulesForm({ tenantSlug, existingRules, canE
   };
 
   const handleFormSubmit = (
-    values: TenantBookingRulesFormValues,
-    { resetForm }: { resetForm: (opts: { values: TenantBookingRulesFormValues }) => void }
+    values: FormValues,
+    { resetForm }: { resetForm: (opts: { values: FormValues }) => void }
   ) => {
     if (!canEdit) return;
     setActionResult(null);
 
+    // The server action also converts, but we send the unit fields explicitly.
+    const payload: Record<string, unknown> = {
+      ...values,
+      minimumNoticeMinutes: values.minimumNoticeMinutes,
+      minimumNoticeMinutesUnit: values.minimumNoticeMinutesUnit,
+      cancellationNoticeMinutes: values.cancellationNoticeMinutes,
+      cancellationNoticeMinutesUnit: values.cancellationNoticeMinutesUnit,
+      rescheduleNoticeMinutes: values.rescheduleNoticeMinutes,
+      rescheduleNoticeMinutesUnit: values.rescheduleNoticeMinutesUnit,
+    };
+
     startTransition(async () => {
-      const result = await saveTenantBookingRulesAction(tenantSlug, values as unknown as Record<string, unknown>);
+      const result = await saveTenantBookingRulesAction(tenantSlug, payload);
       setActionResult(result);
       showActionToast(result, "Booking rules saved!");
       if (result.success) {
@@ -67,9 +105,8 @@ export default function TenantBookingRulesForm({ tenantSlug, existingRules, canE
   };
 
   return (
-    <Formik<TenantBookingRulesFormValues>
+    <Formik<FormValues>
       initialValues={initialValues}
-      validationSchema={tenantBookingRulesSchema}
       onSubmit={handleFormSubmit}
       enableReinitialize={false}
       validateOnBlur
@@ -103,28 +140,45 @@ export default function TenantBookingRulesForm({ tenantSlug, existingRules, canE
               Scheduling Rules
             </Typography>
 
-            <Field name="minimumNoticeMinutes">
-              {({ field }: { field: { name: string; value: number; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                <TextField
-                  {...field}
-                  type="number"
-                  label="Minimum Booking Notice (minutes)"
-                  fullWidth
-                  margin="normal"
-                  error={
-                    (!!formik.touched.minimumNoticeMinutes && !!formik.errors.minimumNoticeMinutes) ||
-                    !!actionResult?.fieldErrors?.minimumNoticeMinutes
-                  }
-                  helperText={
-                    (formik.touched.minimumNoticeMinutes && formik.errors.minimumNoticeMinutes) ||
-                    actionResult?.fieldErrors?.minimumNoticeMinutes ||
-                    `How far in advance customers must book. Range: ${BOOKING_RULE_BOUNDS.minimumNoticeMinutes.min}–${BOOKING_RULE_BOUNDS.minimumNoticeMinutes.max} minutes`
-                  }
-                  disabled={isDisabled}
-                  slotProps={{ input: { inputProps: { min: BOOKING_RULE_BOUNDS.minimumNoticeMinutes.min, max: BOOKING_RULE_BOUNDS.minimumNoticeMinutes.max } } }}
-                />
-              )}
-            </Field>
+            <Stack direction="row" spacing={2} alignItems="flex-start">
+              <Field name="minimumNoticeMinutes">
+                {({ field }: { field: { name: string; value: number; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
+                  <TextField
+                    {...field}
+                    type="number"
+                    label="Minimum Booking Notice"
+                    fullWidth
+                    margin="normal"
+                    error={
+                      (!!formik.touched.minimumNoticeMinutes && !!formik.errors.minimumNoticeMinutes) ||
+                      !!actionResult?.fieldErrors?.minimumNoticeMinutes
+                    }
+                    helperText={
+                      (formik.touched.minimumNoticeMinutes && formik.errors.minimumNoticeMinutes) ||
+                      actionResult?.fieldErrors?.minimumNoticeMinutes ||
+                      "How far in advance customers must book."
+                    }
+                    disabled={isDisabled}
+                    slotProps={{ input: { inputProps: { min: 0 } } }}
+                  />
+                )}
+              </Field>
+              <Field name="minimumNoticeMinutesUnit">
+                {({ field }: { field: { name: string; value: DurationUnit; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
+                  <TextField
+                    {...field}
+                    select
+                    label="Unit"
+                    margin="normal"
+                    disabled={isDisabled}
+                    sx={{ minWidth: 140 }}
+                  >
+                    <MenuItem value="minutes">Minutes</MenuItem>
+                    <MenuItem value="days">Days</MenuItem>
+                  </TextField>
+                )}
+              </Field>
+            </Stack>
 
             <Field name="maximumAdvanceDays">
               {({ field }: { field: { name: string; value: number; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
@@ -215,28 +269,45 @@ export default function TenantBookingRulesForm({ tenantSlug, existingRules, canE
               )}
             </Field>
 
-            <Field name="cancellationNoticeMinutes">
-              {({ field }: { field: { name: string; value: number; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                <TextField
-                  {...field}
-                  type="number"
-                  label="Customer Cancellation Notice (minutes)"
-                  fullWidth
-                  margin="normal"
-                  error={
-                    (!!formik.touched.cancellationNoticeMinutes && !!formik.errors.cancellationNoticeMinutes) ||
-                    !!actionResult?.fieldErrors?.cancellationNoticeMinutes
-                  }
-                  helperText={
-                    (formik.touched.cancellationNoticeMinutes && formik.errors.cancellationNoticeMinutes) ||
-                    actionResult?.fieldErrors?.cancellationNoticeMinutes ||
-                    "Minimum notice before appointment start for customer cancellation"
-                  }
-                  disabled={isDisabled || !formik.values.allowCustomerCancellation}
-                  slotProps={{ input: { inputProps: { min: BOOKING_RULE_BOUNDS.cancellationNoticeMinutes.min, max: BOOKING_RULE_BOUNDS.cancellationNoticeMinutes.max } } }}
-                />
-              )}
-            </Field>
+            <Stack direction="row" spacing={2} alignItems="flex-start">
+              <Field name="cancellationNoticeMinutes">
+                {({ field }: { field: { name: string; value: number; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
+                  <TextField
+                    {...field}
+                    type="number"
+                    label="Customer Cancellation Notice"
+                    fullWidth
+                    margin="normal"
+                    error={
+                      (!!formik.touched.cancellationNoticeMinutes && !!formik.errors.cancellationNoticeMinutes) ||
+                      !!actionResult?.fieldErrors?.cancellationNoticeMinutes
+                    }
+                    helperText={
+                      (formik.touched.cancellationNoticeMinutes && formik.errors.cancellationNoticeMinutes) ||
+                      actionResult?.fieldErrors?.cancellationNoticeMinutes ||
+                      "Minimum notice before appointment start for customer cancellation"
+                    }
+                    disabled={isDisabled || !formik.values.allowCustomerCancellation}
+                    slotProps={{ input: { inputProps: { min: 0 } } }}
+                  />
+                )}
+              </Field>
+              <Field name="cancellationNoticeMinutesUnit">
+                {({ field }: { field: { name: string; value: DurationUnit; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
+                  <TextField
+                    {...field}
+                    select
+                    label="Unit"
+                    margin="normal"
+                    disabled={isDisabled || !formik.values.allowCustomerCancellation}
+                    sx={{ minWidth: 140 }}
+                  >
+                    <MenuItem value="minutes">Minutes</MenuItem>
+                    <MenuItem value="days">Days</MenuItem>
+                  </TextField>
+                )}
+              </Field>
+            </Stack>
 
             <Divider sx={{ my: 3 }} />
 
@@ -263,28 +334,45 @@ export default function TenantBookingRulesForm({ tenantSlug, existingRules, canE
               )}
             </Field>
 
-            <Field name="rescheduleNoticeMinutes">
-              {({ field }: { field: { name: string; value: number; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                <TextField
-                  {...field}
-                  type="number"
-                  label="Customer Rescheduling Notice (minutes)"
-                  fullWidth
-                  margin="normal"
-                  error={
-                    (!!formik.touched.rescheduleNoticeMinutes && !!formik.errors.rescheduleNoticeMinutes) ||
-                    !!actionResult?.fieldErrors?.rescheduleNoticeMinutes
-                  }
-                  helperText={
-                    (formik.touched.rescheduleNoticeMinutes && formik.errors.rescheduleNoticeMinutes) ||
-                    actionResult?.fieldErrors?.rescheduleNoticeMinutes ||
-                    "Minimum notice before appointment start for customer rescheduling"
-                  }
-                  disabled={isDisabled || !formik.values.allowCustomerRescheduling}
-                  slotProps={{ input: { inputProps: { min: BOOKING_RULE_BOUNDS.rescheduleNoticeMinutes.min, max: BOOKING_RULE_BOUNDS.rescheduleNoticeMinutes.max } } }}
-                />
-              )}
-            </Field>
+            <Stack direction="row" spacing={2} alignItems="flex-start">
+              <Field name="rescheduleNoticeMinutes">
+                {({ field }: { field: { name: string; value: number; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
+                  <TextField
+                    {...field}
+                    type="number"
+                    label="Customer Rescheduling Notice"
+                    fullWidth
+                    margin="normal"
+                    error={
+                      (!!formik.touched.rescheduleNoticeMinutes && !!formik.errors.rescheduleNoticeMinutes) ||
+                      !!actionResult?.fieldErrors?.rescheduleNoticeMinutes
+                    }
+                    helperText={
+                      (formik.touched.rescheduleNoticeMinutes && formik.errors.rescheduleNoticeMinutes) ||
+                      actionResult?.fieldErrors?.rescheduleNoticeMinutes ||
+                      "Minimum notice before appointment start for customer rescheduling"
+                    }
+                    disabled={isDisabled || !formik.values.allowCustomerRescheduling}
+                    slotProps={{ input: { inputProps: { min: 0 } } }}
+                  />
+                )}
+              </Field>
+              <Field name="rescheduleNoticeMinutesUnit">
+                {({ field }: { field: { name: string; value: DurationUnit; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
+                  <TextField
+                    {...field}
+                    select
+                    label="Unit"
+                    margin="normal"
+                    disabled={isDisabled || !formik.values.allowCustomerRescheduling}
+                    sx={{ minWidth: 140 }}
+                  >
+                    <MenuItem value="minutes">Minutes</MenuItem>
+                    <MenuItem value="days">Days</MenuItem>
+                  </TextField>
+                )}
+              </Field>
+            </Stack>
 
             <Divider sx={{ my: 3 }} />
 

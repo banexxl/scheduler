@@ -56,8 +56,9 @@ export default function ServiceCategoryForm({ initialValues, onSubmit, submitLab
           <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: "action.hover" }}>
             <Typography variant="subtitle2" gutterBottom>What is a service category?</Typography>
             <Typography variant="body2" color="text.secondary">
-              Categories group related services together on the booking page (e.g. &quot;Hair&quot;, &quot;Nails&quot;, &quot;Massage&quot;).
-              Customers browse by category to find the service they want. Services without a category appear under &quot;Other&quot;.
+              Categories group related services and rentals together on the booking page (e.g. &quot;Hair&quot;, &quot;Massage&quot;,
+              &quot;Equipment Rental&quot;, &quot;Hardware Rental&quot;). Customers browse by category to find the service or item
+              they want. Services without a category appear under &quot;Other&quot;.
             </Typography>
           </Paper>
 
@@ -67,7 +68,8 @@ export default function ServiceCategoryForm({ initialValues, onSubmit, submitLab
             <VisibilityBadge visible />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-            Shown to customers as a section heading on the booking page (e.g. &quot;Hair Services&quot;, &quot;Body Treatments&quot;).
+            Shown to customers as a section heading on the booking page (e.g. &quot;Hair Services&quot;, &quot;Body Treatments&quot;,
+            &quot;Equipment Rental&quot;, &quot;Hardware Rental&quot;).
           </Typography>
           <Field name="name">
             {({ field }: { field: { name: string; value: string; onBlur: React.FocusEventHandler } }) => (
@@ -111,13 +113,14 @@ export default function ServiceCategoryForm({ initialValues, onSubmit, submitLab
             <VisibilityBadge visible />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-            Optional text shown below the category heading on the booking page. Use it to give customers a quick overview of what this category includes.
+            Optional text shown below the category heading on the booking page. Use it to give customers a quick overview of
+            what this category includes, such as the services offered or the equipment and hardware available for rental.
           </Typography>
           <Field name="description">
             {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
               <TextField
                 {...field}
-                placeholder="e.g. Professional hair services including cuts, coloring, and styling."
+                placeholder="e.g. Professional hair services, or rental of equipment and hardware."
                 multiline
                 minRows={2}
                 maxRows={4}

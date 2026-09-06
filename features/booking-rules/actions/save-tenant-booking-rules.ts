@@ -15,6 +15,43 @@ import { getUser } from "@/lib/auth/get-user";
 import { getTenantBySlug } from "@/lib/tenants/get-tenant-by-slug";
 import { tenantBookingRulesSchema } from "../schemas/booking-rules-schema";
 import type { TenantBookingRulesFormValues } from "../schemas/booking-rules-schema";
+import { isDurationUnit, toMinutes } from "../utils/duration-unit";
+
+/**
+ * Notice fields that support a days/minutes unit selector in the UI.
+ * The paired `*Unit` field (e.g. `minimumNoticeMinutesUnit`) indicates the
+ * unit of the submitted value; the value is normalized to minutes here so the
+ * database always stores minutes.
+ */
+const UNIT_AWARE_FIELDS = [
+  "minimumNoticeMinutes",
+  "cancellationNoticeMinutes",
+  "rescheduleNoticeMinutes",
+] as const;
+
+/**
+ * Normalizes unit-aware notice fields to minutes.
+ *
+ * Reads each `<field>Unit` value ("minutes" | "days"), converts the raw
+ * field value to minutes, and removes the unit key so schema validation
+ * (which expects minute values) succeeds.
+ */
+function normalizeUnitFields(input: Record<string, unknown>): Record<string, unknown> {
+  const result = { ...input };
+  for (const field of UNIT_AWARE_FIELDS) {
+    const unitKey = `${field}Unit`;
+    const unit = result[unitKey];
+    const rawValue = result[field];
+    if (isDurationUnit(unit) && rawValue !== "" && rawValue !== null && rawValue !== undefined) {
+      const numeric = Number(rawValue);
+      if (Number.isFinite(numeric)) {
+        result[field] = toMinutes(numeric, unit);
+      }
+    }
+    delete result[unitKey];
+  }
+  return result;
+}
 
 export type SaveTenantBookingRulesResult = {
   success: boolean;
@@ -50,10 +87,11 @@ export async function saveTenantBookingRulesAction(
     return { success: false, message: "Only owners and admins can manage booking rules." };
   }
 
-  // 4. Validate input
+  // 4. Normalize unit-aware fields (days/minutes) to minutes, then validate
+  const normalized = normalizeUnitFields(values);
   let validated: TenantBookingRulesFormValues;
   try {
-    validated = await tenantBookingRulesSchema.validate(values, {
+    validated = await tenantBookingRulesSchema.validate(normalized, {
       abortEarly: false,
       stripUnknown: true,
     });

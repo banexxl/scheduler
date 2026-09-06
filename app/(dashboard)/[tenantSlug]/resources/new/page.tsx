@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
 import { requireTenantRole } from "@/lib/tenants/require-tenant-role";
 import { getResourceTypes } from "@/features/resources/services/get-resource-types";
@@ -19,8 +20,8 @@ export default async function NewResourcePage({ params }: { params: Promise<{ te
   if (types.filter((t) => t.isActive).length === 0) {
     return (
       <Box>
-        <Alert severity="info">Create a resource type first before adding resources.</Alert>
-        <Link component="a" href={`/${tenantSlug}/resources/types/new`} variant="body2">Create Resource Type</Link>
+        <Alert severity="info" sx={{ mb: 2 }}>Create a resource type first before adding resources.</Alert>
+        <Button component="a" href={`/${tenantSlug}/resources/types/new`} variant="contained">Create Resource Type</Button>
       </Box>
     );
   }

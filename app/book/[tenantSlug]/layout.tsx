@@ -5,6 +5,8 @@ import { getTemplateDefinition } from "@/features/templates/registry";
 import TenantThemeProvider from "@/providers/tenant-theme-provider";
 import BookingProvider from "@/features/booking/context/BookingProvider";
 import PortalAuthProvider from "@/features/customer-portal/components/portal-auth-provider";
+import PortalSectionsProvider from "@/features/customer-portal/components/portal-sections-provider";
+import { resolvePublicSite } from "@/features/public-site/services/public-site-resolver";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -44,6 +46,23 @@ export default async function PublicBookingLayout({
   const templateDef = getTemplateDefinition(branding.templateId);
   const TemplateShell = templateDef.component;
 
+  // 3b. Resolve which content sections are actually set up so the header
+  //     navigation only links to sections that will render on the page.
+  const siteResult = await resolvePublicSite(tenantSlug);
+  const site = siteResult.data;
+  const hasContactInfo =
+    (site?.locations ?? []).some(
+      (loc) => loc.streetAddress || loc.phoneNumber || loc.email
+    ) || (site?.tenant?.socialLinks?.length ?? 0) > 0;
+
+  const sections = {
+    services: (site?.services?.length ?? 0) > 0,
+    staff: (site?.staff?.length ?? 0) > 0,
+    locations: (site?.locations?.length ?? 0) > 0,
+    reviews: (site?.reviews?.reviews?.length ?? 0) > 0,
+    contact: hasContactInfo,
+  };
+
   // 4. Check auth state (non-blocking)
   let userEmail: string | null = null;
   try {
@@ -58,11 +77,13 @@ export default async function PublicBookingLayout({
     <div className={fontClassName || undefined} style={{ minHeight: "100vh" }}>
       <TenantThemeProvider branding={branding}>
         <PortalAuthProvider userEmail={userEmail}>
-          <BookingProvider>
-            <TemplateShell>
-              {children}
-            </TemplateShell>
-          </BookingProvider>
+          <PortalSectionsProvider sections={sections}>
+            <BookingProvider>
+              <TemplateShell>
+                {children}
+              </TemplateShell>
+            </BookingProvider>
+          </PortalSectionsProvider>
         </PortalAuthProvider>
       </TenantThemeProvider>
     </div>

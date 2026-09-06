@@ -9,6 +9,7 @@
 
 import { usePathname } from "next/navigation";
 import { useTenantTheme } from "@/providers/tenant-theme-provider";
+import { usePortalSections } from "../components/portal-sections-provider";
 import type { PortalNavItem } from "../types";
 
 export function usePortalNavigation(): {
@@ -16,17 +17,20 @@ export function usePortalNavigation(): {
   tenantSlug: string;
 } {
   const { tenant } = useTenantTheme();
+  const sections = usePortalSections();
   const pathname = usePathname();
   const base = `/book/${tenant.slug}`;
   const isHome = pathname === base || pathname === `${base}/`;
 
+  // Home is always shown; every other link is only shown when the matching
+  // section is actually set up (mirrors the conditional sections on the page).
   const items: PortalNavItem[] = [
     { label: "Home", href: base, active: isHome },
-    { label: "Services", href: `${base}#services`, active: false },
-    { label: "Staff", href: `${base}#staff`, active: false },
-    { label: "Locations", href: `${base}#locations`, active: false },
-    { label: "Reviews", href: `${base}#reviews`, active: false },
-    { label: "Contact", href: `${base}#contact`, active: false },
+    ...(sections.services ? [{ label: "Services", href: `${base}#services`, active: false }] : []),
+    ...(sections.staff ? [{ label: "Staff", href: `${base}#staff`, active: false }] : []),
+    ...(sections.locations ? [{ label: "Locations", href: `${base}#locations`, active: false }] : []),
+    ...(sections.reviews ? [{ label: "Reviews", href: `${base}#reviews`, active: false }] : []),
+    ...(sections.contact ? [{ label: "Contact", href: `${base}#contact`, active: false }] : []),
   ];
 
   return { items, tenantSlug: tenant.slug };

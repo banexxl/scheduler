@@ -15,23 +15,46 @@ import type { PortalNavItem } from "../types";
 export function usePortalNavigation(): {
   items: PortalNavItem[];
   tenantSlug: string;
+  /** Where the brand/logo and "Home" should link, based on the current route. */
+  homeHref: string;
 } {
   const { tenant } = useTenantTheme();
   const sections = usePortalSections();
   const pathname = usePathname();
   const base = `/book/${tenant.slug}`;
-  const isHome = pathname === base || pathname === `${base}/`;
+  const portalBase = `${base}/portal`;
 
-  // Home is always shown; every other link is only shown when the matching
-  // section is actually set up (mirrors the conditional sections on the page).
-  const items: PortalNavItem[] = [
-    { label: "Home", href: base, active: isHome },
-    ...(sections.services ? [{ label: "Services", href: `${base}#services`, active: false }] : []),
-    ...(sections.staff ? [{ label: "Staff", href: `${base}#staff`, active: false }] : []),
-    ...(sections.locations ? [{ label: "Locations", href: `${base}#locations`, active: false }] : []),
-    ...(sections.reviews ? [{ label: "Reviews", href: `${base}#reviews`, active: false }] : []),
-    ...(sections.contact ? [{ label: "Contact", href: `${base}#contact`, active: false }] : []),
-  ];
+  const isActive = (href: string) =>
+    pathname === href || pathname === `${href}/`;
 
-  return { items, tenantSlug: tenant.slug };
+  // Which surface are we on? Portal nav only applies inside the portal routes.
+  const onPortal = pathname === portalBase || pathname.startsWith(`${portalBase}/`);
+
+  // The brand/logo "home" is route-based: on the portal it goes to the portal
+  // home; everywhere else it goes to the public book page.
+  const homeHref = onPortal ? portalBase : base;
+
+  let items: PortalNavItem[];
+
+  if (onPortal) {
+    // Portal navigation — links stay inside the customer portal.
+    items = [
+      { label: "Home", href: portalBase, active: isActive(portalBase) },
+      { label: "Appointments", href: `${portalBase}/appointments`, active: isActive(`${portalBase}/appointments`) },
+      { label: "Rewards", href: `${portalBase}/rewards`, active: isActive(`${portalBase}/rewards`) },
+      { label: "Account", href: `${portalBase}/account`, active: isActive(`${portalBase}/account`) },
+    ];
+  } else {
+    // Public storefront navigation — Home plus anchors to configured sections.
+    items = [
+      { label: "Home", href: base, active: isActive(base) },
+      ...(sections.services ? [{ label: "Services", href: `${base}#services`, active: false }] : []),
+      ...(sections.staff ? [{ label: "Staff", href: `${base}#staff`, active: false }] : []),
+      ...(sections.locations ? [{ label: "Locations", href: `${base}#locations`, active: false }] : []),
+      ...(sections.reviews ? [{ label: "Reviews", href: `${base}#reviews`, active: false }] : []),
+      ...(sections.contact ? [{ label: "Contact", href: `${base}#contact`, active: false }] : []),
+    ];
+  }
+
+  return { items, tenantSlug: tenant.slug, homeHref };
 }

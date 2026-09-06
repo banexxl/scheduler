@@ -12,7 +12,7 @@ import "server-only";
  * Does not require authentication. Uses tenant-scoped queries.
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import type {
   PublicBookableService,
   PublicServiceCategory,
@@ -32,7 +32,12 @@ import type {
 export async function getPublicBookableServices(
   tenantId: string
 ): Promise<PublicBookableService[]> {
-  const supabase = await createClient();
+  // Public catalog read: the services / service_locations / service_resources
+  // tables only grant SELECT to active tenant members via RLS, so a public
+  // visitor (or a logged-in customer) would read nothing. Use the service-role
+  // client — the same pattern resolvePublicSite uses for public catalog data.
+  // Queries remain strictly tenant-scoped and expose only public-safe fields.
+  const supabase = createServiceRoleClient();
 
   // Load active services
   const { data: services } = await supabase
@@ -141,7 +146,7 @@ export async function getPublicServiceCategories(
 ): Promise<PublicServiceCategory[]> {
   if (bookableServiceIds.length === 0) return [];
 
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
 
   // Load services with categories
   const { data: services } = await supabase
@@ -191,7 +196,7 @@ export async function getPublicLocationsForService(
   tenantId: string,
   serviceId: string
 ): Promise<PublicBookableLocation[]> {
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
 
   // Get active service-location assignment IDs
   const { data: assignments } = await supabase
@@ -240,7 +245,7 @@ export async function getPublicResourcesForServiceLocation(
   serviceId: string,
   locationId: string
 ): Promise<PublicBookableResource[]> {
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
 
   // Get active service-resource assignments
   const { data: srAssignments } = await supabase
@@ -295,7 +300,7 @@ export async function getPublicServiceBySlug(
   tenantId: string,
   serviceSlug: string
 ): Promise<PublicBookableService | null> {
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
 
   const { data } = await supabase
     .from("services")

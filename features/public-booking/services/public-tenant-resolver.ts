@@ -8,7 +8,7 @@ import "server-only";
  * Uses service-role or a dedicated public-safe query approach.
  */
 
-import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import type {
   PublicBookingTenant,
   PublicBookingSettings,
@@ -24,7 +24,10 @@ import { DEFAULT_PUBLIC_BOOKING_SETTINGS } from "../types/public-booking";
 export async function resolvePublicTenant(
   slug: string
 ): Promise<PublicBookingTenant | null> {
-  const supabase = await createClient();
+  // Public read: uses the service-role client so anonymous visitors and
+  // logged-in customers (who are not tenant members) can resolve the tenant.
+  // Query stays scoped to active/trialing tenants and returns only public fields.
+  const supabase = createServiceRoleClient();
 
   const { data } = await supabase
     .from("tenants")
@@ -55,7 +58,9 @@ export async function resolvePublicTenant(
 export async function getPublicBookingSettings(
   tenantId: string
 ): Promise<PublicBookingSettings> {
-  const supabase = await createClient();
+  // Public read via service-role — the settings table is RLS member-only, but
+  // these fields are public booking config and safe to expose.
+  const supabase = createServiceRoleClient();
 
   const { data } = await supabase
     .from("tenant_public_booking_settings")

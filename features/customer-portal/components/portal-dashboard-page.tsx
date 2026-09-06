@@ -19,6 +19,7 @@ import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import { logoutPortalAction } from "../actions/logout-portal-action";
 import CustomerAccountCard, { type CustomerAccount } from "./customer-account-card";
+import TenantDetailsCard from "./tenant-details-card";
 import type { CustomerPortalData, CustomerPortalAppointment } from "../types/portal";
 import type { PublicWaitlistEntry } from "@/features/waitlist/types/waitlist";
 
@@ -121,6 +122,9 @@ export default function PortalDashboardPage({
             </Stack>
           </Stack>
         </Paper>
+
+        {/* Business details (as configured by the tenant) */}
+        <TenantDetailsCard />
 
         {/* Customer account details */}
         {account && <CustomerAccountCard account={account} />}

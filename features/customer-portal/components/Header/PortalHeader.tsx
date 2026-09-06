@@ -22,7 +22,7 @@ import MobileNavigation from "../MobileNavigation/MobileNavigation";
 
 export default function PortalHeader() {
   const { branding, tenant } = useTenantTheme();
-  const { items, tenantSlug } = usePortalNavigation();
+  const { items, tenantSlug, homeHref } = usePortalNavigation();
   const { isLoggedIn } = usePortalAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -78,7 +78,7 @@ export default function PortalHeader() {
           {/* Logo / Brand */}
           <Box
             component="a"
-            href={`/book/${tenantSlug}`}
+            href={homeHref}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -176,21 +176,7 @@ export default function PortalHeader() {
 
           {/* Auth + Book buttons */}
           <Box sx={{ ml: "auto", display: "flex", alignItems: "center", gap: 1 }}>
-            {isLoggedIn ? (
-              <Button
-                href={`/book/${tenantSlug}/portal`}
-                size="small"
-                sx={{
-                  textTransform: "none",
-                  fontWeight: 500,
-                  color: "#a0a0b8",
-                  display: { xs: "none", sm: "inline-flex" },
-                  "&:hover": { color: "#f0f0f5" },
-                }}
-              >
-                My Account
-              </Button>
-            ) : (
+            {!isLoggedIn && (
               <Button
                 href={`/book/${tenantSlug}/login`}
                 size="small"
@@ -205,7 +191,8 @@ export default function PortalHeader() {
                 Sign In
               </Button>
             )}
-            {/* <Button
+            {/* Book an appointment — takes the customer to the booking wizard. */}
+            <Button
               href={`/book/${tenantSlug}#booking`}
               variant="contained"
               size="small"
@@ -221,7 +208,7 @@ export default function PortalHeader() {
               }}
             >
               Book
-            </Button> */}
+            </Button>
           </Box>
         </Toolbar>
       </AppBar>

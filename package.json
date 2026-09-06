@@ -11,6 +11,7 @@
     "type-check": "tsc --noEmit",
     "clean": "rimraf .next",
     "db:types": "node scripts/generate-database-types.mjs",
+    "env:example": "node scripts/generate-env-example.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:unit": "vitest run --exclude '**/integration/**' --exclude '**/e2e/**'",

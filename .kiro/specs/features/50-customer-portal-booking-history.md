@@ -214,3 +214,54 @@ features/public-booking/components/public-booking-shell.tsx (portal link in foot
 - Push notifications, SMS/WhatsApp
 - External calendar sync
 - Recurring appointments
+
+## Addendum — Portal Home Cards, Navigation & Account Linking
+
+> Extends the original Milestone 8.6 portal. The dark-theme redesign and public
+> booking integration are documented in `109-customer-booking-experience-2.md`
+> (section 2.1).
+
+### Portal home cards (`/book/{slug}/portal`, authenticated)
+
+When a customer is authenticated, the dashboard renders two cards above the
+appointment tabs:
+
+- **Tenant Details** — `features/customer-portal/components/tenant-details-card.tsx`.
+  Business details read from `TenantThemeProvider` context: logo, name, tagline,
+  description, address, phone, email, website, social links. No extra fetch.
+- **Customer Account** — `features/customer-portal/components/customer-account-card.tsx`.
+  The logged-in customer's global `customer_accounts` row: avatar, name, verified
+  chip (`email_verified_at`), member-since (`created_at`), email, phone, preferred
+  language. Loaded in `app/book/[tenantSlug]/portal/page.tsx` via the admin client
+  scoped to `user_id = auth.uid()`; DTO excludes `id`, `user_id`, `is_active`.
+
+### Route-based header navigation
+
+`features/customer-portal/hooks/usePortalNavigation.ts` selects the nav set by the
+**current route** (not auth state):
+
+- Outside `/portal`: logo + "Home" → `/book/{slug}`; storefront section anchors.
+- On `/portal*`: logo + "Home" → `/book/{slug}/portal`; Appointments, Rewards,
+  Account.
+
+### Account ↔ tenant linking on login
+
+`customer-login-action.ts` calls the shared
+`features/customer-portal/services/auto-link-customer.ts`, which creates the
+`tenant_customers` row and `customer_account_tenant_links` bridge when missing.
+This guarantees a freshly registered customer is linked to the tenant on first
+login regardless of email-confirmation timing (previously the login helper only
+linked pre-existing `tenant_customers` rows).
+
+### Dark theme
+
+Portal dashboard and subpages (`appointments`, `account`, `rewards`) use the shared
+`features/customer-portal/components/PortalPageShell.tsx` dark-glass wrapper.
+
+### Additional Files
+
+```
+features/customer-portal/components/tenant-details-card.tsx
+features/customer-portal/components/customer-account-card.tsx
+features/customer-portal/components/PortalPageShell.tsx
+```

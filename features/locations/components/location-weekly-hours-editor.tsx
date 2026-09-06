@@ -5,10 +5,10 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
-import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
 import Divider from "@mui/material/Divider";
+import TimeSelect24h from "./time-select-24h";
 import { ALL_DAYS, DAY_LABELS } from "@/lib/scheduling/scheduling-constants";
 import type { DayOfWeek } from "@/lib/scheduling/scheduling-constants";
 import type { LocationBusinessHour, LocationBusinessHourInput } from "../types/location-business-hour";
@@ -99,13 +99,11 @@ export default function LocationWeeklyHoursEditor({
             {dayPeriods.length === 0 && <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>Closed</Typography>}
             {dayPeriods.map((period) => (
               <Paper key={period.key} variant="outlined" sx={{ p: 1, mb: 0.5, display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-                <TextField label="Start" type="time" size="small" sx={{ width: 120 }} value={period.startTime}
-                  onChange={(e) => updatePeriod(period.key, "startTime", e.target.value)} disabled={isPending || !canEdit}
-                  slotProps={{ htmlInput: { step: 300 } }} />
+                <TimeSelect24h label="Start" value={period.startTime}
+                  onChange={(v) => updatePeriod(period.key, "startTime", v)} disabled={isPending || !canEdit} />
                 <Typography variant="body2">&mdash;</Typography>
-                <TextField label="End" type="time" size="small" sx={{ width: 120 }} value={period.endTime}
-                  onChange={(e) => updatePeriod(period.key, "endTime", e.target.value)} disabled={isPending || !canEdit}
-                  slotProps={{ htmlInput: { step: 300 } }} />
+                <TimeSelect24h label="End" value={period.endTime}
+                  onChange={(v) => updatePeriod(period.key, "endTime", v)} disabled={isPending || !canEdit} />
                 {canEdit && (
                   <IconButton size="small" onClick={() => removePeriod(period.key)} disabled={isPending} aria-label="Remove period">&#10005;</IconButton>
                 )}

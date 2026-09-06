@@ -10,6 +10,7 @@ import IconButton from "@mui/material/IconButton";
 import Alert from "@mui/material/Alert";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
+import TimeSelect24h from "./time-select-24h";
 import { locationScheduleExceptionSchema } from "../schemas/location-schedule-exception-schema";
 
 type ExceptionFormValues = {
@@ -95,17 +96,15 @@ export default function LocationScheduleExceptionForm({ initialValues, onSubmit,
                   <Box>
                     {formik.values.periods.map((period, idx) => (
                       <Paper key={idx} variant="outlined" sx={{ p: 1, mb: 0.5, display: "flex", alignItems: "center", gap: 1 }}>
-                        <TextField label="Start" type="time" size="small" sx={{ width: 120 }}
+                        <TimeSelect24h label="Start"
                           value={period.startTime}
-                          onChange={(e) => formik.setFieldValue(`periods.${idx}.startTime`, e.target.value)}
-                          disabled={isPending || !canEdit}
-                          slotProps={{ htmlInput: { step: 300 } }} />
+                          onChange={(v) => formik.setFieldValue(`periods.${idx}.startTime`, v)}
+                          disabled={isPending || !canEdit} />
                         <Typography variant="body2">&mdash;</Typography>
-                        <TextField label="End" type="time" size="small" sx={{ width: 120 }}
+                        <TimeSelect24h label="End"
                           value={period.endTime}
-                          onChange={(e) => formik.setFieldValue(`periods.${idx}.endTime`, e.target.value)}
-                          disabled={isPending || !canEdit}
-                          slotProps={{ htmlInput: { step: 300 } }} />
+                          onChange={(v) => formik.setFieldValue(`periods.${idx}.endTime`, v)}
+                          disabled={isPending || !canEdit} />
                         {canEdit && (
                           <IconButton size="small" onClick={() => remove(idx)} disabled={isPending} aria-label="Remove period">
                             &#10005;

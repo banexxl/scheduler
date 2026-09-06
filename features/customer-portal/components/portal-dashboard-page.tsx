@@ -18,6 +18,7 @@ import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import { logoutPortalAction } from "../actions/logout-portal-action";
+import CustomerAccountCard, { type CustomerAccount } from "./customer-account-card";
 import type { CustomerPortalData, CustomerPortalAppointment } from "../types/portal";
 import type { PublicWaitlistEntry } from "@/features/waitlist/types/waitlist";
 
@@ -27,6 +28,7 @@ type Props = {
   appointments: CustomerPortalData;
   timeZone: string;
   waitlistEntries?: PublicWaitlistEntry[];
+  account?: CustomerAccount | null;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -45,6 +47,7 @@ export default function PortalDashboardPage({
   appointments,
   timeZone,
   waitlistEntries = [],
+  account = null,
 }: Props) {
   const [tab, setTab] = useState(0);
   const [isPending, startTransition] = useTransition();
@@ -118,6 +121,9 @@ export default function PortalDashboardPage({
             </Stack>
           </Stack>
         </Paper>
+
+        {/* Customer account details */}
+        {account && <CustomerAccountCard account={account} />}
 
         {/* Tabs */}
         <Paper elevation={1} sx={{ borderRadius: 3, overflow: "hidden" }}>

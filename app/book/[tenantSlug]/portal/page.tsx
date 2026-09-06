@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import PortalAccessForm from "@/features/customer-portal/components/portal-access-form";
 import PortalDashboardPage from "@/features/customer-portal/components/portal-dashboard-page";
+import type { CustomerAccount } from "@/features/customer-portal/components/customer-account-card";
 import { getCustomerPortalAppointments } from "@/features/customer-portal/services/portal-appointment-queries";
 import { getCustomerWaitlistEntries } from "@/features/waitlist/services/waitlist-portal-queries";
 import { autoLinkCustomerToTenant } from "@/features/customer-portal/services/auto-link-customer";
@@ -72,6 +73,27 @@ export default async function CustomerPortalPage({
       });
     }
 
+    // Load global customer account (own row only — RLS scoped to auth.uid()).
+    const { data: accountRow } = await adminClient
+      .from("customer_accounts")
+      .select("full_name, email, phone, avatar_url, preferred_language, email_verified_at, created_at")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const account: CustomerAccount | null = accountRow
+      ? {
+        fullName: accountRow.full_name,
+        email: accountRow.email,
+        phone: accountRow.phone,
+        avatarUrl: accountRow.avatar_url,
+        preferredLanguage: accountRow.preferred_language,
+        emailVerified: Boolean(accountRow.email_verified_at),
+        memberSince: accountRow.created_at
+          ? new Date(accountRow.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+          : null,
+      }
+      : null;
+
     // Load portal data
     const [data, waitlistEntries] = await Promise.all([
       getCustomerPortalAppointments(tenantId, userEmail, timeZone),
@@ -85,6 +107,7 @@ export default async function CustomerPortalPage({
         appointments={data}
         timeZone={timeZone}
         waitlistEntries={waitlistEntries}
+        account={account}
       />
     );
   }

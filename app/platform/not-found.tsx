@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 
 export default function PlatformNotFound() {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "50vh", gap: 2 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", gap: 2, bgcolor: "primary.main", color: "primary.contrastText", p: 3 }}>
       <Typography variant="h5" sx={{ fontWeight: 700 }}>
         Page not found
       </Typography>

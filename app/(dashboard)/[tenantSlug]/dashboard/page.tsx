@@ -4,6 +4,8 @@ import { getBusinessDashboard } from "@/features/business/services/get-business-
 import { getDashboardAnalytics } from "@/features/analytics/services/get-dashboard-analytics";
 import { ANALYTICS_PERIODS } from "@/features/analytics/types/analytics";
 import type { AnalyticsPeriod } from "@/features/analytics/types/analytics";
+import { loadOnboardingProgress } from "@/features/onboarding/services/load-onboarding-progress";
+import { OnboardingWarning } from "@/features/onboarding/components/onboarding-warning";
 import TenantDashboard from "./dashboard"
 
 /**
@@ -56,27 +58,41 @@ export default async function DashboardPage({
   const todayAppointments = analytics?.summary?.todayTotal ?? 0;
   const upcomingAppointments = analytics?.summary?.todayUpcoming ?? 0;
 
+  // Onboarding progress — surface a warning when setup is incomplete.
+  let onboardingProgress = null;
+  try {
+    const onboarding = await loadOnboardingProgress(tenant.id);
+    onboardingProgress = onboarding.progress;
+  } catch {
+    onboardingProgress = null;
+  }
+
   return (
-    <TenantDashboard
-      tenantSlug={tenantSlug}
-      dashboard={{
-        business: {
-          name: dashboard.business.name,
-          slug: dashboard.business.slug,
-          status: dashboard.business.status,
-          defaultTimezone: dashboard.business.defaultTimezone,
-          defaultCurrency: dashboard.business.defaultCurrency,
-        },
-        counts: {
-          locations: dashboard.counts.locations,
-          activeTeamMembers: dashboard.counts.activeTeamMembers,
-          customers: dashboard.counts.customers,
-          todayAppointments,
-          upcomingAppointments,
-        },
-        subscription: dashboard.subscription ? { status: dashboard.subscription.status } : null,
-      }}
-      analytics={analytics}
-    />
+    <>
+      {onboardingProgress && (
+        <OnboardingWarning tenantSlug={tenantSlug} progress={onboardingProgress} />
+      )}
+      <TenantDashboard
+        tenantSlug={tenantSlug}
+        dashboard={{
+          business: {
+            name: dashboard.business.name,
+            slug: dashboard.business.slug,
+            status: dashboard.business.status,
+            defaultTimezone: dashboard.business.defaultTimezone,
+            defaultCurrency: dashboard.business.defaultCurrency,
+          },
+          counts: {
+            locations: dashboard.counts.locations,
+            activeTeamMembers: dashboard.counts.activeTeamMembers,
+            customers: dashboard.counts.customers,
+            todayAppointments,
+            upcomingAppointments,
+          },
+          subscription: dashboard.subscription ? { status: dashboard.subscription.status } : null,
+        }}
+        analytics={analytics}
+      />
+    </>
   );
 }

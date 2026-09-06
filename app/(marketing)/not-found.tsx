@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 
 export default function MarketingNotFound() {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "70vh", py: 4 }}>
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", bgcolor: "primary.main", py: 4 }}>
       <Container maxWidth="xs">
         <Paper elevation={2} sx={{ p: 4, borderRadius: 3, textAlign: "center" }}>
           <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700 }}>

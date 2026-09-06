@@ -10,7 +10,7 @@ import Button from "@mui/material/Button";
  */
 export default function NotFoundPage() {
   return (
-    <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "#f8fafc", p: 3 }}>
+    <Box sx={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "primary.main", p: 3 }}>
       <Container maxWidth="xs">
         <Paper elevation={2} sx={{ p: 4, borderRadius: 3, textAlign: "center" }}>
           <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 700 }}>

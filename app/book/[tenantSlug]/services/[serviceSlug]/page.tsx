@@ -49,10 +49,25 @@ export default async function ServiceDetailPage({ params }: { params: Promise<Pa
   const price = Number(service.price);
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: theme.backgroundColor }}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "#0a0a0f",
+        color: "#f0f0f5",
+        "& .MuiPaper-root": {
+          bgcolor: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          color: "#e9e6f5",
+          backgroundImage: "none",
+        },
+        "& .MuiTypography-root": { color: "inherit" },
+        "& .MuiTypography-colorTextSecondary": { color: "#8b8b9e" },
+        "& .MuiDivider-root": { borderColor: "rgba(255,255,255,0.08)" },
+      }}
+    >
       {/* Header */}
-      <Box sx={{ bgcolor: theme.primaryColor, color: "#fff", py: 4, px: 3, textAlign: "center" }}>
-        <Typography component="h1" sx={{ fontSize: { xs: "1.5rem", md: "2rem" }, fontWeight: 700, mb: 0.5 }}>
+      <Box sx={{ background: `linear-gradient(135deg, ${theme.primaryColor}, rgba(124,58,237,0.6))`, color: "#fff", py: 4, px: 3, textAlign: "center" }}>
+        <Typography component="h1" sx={{ fontSize: { xs: "1.5rem", md: "2rem" }, fontWeight: 700, mb: 0.5, color: "#fff" }}>
           {service.name}
         </Typography>
         <Stack direction="row" spacing={1} justifyContent="center" sx={{ mt: 1 }}>
@@ -69,7 +84,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<Pa
         {/* Description */}
         {service.description && (
           <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: `${theme.borderRadius}px` }}>
-            <Typography sx={{ fontSize: "0.9375rem", color: "text.secondary", whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
+            <Typography sx={{ fontSize: "0.9375rem", color: "#8b8b9e", whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
               {service.description}
             </Typography>
           </Paper>
@@ -94,7 +109,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<Pa
                 <Paper key={loc.id} variant="outlined" sx={{ p: 2, borderRadius: `${theme.borderRadius}px` }}>
                   <Typography sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{loc.name}</Typography>
                   {loc.address && (
-                    <Typography sx={{ fontSize: "0.8125rem", color: "text.secondary" }}>{loc.address}</Typography>
+                    <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e" }}>{loc.address}</Typography>
                   )}
                 </Paper>
               ))}
@@ -112,7 +127,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<Pa
                   {s.avatarUrl ? (
                     <Box component="img" src={s.avatarUrl} alt={s.displayName} sx={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover", mx: "auto", mb: 0.5 }} />
                   ) : (
-                    <Box sx={{ width: 48, height: 48, borderRadius: "50%", bgcolor: theme.surfaceColor, mx: "auto", mb: 0.5, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Box sx={{ width: 48, height: 48, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.06)", mx: "auto", mb: 0.5, display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <Typography sx={{ fontSize: "1rem" }}>{s.displayName.charAt(0)}</Typography>
                     </Box>
                   )}

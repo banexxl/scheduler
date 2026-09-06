@@ -25,8 +25,8 @@ export default function BoldShell({ children }: TemplateShellProps) {
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: "background.default",
-        color: "text.primary",
+        bgcolor: "#0a0a0f",
+        color: "#f0f0f5",
         display: "flex",
         flexDirection: "column",
       }}
@@ -50,9 +50,10 @@ export default function BoldShell({ children }: TemplateShellProps) {
       >
         <Box
           sx={{
-            bgcolor: "background.paper",
+            bgcolor: isStep ? "transparent" : "rgba(22,22,30,0.5)",
+            border: isStep ? "none" : "1px solid rgba(255,255,255,0.06)",
+            backdropFilter: isStep ? "none" : "blur(8px)",
             borderRadius: 2,
-            boxShadow: isStep ? 0 : 2,
             p: { xs: 2, sm: 4 },
           }}
         >

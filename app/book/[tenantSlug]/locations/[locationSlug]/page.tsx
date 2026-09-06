@@ -46,21 +46,35 @@ export default async function LocationDetailPage({ params }: { params: Promise<P
   const address = [location.streetAddress, location.city, location.provinceState, location.postalCode, location.country].filter(Boolean).join(", ");
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: theme.backgroundColor }}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "#0a0a0f",
+        color: "#f0f0f5",
+        "& .MuiPaper-root": {
+          bgcolor: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          color: "#e9e6f5",
+          backgroundImage: "none",
+        },
+        "& .MuiTypography-root": { color: "inherit" },
+        "& .MuiDivider-root": { borderColor: "rgba(255,255,255,0.08)" },
+      }}
+    >
       {/* Header */}
-      <Box sx={{ bgcolor: theme.primaryColor, color: "#fff", py: 4, px: 3, textAlign: "center" }}>
-        <Typography component="h1" sx={{ fontSize: { xs: "1.5rem", md: "2rem" }, fontWeight: 700 }}>
+      <Box sx={{ background: `linear-gradient(135deg, ${theme.primaryColor}, rgba(124,58,237,0.6))`, color: "#fff", py: 4, px: 3, textAlign: "center" }}>
+        <Typography component="h1" sx={{ fontSize: { xs: "1.5rem", md: "2rem" }, fontWeight: 700, color: "#fff" }}>
           {location.name}
         </Typography>
         {address && (
-          <Typography sx={{ fontSize: "0.9rem", opacity: 0.9, mt: 0.5 }}>{address}</Typography>
+          <Typography sx={{ fontSize: "0.9rem", opacity: 0.9, mt: 0.5, color: "#fff" }}>{address}</Typography>
         )}
       </Box>
 
       <Box sx={{ maxWidth: 700, mx: "auto", px: 2, py: 4 }}>
         {/* Description */}
         {location.description && (
-          <Typography sx={{ fontSize: "0.9375rem", color: "text.secondary", mb: 3, whiteSpace: "pre-wrap" }}>
+          <Typography sx={{ fontSize: "0.9375rem", color: "#8b8b9e", mb: 3, whiteSpace: "pre-wrap" }}>
             {location.description}
           </Typography>
         )}
@@ -92,7 +106,7 @@ export default async function LocationDetailPage({ params }: { params: Promise<P
               {hours.map(h => (
                 <Box key={h.dayOfWeek} sx={{ display: "flex", justifyContent: "space-between" }}>
                   <Typography sx={{ fontSize: "0.8125rem" }}>{DAY_NAMES[h.dayOfWeek]}</Typography>
-                  <Typography sx={{ fontSize: "0.8125rem", fontWeight: 500, color: h.isClosed ? "text.disabled" : "text.primary" }}>
+                  <Typography sx={{ fontSize: "0.8125rem", fontWeight: 500, color: h.isClosed ? "rgba(240,240,245,0.4)" : "#f0f0f5" }}>
                     {h.isClosed ? "Closed" : `${h.opensAt} – ${h.closesAt}`}
                   </Typography>
                 </Box>
@@ -110,7 +124,7 @@ export default async function LocationDetailPage({ params }: { params: Promise<P
                 <Paper key={svc.id} variant="outlined" sx={{ p: 2, borderRadius: `${theme.borderRadius}px`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <Box>
                     <Typography sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{svc.name}</Typography>
-                    <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{svc.durationMinutes} min</Typography>
+                    <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>{svc.durationMinutes} min</Typography>
                   </Box>
                   {Number(svc.price) > 0 && (
                     <Typography sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{svc.price} {svc.currency}</Typography>

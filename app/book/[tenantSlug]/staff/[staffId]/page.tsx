@@ -45,9 +45,23 @@ export default async function StaffDetailPage({ params }: { params: Promise<Para
   const { profile, services, theme } = data;
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: theme.backgroundColor }}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "#0a0a0f",
+        color: "#f0f0f5",
+        "& .MuiPaper-root": {
+          bgcolor: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          color: "#e9e6f5",
+          backgroundImage: "none",
+        },
+        "& .MuiTypography-root": { color: "inherit" },
+        "& .MuiDivider-root": { borderColor: "rgba(255,255,255,0.08)" },
+      }}
+    >
       {/* Header */}
-      <Box sx={{ bgcolor: theme.primaryColor, color: "#fff", py: 5, px: 3, textAlign: "center" }}>
+      <Box sx={{ background: `linear-gradient(135deg, ${theme.primaryColor}, rgba(124,58,237,0.6))`, color: "#fff", py: 5, px: 3, textAlign: "center" }}>
         {profile.avatarUrl ? (
           <Box
             component="img"
@@ -72,7 +86,7 @@ export default async function StaffDetailPage({ params }: { params: Promise<Para
         {/* Bio */}
         {profile.bio && (
           <Paper variant="outlined" sx={{ p: 3, mb: 3, borderRadius: `${theme.borderRadius}px` }}>
-            <Typography sx={{ fontSize: "0.9375rem", color: "text.secondary", whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
+            <Typography sx={{ fontSize: "0.9375rem", color: "#8b8b9e", whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
               {profile.bio}
             </Typography>
           </Paper>
@@ -93,7 +107,7 @@ export default async function StaffDetailPage({ params }: { params: Promise<Para
                 >
                   <Box>
                     <Typography sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{svc.name}</Typography>
-                    <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{svc.durationMinutes} min</Typography>
+                    <Typography sx={{ fontSize: "0.75rem", color: "#8b8b9e" }}>{svc.durationMinutes} min</Typography>
                   </Box>
                   {Number(svc.price) > 0 && (
                     <Typography sx={{ fontSize: "0.875rem", fontWeight: 600 }}>{svc.price} {svc.currency}</Typography>

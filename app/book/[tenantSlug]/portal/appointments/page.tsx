@@ -8,6 +8,7 @@ import Divider from "@mui/material/Divider";
 import EventIcon from "@mui/icons-material/Event";
 import { requirePortalSession } from "@/features/customer-portal/services/require-portal-session";
 import { getCustomerPortalAppointments } from "@/features/customer-portal/services/portal-appointment-queries";
+import PortalPageShell from "@/features/customer-portal/components/PortalPageShell";
 import type { CustomerPortalAppointment } from "@/features/customer-portal/types/portal";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -46,10 +47,10 @@ export default async function PortalAppointmentsPage({
   const appointments = tab === "upcoming" ? data.upcoming : tab === "past" ? data.past : data.cancelled;
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", py: 3, px: { xs: 1.5, sm: 2 } }}>
-      <Box sx={{ maxWidth: 600, mx: "auto" }}>
+    <PortalPageShell>
+      <Box>
         {/* Header */}
-        <Paper elevation={2} sx={{ p: 3, borderRadius: 3, mb: 2 }}>
+        <Paper elevation={0} sx={{ p: 3, borderRadius: 3, mb: 2 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Box>
               <Typography variant="h6" fontWeight={700}>{tenant.name}</Typography>
@@ -87,7 +88,7 @@ export default async function PortalAppointmentsPage({
           <Box sx={{ p: { xs: 2, sm: 3 } }}>
             {appointments.length === 0 ? (
               <Box sx={{ textAlign: "center", py: 4 }}>
-                <EventIcon sx={{ fontSize: 48, color: "grey.400", mb: 1 }} />
+                <EventIcon sx={{ fontSize: 48, color: "rgba(255,255,255,0.2)", mb: 1 }} />
                 <Typography variant="body2" color="text.secondary">
                   No {tab} appointments
                 </Typography>
@@ -111,7 +112,7 @@ export default async function PortalAppointmentsPage({
           Times shown in {tenant.defaultTimeZone}
         </Typography>
       </Box>
-    </Box>
+    </PortalPageShell>
   );
 }
 

@@ -76,16 +76,16 @@ export default async function WaitlistOfferPage({
   const appointmentTime = formatInTimeZone(offer.starts_at, tenant.defaultTimeZone, "h:mm a");
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center", p: 3 }}>
-      <Paper elevation={2} sx={{ p: 4, maxWidth: 480, width: "100%", textAlign: "center", borderRadius: 3 }}>
-        <Typography variant="h5" fontWeight={700} gutterBottom>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#0a0a0f", color: "#f0f0f5", display: "flex", alignItems: "center", justifyContent: "center", p: 3 }}>
+      <Paper elevation={0} sx={{ p: 4, maxWidth: 480, width: "100%", textAlign: "center", borderRadius: 3, bgcolor: "rgba(22,22,30,0.7)", border: "1px solid rgba(255,255,255,0.06)", color: "#e9e6f5", backgroundImage: "none" }}>
+        <Typography variant="h5" fontWeight={700} gutterBottom sx={{ color: "#f0f0f5" }}>
           {tenant.name}
         </Typography>
-        <Typography variant="h6" sx={{ mb: 2 }}>
+        <Typography variant="h6" sx={{ mb: 2, color: "#f0f0f5" }}>
           A time opened up!
         </Typography>
 
-        <Paper variant="outlined" sx={{ p: 2, mb: 3, textAlign: "left" }}>
+        <Paper variant="outlined" sx={{ p: 2, mb: 3, textAlign: "left", bgcolor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "#e9e6f5", backgroundImage: "none" }}>
           <Typography variant="body2"><strong>Service:</strong> {serviceName}</Typography>
           <Typography variant="body2"><strong>Date:</strong> {appointmentDate}</Typography>
           <Typography variant="body2"><strong>Time:</strong> {appointmentTime}</Typography>
@@ -93,7 +93,7 @@ export default async function WaitlistOfferPage({
           <Typography variant="body2"><strong>With:</strong> {resourceName}</Typography>
         </Paper>
 
-        <Alert severity="info" variant="outlined" sx={{ mb: 2, textAlign: "left" }}>
+        <Alert severity="info" variant="outlined" sx={{ mb: 2, textAlign: "left", bgcolor: "rgba(167,139,250,0.08)", color: "#e9e6f5", border: "1px solid rgba(167,139,250,0.25)", "& .MuiAlert-icon": { color: "#a78bfa" } }}>
           This slot is not reserved. Book promptly to secure it.
         </Alert>
 
@@ -123,13 +123,13 @@ export default async function WaitlistOfferPage({
 
 function OfferError({ tenantSlug, message }: { tenantSlug: string; message: string }) {
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", display: "flex", alignItems: "center", justifyContent: "center", p: 3 }}>
-      <Paper elevation={2} sx={{ p: 4, maxWidth: 420, textAlign: "center", borderRadius: 3 }}>
-        <Typography variant="h6" gutterBottom>Offer Unavailable</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#0a0a0f", color: "#f0f0f5", display: "flex", alignItems: "center", justifyContent: "center", p: 3 }}>
+      <Paper elevation={0} sx={{ p: 4, maxWidth: 420, textAlign: "center", borderRadius: 3, bgcolor: "rgba(22,22,30,0.7)", border: "1px solid rgba(255,255,255,0.06)", color: "#e9e6f5", backgroundImage: "none" }}>
+        <Typography variant="h6" gutterBottom sx={{ color: "#f0f0f5" }}>Offer Unavailable</Typography>
+        <Typography variant="body2" sx={{ mb: 3, color: "#8b8b9e" }}>
           {message}
         </Typography>
-        <Button component="a" href={`/book/${tenantSlug}`} variant="outlined" size="small">
+        <Button component="a" href={`/book/${tenantSlug}`} variant="outlined" size="small" sx={{ color: "#a78bfa", borderColor: "rgba(167,139,250,0.4)" }}>
           View available times
         </Button>
       </Paper>

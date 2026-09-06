@@ -7,6 +7,7 @@ import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import { requirePortalSession } from "@/features/customer-portal/services/require-portal-session";
 import { createAdminClient } from "@/lib/supabase/admin";
+import PortalPageShell from "@/features/customer-portal/components/PortalPageShell";
 
 /**
  * Customer Portal — Account Page.
@@ -53,10 +54,10 @@ export default async function PortalAccountPage({
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", py: 3, px: { xs: 1.5, sm: 2 } }}>
-      <Box sx={{ maxWidth: 600, mx: "auto" }}>
+    <PortalPageShell>
+      <Box>
         {/* Header */}
-        <Paper elevation={2} sx={{ p: 3, borderRadius: 3, mb: 2 }}>
+        <Paper elevation={0} sx={{ p: 3, borderRadius: 3, mb: 2 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Box>
               <Typography variant="h6" fontWeight={700}>{tenant.name}</Typography>
@@ -122,7 +123,7 @@ export default async function PortalAccountPage({
           </Stack>
         </Paper>
       </Box>
-    </Box>
+    </PortalPageShell>
   );
 }
 

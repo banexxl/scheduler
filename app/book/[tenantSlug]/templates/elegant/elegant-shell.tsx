@@ -26,8 +26,8 @@ export default function ElegantShell({ children }: TemplateShellProps) {
     <Box
       sx={{
         minHeight: "100vh",
-        bgcolor: "background.default",
-        color: "text.primary",
+        bgcolor: "#0a0a0f",
+        color: "#f0f0f5",
         display: "flex",
         flexDirection: "column",
       }}
@@ -47,11 +47,11 @@ export default function ElegantShell({ children }: TemplateShellProps) {
           flexGrow: 1,
         }}
       >
-        {!isStep && <Divider sx={{ mb: { xs: 3, sm: 5 }, borderColor: "divider" }} />}
+        {!isStep && <Divider sx={{ mb: { xs: 3, sm: 5 }, borderColor: "rgba(255,255,255,0.08)" }} />}
 
         {children}
 
-        {!isStep && <Divider sx={{ mt: { xs: 4, sm: 6 }, borderColor: "divider" }} />}
+        {!isStep && <Divider sx={{ mt: { xs: 4, sm: 6 }, borderColor: "rgba(255,255,255,0.08)" }} />}
       </Box>
 
       {!isStep && <PortalCTA />}

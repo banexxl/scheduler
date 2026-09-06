@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
 import { requirePortalSession } from "@/features/customer-portal/services/require-portal-session";
 import { createAdminClient } from "@/lib/supabase/admin";
+import PortalPageShell from "@/features/customer-portal/components/PortalPageShell";
 
 /**
  * Customer Portal — Rewards Page.
@@ -23,9 +24,9 @@ export default async function PortalRewardsPage({
 
   if (!session.customerId) {
     return (
-      <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", py: 3, px: { xs: 1.5, sm: 2 } }}>
-        <Box sx={{ maxWidth: 600, mx: "auto" }}>
-          <Paper elevation={2} sx={{ p: 3, borderRadius: 3, mb: 2 }}>
+      <PortalPageShell>
+        <Box>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, mb: 2 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <Box>
                 <Typography variant="h6" fontWeight={700}>{tenant.name}</Typography>
@@ -36,15 +37,15 @@ export default async function PortalRewardsPage({
               </Button>
             </Stack>
           </Paper>
-          <Paper elevation={1} sx={{ p: 4, borderRadius: 3, textAlign: "center" }}>
-            <CardGiftcardIcon sx={{ fontSize: 48, color: "grey.400", mb: 1 }} />
+          <Paper elevation={0} sx={{ p: 4, borderRadius: 3, textAlign: "center" }}>
+            <CardGiftcardIcon sx={{ fontSize: 48, color: "rgba(255,255,255,0.2)", mb: 1 }} />
             <Typography variant="body2" color="text.secondary">No rewards yet</Typography>
             <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
               Complete appointments to start earning rewards
             </Typography>
           </Paper>
         </Box>
-      </Box>
+      </PortalPageShell>
     );
   }
 
@@ -99,10 +100,10 @@ export default async function PortalRewardsPage({
   }>;
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", py: 3, px: { xs: 1.5, sm: 2 } }}>
-      <Box sx={{ maxWidth: 600, mx: "auto" }}>
+    <PortalPageShell>
+      <Box>
         {/* Header */}
-        <Paper elevation={2} sx={{ p: 3, borderRadius: 3, mb: 2 }}>
+        <Paper elevation={0} sx={{ p: 3, borderRadius: 3, mb: 2 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Box>
               <Typography variant="h6" fontWeight={700}>{tenant.name}</Typography>
@@ -208,12 +209,12 @@ export default async function PortalRewardsPage({
 
         {/* Empty state when nothing */}
         {!loyalty && rewards.length === 0 && packages.length === 0 && (
-          <Paper elevation={1} sx={{ p: 4, borderRadius: 3, textAlign: "center" }}>
-            <CardGiftcardIcon sx={{ fontSize: 48, color: "grey.400", mb: 1 }} />
+          <Paper elevation={0} sx={{ p: 4, borderRadius: 3, textAlign: "center" }}>
+            <CardGiftcardIcon sx={{ fontSize: 48, color: "rgba(255,255,255,0.2)", mb: 1 }} />
             <Typography variant="body2" color="text.secondary">No rewards or packages available yet</Typography>
           </Paper>
         )}
       </Box>
-    </Box>
+    </PortalPageShell>
   );
 }

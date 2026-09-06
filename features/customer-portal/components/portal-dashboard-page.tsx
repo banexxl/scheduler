@@ -62,14 +62,41 @@ export default function PortalDashboardPage({
   ];
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", py: 3, px: { xs: 1.5, sm: 2 } }}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        bgcolor: "#0a0a0f",
+        color: "#f0f0f5",
+        py: 3,
+        px: { xs: 1.5, sm: 2 },
+        // Dark glass styling for all nested MUI surfaces on this page.
+        "& .MuiPaper-root": {
+          bgcolor: "rgba(22,22,30,0.6)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          backdropFilter: "blur(8px)",
+          color: "#e9e6f5",
+          backgroundImage: "none",
+        },
+        "& .MuiPaper-root.MuiPaper-outlined": {
+          bgcolor: "rgba(255,255,255,0.03)",
+        },
+        "& .MuiTypography-root": { color: "inherit" },
+        "& .MuiTypography-colorTextSecondary, & .MuiTypography-body2, & .MuiTypography-caption": {
+          color: "#8b8b9e",
+        },
+        "& .MuiTab-root": { color: "#8b8b9e" },
+        "& .MuiTab-root.Mui-selected": { color: "#f0f0f5" },
+        "& .MuiTabs-indicator": { backgroundColor: "#a78bfa" },
+        "& .MuiDivider-root": { borderColor: "rgba(255,255,255,0.08)" },
+      }}
+    >
       <Box sx={{ maxWidth: 600, mx: "auto" }}>
         {/* Header */}
-        <Paper elevation={2} sx={{ p: 3, borderRadius: 3, mb: 2 }}>
+        <Paper elevation={0} sx={{ p: 3, borderRadius: 3, mb: 2 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Box>
               <Typography variant="h6" fontWeight={700}>{tenantName}</Typography>
-              <Typography variant="body2" color="text.secondary">My Appointments</Typography>
+              <Typography variant="body2">My Appointments</Typography>
             </Box>
             <Stack direction="row" spacing={1}>
               <Button
@@ -98,7 +125,7 @@ export default function PortalDashboardPage({
             value={tab}
             onChange={(_, v) => setTab(v)}
             variant="fullWidth"
-            sx={{ borderBottom: "1px solid", borderColor: "divider" }}
+            sx={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
           >
             {tabs.map((t, i) => (
               <Tab key={i} label={t.label} />

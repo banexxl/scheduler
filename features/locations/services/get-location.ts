@@ -16,6 +16,8 @@ export type LocationDetail = {
   phoneNumber: string | null;
   email: string | null;
   timezone: string;
+  latitude: number | null;
+  longitude: number | null;
   isPrimary: boolean;
   isActive: boolean;
   sortOrder: number;
@@ -33,7 +35,7 @@ export async function getLocation(
   const { data } = await supabase
     .from("locations")
     .select(
-      "id, tenant_id, name, slug, location_type, description, street_address, city, province_state, country, postal_code, phone_number, email, timezone, is_primary, is_active, sort_order"
+      "id, tenant_id, name, slug, location_type, description, street_address, city, province_state, country, postal_code, phone_number, email, timezone, latitude, longitude, is_primary, is_active, sort_order"
     )
     .eq("id", locationId)
     .eq("tenant_id", tenantId)
@@ -56,6 +58,8 @@ export async function getLocation(
     phoneNumber: data.phone_number,
     email: data.email,
     timezone: data.timezone,
+    latitude: data.latitude,
+    longitude: data.longitude,
     isPrimary: data.is_primary,
     isActive: data.is_active,
     sortOrder: data.sort_order,

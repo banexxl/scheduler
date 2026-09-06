@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import { useTheme } from "@mui/material/styles";
 import { loadGoogleMaps } from "../utils/load-google-maps";
 
 export type ParsedAddress = {
@@ -10,12 +13,14 @@ export type ParsedAddress = {
      provinceState: string;
      country: string;
      postalCode: string;
+     latitude: number | null;
+     longitude: number | null;
 };
 
 type AddressAutocompleteFieldProps = {
      /** Current street address value (controlled by the form). */
      value: string;
-     /** Fired on every keystroke so the form stays in sync. */
+     /** Fired on every keystroke (manual fallback) so the form stays in sync. */
      onChange: (value: string) => void;
      /** Fired when the user selects a suggestion; provides parsed components. */
      onPlaceSelected: (address: ParsedAddress) => void;
@@ -26,38 +31,50 @@ type AddressAutocompleteFieldProps = {
      helperText?: React.ReactNode;
 };
 
-type AddressComponent = {
-     long_name: string;
-     short_name: string;
-     types: string[];
-};
+/** Reads a single address component's text by type from the new Places API. */
+function componentText(
+     components: google.maps.places.AddressComponent[] | undefined,
+     type: string
+): string {
+     if (!components) return "";
+     const match = components.find((c) => c.types.includes(type));
+     return match?.longText ?? "";
+}
 
-function parsePlace(components: AddressComponent[]): ParsedAddress {
-     const get = (type: string, useShort = false): string => {
-          const match = components.find((c) => c.types.includes(type));
-          if (!match) return "";
-          return useShort ? match.short_name : match.long_name;
-     };
+function parsePlace(place: google.maps.places.Place): ParsedAddress {
+     const components = place.addressComponents;
 
-     const streetNumber = get("street_number");
-     const route = get("route");
+     const streetNumber = componentText(components, "street_number");
+     const route = componentText(components, "route");
      const streetAddress = [streetNumber, route].filter(Boolean).join(" ").trim();
 
      const city =
-          get("locality") ||
-          get("postal_town") ||
-          get("sublocality") ||
-          get("administrative_area_level_2");
+          componentText(components, "locality") ||
+          componentText(components, "postal_town") ||
+          componentText(components, "sublocality") ||
+          componentText(components, "administrative_area_level_2");
+
+     const location = place.location;
 
      return {
           streetAddress,
           city,
-          provinceState: get("administrative_area_level_1"),
-          country: get("country"),
-          postalCode: get("postal_code"),
+          provinceState: componentText(components, "administrative_area_level_1"),
+          country: componentText(components, "country"),
+          postalCode: componentText(components, "postal_code"),
+          latitude: location ? location.lat() : null,
+          longitude: location ? location.lng() : null,
      };
 }
 
+/**
+ * Address search backed by the modern Google Places `PlaceAutocompleteElement`.
+ *
+ * The legacy `google.maps.places.Autocomplete` widget is deprecated and is not
+ * available to Google Maps customers created after March 1, 2025, so we use the
+ * recommended web-component replacement. When the element cannot load, we fall
+ * back to a plain MUI text field for manual entry.
+ */
 export default function AddressAutocompleteField({
      value,
      onChange,
@@ -68,8 +85,9 @@ export default function AddressAutocompleteField({
      error,
      helperText,
 }: AddressAutocompleteFieldProps) {
-     const inputRef = useRef<HTMLInputElement | null>(null);
-     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+     const theme = useTheme();
+     const containerRef = useRef<HTMLDivElement | null>(null);
+     const elementRef = useRef<google.maps.places.PlaceAutocompleteElement | null>(null);
      const onPlaceSelectedRef = useRef(onPlaceSelected);
      const onChangeRef = useRef(onChange);
      const [loadFailed, setLoadFailed] = useState(false);
@@ -80,29 +98,37 @@ export default function AddressAutocompleteField({
 
      useEffect(() => {
           let cancelled = false;
-          let listener: google.maps.MapsEventListener | null = null;
+          const container = containerRef.current;
+          let element: google.maps.places.PlaceAutocompleteElement | null = null;
+          const handleSelect = async (event: Event) => {
+               const prediction = (event as google.maps.places.PlacePredictionSelectEvent)
+                    .placePrediction;
+               if (!prediction) return;
 
-          if (!inputRef.current) return;
+               const place = prediction.toPlace();
+               await place.fetchFields({
+                    fields: ["addressComponents", "formattedAddress", "location"],
+               });
+
+               const parsed = parsePlace(place);
+               onChangeRef.current(parsed.streetAddress || place.formattedAddress || "");
+               onPlaceSelectedRef.current(parsed);
+          };
+
+          if (!container) return;
 
           loadGoogleMaps()
                .then((google) => {
-                    if (cancelled || !inputRef.current) return;
+                    if (cancelled || !container) return;
 
-                    const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
-                         types: ["address"],
-                         fields: ["address_components", "formatted_address"],
+                    element = new google.maps.places.PlaceAutocompleteElement({
+                         includedPrimaryTypes: ["street_address", "premise", "subpremise"],
                     });
-                    autocompleteRef.current = autocomplete;
+                    element.style.width = "100%";
+                    elementRef.current = element;
 
-                    listener = autocomplete.addListener("place_changed", () => {
-                         const place = autocomplete.getPlace();
-                         if (!place.address_components) return;
-
-                         const parsed = parsePlace(place.address_components as AddressComponent[]);
-                         // Sync the visible input with the resolved street address.
-                         onChangeRef.current(parsed.streetAddress || place.formatted_address || "");
-                         onPlaceSelectedRef.current(parsed);
-                    });
+                    element.addEventListener("gmp-select", handleSelect);
+                    container.appendChild(element);
                })
                .catch(() => {
                     if (!cancelled) setLoadFailed(true);
@@ -110,34 +136,70 @@ export default function AddressAutocompleteField({
 
           return () => {
                cancelled = true;
-               if (listener) listener.remove();
-               // Remove the Google-injected dropdown containers to avoid leaks.
-               document
-                    .querySelectorAll(".pac-container")
-                    .forEach((el) => el.remove());
+               if (element) {
+                    element.removeEventListener("gmp-select", handleSelect);
+                    element.remove();
+               }
+               elementRef.current = null;
           };
      }, []);
 
+     // Fallback: manual entry when the Places element is unavailable.
+     if (loadFailed) {
+          return (
+               <TextField
+                    name={name}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    onBlur={onBlur}
+                    label="Street Address"
+                    placeholder="Enter the street address"
+                    fullWidth
+                    margin="dense"
+                    disabled={disabled}
+                    error={error}
+                    helperText="Address suggestions unavailable — you can type the address manually."
+                    autoComplete="off"
+                    slotProps={{ htmlInput: { autoComplete: "off" } }}
+               />
+          );
+     }
+
      return (
-          <TextField
-               name={name}
-               value={value}
-               onChange={(e) => onChange(e.target.value)}
-               onBlur={onBlur}
-               inputRef={inputRef}
-               label="Street Address"
-               placeholder="Start typing an address…"
-               fullWidth
-               margin="dense"
-               disabled={disabled}
-               error={error}
-               helperText={
-                    loadFailed
-                         ? "Address suggestions unavailable — you can type the address manually."
-                         : helperText
-               }
-               autoComplete="off"
-               slotProps={{ htmlInput: { autoComplete: "off" } }}
-          />
+          <Box sx={{ mt: 1, mb: 0.5 }}>
+               <Typography
+                    variant="caption"
+                    component="label"
+                    sx={{ display: "block", color: error ? "error.main" : "text.secondary", mb: 0.5 }}
+               >
+                    Street Address
+               </Typography>
+               <Box
+                    ref={containerRef}
+                    aria-disabled={disabled}
+                    sx={{
+                         // Style the injected web component to match MUI inputs.
+                         "& gmp-place-autocomplete": {
+                              width: "100%",
+                              "--gmp-mat-color-surface": theme.palette.background.paper,
+                              "--gmp-mat-color-on-surface": theme.palette.text.primary,
+                              "--gmp-mat-color-outline": error
+                                   ? theme.palette.error.main
+                                   : theme.palette.divider,
+                              "--gmp-mat-color-primary": theme.palette.primary.main,
+                         },
+                         pointerEvents: disabled ? "none" : "auto",
+                         opacity: disabled ? 0.5 : 1,
+                    }}
+               />
+               {helperText && (
+                    <Typography
+                         variant="caption"
+                         sx={{ display: "block", color: error ? "error.main" : "text.secondary", mt: 0.5, mx: "14px" }}
+                    >
+                         {helperText}
+                    </Typography>
+               )}
+          </Box>
      );
 }

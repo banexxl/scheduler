@@ -21,6 +21,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import { locationSchema, type LocationFormValues, LOCATION_TYPES } from "../schemas/location-schema";
 import { generateLocationSlug } from "../utils/location-slug";
 import AddressAutocompleteField, { type ParsedAddress } from "./address-autocomplete-field";
+import LocationMap from "./location-map";
 import { TIMEZONE_LIST } from "@/features/business/utils/timezone-list";
 
 const LOCATION_TYPE_LABELS: Record<string, string> = {
@@ -221,6 +222,8 @@ export default function LocationForm({ initialValues, onSubmit, submitLabel, can
                     if (address.provinceState) formik.setFieldValue("provinceState", address.provinceState);
                     if (address.country) formik.setFieldValue("country", address.country);
                     if (address.postalCode) formik.setFieldValue("postalCode", address.postalCode);
+                    formik.setFieldValue("latitude", address.latitude);
+                    formik.setFieldValue("longitude", address.longitude);
                   }}
                   disabled={isDisabled}
                   error={!!formik.touched.streetAddress && !!formik.errors.streetAddress}
@@ -265,6 +268,12 @@ export default function LocationForm({ initialValues, onSubmit, submitLabel, can
                 )}
               </Field>
             </Stack>
+
+            {/* ── Map preview (read-only) ─────────────────────── */}
+            <LocationMap
+              latitude={formik.values.latitude ?? null}
+              longitude={formik.values.longitude ?? null}
+            />
 
             <Divider sx={{ my: 3 }} />
 

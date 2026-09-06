@@ -22,7 +22,7 @@ export async function updateLocationAction(
   }
 
   const tenant = await getTenantBySlug(tenantSlug);
-  if (!tenant || !["active","trialing"].includes(tenant.status)) {
+  if (!tenant || !["active", "trialing"].includes(tenant.status)) {
     return { success: false, message: "Business not found." };
   }
 
@@ -105,6 +105,8 @@ export async function updateLocationAction(
       phone_number: validated.phoneNumber ?? null,
       email: validated.email ?? null,
       timezone: validated.timezone,
+      latitude: validated.latitude ?? null,
+      longitude: validated.longitude ?? null,
       is_active: validated.isActive,
     })
     .eq("id", locationId)

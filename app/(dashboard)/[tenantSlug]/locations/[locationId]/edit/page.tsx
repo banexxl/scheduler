@@ -52,6 +52,8 @@ export default async function EditLocationPage({
     phoneNumber: location.phoneNumber ?? "",
     email: location.email ?? "",
     timezone: location.timezone,
+    latitude: location.latitude,
+    longitude: location.longitude,
     isActive: location.isActive,
   };
 

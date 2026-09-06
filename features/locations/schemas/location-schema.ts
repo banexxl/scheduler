@@ -127,6 +127,26 @@ export const locationSchema = yup.object({
       "Must be a valid timezone identifier"
     ),
 
+  latitude: yup
+    .number()
+    .optional()
+    .nullable()
+    .transform((val: unknown, orig: unknown) =>
+      orig === "" || orig === null || orig === undefined ? undefined : (val as number)
+    )
+    .min(-90, "Latitude must be between -90 and 90")
+    .max(90, "Latitude must be between -90 and 90"),
+
+  longitude: yup
+    .number()
+    .optional()
+    .nullable()
+    .transform((val: unknown, orig: unknown) =>
+      orig === "" || orig === null || orig === undefined ? undefined : (val as number)
+    )
+    .min(-180, "Longitude must be between -180 and 180")
+    .max(180, "Longitude must be between -180 and 180"),
+
   isActive: yup.boolean().required().default(true),
 });
 

@@ -38,6 +38,8 @@ export default async function NewLocationPage({
     phoneNumber: "",
     email: "",
     timezone: defaultTimezone,
+    latitude: null,
+    longitude: null,
     isActive: true,
   };
 

@@ -131,6 +131,8 @@ export async function createLocationAction(
     phone_number: validated.phoneNumber ?? null,
     email: validated.email ?? null,
     timezone: validated.timezone,
+    latitude: validated.latitude ?? null,
+    longitude: validated.longitude ?? null,
     is_active: validated.isActive,
     is_primary: false,
     sort_order: sortOrder,

@@ -47,6 +47,27 @@ inclusion: always
 - Never used for authentication
 - Never use to work around missing RLS policies
 
+## Public Catalog Reads (service-role)
+
+The public booking storefront must render for anonymous visitors and logged-in
+**customers** (who are not tenant members). The business-config tables
+(`services`, `service_locations`, `service_resources`,
+`tenant_public_booking_settings`) grant SELECT only to active tenant members via
+RLS, so those readers use the **service-role client** on a trusted server path —
+the same pattern as `resolvePublicSite`.
+
+Rules for these public readers:
+- Server-only (`import "server-only"`), never reachable from client components.
+- Queries **always** scoped by `tenant_id` and to `active`/`trialing` tenants.
+- Only `is_active`/published, public-safe fields are selected — no internal notes,
+  IDs beyond what the UI needs, or cross-tenant data.
+- This is public **catalog** data only; it is not a license to bypass RLS for
+  user-owned or sensitive data. Authenticated user data still goes through the
+  RLS-scoped server client.
+
+Files: `features/public-booking/services/public-service-discovery.ts`,
+`features/public-booking/services/public-tenant-resolver.ts`.
+
 ## Route Protection
 
 | Area | Guard | On failure |

@@ -92,9 +92,11 @@ export default function AddressAutocompleteField({
      const onChangeRef = useRef(onChange);
      const [loadFailed, setLoadFailed] = useState(false);
 
-     // Keep the latest callbacks without re-running the effect.
-     onPlaceSelectedRef.current = onPlaceSelected;
-     onChangeRef.current = onChange;
+     // Keep the latest callbacks without re-running the mount effect.
+     useEffect(() => {
+          onPlaceSelectedRef.current = onPlaceSelected;
+          onChangeRef.current = onChange;
+     });
 
      useEffect(() => {
           let cancelled = false;

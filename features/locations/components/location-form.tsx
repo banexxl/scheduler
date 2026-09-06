@@ -20,6 +20,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import LockIcon from "@mui/icons-material/Lock";
 import { locationSchema, type LocationFormValues, LOCATION_TYPES } from "../schemas/location-schema";
 import { generateLocationSlug } from "../utils/location-slug";
+import AddressAutocompleteField, { type ParsedAddress } from "./address-autocomplete-field";
 import { TIMEZONE_LIST } from "@/features/business/utils/timezone-list";
 
 const LOCATION_TYPE_LABELS: Record<string, string> = {
@@ -209,9 +210,25 @@ export default function LocationForm({ initialValues, onSubmit, submitLabel, can
 
             <Field name="streetAddress">
               {({ field }: { field: { name: string; value: string; onChange: React.ChangeEventHandler; onBlur: React.FocusEventHandler } }) => (
-                <TextField {...field} label="Street Address" placeholder="e.g. 123 Main Street" fullWidth margin="dense" disabled={isDisabled}
+                <AddressAutocompleteField
+                  name={field.name}
+                  value={field.value ?? ""}
+                  onChange={(v) => formik.setFieldValue("streetAddress", v)}
+                  onBlur={field.onBlur}
+                  onPlaceSelected={(address: ParsedAddress) => {
+                    formik.setFieldValue("streetAddress", address.streetAddress);
+                    if (address.city) formik.setFieldValue("city", address.city);
+                    if (address.provinceState) formik.setFieldValue("provinceState", address.provinceState);
+                    if (address.country) formik.setFieldValue("country", address.country);
+                    if (address.postalCode) formik.setFieldValue("postalCode", address.postalCode);
+                  }}
+                  disabled={isDisabled}
                   error={!!formik.touched.streetAddress && !!formik.errors.streetAddress}
-                  helperText={formik.touched.streetAddress && formik.errors.streetAddress} />
+                  helperText={
+                    (formik.touched.streetAddress && formik.errors.streetAddress) ||
+                    "Start typing to search — city, region and postal code fill in automatically."
+                  }
+                />
               )}
             </Field>
 

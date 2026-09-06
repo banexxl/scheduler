@@ -124,16 +124,44 @@ export default function PortalHero() {
           <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
             {logoUrl ? (
               <Box
-                component="img"
-                src={logoUrl}
-                alt={`${tenant.name} logo`}
                 sx={{
-                  height: { xs: 64, md: 80 },
-                  maxWidth: 200,
-                  objectFit: "contain",
-                  filter: `drop-shadow(0 0 24px ${primaryColor}50)`,
+                  position: "relative",
+                  display: "inline-flex",
+                  p: { xs: 1, md: 1.25 },
+                  borderRadius: "20px",
+                  border: `3px solid ${primaryColor}`,
+                  boxShadow: `0 0 0 2px rgba(255,255,255,0.85) inset, 0 0 24px ${primaryColor}80, 0 8px 20px rgba(0,0,0,0.3)`,
+                  bgcolor: "rgba(255,255,255,0.9)",
+                  overflow: "hidden",
                 }}
-              />
+              >
+                <Box
+                  component="img"
+                  src={logoUrl}
+                  alt={`${tenant.name} logo`}
+                  sx={{
+                    height: { xs: 64, md: 80 },
+                    maxWidth: 200,
+                    objectFit: "contain",
+                    display: "block",
+                    borderRadius: "12px",
+                  }}
+                />
+                {/* Primary color tint over the logo so it always picks up
+                    some brand color regardless of its own hue */}
+                <Box
+                  aria-hidden
+                  sx={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "20px",
+                    backgroundColor: primaryColor,
+                    opacity: 0.28,
+                    mixBlendMode: "color",
+                    pointerEvents: "none",
+                  }}
+                />
+              </Box>
             ) : (
               <Avatar
                 sx={{

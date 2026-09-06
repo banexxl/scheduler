@@ -42,6 +42,7 @@ export default function PublicBookingShell({
 }: Props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const primaryColor = theme.palette.primary.main;
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", pb: 4 }}>
@@ -58,18 +59,48 @@ export default function PublicBookingShell({
       >
         {tenant.logoUrl && (
           <Box
-            component="img"
-            src={tenant.logoUrl}
-            alt={`${tenant.name} logo`}
             sx={{
-              width: 64,
-              height: 64,
-              borderRadius: "50%",
-              objectFit: "cover",
+              position: "relative",
+              display: "inline-flex",
+              width: 76,
+              height: 76,
               mb: 1.5,
-              border: "3px solid rgba(255,255,255,0.3)",
+              mx: "auto",
+              borderRadius: "20px",
+              // Outer border (primary) + inner white ring separation
+              border: `3px solid ${primaryColor}`,
+              boxShadow: `0 0 0 2px rgba(255,255,255,0.85) inset, 0 0 18px ${primaryColor}80, 0 6px 16px rgba(0,0,0,0.25)`,
+              overflow: "hidden",
+              bgcolor: "rgba(255,255,255,0.9)",
             }}
-          />
+          >
+            <Box
+              component="img"
+              src={tenant.logoUrl}
+              alt={`${tenant.name} logo`}
+              sx={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                borderRadius: "16px",
+                display: "block",
+              }}
+            />
+            {/* Primary color tint layered over the logo so it always
+                picks up some of the brand color regardless of its own hue */}
+            <Box
+              aria-hidden
+              sx={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: "16px",
+                backgroundColor: primaryColor,
+                opacity: 0.28,
+                mixBlendMode: "color",
+                pointerEvents: "none",
+              }}
+            />
+          </Box>
         )}
         <Typography variant="h5" component="h1" fontWeight={700}>
           {settings.bookingPageTitle ?? `Book with ${tenant.name}`}

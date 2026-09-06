@@ -91,11 +91,38 @@ export default function PortalHeader() {
           >
             {logoUrl ? (
               <Box
-                component="img"
-                src={logoUrl}
-                alt={`${tenant.name} logo`}
-                sx={{ height: 36, maxWidth: 120, objectFit: "contain", filter: "drop-shadow(0 0 8px rgba(255,255,255,0.1))" }}
-              />
+                sx={{
+                  position: "relative",
+                  display: "inline-flex",
+                  p: 0.5,
+                  borderRadius: "12px",
+                  border: `2px solid ${primaryColor}`,
+                  boxShadow: `0 0 0 1.5px rgba(255,255,255,0.85) inset, 0 0 12px ${primaryColor}70, 0 2px 8px rgba(0,0,0,0.3)`,
+                  bgcolor: "rgba(255,255,255,0.9)",
+                  overflow: "hidden",
+                }}
+              >
+                <Box
+                  component="img"
+                  src={logoUrl}
+                  alt={`${tenant.name} logo`}
+                  sx={{ height: 36, maxWidth: 120, objectFit: "contain", display: "block", borderRadius: "8px" }}
+                />
+                {/* Primary color tint over the logo so it always picks up
+                    some brand color regardless of its own hue */}
+                <Box
+                  aria-hidden
+                  sx={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "12px",
+                    backgroundColor: primaryColor,
+                    opacity: 0.28,
+                    mixBlendMode: "color",
+                    pointerEvents: "none",
+                  }}
+                />
+              </Box>
             ) : (
               <Avatar
                 sx={{

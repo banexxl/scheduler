@@ -139,7 +139,7 @@ export default async function PublicBookingPage({
       return (
         <GlassSection id="services">
           <SectionHeading>Our Services</SectionHeading>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} justifyContent="center">
             {preview.map((service) => (
               <Grid key={service.id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Paper
@@ -320,7 +320,24 @@ export default async function PublicBookingPage({
         </GlassSection>
       )}
 
-      {/* FAQ */}
+      {/* ═══ Booking Wizard — dark purple "Book an Appointment" surface ═══ */}
+      {features.publicBookingEnabled && bookableServices.length > 0 && (
+        <Box id="booking" sx={{ maxWidth: 640, mx: "auto", py: 5 }}>
+          <Typography component="h2" sx={{ fontSize: "1.5rem", fontWeight: 700, mb: 3, textAlign: "center", color: "#f0f0f5" }}>
+            Book an Appointment
+          </Typography>
+          <PublicBookingFlow
+            tenantSlug={tenantSlug}
+            tenant={bookingTenant}
+            timeZone={bookingTenant.defaultTimeZone}
+            settings={settings}
+            services={bookableServices}
+            giftCardsEnabled={features.giftCardsEnabled}
+          />
+        </Box>
+      )}
+
+      {/* FAQ (below Book an Appointment) */}
       {config && config.faq.length > 0 && (
         <GlassSection id="faq">
           <SectionHeading>Frequently Asked Questions</SectionHeading>
@@ -336,7 +353,7 @@ export default async function PublicBookingPage({
         </GlassSection>
       )}
 
-      {/* Gift Cards */}
+      {/* Gift Cards (below Book an Appointment) */}
       {features.giftCardsEnabled && (
         <GlassSection>
           <Box sx={{ textAlign: "center" }}>
@@ -353,23 +370,6 @@ export default async function PublicBookingPage({
             </Button>
           </Box>
         </GlassSection>
-      )}
-
-      {/* ═══ Booking Wizard — white "Book an Appointment" surface ═══ */}
-      {features.publicBookingEnabled && bookableServices.length > 0 && (
-        <Box id="booking" sx={{ maxWidth: 640, mx: "auto", py: 5 }}>
-          <Typography component="h2" sx={{ fontSize: "1.5rem", fontWeight: 700, mb: 3, textAlign: "center", color: "#f0f0f5" }}>
-            Book an Appointment
-          </Typography>
-          <PublicBookingFlow
-            tenantSlug={tenantSlug}
-            tenant={bookingTenant}
-            timeZone={bookingTenant.defaultTimeZone}
-            settings={settings}
-            services={bookableServices}
-            giftCardsEnabled={features.giftCardsEnabled}
-          />
-        </Box>
       )}
 
       {/* Contact (near the bottom) */}

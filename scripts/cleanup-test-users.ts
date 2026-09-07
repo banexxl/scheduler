@@ -7,9 +7,17 @@
  * NOT NULL). Those rows are tenant-scoped, so deleting the owned tenant first
  * (which cascades them) unblocks the auth-user delete.
  *
+ * Owned tenants are deleted via the delete_tenant_for_test RPC rather than a
+ * plain `tenant_members` delete: the tenant_members_prevent_last_owner
+ * trigger fires per row even inside a single bulk DELETE, so wiping every
+ * member of a tenant still trips it on the owner row (it only sees "0 other
+ * active owners" and raises "A tenant must have at least one active owner").
+ * The RPC sets the transaction-local `app.deleting_tenant` bypass the trigger
+ * checks for before deleting members and the tenant row.
+ *
  * Order per test user:
- *   1. Delete owned tenants (memberships first to satisfy the last-owner
- *      trigger, then the tenant row — cascades media, schedule exceptions,
+ *   1. Delete owned tenants via delete_tenant_for_test (bypasses the
+ *      last-owner trigger, cascades media, schedule exceptions,
  *      appointments, etc.).
  *   2. Delete any remaining memberships in other tenants.
  *   3. Delete the auth.users account.
@@ -68,19 +76,16 @@ async function main(): Promise<void> {
   const ownedTenantIds = [...new Set((ownerMemberships ?? []).map((m) => m.tenant_id as string))];
 
   for (const tenantId of ownedTenantIds) {
-    // Remove memberships before the tenant row so the last-owner protection
-    // trigger doesn't block, then delete the tenant (cascades child rows
+    // Bypasses tenant_members_prevent_last_owner via a transaction-local
+    // set_config, then deletes members + tenant (cascades child rows
     // including business_media and location_schedule_exceptions).
-    const { error: memErr } = await supabase.from("tenant_members").delete().eq("tenant_id", tenantId);
-    if (memErr) {
-      console.warn(`[cleanup] Could not clear members of tenant ${tenantId}: ${memErr.message}`);
-    }
-
-    const { error: tenantErr } = await supabase.from("tenants").delete().eq("id", tenantId);
-    if (tenantErr) {
-      console.warn(`[cleanup] Could not delete tenant ${tenantId}: ${tenantErr.message}`);
+    const { data, error: rpcErr } = await supabase.rpc("delete_tenant_for_test", {
+      p_tenant_id: tenantId,
+    });
+    if (rpcErr) {
+      console.warn(`[cleanup] Could not delete tenant ${tenantId}: ${rpcErr.message}`);
     } else {
-      console.log(`[cleanup] Deleted tenant ${tenantId}`);
+      console.log(`[cleanup] Deleted tenant ${tenantId} (${JSON.stringify(data)})`);
     }
   }
 

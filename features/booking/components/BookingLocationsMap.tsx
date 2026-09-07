@@ -34,15 +34,6 @@ type Props = {
 
 type MappableLocation = MapLocation & { latitude: number; longitude: number };
 
-/**
- * Dark map styling to match the booking page's glass/dark surface.
- *
- * NOTE: Advanced Markers require a Map ID, and once a Map ID is set the Maps API
- * ignores inline JSON `styles`. To preserve this dark theme, recreate these
- * rules as cloud-based map styling and associate them with the Map ID
- * (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`) in the Google Cloud console.
- */
-
 function hasCoords(loc: MapLocation): loc is MappableLocation {
      return (
           typeof loc.latitude === "number" &&
@@ -83,10 +74,11 @@ export default function BookingLocationsMap({
                               gestureHandling: "cooperative",
                               clickableIcons: false,
                               backgroundColor: "#1d1d27",
-                              // Advanced Markers require a Map ID. Note: inline
-                              // `styles` are ignored once a Map ID is set — the dark
-                              // theme must be configured as cloud-based styling on
-                              // the Map ID in the Google Cloud console.
+                              // Advanced Markers require a Map ID, which makes the API
+                              // ignore inline JSON `styles`. `colorScheme` is a
+                              // separate, Map-ID-independent option that switches the
+                              // base map to Google's built-in dark theme.
+                              colorScheme: google.maps.ColorScheme.DARK,
                               mapId: getGoogleMapId(),
                          });
                     }

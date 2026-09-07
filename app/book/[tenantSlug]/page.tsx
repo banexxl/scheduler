@@ -338,22 +338,6 @@ export default async function PublicBookingPage({
         </Box>
       )}
 
-      {/* FAQ (below Book an Appointment) */}
-      {config && config.faq.length > 0 && (
-        <GlassSection id="faq">
-          <SectionHeading>Frequently Asked Questions</SectionHeading>
-          <Stack spacing={2} sx={{ maxWidth: 600, mx: "auto" }}>
-            {config.faq.map((entry, idx) => (
-              <Box key={idx}>
-                <Typography sx={{ fontSize: "0.9375rem", fontWeight: 600, mb: 0.5, color: "#f0f0f5" }}>{entry.question}</Typography>
-                <Typography sx={{ fontSize: "0.875rem", color: "#8b8b9e", whiteSpace: "pre-wrap", lineHeight: 1.7 }}>{entry.answer}</Typography>
-                {idx < config.faq.length - 1 && <Divider sx={{ mt: 2, borderColor: "rgba(255,255,255,0.06)" }} />}
-              </Box>
-            ))}
-          </Stack>
-        </GlassSection>
-      )}
-
       {/* Gift Cards (below Book an Appointment) */}
       {features.giftCardsEnabled && (
         <GlassSection>
@@ -447,6 +431,22 @@ export default async function PublicBookingPage({
               longitude: loc.longitude,
             }))}
           />
+        </GlassSection>
+      )}
+
+      {/* FAQ (below Book an Appointment) */}
+      {config && config.faq.length > 0 && (
+        <GlassSection id="faq">
+          <SectionHeading>Frequently Asked Questions</SectionHeading>
+          <Stack spacing={2} sx={{ maxWidth: 600, mx: "auto" }}>
+            {config.faq.map((entry, idx) => (
+              <Box key={idx}>
+                <Typography sx={{ fontSize: "0.9375rem", fontWeight: 600, mb: 0.5, color: "#f0f0f5" }}>{entry.question}</Typography>
+                <Typography sx={{ fontSize: "0.875rem", color: "#8b8b9e", whiteSpace: "pre-wrap", lineHeight: 1.7 }}>{entry.answer}</Typography>
+                {idx < config.faq.length - 1 && <Divider sx={{ mt: 2, borderColor: "rgba(255,255,255,0.06)" }} />}
+              </Box>
+            ))}
+          </Stack>
         </GlassSection>
       )}
 

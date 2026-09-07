@@ -107,13 +107,20 @@ export default function PortalFooter() {
             >
               {isLoggedIn ? "My Account" : "Sign In"}
             </Link>
-            <Stack direction="row" spacing={0.5} alignItems="center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logos/getslot_icon.svg" alt="" width={12} height={12} />
-              <Typography sx={{ fontSize: "0.6875rem", color: "#3a3a4a" }}>
-                Powered by GetSlot
-              </Typography>
-            </Stack>
+            <Link
+              href={process.env.NEXT_PUBLIC_APP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ textDecoration: "none" }}
+            >
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logos/getslot_icon.svg" alt="" width={12} height={12} />
+                <Typography sx={{ fontSize: "0.6875rem", color: "#3a3a4a" }}>
+                  Powered by GetSlot
+                </Typography>
+              </Stack>
+            </Link>
           </Stack>
         </Stack>
       </Box>

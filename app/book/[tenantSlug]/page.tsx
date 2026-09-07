@@ -38,10 +38,11 @@ function GlassSection({ id, children }: { id?: string; children: React.ReactNode
       id={id}
       sx={{
         bgcolor: "rgba(22, 22, 30, 0.5)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        border: "1px solid rgba(124,58,237,0.1)",
         borderRadius: 3,
         p: { xs: 3, sm: 4 },
         backdropFilter: "blur(8px)",
+        boxShadow: "0 0 30px rgba(124,58,237,0.04)",
         mb: 3,
       }}
     >
@@ -49,6 +50,20 @@ function GlassSection({ id, children }: { id?: string; children: React.ReactNode
     </Box>
   );
 }
+
+/** Shared hover treatment for content cards: purple glow border + lift on hover. */
+const hoverCardSx = {
+  bgcolor: "rgba(255,255,255,0.03)",
+  border: "1px solid rgba(255,255,255,0.06)",
+  borderRadius: 2,
+  boxShadow: "0 0 16px rgba(124,58,237,0.04)",
+  transition: "border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": {
+    borderColor: "rgba(124,58,237,0.35)",
+    transform: "translateY(-4px)",
+    boxShadow: "0 12px 32px rgba(124,58,237,0.18)",
+  },
+} as const;
 
 function SectionHeading({ id, children }: { id?: string; children: React.ReactNode }) {
   return (
@@ -149,11 +164,7 @@ export default async function PublicBookingPage({
                     height: "100%",
                     display: "flex",
                     flexDirection: "column",
-                    bgcolor: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    borderRadius: 2,
-                    transition: "border-color 0.3s, transform 0.3s",
-                    "&:hover": { borderColor: "rgba(124,58,237,0.3)", transform: "translateY(-2px)" },
+                    ...hoverCardSx,
                   }}
                   elevation={0}
                 >
@@ -234,6 +245,12 @@ export default async function PublicBookingPage({
                     borderRadius: 1.5,
                     display: "block",
                     border: "1px solid rgba(255,255,255,0.06)",
+                    transition: "border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease",
+                    "&:hover": {
+                      borderColor: "rgba(124,58,237,0.4)",
+                      transform: "scale(1.03)",
+                      boxShadow: "0 8px 24px rgba(124,58,237,0.2)",
+                    },
                   }}
                 />
               </Grid>
@@ -252,12 +269,7 @@ export default async function PublicBookingPage({
             {testimonials.slice(0, 6).map((t) => (
               <Grid key={t.id} size={{ xs: 12, sm: 6 }}>
                 <Paper
-                  sx={{
-                    p: 2.5,
-                    bgcolor: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    borderRadius: 2,
-                  }}
+                  sx={{ p: 2.5, ...hoverCardSx }}
                   elevation={0}
                 >
                   <Rating value={t.rating} readOnly size="small" sx={{ mb: 1 }} />
@@ -302,7 +314,7 @@ export default async function PublicBookingPage({
           )}
           <Stack spacing={2}>
             {reviews.reviews.slice(0, 6).map((review) => (
-              <Paper key={review.id} sx={{ p: 2.5, bgcolor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 2 }} elevation={0}>
+              <Paper key={review.id} sx={{ p: 2.5, ...hoverCardSx }} elevation={0}>
                 <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
                   <Rating value={review.rating} readOnly size="small" />
                   {review.reviewerName && <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: "#f0f0f5" }}>{review.reviewerName}</Typography>}
@@ -411,7 +423,7 @@ export default async function PublicBookingPage({
           <Grid container spacing={2}>
             {locations.map((loc) => (
               <Grid key={loc.id} size={{ xs: 12, sm: locations.length === 1 ? 12 : 6 }}>
-                <Paper sx={{ p: 2.5, bgcolor: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 2 }} elevation={0}>
+                <Paper sx={{ p: 2.5, ...hoverCardSx }} elevation={0}>
                   <Typography sx={{ fontSize: "1rem", fontWeight: 600, mb: 0.5, color: "#f0f0f5" }}>{loc.name}</Typography>
                   {loc.streetAddress && (
                     <Typography sx={{ fontSize: "0.8125rem", color: "#8b8b9e" }}>

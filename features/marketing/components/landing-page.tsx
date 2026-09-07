@@ -102,21 +102,22 @@ function GlassCard({ children, delay = 0, glowColor = "rgba(124,58,237,0.15)" }:
     <motion.div
       custom={delay}
       variants={fadeUp}
-      whileHover={{ y: -6, transition: { duration: 0.25 } }}
+      whileHover={{ y: -8, scale: 1.015, transition: { duration: 0.25, ease: "easeOut" } }}
     >
       <Box
         sx={{
           p: 3.5,
           borderRadius: 3,
           bgcolor: "rgba(22, 22, 30, 0.6)",
-          border: "1px solid rgba(255,255,255,0.06)",
+          border: "1px solid rgba(124,58,237,0.14)",
           backdropFilter: "blur(12px)",
           position: "relative",
           overflow: "hidden",
+          boxShadow: "0 0 24px rgba(124,58,237,0.06)",
           transition: "border-color 0.3s, box-shadow 0.3s",
           "&:hover": {
-            borderColor: "rgba(124,58,237,0.3)",
-            boxShadow: `0 8px 40px ${glowColor}, inset 0 1px 0 rgba(255,255,255,0.06)`,
+            borderColor: "rgba(124,58,237,0.5)",
+            boxShadow: `0 16px 56px ${glowColor}, 0 0 0 1px rgba(124,58,237,0.18), inset 0 1px 0 rgba(255,255,255,0.06)`,
           },
           "&::before": {
             content: '""',
@@ -464,25 +465,32 @@ export default function MarketingLandingPage({ plans }: Props) {
               {STEPS.map((step, i) => (
                 <motion.div key={i} custom={i + 2} variants={fadeUp}>
                   <Stack direction={{ xs: "column", md: "row" }} spacing={3} alignItems="center">
-                    <Box
-                      sx={{
-                        width: 72,
-                        height: 72,
-                        borderRadius: "50%",
-                        background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(99,102,241,0.2))",
-                        border: "1px solid rgba(124,58,237,0.3)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "1.5rem",
-                        fontWeight: 800,
-                        color: "#a78bfa",
-                        flexShrink: 0,
-                        boxShadow: "0 0 30px rgba(124,58,237,0.15)",
-                      }}
-                    >
-                      {i + 1}
-                    </Box>
+                    <motion.div whileHover={{ scale: 1.08, transition: { duration: 0.25, ease: "easeOut" } }}>
+                      <Box
+                        sx={{
+                          width: 72,
+                          height: 72,
+                          borderRadius: "50%",
+                          background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(99,102,241,0.2))",
+                          border: "1px solid rgba(124,58,237,0.3)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "1.5rem",
+                          fontWeight: 800,
+                          color: "#a78bfa",
+                          flexShrink: 0,
+                          boxShadow: "0 0 30px rgba(124,58,237,0.15)",
+                          transition: "box-shadow 0.3s, border-color 0.3s",
+                          "&:hover": {
+                            borderColor: "rgba(124,58,237,0.6)",
+                            boxShadow: "0 0 45px rgba(124,58,237,0.3)",
+                          },
+                        }}
+                      >
+                        {i + 1}
+                      </Box>
+                    </motion.div>
                     <Box>
                       <Typography sx={{ fontSize: "1.25rem", fontWeight: 700, mb: 0.5, color: "#f0f0f5" }}>{step.title}</Typography>
                       <Typography sx={{ color: "#8b8b9e", lineHeight: 1.65 }}>{step.description}</Typography>

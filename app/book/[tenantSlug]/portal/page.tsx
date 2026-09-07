@@ -64,13 +64,15 @@ export default async function CustomerPortalPage({
       .maybeSingle();
 
     // Auto-link if no record exists (first-time Google OAuth or fresh registration)
-    if (!customerRow) {
-      await autoLinkCustomerToTenant({
+    let tenantCustomerId = customerRow ? (customerRow as unknown as { id: string }).id : null;
+    if (!tenantCustomerId) {
+      const linkResult = await autoLinkCustomerToTenant({
         userId,
         email: userEmail,
         fullName: userName,
         tenantId,
       });
+      tenantCustomerId = linkResult.customerId;
     }
 
     // Load global customer account (own row only — RLS scoped to auth.uid()).
@@ -96,7 +98,7 @@ export default async function CustomerPortalPage({
 
     // Load portal data
     const [data, waitlistEntries] = await Promise.all([
-      getCustomerPortalAppointments(tenantId, userEmail, timeZone),
+      getCustomerPortalAppointments(tenantId, userEmail, timeZone, tenantCustomerId),
       getCustomerWaitlistEntries(tenantId, userEmail),
     ]);
 

@@ -3,7 +3,10 @@ import "server-only";
 /**
  * Portal Appointment Queries — Milestone 8.6.
  *
- * Loads tenant-scoped appointment data for a customer email.
+ * Loads tenant-scoped appointment data for a customer. Matches by
+ * tenant_customers.id (the reliable, identity-based link — set when a
+ * booking was made while logged in) OR by exact customer_email (a
+ * fallback for older/guest bookings that predate that link).
  * Returns public-safe DTOs without internal IDs or notes.
  */
 
@@ -15,20 +18,44 @@ import type { CustomerPortalAppointment, CustomerPortalData } from "../types/por
 
 // ─── Main Query ──────────────────────────────────────────────────────────────
 
+const APPOINTMENT_COLUMNS = "id, appointment_number, status, starts_at, ends_at, duration_minutes, price, currency, service_id, service_name_snapshot, resource_name_snapshot, location_name_snapshot";
+
 export async function getCustomerPortalAppointments(
   tenantId: string,
   normalizedEmail: string,
-  timeZone: string
+  timeZone: string,
+  customerId?: string | null
 ): Promise<CustomerPortalData> {
   const supabase = createAdminClient();
 
-  const { data } = await (supabase as never as ReturnType<typeof createAdminClient>)
-    .from("appointments")
-    .select("id, appointment_number, status, starts_at, ends_at, duration_minutes, price, currency, service_id, service_name_snapshot, resource_name_snapshot, location_name_snapshot" as never)
-    .eq("tenant_id" as never, tenantId)
-    .eq("customer_email" as never, normalizedEmail)
-    .order("starts_at" as never, { ascending: false })
-    .limit(100);
+  // Two separate, parameterized queries merged by id — safer than building a
+  // raw PostgREST .or() filter string out of a user-supplied email.
+  const [byEmail, byCustomerId] = await Promise.all([
+    (supabase as never as ReturnType<typeof createAdminClient>)
+      .from("appointments")
+      .select(APPOINTMENT_COLUMNS as never)
+      .eq("tenant_id" as never, tenantId)
+      .eq("customer_email" as never, normalizedEmail)
+      .order("starts_at" as never, { ascending: false })
+      .limit(100),
+    customerId
+      ? (supabase as never as ReturnType<typeof createAdminClient>)
+        .from("appointments")
+        .select(APPOINTMENT_COLUMNS as never)
+        .eq("tenant_id" as never, tenantId)
+        .eq("customer_id" as never, customerId)
+        .order("starts_at" as never, { ascending: false })
+        .limit(100)
+      : Promise.resolve({ data: null }),
+  ]);
+
+  const merged = new Map<string, Record<string, unknown>>();
+  for (const row of [...(byEmail.data ?? []), ...(byCustomerId.data ?? [])] as unknown as Array<Record<string, unknown>>) {
+    merged.set(row.id as string, row);
+  }
+  const data = merged.size > 0
+    ? [...merged.values()].sort((a, b) => (b.starts_at as string).localeCompare(a.starts_at as string))
+    : null;
 
   if (!data) {
     return { upcoming: [], past: [], cancelled: [] };

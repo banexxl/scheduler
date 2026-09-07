@@ -60,6 +60,8 @@ type Props = {
   packageOptions?: PackageOption[];
   /** Whether recurring appointments are available */
   recurringEnabled?: boolean;
+  /** Set when the visitor is logged into their global customer account — locks the customer-details email field to it. */
+  loggedInEmail?: string | null;
 };
 
 export default function PublicBookingFlow({
@@ -73,6 +75,7 @@ export default function PublicBookingFlow({
   paymentRequired = false,
   packageOptions = [],
   recurringEnabled = true,
+  loggedInEmail = null,
 }: Props) {
   const [step, setStep] = useState(0);
 
@@ -92,7 +95,7 @@ export default function PublicBookingFlow({
 
   // Customer
   const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerEmail, setCustomerEmail] = useState(() => loggedInEmail ?? "");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerNotes, setCustomerNotes] = useState("");
 
@@ -378,6 +381,7 @@ export default function PublicBookingFlow({
               onChangeNotes={setCustomerNotes}
               onSubmit={handleCustomerSubmit}
               onBack={handleBack}
+              loggedInEmail={loggedInEmail}
             />
           )}
 

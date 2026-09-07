@@ -35,6 +35,7 @@ import { createAppointment } from "@/features/appointments/services/create-appoi
 import { getResolvedBookingRules } from "@/features/booking-rules/services/get-booking-rules";
 import { calculateAvailability } from "@/features/availability/services/calculate-availability";
 import { enqueueAppointmentCreatedNotification } from "@/features/notifications/services/enqueue-notification";
+import { autoLinkCustomerToTenant } from "@/features/customer-portal/services/auto-link-customer";
 import { toZonedTime } from "date-fns-tz";
 import { format } from "date-fns";
 import type { PublicBookingConfirmation, PublicBookingErrorCode } from "../types/public-booking";
@@ -198,12 +199,35 @@ export async function createPublicBookingAction(
         // 8. Resolve local start time from the matched slot
         const localStartTime = matchingSlot.localStartTime;
 
+        // 8.5. If the visitor is logged into their global customer account,
+        // link the appointment to their tenant_customers record so the
+        // customer portal can find it by identity instead of relying only
+        // on an exact customer_email string match (see auto-link-customer.ts
+        // — the same mechanism the portal login page uses).
+        let customerId: string | null = null;
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user?.email) {
+                const linkResult = await autoLinkCustomerToTenant({
+                    userId: user.id,
+                    email: user.email,
+                    fullName: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+                    tenantId,
+                });
+                customerId = linkResult.customerId;
+            }
+        } catch {
+            // Guest checkout must never fail because of this — fall back to
+            // an unlinked (guest) booking, matched later by email only.
+        }
+
         // 9. Create appointment using the trusted service
         const createResult = await createAppointment({
             tenantId,
             serviceId: validated.serviceId,
             locationId: validated.locationId,
             resourceId: validated.resourceId,
+            customerId,
             customerName: validated.customerName,
             customerEmail: validated.customerEmail ?? null,
             customerPhone: validated.customerPhone ?? null,
@@ -213,7 +237,7 @@ export async function createPublicBookingAction(
             source: "public_booking",
             customerNotes: validated.customerNotes ?? null,
             internalNotes: null,
-            createdBy: null, // Public — no authenticated user
+            createdBy: null, // Public — no authenticated staff user
         });
 
         // 10. Handle creation result

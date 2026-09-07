@@ -13,6 +13,7 @@ import { getPublicBookableServices } from "@/features/public-booking/services/pu
 import { resolvePublicSite } from "@/features/public-site/services/public-site-resolver";
 import { getPublicHomepageData } from "@/features/homepage-builder/actions/homepage-actions";
 import PublicBookingFlow from "@/features/public-booking/components/public-booking-flow";
+import { createClient } from "@/lib/supabase/server";
 import BookingLocationsMap from "@/features/booking/components/BookingLocationsMap";
 import JsonLdScript from "@/features/public-site/components/json-ld-script";
 import { buildLocalBusinessJsonLd, buildFaqJsonLd } from "@/features/public-site/utils/structured-data";
@@ -115,6 +116,17 @@ export default async function PublicBookingPage({
     bookableServices = await getPublicBookableServices(bookingTenant.id);
   } catch {
     bookableServices = [];
+  }
+
+  // Logged-in visitors get their email locked into the booking form so the
+  // appointment reliably links to their account (see create-public-booking-action.ts).
+  let loggedInEmail: string | null = null;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    loggedInEmail = user?.email ? user.email.trim().toLowerCase() : null;
+  } catch {
+    loggedInEmail = null;
   }
 
   const site = siteResult.data;
@@ -346,6 +358,7 @@ export default async function PublicBookingPage({
             settings={settings}
             services={bookableServices}
             giftCardsEnabled={features.giftCardsEnabled}
+            loggedInEmail={loggedInEmail}
           />
         </Box>
       )}

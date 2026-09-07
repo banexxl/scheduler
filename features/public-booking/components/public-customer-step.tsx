@@ -32,6 +32,8 @@ type Props = {
   onBack: () => void;
   requireEmail?: boolean;
   requirePhone?: boolean;
+  /** Set when the visitor is logged into their account — locks the email field to it. */
+  loggedInEmail?: string | null;
 };
 
 function isValidEmail(email: string): boolean {
@@ -45,14 +47,16 @@ export default function PublicCustomerStep({
   onSubmit, onBack,
   requireEmail = false,
   requirePhone = false,
+  loggedInEmail = null,
 }: Props) {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [attempted, setAttempted] = useState(false);
+  const emailLocked = Boolean(loggedInEmail);
 
   const errors: Record<string, string> = {};
   if (!customerName.trim()) errors.name = "Name is required";
-  if (requireEmail && !customerEmail.trim()) errors.email = "Email is required";
-  if (customerEmail && !isValidEmail(customerEmail)) errors.email = "Enter a valid email";
+  if (!emailLocked && requireEmail && !customerEmail.trim()) errors.email = "Email is required";
+  if (!emailLocked && customerEmail && !isValidEmail(customerEmail)) errors.email = "Enter a valid email";
   if (requirePhone && !customerPhone.trim()) errors.phone = "Phone is required";
 
   const hasErrors = Object.keys(errors).length > 0;
@@ -87,15 +91,16 @@ export default function PublicCustomerStep({
         />
 
         <TextField
-          label={requireEmail ? "Email" : "Email (optional)"}
+          label={emailLocked || requireEmail ? "Email" : "Email (optional)"}
           type="email"
           value={customerEmail}
           onChange={(e) => onChangeEmail(e.target.value)}
           onBlur={() => setTouched((t) => ({ ...t, email: true }))}
-          required={requireEmail}
+          required={emailLocked || requireEmail}
+          disabled={emailLocked}
           fullWidth
           error={showError("email")}
-          helperText={showError("email") ? errors.email : undefined}
+          helperText={showError("email") ? errors.email : emailLocked ? "Using your account email" : undefined}
           autoComplete="email"
           slotProps={{ htmlInput: { inputMode: "email" } }}
         />

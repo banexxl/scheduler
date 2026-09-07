@@ -41,7 +41,8 @@ export default async function PortalAppointmentsPage({
   const data = await getCustomerPortalAppointments(
     session.tenantId,
     session.normalizedEmail,
-    tenant.defaultTimeZone
+    tenant.defaultTimeZone,
+    session.customerId
   );
 
   const appointments = tab === "upcoming" ? data.upcoming : tab === "past" ? data.past : data.cancelled;

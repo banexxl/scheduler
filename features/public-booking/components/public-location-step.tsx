@@ -25,11 +25,13 @@ type Props = {
   tenantSlug: string;
   tenantId: string;
   serviceId: string;
+  /** Location already chosen (e.g. by a prior auto-select) if the customer navigated back into this step. */
+  initialLocationId?: string | null;
   onSelect: (locationId: string) => void;
   onBack: () => void;
 };
 
-export default function PublicLocationStep({ tenantSlug, serviceId, onSelect, onBack }: Props) {
+export default function PublicLocationStep({ tenantSlug, serviceId, initialLocationId, onSelect, onBack }: Props) {
   const [locations, setLocations] = useState<PublicBookableLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -43,7 +45,10 @@ export default function PublicLocationStep({ tenantSlug, serviceId, onSelect, on
       if (cancelled) return;
       if (result.success) {
         setLocations(result.data);
-        if (result.data.length === 1) {
+        // Skip the auto-select when a location is already chosen — that means
+        // the customer navigated back into this step, and re-firing it would
+        // immediately bounce them forward again, making "Back" a no-op.
+        if (result.data.length === 1 && !initialLocationId) {
           onSelect(result.data[0]!.id);
         }
       } else {
@@ -94,6 +99,9 @@ export default function PublicLocationStep({ tenantSlug, serviceId, onSelect, on
   return (
     <Box>
       <Typography variant="h6" component="h2" gutterBottom>Choose a location</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Select where you&apos;d like your appointment to take place.
+      </Typography>
       <Stack spacing={1.5}>
         {locations.map((loc) => (
           <Paper
@@ -102,6 +110,7 @@ export default function PublicLocationStep({ tenantSlug, serviceId, onSelect, on
             sx={{
               p: 2,
               cursor: "pointer",
+              borderColor: loc.id === initialLocationId ? "primary.main" : undefined,
               transition: "border-color 0.15s, box-shadow 0.15s",
               "&:hover": { borderColor: "primary.main", boxShadow: 1 },
               "&:focus-visible": { outline: "2px solid", outlineColor: "primary.main", outlineOffset: 2 },
@@ -111,6 +120,7 @@ export default function PublicLocationStep({ tenantSlug, serviceId, onSelect, on
             tabIndex={0}
             onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(loc.id); } }}
             aria-label={`Select ${loc.name}`}
+            aria-pressed={loc.id === initialLocationId}
           >
             <Typography variant="subtitle1" fontWeight={600}>{loc.name}</Typography>
             {loc.city && (

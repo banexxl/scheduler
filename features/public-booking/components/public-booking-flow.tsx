@@ -332,6 +332,7 @@ export default function PublicBookingFlow({
               tenantSlug={tenantSlug}
               tenantId={tenant.id}
               serviceId={selectedService.id}
+              initialLocationId={selectedLocationId}
               onSelect={handleLocationSelect}
               onBack={handleBack}
             />

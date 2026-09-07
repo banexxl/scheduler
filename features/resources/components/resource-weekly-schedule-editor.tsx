@@ -190,6 +190,14 @@ export default function ResourceWeeklyScheduleEditor({
                       updatePeriod(period.key, "locationId", e.target.value || null)
                     }
                     disabled={isPending || !canEdit}
+                    slotProps={{
+                      select: {
+                        displayEmpty: true,
+                        renderValue: (value) =>
+                          locations.find((loc) => loc.id === value)?.name ?? "Any location",
+                      },
+                      inputLabel: { shrink: true },
+                    }}
                   >
                     <MenuItem value="">Any location</MenuItem>
                     {locations.map((loc) => (

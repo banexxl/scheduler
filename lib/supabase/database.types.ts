@@ -8047,11 +8047,53 @@ export type Database = {
         Args: { p_limit?: number; p_tenant_slug: string }
         Returns: Json
       }
+      get_public_location_exception: {
+        Args: {
+          p_exception_date: string
+          p_location_id: string
+          p_tenant_id: string
+        }
+        Returns: {
+          exception_type: string
+          id: string
+          is_active: boolean
+        }[]
+      }
       get_public_location_hours: {
         Args: { p_location_id: string; p_tenant_slug: string }
         Returns: Json
       }
       get_public_locations: { Args: { p_tenant_slug: string }; Returns: Json }
+      get_public_resource_busy_intervals: {
+        Args: {
+          p_exclude_appointment_id?: string
+          p_range_end: string
+          p_range_start: string
+          p_resource_ids: string[]
+          p_tenant_id: string
+        }
+        Returns: {
+          id: string
+          occupied_ends_at: string
+          occupied_starts_at: string
+          resource_id: string
+        }[]
+      }
+      get_public_resource_time_off: {
+        Args: {
+          p_range_end: string
+          p_range_start: string
+          p_resource_ids: string[]
+          p_tenant_id: string
+        }
+        Returns: {
+          ends_at: string
+          is_all_day: boolean
+          location_id: string
+          resource_id: string
+          starts_at: string
+        }[]
+      }
       get_public_reviews: {
         Args: { p_limit?: number; p_tenant_slug: string }
         Returns: Json
@@ -8061,6 +8103,13 @@ export type Database = {
         Returns: Json
       }
       get_public_staff: { Args: { p_tenant_slug: string }; Returns: Json }
+      get_public_tenant_timezone: {
+        Args: { p_tenant_id: string }
+        Returns: {
+          default_timezone: string
+          id: string
+        }[]
+      }
       get_published_site_config: {
         Args: { p_tenant_slug: string }
         Returns: Json

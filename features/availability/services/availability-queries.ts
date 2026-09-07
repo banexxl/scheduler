@@ -2,6 +2,11 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 
+// Temporary untyped RPC interface for the new public-read functions until
+// `npm run db:types` regenerates database.types.ts to include them.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RpcClient = { rpc: (fn: string, params: Record<string, unknown>) => PromiseLike<{ data: any; error: any }> };
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export type TenantTimezone = {
@@ -115,17 +120,20 @@ export async function loadTenantTimezone(
 ): Promise<TenantTimezone | null> {
   const supabase = await createClient();
 
-  const { data } = await supabase
-    .from("tenants")
-    .select("id, default_timezone")
-    .eq("id", tenantId)
-    .single();
+  // Anonymous/customer callers aren't tenant members, so RLS blocks a direct
+  // `tenants` read. This RPC exposes only id + timezone (never created_by or
+  // other tenant fields) to unblock the public availability engine.
+  const { data } = await (supabase as unknown as RpcClient).rpc(
+    "get_public_tenant_timezone",
+    { p_tenant_id: tenantId }
+  );
+  const row = (data as { id: string; default_timezone: string }[] | null)?.[0];
 
-  if (!data) return null;
+  if (!row) return null;
 
   return {
-    id: data.id,
-    defaultTimezone: data.default_timezone,
+    id: row.id,
+    defaultTimezone: row.default_timezone,
   };
 }
 
@@ -340,14 +348,14 @@ export async function loadLocationException(
 ): Promise<{ exception: LocationExceptionRow; periods: LocationExceptionPeriodRow[] } | null> {
   const supabase = await createClient();
 
-  const { data: exception } = await supabase
-    .from("location_schedule_exceptions_v2")
-    .select("id, location_id, exception_date, exception_type, is_active")
-    .eq("tenant_id", tenantId)
-    .eq("location_id", locationId)
-    .eq("exception_date", localDate)
-    .eq("is_active", true)
-    .single();
+  // Anonymous/customer callers aren't tenant members, so RLS blocks a direct
+  // read here -- title/notes on this table can hold internal notes, so this
+  // RPC deliberately projects only type/active flag, never free text.
+  const { data: exceptionRows } = await (supabase as unknown as RpcClient).rpc(
+    "get_public_location_exception",
+    { p_tenant_id: tenantId, p_location_id: locationId, p_exception_date: localDate }
+  );
+  const exception = (exceptionRows as { id: string; exception_type: string; is_active: boolean }[] | null)?.[0];
 
   if (!exception) return null;
 
@@ -372,8 +380,8 @@ export async function loadLocationException(
   return {
     exception: {
       id: exception.id,
-      locationId: exception.location_id,
-      exceptionDate: exception.exception_date,
+      locationId,
+      exceptionDate: localDate,
       exceptionType: exception.exception_type,
       isActive: exception.is_active,
     },
@@ -425,21 +433,25 @@ export async function loadResourceTimeOff(
 
   const supabase = await createClient();
 
-  const { data } = await supabase
-    .from("resource_time_off")
-    .select("id, resource_id, location_id, starts_at, ends_at, is_active")
-    .eq("tenant_id", tenantId)
-    .in("resource_id", resourceIds)
-    .eq("is_active", true)
-    .lt("starts_at", dayEndInstant)
-    .gt("ends_at", dayStartInstant);
+  // Anonymous/customer callers aren't tenant members, so RLS blocks a direct
+  // read here -- title/notes on this table can hold internal HR-style notes,
+  // so this RPC deliberately projects only the busy interval, never free text.
+  const { data } = await (supabase as unknown as RpcClient).rpc(
+    "get_public_resource_time_off",
+    {
+      p_tenant_id: tenantId,
+      p_resource_ids: resourceIds,
+      p_range_start: dayStartInstant,
+      p_range_end: dayEndInstant,
+    }
+  );
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
+  return ((data ?? []) as { resource_id: string; location_id: string | null; starts_at: string; ends_at: string }[]).map((row) => ({
+    id: `${row.resource_id}:${row.starts_at}`,
     resourceId: row.resource_id,
     locationId: row.location_id,
     startsAt: row.starts_at,
     endsAt: row.ends_at,
-    isActive: row.is_active,
+    isActive: true,
   }));
 }

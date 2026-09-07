@@ -29,6 +29,11 @@ import type {
   BlockingAppointmentInterval,
 } from "../types/appointment";
 
+// Temporary untyped RPC interface for get_public_resource_busy_intervals
+// until `npm run db:types` regenerates database.types.ts to include it.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RpcClient = { rpc: (fn: string, params: Record<string, unknown>) => PromiseLike<{ data: any; error: any }> };
+
 // ─── Row Mapper ──────────────────────────────────────────────────────────────
 
 function mapAppointmentRow(row: Record<string, unknown>): Appointment {
@@ -294,20 +299,24 @@ export async function loadBlockingAppointments(
 
   const supabase = await createClient();
 
-  const { data } = await supabase
-    .from("appointments")
-    .select("id, resource_id, occupied_starts_at, occupied_ends_at")
-    .eq("tenant_id", tenantId)
-    .in("resource_id", resourceIds)
-    .neq("status", "cancelled")
-    .lt("occupied_starts_at", rangeEnd)
-    .gt("occupied_ends_at", rangeStart);
+  // Anonymous/customer callers aren't tenant members, so RLS blocks a direct
+  // `appointments` read. This RPC exposes only id/resource/occupied window --
+  // never customer_name, email, phone, or notes.
+  const { data } = await (supabase as unknown as RpcClient).rpc(
+    "get_public_resource_busy_intervals",
+    {
+      p_tenant_id: tenantId,
+      p_resource_ids: resourceIds,
+      p_range_start: rangeStart,
+      p_range_end: rangeEnd,
+    }
+  );
 
-  return (data ?? []).map((row) => ({
-    appointmentId: (row as Record<string, unknown>).id as string,
-    resourceId: (row as Record<string, unknown>).resource_id as string,
-    occupiedStartsAt: (row as Record<string, unknown>).occupied_starts_at as string,
-    occupiedEndsAt: (row as Record<string, unknown>).occupied_ends_at as string,
+  return ((data ?? []) as { id: string; resource_id: string; occupied_starts_at: string; occupied_ends_at: string }[]).map((row) => ({
+    appointmentId: row.id,
+    resourceId: row.resource_id,
+    occupiedStartsAt: row.occupied_starts_at,
+    occupiedEndsAt: row.occupied_ends_at,
   }));
 }
 
@@ -373,20 +382,24 @@ export async function loadBlockingAppointmentsExcluding(
 
   const supabase = await createClient();
 
-  const { data } = await supabase
-    .from("appointments")
-    .select("id, resource_id, occupied_starts_at, occupied_ends_at")
-    .eq("tenant_id", tenantId)
-    .in("resource_id", resourceIds)
-    .neq("status", "cancelled")
-    .neq("id", excludeAppointmentId)
-    .lt("occupied_starts_at", rangeEnd)
-    .gt("occupied_ends_at", rangeStart);
+  // Anonymous/customer callers aren't tenant members, so RLS blocks a direct
+  // `appointments` read. This RPC exposes only id/resource/occupied window --
+  // never customer_name, email, phone, or notes.
+  const { data } = await (supabase as unknown as RpcClient).rpc(
+    "get_public_resource_busy_intervals",
+    {
+      p_tenant_id: tenantId,
+      p_resource_ids: resourceIds,
+      p_range_start: rangeStart,
+      p_range_end: rangeEnd,
+      p_exclude_appointment_id: excludeAppointmentId,
+    }
+  );
 
-  return (data ?? []).map((row) => ({
-    appointmentId: (row as Record<string, unknown>).id as string,
-    resourceId: (row as Record<string, unknown>).resource_id as string,
-    occupiedStartsAt: (row as Record<string, unknown>).occupied_starts_at as string,
-    occupiedEndsAt: (row as Record<string, unknown>).occupied_ends_at as string,
+  return ((data ?? []) as { id: string; resource_id: string; occupied_starts_at: string; occupied_ends_at: string }[]).map((row) => ({
+    appointmentId: row.id,
+    resourceId: row.resource_id,
+    occupiedStartsAt: row.occupied_starts_at,
+    occupiedEndsAt: row.occupied_ends_at,
   }));
 }

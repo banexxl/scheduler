@@ -36,6 +36,8 @@ export type BookingLocation = {
   city: string | null;
   streetAddress: string | null;
   phoneNumber: string | null;
+  latitude: number | null;
+  longitude: number | null;
 };
 
 // ─── Time Slot (Milestone 17.1) ──────────────────────────────────────────────

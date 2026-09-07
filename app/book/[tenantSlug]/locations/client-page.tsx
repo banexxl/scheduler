@@ -18,6 +18,7 @@ import Alert from "@mui/material/Alert";
 import { useBooking } from "@/features/booking/hooks/useBooking";
 import BookingStepper from "@/features/booking/components/BookingStepper";
 import LocationCard from "@/features/booking/components/LocationCard";
+import BookingLocationsMap from "@/features/booking/components/BookingLocationsMap";
 import BookingEmptyState from "@/features/booking/components/EmptyState";
 import type { BookingLocation } from "@/features/booking/types";
 
@@ -74,6 +75,7 @@ export default function LocationsClientPage({ tenantSlug, locations }: Props) {
           {loc && (
             <LocationCard location={loc} selected={true} onSelect={() => { }} />
           )}
+          {loc && <BookingLocationsMap locations={[loc]} selectedId={loc.id} />}
           <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
             <Button href={`/book/${tenantSlug}/staff`} variant="outlined" sx={{ textTransform: "none" }}>
               Back
@@ -110,6 +112,12 @@ export default function LocationsClientPage({ tenantSlug, locations }: Props) {
             />
           ))}
         </Stack>
+
+        <BookingLocationsMap
+          locations={locations}
+          selectedId={state.locationId}
+          onSelect={setLocation}
+        />
 
         <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
           <Button href={`/book/${tenantSlug}/staff`} variant="outlined" sx={{ textTransform: "none" }}>

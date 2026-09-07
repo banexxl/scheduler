@@ -13,6 +13,7 @@ import { getPublicBookableServices } from "@/features/public-booking/services/pu
 import { resolvePublicSite } from "@/features/public-site/services/public-site-resolver";
 import { getPublicHomepageData } from "@/features/homepage-builder/actions/homepage-actions";
 import PublicBookingFlow from "@/features/public-booking/components/public-booking-flow";
+import BookingLocationsMap from "@/features/booking/components/BookingLocationsMap";
 import JsonLdScript from "@/features/public-site/components/json-ld-script";
 import { buildLocalBusinessJsonLd, buildFaqJsonLd } from "@/features/public-site/utils/structured-data";
 import type { HomepageSectionId } from "@/features/homepage-builder/types";
@@ -438,6 +439,14 @@ export default async function PublicBookingPage({
               </Grid>
             ))}
           </Grid>
+          <BookingLocationsMap
+            locations={locations.map((loc) => ({
+              id: loc.id,
+              name: loc.name,
+              latitude: loc.latitude,
+              longitude: loc.longitude,
+            }))}
+          />
         </GlassSection>
       )}
 

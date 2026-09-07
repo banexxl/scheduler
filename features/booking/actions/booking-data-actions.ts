@@ -197,7 +197,7 @@ export async function getAvailableLocations(
 
   const { data } = await supabase
     .from("locations")
-    .select("id, name, city, street_address, phone_number")
+    .select("id, name, city, street_address, phone_number, latitude, longitude")
     .eq("tenant_id", tenantId)
     .eq("is_active", true)
     .order("is_primary", { ascending: false })
@@ -211,6 +211,8 @@ export async function getAvailableLocations(
     city: (row.city as string) ?? null,
     streetAddress: (row.street_address as string) ?? null,
     phoneNumber: (row.phone_number as string) ?? null,
+    latitude: (row.latitude as number) ?? null,
+    longitude: (row.longitude as number) ?? null,
   }));
 }
 

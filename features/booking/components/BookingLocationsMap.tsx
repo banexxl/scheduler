@@ -40,7 +40,7 @@ type MappableLocation = MapLocation & { latitude: number; longitude: number };
  * NOTE: Advanced Markers require a Map ID, and once a Map ID is set the Maps API
  * ignores inline JSON `styles`. To preserve this dark theme, recreate these
  * rules as cloud-based map styling and associate them with the Map ID
- * (`NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID`) in the Google Cloud console.
+ * (`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`) in the Google Cloud console.
  */
 
 function hasCoords(loc: MapLocation): loc is MappableLocation {

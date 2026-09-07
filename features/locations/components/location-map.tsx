@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Alert from "@mui/material/Alert";
 import { loadGoogleMaps } from "../utils/load-google-maps";
 import { getGoogleMapId } from "../utils/google-maps-config";
 
 type LocationMapProps = {
-     /** Latitude of the marker. Map hides when null/undefined. */
+     /** Latitude of the marker. Shows a warning instead of the map when null/undefined. */
      latitude: number | null | undefined;
-     /** Longitude of the marker. Map hides when null/undefined. */
+     /** Longitude of the marker. Shows a warning instead of the map when null/undefined. */
      longitude: number | null | undefined;
      /** Zoom level (default 15 — street level). */
      zoom?: number;
@@ -20,9 +21,11 @@ type LocationMapProps = {
 /**
  * Read-only Google Map that renders a single marker at the given coordinates.
  *
- * Renders nothing when coordinates are missing. Reuses the shared Google Maps
- * loader (Places library already includes the Maps core). No extra API calls —
- * coordinates are captured at address-selection time and stored on the location.
+ * Shows a warning instead when coordinates are missing — without them this
+ * location won't get a marker on the public booking map either. Reuses the
+ * shared Google Maps loader (Places library already includes the Maps
+ * core). No extra API calls — coordinates are captured at address-selection
+ * time and stored on the location.
  */
 export default function LocationMap({
      latitude,
@@ -82,7 +85,15 @@ export default function LocationMap({
           };
      }, [hasCoords, latitude, longitude, zoom]);
 
-     if (!hasCoords) return null;
+     if (!hasCoords) {
+          return (
+               <Alert severity="warning" sx={{ mt: 1.5 }}>
+                    No coordinates set for this address — it won&apos;t appear on the
+                    public booking map. Re-select the address from the autocomplete
+                    suggestions to geocode it.
+               </Alert>
+          );
+     }
 
      if (loadFailed) {
           return (

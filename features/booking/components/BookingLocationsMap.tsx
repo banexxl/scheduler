@@ -13,6 +13,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { loadGoogleMaps } from "@/features/locations/utils/load-google-maps";
+import { getGoogleMapId } from "@/features/locations/utils/google-maps-config";
 
 /** Minimal shape needed to plot a location marker. */
 export type MapLocation = {
@@ -33,25 +34,14 @@ type Props = {
 
 type MappableLocation = MapLocation & { latitude: number; longitude: number };
 
-/** Dark map styling to match the booking page's glass/dark surface. */
-const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
-     { elementType: "geometry", stylers: [{ color: "#1d1d27" }] },
-     { elementType: "labels.text.stroke", stylers: [{ color: "#1d1d27" }] },
-     { elementType: "labels.text.fill", stylers: [{ color: "#8b8b9e" }] },
-     { featureType: "administrative", elementType: "geometry", stylers: [{ color: "#2a2a38" }] },
-     { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#a0a0b8" }] },
-     { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#6b6b82" }] },
-     { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#20302a" }] },
-     { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#4a6b57" }] },
-     { featureType: "road", elementType: "geometry", stylers: [{ color: "#2c2c3a" }] },
-     { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#8b8b9e" }] },
-     { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#3a3a4d" }] },
-     { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#a78bfa" }] },
-     { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2c2c3a" }] },
-     { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#8b8b9e" }] },
-     { featureType: "water", elementType: "geometry", stylers: [{ color: "#12121a" }] },
-     { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#3a5068" }] },
-];
+/**
+ * Dark map styling to match the booking page's glass/dark surface.
+ *
+ * NOTE: Advanced Markers require a Map ID, and once a Map ID is set the Maps API
+ * ignores inline JSON `styles`. To preserve this dark theme, recreate these
+ * rules as cloud-based map styling and associate them with the Map ID
+ * (`NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID`) in the Google Cloud console.
+ */
 
 function hasCoords(loc: MapLocation): loc is MappableLocation {
      return (
@@ -70,7 +60,9 @@ export default function BookingLocationsMap({
 }: Props) {
      const mapRef = useRef<HTMLDivElement | null>(null);
      const mapInstanceRef = useRef<google.maps.Map | null>(null);
-     const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
+     const markersRef = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(
+          new Map()
+     );
      const [loadFailed, setLoadFailed] = useState(false);
 
      const mappable = useMemo(() => locations.filter(hasCoords), [locations]);
@@ -90,8 +82,12 @@ export default function BookingLocationsMap({
                               zoomControl: true,
                               gestureHandling: "cooperative",
                               clickableIcons: false,
-                              styles: DARK_MAP_STYLES,
                               backgroundColor: "#1d1d27",
+                              // Advanced Markers require a Map ID. Note: inline
+                              // `styles` are ignored once a Map ID is set — the dark
+                              // theme must be configured as cloud-based styling on
+                              // the Map ID in the Google Cloud console.
+                              mapId: getGoogleMapId(),
                          });
                     }
 
@@ -101,7 +97,7 @@ export default function BookingLocationsMap({
                     // Remove markers for locations that no longer exist.
                     for (const [id, marker] of markersRef.current) {
                          if (!mappable.some((loc) => loc.id === id)) {
-                              marker.setMap(null);
+                              marker.map = null;
                               markersRef.current.delete(id);
                          }
                     }
@@ -112,15 +108,19 @@ export default function BookingLocationsMap({
 
                          let marker = markersRef.current.get(loc.id);
                          if (!marker) {
-                              marker = new google.maps.Marker({ position, map, title: loc.name });
+                              marker = new google.maps.marker.AdvancedMarkerElement({
+                                   position,
+                                   map,
+                                   title: loc.name,
+                              });
                               if (onSelect) {
-                                   marker.addListener("click", () => onSelect(loc.id));
+                                   marker.addListener("gmp-click", () => onSelect(loc.id));
                               }
                               markersRef.current.set(loc.id, marker);
                          } else {
-                              marker.setPosition(position);
+                              marker.position = position;
                          }
-                         marker.setZIndex(loc.id === selectedId ? 1000 : undefined);
+                         marker.zIndex = loc.id === selectedId ? 1000 : undefined;
                     }
 
                     // Frame the markers.

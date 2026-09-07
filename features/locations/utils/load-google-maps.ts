@@ -1,8 +1,12 @@
 /**
- * Lazily loads the Google Maps JavaScript API with the Places library.
+ * Lazily loads the Google Maps JavaScript API with the Places and Marker
+ * libraries.
  *
  * The script is loaded once per page and shared across all callers via a
  * module-level promise. Safe to call from multiple components.
+ *
+ * The `marker` library is required for `google.maps.marker.AdvancedMarkerElement`,
+ * the recommended replacement for the deprecated `google.maps.Marker`.
  *
  * Requires `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`. This key is intentionally public
  * (browser-side) and should be restricted by HTTP referrer in Google Cloud.
@@ -16,7 +20,7 @@ export function loadGoogleMaps(): Promise<typeof google> {
      }
 
      // Already available.
-     if (window.google?.maps?.places) {
+     if (window.google?.maps?.places && window.google.maps.marker) {
           return Promise.resolve(window.google);
      }
 
@@ -48,7 +52,7 @@ export function loadGoogleMaps(): Promise<typeof google> {
 
           const params = new URLSearchParams({
                key: apiKey,
-               libraries: "places",
+               libraries: "places,marker",
                loading: "async",
                callback: callbackName,
           });

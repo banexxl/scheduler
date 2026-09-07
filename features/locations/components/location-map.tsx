@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { loadGoogleMaps } from "../utils/load-google-maps";
+import { getGoogleMapId } from "../utils/google-maps-config";
 
 type LocationMapProps = {
      /** Latitude of the marker. Map hides when null/undefined. */
@@ -31,7 +32,7 @@ export default function LocationMap({
 }: LocationMapProps) {
      const mapRef = useRef<HTMLDivElement | null>(null);
      const mapInstanceRef = useRef<google.maps.Map | null>(null);
-     const markerRef = useRef<google.maps.Marker | null>(null);
+     const markerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
      const [loadFailed, setLoadFailed] = useState(false);
 
      const hasCoords =
@@ -58,15 +59,18 @@ export default function LocationMap({
                               zoomControl: true,
                               gestureHandling: "cooperative",
                               clickableIcons: false,
+                              mapId: getGoogleMapId(),
                          });
-                         markerRef.current = new google.maps.Marker({
+                         markerRef.current = new google.maps.marker.AdvancedMarkerElement({
                               position,
                               map: mapInstanceRef.current,
                          });
                     } else {
                          mapInstanceRef.current.setCenter(position);
                          mapInstanceRef.current.setZoom(zoom);
-                         markerRef.current?.setPosition(position);
+                         if (markerRef.current) {
+                              markerRef.current.position = position;
+                         }
                     }
                })
                .catch(() => {

@@ -25,12 +25,24 @@ setup("authenticate", async ({ page }) => {
   // Navigate to login page
   await page.goto("/login");
 
-  // Fill credentials
-  await page.getByLabel(/email/i).fill(username);
-  await page.getByRole("textbox", { name: /password/i }).fill(password);
+  // Fill credentials.
+  // Note: the password input has type="password" by default, which has no
+  // implicit ARIA "textbox" role, so target it by its label instead.
+  const emailField = page.getByLabel("Email", { exact: true });
+  const passwordField = page.getByLabel("Password", { exact: true });
+
+  await emailField.click();
+  await emailField.fill(username);
+
+  // The password field is a controlled Formik input wrapped in a custom
+  // component; filling can race with React's commit, leaving the value empty
+  // on submit. Type it, then assert the value is actually set before submitting.
+  await passwordField.click();
+  await passwordField.fill(password);
+  await expect(passwordField).toHaveValue(password);
 
   // Submit
-  await page.getByRole("button", { name: /sign in|log in|submit/i }).click();
+  await page.getByRole("button", { name: /^sign in$/i }).click();
 
   // Wait for redirect to dashboard or any authenticated page
   await page.waitForURL((url) => !url.pathname.includes("/login"), { timeout: 15000 });

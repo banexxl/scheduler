@@ -17,6 +17,8 @@ export function usePortalNavigation(): {
   tenantSlug: string;
   /** Where the brand/logo and "Home" should link, based on the current route. */
   homeHref: string;
+  /** True when the current route is inside the customer portal. */
+  onPortal: boolean;
 } {
   const { tenant } = useTenantTheme();
   const sections = usePortalSections();
@@ -53,8 +55,9 @@ export function usePortalNavigation(): {
       ...(sections.locations ? [{ label: "Locations", href: `${base}#locations`, active: false }] : []),
       ...(sections.reviews ? [{ label: "Reviews", href: `${base}#reviews`, active: false }] : []),
       ...(sections.contact ? [{ label: "Contact", href: `${base}#contact`, active: false }] : []),
+      { label: "Book", href: `${base}#booking`, active: false },
     ];
   }
 
-  return { items, tenantSlug: tenant.slug, homeHref };
+  return { items, tenantSlug: tenant.slug, homeHref, onPortal };
 }

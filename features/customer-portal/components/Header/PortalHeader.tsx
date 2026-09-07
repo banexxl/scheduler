@@ -22,7 +22,7 @@ import MobileNavigation from "../MobileNavigation/MobileNavigation";
 
 export default function PortalHeader() {
   const { branding, tenant } = useTenantTheme();
-  const { items, tenantSlug, homeHref } = usePortalNavigation();
+  const { items, tenantSlug, homeHref, onPortal } = usePortalNavigation();
   const { isLoggedIn } = usePortalAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -191,9 +191,9 @@ export default function PortalHeader() {
                 Sign In
               </Button>
             )}
-            {/* Book an appointment — takes the customer to the booking wizard. */}
+            {/* On the portal: link back to booking. Elsewhere: link to the portal. */}
             <Button
-              href={`/book/${tenantSlug}#booking`}
+              href={onPortal ? `/book/${tenantSlug}#booking` : `/book/${tenantSlug}/portal`}
               variant="contained"
               size="small"
               sx={{
@@ -207,7 +207,7 @@ export default function PortalHeader() {
                 },
               }}
             >
-              Book
+              {onPortal ? "Book" : "Account"}
             </Button>
           </Box>
         </Toolbar>

@@ -35,8 +35,9 @@ const ORB_KEYFRAMES = `
 export default function PortalHero() {
   const { branding, tenant, portal } = useTenantTheme();
 
-  const headline = portal.hero.headline || tenant.name;
-  const subheadline = portal.hero.subheadline || portal.description || branding.tagline;
+  const headline = portal.hero.headline?.trim() || tenant.name;
+  const subheadline =
+    portal.hero.subheadline?.trim() || portal.description || branding.tagline;
   const ctaLabel = portal.hero.ctaLabel;
   const logoUrl = branding.logoUrl;
   const primaryColor = branding.primaryColor;
@@ -182,6 +183,26 @@ export default function PortalHero() {
           </Box>
         </motion.div>
 
+        {/* Tenant name — always shown under the logo. Hidden only when the
+            headline is already the tenant name to avoid duplication. */}
+        {headline !== tenant.name && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.6 }}>
+            <Typography
+              component="p"
+              sx={{
+                fontSize: { xs: "1rem", md: "1.8rem" },
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: primaryColor,
+                mb: 2,
+              }}
+            >
+              {tenant.name}
+            </Typography>
+          </motion.div>
+        )}
+
         {/* Headline */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}>
           <Typography
@@ -193,6 +214,7 @@ export default function PortalHero() {
               mb: 1.5,
               letterSpacing: "-0.03em",
               lineHeight: 1.15,
+              color: "#f0f0f5",
             }}
           >
             {headline}

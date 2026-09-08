@@ -26,6 +26,7 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import AnimatedBackground, { SectionGlow } from "./animated-background";
+import CookieConsentBanner from "./cookie-consent-banner";
 
 // ─── Animation Helpers ───────────────────────────────────────────────────────
 
@@ -710,6 +711,7 @@ export default function MarketingLandingPage({ plans }: Props) {
         </Container>
       </Box>
 
+      <CookieConsentBanner />
     </Box>
   );
 }

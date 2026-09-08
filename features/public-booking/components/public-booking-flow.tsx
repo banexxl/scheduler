@@ -22,6 +22,10 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import Fade from "@mui/material/Fade";
 import Box from "@mui/material/Box";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
 import type {
   PublicBookableService,
   PublicBookingSettings,
@@ -277,6 +281,8 @@ export default function PublicBookingFlow({
   // Progress
   const totalSteps = stepLabels.length;
 
+  const isLoggedIn = !!loggedInEmail;
+
   // ─── Render ──────────────────────────────────────────────────────────────
 
   if (confirmation) {
@@ -306,9 +312,48 @@ export default function PublicBookingFlow({
       stepLabels={stepLabels}
       isConfirmed={false}
     >
+      {!isLoggedIn && (
+        <Alert
+          severity="warning"
+          sx={{ mb: 2 }}
+          action={
+            <Stack direction="row" spacing={1}>
+              <Button
+                component="a"
+                href={`/book/${tenantSlug}/login`}
+                size="small"
+                color="inherit"
+                variant="outlined"
+              >
+                Sign in
+              </Button>
+              <Button
+                component="a"
+                href={`/book/${tenantSlug}/register`}
+                size="small"
+                color="inherit"
+                variant="contained"
+              >
+                Register
+              </Button>
+            </Stack>
+          }
+        >
+          <AlertTitle>Sign in to book</AlertTitle>
+          Please sign in or create a free account to book an appointment.
+        </Alert>
+      )}
+
       {/* Each step is keyed so the Fade remounts and animates on step change. */}
       <Fade key={step} in timeout={280} appear>
-        <Box>
+        <Box
+          sx={!isLoggedIn ? {
+            pointerEvents: "none",
+            opacity: 0.5,
+            userSelect: "none",
+          } : undefined}
+          aria-disabled={!isLoggedIn}
+        >
           {/* Service */}
           {step === 0 && (
             <PublicServiceStep
